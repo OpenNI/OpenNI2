@@ -35,6 +35,15 @@ public:
 	void setSensorType(OniSensorType sensorType);
 	
 	void mainLoop();
+
+	OniStatus setAutoWhiteBalance(BOOL val);
+
+	OniStatus getAutoWhitBalance(BOOL *val);
+
+	OniStatus setAutoExposure(BOOL val);
+
+	OniStatus getAutoExposure(BOOL *val);
+	
 	
 private:
 		

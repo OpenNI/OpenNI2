@@ -105,7 +105,7 @@ StreamBase* KinectDevice::createStream(OniSensorType sensorType)
 		{
 			if (m_pColorStream->getSensorType() != sensorType)
 			{
-				if (!m_pColorStream->isRunning())
+				if (!m_pColorStream->isRunning() && m_pColorStream->getStreamCount() == 0)
 				{
 					m_pColorStream->setSensorType(sensorType);
 					pImage = XN_NEW(ColorKinectStream, m_pColorStream);
@@ -136,7 +136,7 @@ StreamBase* KinectDevice::createStream(OniSensorType sensorType)
 		{
 			if (m_pColorStream->getSensorType() != sensorType)
 			{
-				if (!m_pColorStream->isRunning())
+				if (!m_pColorStream->isRunning() && m_pColorStream->getStreamCount() == 0)
 				{
 					m_pColorStream->setSensorType(sensorType);
 					pImage = XN_NEW(IRKinectStream, m_pColorStream);

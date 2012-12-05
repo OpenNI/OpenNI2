@@ -46,7 +46,11 @@ public:
 	virtual OniStatus SetVideoMode(OniVideoMode* pVideoMode);
 
 	virtual OniStatus GetVideoMode(OniVideoMode* pVideoMode);
-
+	
+	virtual OniStatus SetCropping(OniCropping* cropping);
+	
+	virtual OniStatus GetCropping(OniCropping* cropping);
+	
 	void addRefToFrame(OniDriverFrame* pFrame);
 	
 	void releaseFrame(OniDriverFrame* pFrame);
@@ -59,7 +63,7 @@ public:
 protected:
 	KinectStreamImpl *m_pStreamImpl;
 	OniVideoMode m_videoMode;
-	
+	OniCropping m_cropping;
 	bool m_running;
 	
 private:

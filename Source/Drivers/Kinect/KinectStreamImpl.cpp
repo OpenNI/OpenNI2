@@ -163,6 +163,62 @@ void KinectStreamImpl::mainLoop()
 	return;
 }
 
+OniStatus KinectStreamImpl::setAutoWhiteBalance(BOOL val)
+{
+	INuiColorCameraSettings *pCameraSettings;
+	HRESULT hr = m_pNuiSensor->NuiGetColorCameraSettings(&pCameraSettings);
+	if (FAILED(hr))
+	{
+		return ONI_STATUS_ERROR;
+	}
+	hr = pCameraSettings->SetAutoWhiteBalance(val);
+	OniStatus status = FAILED(hr)? ONI_STATUS_ERROR : ONI_STATUS_OK;
+	pCameraSettings->Release();
+	return status;
+}
+
+OniStatus KinectStreamImpl::getAutoWhitBalance(BOOL *val)
+{
+	INuiColorCameraSettings *pCameraSettings;
+	HRESULT hr = m_pNuiSensor->NuiGetColorCameraSettings(&pCameraSettings);
+	if (FAILED(hr))
+	{
+		return ONI_STATUS_ERROR;
+	}
+	hr = pCameraSettings->GetAutoWhiteBalance(val);
+	OniStatus status = FAILED(hr) ? ONI_STATUS_ERROR : ONI_STATUS_OK;
+	pCameraSettings->Release();
+	return status;
+}
+
+OniStatus KinectStreamImpl::setAutoExposure(BOOL val)
+{
+	INuiColorCameraSettings *pCameraSettings;
+	HRESULT hr = m_pNuiSensor->NuiGetColorCameraSettings(&pCameraSettings);
+	if (FAILED(hr))
+	{
+		return ONI_STATUS_ERROR;
+	}
+	hr = pCameraSettings->SetAutoExposure(val);
+	OniStatus status = FAILED(hr) ? ONI_STATUS_ERROR : ONI_STATUS_OK;
+	pCameraSettings->Release();
+	return status;
+}
+
+OniStatus KinectStreamImpl::getAutoExposure(BOOL *val)
+{
+	INuiColorCameraSettings *pCameraSettings;
+	HRESULT hr = m_pNuiSensor->NuiGetColorCameraSettings(&pCameraSettings);
+	if (FAILED(hr))
+	{
+		return ONI_STATUS_ERROR;
+	}
+	hr = pCameraSettings->GetAutoExposure(val);
+	OniStatus status = FAILED(hr) ? ONI_STATUS_ERROR : ONI_STATUS_OK;
+	pCameraSettings->Release();
+	return status;
+}
+
 void KinectStreamImpl::setDefaultVideoMode()
 {
 	switch (m_sensorType)
