@@ -8,6 +8,7 @@
 #include "PS1080.h"
 #include "D2S.h.h"
 #include "S2D.h.h"
+#include "KinectStreamImpl.h"
 
 using namespace oni::driver;
 using namespace kinect_device;
@@ -91,6 +92,11 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	pFrame->frame.frameIndex = imageFrame.dwFrameNumber;
 	pFrame->frame.timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
+}
+
+OniStatus DepthKinectStream::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)
+{
+	return m_pStreamImpl->convertDepthToColorCoordinates(colorStream, depthX, depthY, depthZ, pColorX, pColorY);
 }
 
 OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataSize)

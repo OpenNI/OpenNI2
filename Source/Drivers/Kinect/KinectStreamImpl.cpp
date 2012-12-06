@@ -61,7 +61,7 @@ OniStatus KinectStreamImpl::start()
 		// Open a color image stream to receive frames
 		HRESULT hr = m_pNuiSensor->NuiImageStreamOpen(
 			getNuiImageType(),
-			getNuiImagResolution(),
+			getNuiImagResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
 			0,
 			2,
 			m_hNextFrameEvent,
@@ -219,6 +219,21 @@ OniStatus KinectStreamImpl::getAutoExposure(BOOL *val)
 	return status;
 }
 
+OniStatus KinectStreamImpl::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)
+{
+	OniVideoMode videoMode;
+	int size = sizeof(videoMode);
+	 if (ONI_STATUS_OK != colorStream->getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size))
+		 return ONI_STATUS_ERROR;
+	 HRESULT hr = m_pNuiSensor->NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution(
+				getNuiImagResolution(videoMode.resolutionX, videoMode.resolutionY),
+				getNuiImagResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
+				nullptr, depthX, depthY, depthZ, (LONG*)pColorX, (LONG*)pColorY);
+	 if (FAILED(hr))
+		 return ONI_STATUS_ERROR;
+	return ONI_STATUS_OK;
+}
+
 void KinectStreamImpl::setDefaultVideoMode()
 {
 	switch (m_sensorType)
@@ -248,22 +263,22 @@ void KinectStreamImpl::setDefaultVideoMode()
 	}
 }
 
-NUI_IMAGE_RESOLUTION KinectStreamImpl::getNuiImagResolution()
+NUI_IMAGE_RESOLUTION KinectStreamImpl::getNuiImagResolution(int resolutionX, int resolutionY)
 {
 	NUI_IMAGE_RESOLUTION imgResolution = NUI_IMAGE_RESOLUTION_320x240;
-	if (m_videoMode.resolutionX == KINNECT_RESOLUTION_X_80 && m_videoMode.resolutionY == KINNECT_RESOLUTION_Y_60 )
+	if (resolutionX == KINNECT_RESOLUTION_X_80 && resolutionY == KINNECT_RESOLUTION_Y_60 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_80x60;
 	} 
-	else if (m_videoMode.resolutionX == KINNECT_RESOLUTION_X_320 && m_videoMode.resolutionY == KINNECT_RESOLUTION_Y_240 )
+	else if (resolutionX == KINNECT_RESOLUTION_X_320 && resolutionY == KINNECT_RESOLUTION_Y_240 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_320x240;
 	}
-	else if (m_videoMode.resolutionX == KINNECT_RESOLUTION_X_640 && m_videoMode.resolutionY == KINNECT_RESOLUTION_Y_480 )
+	else if (resolutionX == KINNECT_RESOLUTION_X_640 && resolutionY == KINNECT_RESOLUTION_Y_480 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_640x480;
 	}
-	else if (m_videoMode.resolutionX == KINNECT_RESOLUTION_X_1280 && m_videoMode.resolutionY == KINNECT_RESOLUTION_Y_960 )
+	else if (resolutionX == KINNECT_RESOLUTION_X_1280 && resolutionY == KINNECT_RESOLUTION_Y_960 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_1280x960;
 	}
