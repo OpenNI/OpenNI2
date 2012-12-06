@@ -39,7 +39,7 @@ XnOniDevice::~XnOniDevice()
 	// free the allocated arrays
 	for(int i=0; i < m_numSensors; ++i)
 	{
-		XN_DELETE(m_sensors[i].pSupportedVideoModes);
+		XN_DELETE_ARR(m_sensors[i].pSupportedVideoModes);
 	}
 	m_sensor.Destroy();
 }

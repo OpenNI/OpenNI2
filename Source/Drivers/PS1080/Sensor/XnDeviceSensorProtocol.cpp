@@ -97,7 +97,8 @@ XnBool XN_CALLBACK_TYPE XnDeviceSensorProtocolUsbEpCb(XnUChar* pBuffer, XnUInt32
 
 			while (pBuffer < pBufEnd)
 			{
-				if (nMagic == *(XnUInt16*)(pBuffer))
+				if ((pBuffer + sizeof(XnUInt16) <= pBufEnd) && 
+					nMagic == *(XnUInt16*)(pBuffer))
 				{
 					pCurrState->CurrHeader.nMagic = nMagic;
 					pCurrState->State = XN_PACKET_HEADER;
