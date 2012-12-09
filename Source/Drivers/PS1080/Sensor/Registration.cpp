@@ -552,7 +552,7 @@ void XnRegistration::Apply1080(OniDepthPixel* pInput, OniDepthPixel* pOutput)
 
 XnStatus XnRegistration::TranslateSinglePixel(XnUInt32 x, XnUInt32 y, OniDepthPixel z, XnUInt32& imageX, XnUInt32& imageY)
 {
-	if (m_b1000)
+	if (!IsInitialized() || m_b1000)
 	{
 		return XN_STATUS_NOT_IMPLEMENTED;
 	}
