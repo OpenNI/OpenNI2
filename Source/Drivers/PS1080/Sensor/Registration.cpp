@@ -35,7 +35,8 @@ XnRegistration::XnRegistration() :
 	m_pDepthToShiftTable(NULL),
 	m_bD2SAlloc(FALSE),
 	m_pRegistrationTable(NULL),
-	m_pTempBuffer(NULL)
+	m_pTempBuffer(NULL),
+	m_b1000(FALSE)
 {
 }
 
