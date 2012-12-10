@@ -149,7 +149,7 @@ OniStatus ColorKinectStream::getProperty(int propertyId, void* data, int* pDataS
 	return status;
 }
 
-OniStatus ColorKinectStream::setProperty(int propertyId, void* data, int* pDataSize)
+OniStatus ColorKinectStream::setProperty(int propertyId, const void* data, int pDataSize)
 {
 	OniStatus status = ONI_STATUS_NOT_IMPLEMENTED;
 	switch (propertyId)
@@ -161,7 +161,7 @@ OniStatus ColorKinectStream::setProperty(int propertyId, void* data, int* pDataS
 		status = m_pStreamImpl->setAutoExposure(*((BOOL*)data));
 		break;
 	default:
-		status = BaseKinectStream::getProperty(propertyId, data, pDataSize);
+		status = BaseKinectStream::setProperty(propertyId, data, pDataSize);
 	}
 	return status;
 }
