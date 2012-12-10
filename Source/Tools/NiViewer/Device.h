@@ -96,6 +96,7 @@ void toggleImageAutoWhiteBalance(int);
 void toggleCMOSAutoLoops(int);
 
 void toggleCloseRange(int);
+void toggleImageRegistration(int);
 
 void setStreamCropping(openni::VideoStream& stream, int originX, int originY, int width, int height);
 void resetDepthCropping(int);

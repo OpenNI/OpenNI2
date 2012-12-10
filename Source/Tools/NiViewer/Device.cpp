@@ -374,6 +374,20 @@ void toggleCloseRange(int )
 	displayMessage ("Close range: %s", bCloseRange?"On":"Off");	
 }
 
+void toggleImageRegistration(int)
+{
+	openni::ImageRegistrationMode mode = g_device.getImageRegistrationMode();
+
+	openni::ImageRegistrationMode newMode = openni::IMAGE_REGISTRATION_OFF;
+	if (mode == openni::IMAGE_REGISTRATION_OFF)
+	{
+		newMode = openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR;
+	}
+
+	g_device.setImageRegistrationMode(newMode);
+
+}
+
 void seekFrame(int nDiff)
 {
 	// Make sure seek is required.
