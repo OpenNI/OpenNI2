@@ -1312,7 +1312,8 @@ void printRecordingInfo()
 
 	XnUInt32 nWritten;
 	xnOSStrFormat(csMessage, sizeof(csMessage), &nWritten, 
-		"Capture Formats - Depth: %s | Image: %s | IR: %s",
+		"Image registration is %s. Capture Formats - Depth: %s | Image: %s | IR: %s",
+		getDevice().getImageRegistrationMode() == openni::IMAGE_REGISTRATION_OFF ? "off " : "on",
 		captureGetDepthFormatName(), 
 		captureGetColorFormatName(), 
 		captureGetIRFormatName());
