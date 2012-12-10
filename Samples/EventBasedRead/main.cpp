@@ -68,9 +68,9 @@ private:
 class OpenNIEventListener : public OpenNI::Listener
 {
 public:
-	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, int errorState) 
+	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
 	{
-		printf("Device \"%s\" error state changed to %d\n", pInfo->getUri(), errorState);
+		printf("Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
 	}
 
 	virtual void onDeviceConnected(const DeviceInfo* pInfo)
