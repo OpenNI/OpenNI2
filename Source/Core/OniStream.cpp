@@ -94,6 +94,10 @@ VideoStream::~VideoStream()
 	{
 		xnOSTerminateThread(&m_newFrameThread);
 	}
+	else
+	{
+		xnOSCloseThread(&m_newFrameThread);
+	}
 
 	m_pFrameHolder->setStreamEnabled(this, FALSE);
 	m_driverHandler.deviceDestroyStream(m_device.getHandle(), m_streamHandle);

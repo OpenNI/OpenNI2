@@ -192,6 +192,10 @@ void PlayerDevice::close()
 	{
 		xnOSTerminateThread(&m_threadHandle);
 	}
+	else
+	{
+		xnOSCloseThread(&m_threadHandle);
+	}
 
 	// Destroy the player.
 	m_player.Destroy();

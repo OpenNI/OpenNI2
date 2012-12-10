@@ -189,6 +189,7 @@ Recorder::~Recorder()
     detachAllStreams();
     send(Message::MESSAGE_TERMINATE);
     xnOSWaitForThreadExit(m_thread, XN_WAIT_INFINITE);
+	xnOSCloseThread(&m_thread);
     if (NULL != m_handle)
     {
         m_handle->pRecorder = NULL;
