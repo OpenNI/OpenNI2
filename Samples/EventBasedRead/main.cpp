@@ -96,6 +96,13 @@ int main()
 	OpenNIEventListener eventPrinter;
 	OpenNI::addListener(&eventPrinter);
 
+	openni::Array<openni::DeviceInfo> deviceList;
+	openni::OpenNI::enumerateDevices(&deviceList);
+	for (int i = 0; i < deviceList.getSize(); ++i)
+	{
+		printf("Device \"%s\" already connected\n", deviceList[i].getUri());
+	}
+
 	Device device;
 	rc = device.open(ANY_DEVICE);
 	if (rc != STATUS_OK)
