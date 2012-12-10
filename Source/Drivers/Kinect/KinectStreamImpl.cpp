@@ -228,7 +228,7 @@ OniStatus KinectStreamImpl::convertDepthToColorCoordinates(StreamBase* colorStre
 	 HRESULT hr = m_pNuiSensor->NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution(
 				getNuiImagResolution(videoMode.resolutionX, videoMode.resolutionY),
 				getNuiImagResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
-				nullptr, depthX, depthY, depthZ, (LONG*)pColorX, (LONG*)pColorY);
+				NULL, depthX, depthY, depthZ << 3, (LONG*)pColorX, (LONG*)pColorY);
 	 if (FAILED(hr))
 		 return ONI_STATUS_ERROR;
 	return ONI_STATUS_OK;
