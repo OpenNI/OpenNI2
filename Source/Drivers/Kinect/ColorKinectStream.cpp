@@ -180,15 +180,3 @@ OniBool ColorKinectStream::isPropertySupported(int propertyId)
 	}
 	return status;
 }
-
-void ColorKinectStream::notifyAllProperties()
-{
-	OniBool val;
-	int size = sizeof(val);
-	getProperty(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, &val, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, &val, size);
-
-	getProperty(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, &val, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, &val, size);
-	BaseKinectStream::notifyAllProperties();
-}

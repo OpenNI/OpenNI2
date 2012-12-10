@@ -28,8 +28,6 @@ public:
 	virtual OniBool isCommandSupported(int commandId) ;
 	virtual OniStatus tryManualTrigger();
 
-	virtual void notifyAllProperties();
-
 private:
 	INuiSensor * m_pNuiSensor;
 	KinectStreamImpl* m_pDepthStream;

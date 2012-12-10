@@ -19,9 +19,6 @@ public:
 	virtual OniStatus setProperty(int propertyId, const void* data, int pDataSize);
 	
 	virtual OniBool isPropertySupported(int propertyId);
-
-	virtual void notifyAllProperties();
-
 };
 } // namespace kinect_device
 

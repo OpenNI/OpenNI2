@@ -181,7 +181,3 @@ OniStatus KinectDevice::tryManualTrigger()
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
-void KinectDevice::notifyAllProperties() 
-{ 
-	return; 
-}

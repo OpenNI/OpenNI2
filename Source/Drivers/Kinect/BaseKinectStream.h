@@ -41,8 +41,6 @@ public:
 
 	virtual OniBool isPropertySupported(int propertyId);
 
-	virtual void notifyAllProperties();
-
 	virtual OniStatus SetVideoMode(OniVideoMode* pVideoMode);
 
 	virtual OniStatus GetVideoMode(OniVideoMode* pVideoMode);

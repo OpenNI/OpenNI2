@@ -148,29 +148,6 @@ OniBool BaseKinectStream::isPropertySupported(int propertyId)
 	return status;
 }
 
-void BaseKinectStream::notifyAllProperties()
-{
-	XnFloat nDouble;
-	int size = sizeof(nDouble);
-	getProperty(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &nDouble, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &nDouble, size);
-
-	getProperty(ONI_STREAM_PROPERTY_VERTICAL_FOV, &nDouble, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_VERTICAL_FOV, &nDouble, size);
-	
-	OniVideoMode videoMode;
-	size = sizeof(videoMode);
-
-	getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, size);
-	
-	OniCropping cropping;
-	size = sizeof(cropping);
-
-	getProperty(ONI_STREAM_PROPERTY_CROPPING, &cropping, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_CROPPING, &cropping, size);
-}
-
 OniStatus BaseKinectStream::SetVideoMode(OniVideoMode* videoMode)
 {
 	if (!m_pStreamImpl->isRunning())
