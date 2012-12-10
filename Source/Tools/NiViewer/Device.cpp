@@ -384,7 +384,14 @@ void toggleImageRegistration(int)
 		newMode = openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR;
 	}
 
-	g_device.setImageRegistrationMode(newMode);
+	if (g_device.isImageRegistrationModeSupported(newMode))
+	{
+		g_device.setImageRegistrationMode(newMode);
+	}
+	else
+	{
+		displayError("Couldn't change image registration to unsupported mode");
+	}
 
 }
 
