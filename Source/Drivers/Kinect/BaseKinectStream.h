@@ -31,9 +31,9 @@ public:
 
 	virtual ~BaseKinectStream();
 
-	OniStatus BaseKinectStream::start();
+	virtual OniStatus start();
 
-	void BaseKinectStream::stop();
+	virtual void stop();
 
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	

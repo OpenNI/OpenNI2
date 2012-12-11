@@ -11,6 +11,8 @@ class ColorKinectStream : public BaseKinectStream
 {
 public:
 	ColorKinectStream(KinectStreamImpl* pStreamImpl);
+	
+	virtual OniStatus start();
 
 	virtual void frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect);
 

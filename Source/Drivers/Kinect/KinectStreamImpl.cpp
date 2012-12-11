@@ -106,8 +106,11 @@ void KinectStreamImpl::stop()
 
 void KinectStreamImpl::setSensorType(OniSensorType sensorType)
 { 
-	m_sensorType = sensorType; 
-	setDefaultVideoMode();
+	if( m_sensorType != sensorType)
+	{
+		m_sensorType = sensorType; 
+		setDefaultVideoMode();
+	}	
 }
 
 static const unsigned int LOOP_TIMEOUT = 10;

@@ -21,6 +21,20 @@ ColorKinectStream::ColorKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
 }
 
+OniStatus ColorKinectStream::start()
+{
+	OniStatus status = ONI_STATUS_ERROR;
+	if (m_pStreamImpl->getSensorType() == ONI_SENSOR_COLOR || m_pStreamImpl->isRunning() == false)
+	{
+		m_pStreamImpl->setSensorType(ONI_SENSOR_COLOR);
+		status = m_pStreamImpl->start();
+		if (status == ONI_STATUS_OK)
+			m_running = TRUE;
+		
+	}
+	return status;
+}
+
 void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
 	OniDriverFrame* pFrame = NULL;

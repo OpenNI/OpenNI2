@@ -4,7 +4,7 @@
 #include "XnHash.h"
 #include "XnEvent.h"
 #include "XnPlatform.h"
-
+#include "KinectStreamImpl.h"
 #include "NuiApi.h"
 
 using namespace oni::driver;
@@ -20,6 +20,21 @@ IRKinectStream::IRKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
 	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
 }
+
+OniStatus IRKinectStream::start()
+{
+	OniStatus status = ONI_STATUS_ERROR;
+	if (m_pStreamImpl->getSensorType() == ONI_SENSOR_IR || m_pStreamImpl->isRunning() == false)
+	{
+		m_pStreamImpl->setSensorType(ONI_SENSOR_IR);
+		status = m_pStreamImpl->start();
+		if (status == ONI_STATUS_OK)
+			m_running = TRUE;
+		
+	}
+	return status;
+}
+
 
 void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
