@@ -299,7 +299,11 @@ XnStatus xnUSBGetDeviceSpeedInternal(XN_USB_DEV_HANDLE pDevHandle, XnUSBDeviceSp
 XnStatus xnUSBPlatformSpecificInit()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
-	
+
+	// give a unique class name (there might be multiple instances of this code in multiple DLLs)
+	char className[MAX_PATH];
+	sprintf_s(className, "xnUsbDeviceDetector%x", &g_xnUsbhModule);
+
 	WNDCLASS wc;
 	wc.style = 0;
 	wc.cbClsExtra = 0;
@@ -307,7 +311,7 @@ XnStatus xnUSBPlatformSpecificInit()
 	wc.hInstance = (HINSTANCE)g_xnUsbhModule;
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "xnUsbDeviceDetector";
+	wc.lpszClassName = className;
 	wc.lpfnWndProc = DevDetectWndProc;
 	wc.hIcon = NULL;
 	wc.hCursor = NULL;
