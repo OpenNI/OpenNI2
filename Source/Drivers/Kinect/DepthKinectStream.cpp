@@ -114,7 +114,7 @@ OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataS
 	case ONI_STREAM_PROPERTY_MIRRORING:
 		{
 			XnBool * val = (XnBool *)data;
-			*val = FALSE;
+			*val = TRUE;
 			status = ONI_STATUS_OK;
 			break;
 		}
