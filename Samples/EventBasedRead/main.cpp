@@ -52,7 +52,7 @@ void analyzeFrame(const VideoFrameRef& frame)
 	}
 }
 
-class PrintCallback : public VideoStream::Listener
+class PrintCallback : public VideoStream::NewFrameListener
 {
 public:
 	void onNewFrame(VideoStream& stream)
@@ -65,7 +65,9 @@ private:
 	VideoFrameRef m_frame;
 };
 
-class OpenNIEventListener : public OpenNI::Listener
+class OpenNIDeviceListener : public OpenNI::DeviceConnectedListener,
+									public OpenNI::DeviceDisconnectedListener,
+									public OpenNI::DeviceStateChangedListener
 {
 public:
 	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
@@ -93,8 +95,11 @@ int main()
 		return 1;
 	}
 
-	OpenNIEventListener eventPrinter;
-	OpenNI::addListener(&eventPrinter);
+	OpenNIDeviceListener devicePrinter;
+
+	OpenNI::addDeviceConnectedListener(&devicePrinter);
+	OpenNI::addDeviceDisconnectedListener(&devicePrinter);
+	OpenNI::addDeviceStateChangedListener(&devicePrinter);
 
 	openni::Array<openni::DeviceInfo> deviceList;
 	openni::OpenNI::enumerateDevices(&deviceList);
@@ -131,7 +136,7 @@ int main()
 	PrintCallback depthPrinter;
 
 	// Register to new frame
-	depth.addListener(&depthPrinter);
+	depth.addNewFrameListener(&depthPrinter);
 
 	// Wait while we're getting frames through the printer
 	while (!wasKeyboardHit())
@@ -139,7 +144,7 @@ int main()
 		Sleep(100);
 	}
 
-	depth.removeListener(&depthPrinter);
+	depth.removeNewFrameListener(&depthPrinter);
 
 
 	depth.stop();

@@ -188,7 +188,8 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 	readFrame();
 }
 
-class OpenNIEventListener : public openni::OpenNI::Listener
+class OpenNIDeviceListener : public openni::OpenNI::DeviceStateChangedListener,
+							public openni::OpenNI::DeviceDisconnectedListener
 {
 public:
 	virtual void onDeviceStateChanged(const openni::DeviceInfo* pInfo, openni::DeviceState errorState)
@@ -205,7 +206,6 @@ public:
 			}
 		}
 	}
-
 	virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
 	{
 		if (strcmp(pInfo->getUri(), g_device.getDeviceInfo().getUri()) == 0)
@@ -224,8 +224,10 @@ openni::Status openDevice(const char* uri, bool defaultRightColor)
 	}
 
 	// Register to OpenNI events.
-	static OpenNIEventListener eventListener;
-	openni::OpenNI::addListener(&eventListener);
+	static OpenNIDeviceListener deviceListener;
+	
+	openni::OpenNI::addDeviceDisconnectedListener(&deviceListener);
+	openni::OpenNI::addDeviceStateChangedListener(&deviceListener);
 
 	// Open the requested device.
 	nRetVal = g_device.open(uri);
