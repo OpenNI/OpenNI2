@@ -210,6 +210,11 @@ public:
             XnUInt64    undoRecordPos,
             const char* propertyName,
             XnUInt64    data);
+	OniStatus emit_RECORD_REAL_PROPERTY(
+		XnUInt32    nodeId,
+		XnUInt64    undoRecordPos,
+		const char* propertyName,
+		XnDouble    data);
 
 private:
     //

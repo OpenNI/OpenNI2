@@ -39,30 +39,38 @@ ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 namespace {
 
+enum PropertyType
+{
+	PROPERTY_TYPE_GENERAL,
+	PROPERTY_TYPE_INTEGER,
+	PROPERTY_TYPE_REAL
+};
+
 const struct PropertyTable {
-    XnUInt32    propertyId;
-    const char* propertyName;
+    XnUInt32     propertyId;
+    const char*  propertyName;
+	PropertyType propertyType;
 } propertyTable[] = {
-    { XN_STREAM_PROPERTY_INPUT_FORMAT,				"InputFormat"           },
-    { XN_STREAM_PROPERTY_CROPPING_MODE,				"CroppingMode"          },
-    { XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED,		"WhiteBalancedEnabled"  },
-    { XN_STREAM_PROPERTY_GAIN,						"Gain"                  },
-    { XN_STREAM_PROPERTY_HOLE_FILTER,				"HoleFilter"            },
-    { XN_STREAM_PROPERTY_REGISTRATION_TYPE,			"RegistrationType"      },
-    { XN_STREAM_PROPERTY_AGC_BIN,					"AGCBin"                },
-    { XN_STREAM_PROPERTY_CONST_SHIFT,				"ConstShift"            },
-    { XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR,			"PixelSizeFactor"       },
-    { XN_STREAM_PROPERTY_MAX_SHIFT,					"MaxShift"              },
-    { XN_STREAM_PROPERTY_PARAM_COEFF,				"ParamCoeff"            },
-    { XN_STREAM_PROPERTY_SHIFT_SCALE,				"ShiftScale"            },
-    { XN_STREAM_PROPERTY_S2D_TABLE,					"S2D"                   },
-    { XN_STREAM_PROPERTY_D2S_TABLE,					"D2S"                   },
-    { XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE,		"ZPD"                   },
-    { XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE,		"ZPPS"                  },
-    { XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE,	"LDDIS"                 },
-    { XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE,		"DCRCDIS"               },
-    { XN_STREAM_PROPERTY_CLOSE_RANGE,				"CloseRange"            },
-    { XN_STREAM_PROPERTY_PIXEL_REGISTRATION,		"PixelRegistration"     },
+    { XN_STREAM_PROPERTY_INPUT_FORMAT,				"InputFormat"         , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_CROPPING_MODE,				"CroppingMode"        , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED,		"WhiteBalancedEnabled", PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_GAIN,						"Gain"                , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_HOLE_FILTER,				"HoleFilter"          , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_REGISTRATION_TYPE,			"RegistrationType"    , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_AGC_BIN,					"AGCBin"              , PROPERTY_TYPE_GENERAL  },
+    { XN_STREAM_PROPERTY_CONST_SHIFT,				"ConstShift"          , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR,			"PixelSizeFactor"     , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_MAX_SHIFT,					"MaxShift"            , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_PARAM_COEFF,				"ParamCoeff"          , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_SHIFT_SCALE,				"ShiftScale"          , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_S2D_TABLE,					"S2D"                 , PROPERTY_TYPE_GENERAL  },
+    { XN_STREAM_PROPERTY_D2S_TABLE,					"D2S"                 , PROPERTY_TYPE_GENERAL  },
+    { XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE,		"ZPD"                 , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE,		"ZPPS"                , PROPERTY_TYPE_REAL     },
+    { XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE,	"LDDIS"               , PROPERTY_TYPE_REAL     },
+    { XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE,		"DCRCDIS"             , PROPERTY_TYPE_REAL     },
+    { XN_STREAM_PROPERTY_CLOSE_RANGE,				"CloseRange"          , PROPERTY_TYPE_INTEGER  },
+    { XN_STREAM_PROPERTY_PIXEL_REGISTRATION,		"PixelRegistration"   , PROPERTY_TYPE_GENERAL  },
 };
 
 const XnSizeT propertyTableItemsCount = sizeof(propertyTable) / sizeof(propertyTable[0]);
@@ -1028,12 +1036,47 @@ void Recorder::onRecordProperty(
     {
         if (propertyTable[i].propertyId == propertyId)
         {
-            EMIT(RECORD_GENERAL_PROPERTY(
-                    nodeId,
-                    getLastPropertyRecordPos(nodeId, propertyTable[i].propertyName, undoPoint.GetPosition()),
-                    propertyTable[i].propertyName,
-                    pData,
-                    dataSize))
+			switch (propertyTable[i].propertyType)
+			{
+			case PROPERTY_TYPE_INTEGER:
+				{
+					uint64_t value = *(uint64_t*)pData;
+					if (dataSize == sizeof(int))
+					{
+						value = (uint64_t)*(int*)pData;
+					}
+					EMIT(RECORD_INT_PROPERTY(
+						nodeId,
+						getLastPropertyRecordPos(nodeId, propertyTable[i].propertyName, undoPoint.GetPosition()),
+						propertyTable[i].propertyName,
+						value))
+				}
+				break;
+			case PROPERTY_TYPE_REAL:
+				{
+					double value = *(double*)pData;
+					if (dataSize == sizeof(float))
+					{
+						value = (double)*(float*)pData;
+					}
+					EMIT(RECORD_REAL_PROPERTY(
+						nodeId,
+						getLastPropertyRecordPos(nodeId, propertyTable[i].propertyName, undoPoint.GetPosition()),
+						propertyTable[i].propertyName,
+						value))
+				}
+				break;
+			case PROPERTY_TYPE_GENERAL:
+			default:
+				{
+					EMIT(RECORD_GENERAL_PROPERTY(
+						nodeId,
+						getLastPropertyRecordPos(nodeId, propertyTable[i].propertyName, undoPoint.GetPosition()),
+						propertyTable[i].propertyName,
+						pData,
+						dataSize))
+				}
+			}
         }
     }
     undoPoint.Release();
