@@ -758,6 +758,10 @@ public:
 		{
 			return STATUS_ERROR;
 		}
+		if (pListener->m_callbackHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
 
 		return (Status)oniStreamRegisterNewFrameCallback(m_stream, pListener->callback, pListener, &pListener->m_callbackHandle);
 	}
@@ -2042,6 +2046,10 @@ public:
 	*/
 	static Status addDeviceConnectedListener(DeviceConnectedListener* pListener)
 	{
+		if (pListener->m_deviceConnectedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
 		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceConnectedCallbacks, pListener, &pListener->m_deviceConnectedCallbacksHandle);
 	}
 	/**
@@ -2053,6 +2061,10 @@ public:
 	*/
 	static Status addDeviceDisconnectedListener(DeviceDisconnectedListener* pListener)
 	{
+		if (pListener->m_deviceDisconnectedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
 		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceDisconnectedCallbacks, pListener, &pListener->m_deviceDisconnectedCallbacksHandle);
 	}
 	/**
@@ -2064,6 +2076,10 @@ public:
 	*/
 	static Status addDeviceStateChangedListener(DeviceStateChangedListener* pListener)
 	{
+		if (pListener->m_deviceStateChangedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
 		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceStateChangedCallbacks, pListener, &pListener->m_deviceStateChangedCallbacksHandle);
 	}
 	/**
