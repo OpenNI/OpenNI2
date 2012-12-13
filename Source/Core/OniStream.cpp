@@ -240,10 +240,8 @@ void VideoStream::newFrameThreadMainloop()
 		if ((rc == XN_STATUS_OK) && m_running)
 		{
 			m_newFrameEvent.Raise();
-			if (m_pContextNewFrameEvent != NULL)
-			{
-				m_pContextNewFrameEvent->Set();
-			}
+			// HACK: To avoid starvation of other threads.
+			xnOSSleep(1);
 		}
 	}
 }
@@ -307,6 +305,10 @@ void VideoStream::raiseNewFrameEvent()
 {
 	xnOSSetEvent(m_newFrameInternalEvent);
 	xnOSSetEvent(m_newFrameInternalEventForFrameHolder);
+	if (m_pContextNewFrameEvent != NULL)
+	{
+		m_pContextNewFrameEvent->Set();
+	}
 }
 
 XnStatus VideoStream::waitForNewFrameEvent()
