@@ -2046,7 +2046,7 @@ public:
 	*/
 	static Status addDeviceConnectedListener(DeviceConnectedListener* pListener)
 	{
-		if (pListener->m_deviceConnectedCallbacksHandle != NULL)
+		if (pListener->m_deviceConnectedCallbacksHandle == NULL)
 		{
 			return STATUS_ERROR;
 		}
@@ -2061,7 +2061,7 @@ public:
 	*/
 	static Status addDeviceDisconnectedListener(DeviceDisconnectedListener* pListener)
 	{
-		if (pListener->m_deviceDisconnectedCallbacksHandle != NULL)
+		if (pListener->m_deviceDisconnectedCallbacksHandle == NULL)
 		{
 			return STATUS_ERROR;
 		}
@@ -2076,7 +2076,7 @@ public:
 	*/
 	static Status addDeviceStateChangedListener(DeviceStateChangedListener* pListener)
 	{
-		if (pListener->m_deviceStateChangedCallbacksHandle != NULL)
+		if (pListener->m_deviceStateChangedCallbacksHandle == NULL)
 		{
 			return STATUS_ERROR;
 		}
