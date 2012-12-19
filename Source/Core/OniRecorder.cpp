@@ -714,6 +714,15 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
         ))
     undoPoint.Reuse();
 
+	// isGenerating (needed for OpenNI 1.x playback)
+	EMIT(RECORD_INT_PROPERTY(
+		nodeId,
+		getLastPropertyRecordPos(nodeId, "xnIsGenerating", undoPoint.GetPosition()),
+		"xnIsGenerating",
+		TRUE
+		));
+	undoPoint.Reuse();
+
     // xnDeviceMaxDepth
     if (curVideoMode.pixelFormat == ONI_PIXEL_FORMAT_DEPTH_1_MM ||
         curVideoMode.pixelFormat == ONI_PIXEL_FORMAT_DEPTH_100_UM)
