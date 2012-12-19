@@ -62,7 +62,10 @@ XnUSBEventCallbackList g_connectivityEvent;
 //---------------------------------------------------------------------------
 DWORD __stdcall DevDetectThread(LPVOID Arg)
 {
-	g_xnUsbhDevDetectWnd = CreateWindow("xnUsbDeviceDetector", "", WS_POPUP, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
+	char className[MAX_PATH];
+	sprintf_s(className, "xnUsbDeviceDetector%x", &g_xnUsbhModule);
+
+	g_xnUsbhDevDetectWnd = CreateWindow(className, "", WS_POPUP, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
 
 	SetEvent((HANDLE)Arg);
 
