@@ -1,0 +1,28 @@
+OpenNI 2.0.0 Build 29
+December 6 2012
+
+Minimum Requirements:
+---------------------
+- Operating System: 
+  - Windows XP (32/64) with SP2 and above, Windows 7 (32/64)
+  - Ubuntu 12.04 (32/64) and above
+- Processor: Pentium 4, 1.4GHz and above or AMD Athlon 64/FX 1GHz and above.
+- Memory: at least 64MB available.
+- 250MB free hard disk space.
+- CD-ROM drive.
+- Available USB 2.0 high-speed port.
+- Development Environment: 
+  - Microsoft Visual Studio 2008 and 2010. The compiler can be MSVC compiler or an Intel Compiler 11 and above.
+  - GCC 4.x
+- Some of the sample applications require a graphics card equivalent to: ATI RADEON x1300 or NVIDIA GeForce 7300.
+
+Change Log:
+-----------
+
+OpenNI 2.0.0:
+  - Brand new API (see documentation)
+  - Algorithms API were removed, and are now part of middleware libraries (such as NiTE)
+  - New deployment model - private copy to each application (see documentation)
+  - Added support for turning off Auto Exposure and Auto White Balance of the color CMOS in PS1080 devices
+  - Built-in support for Kinect devices via the Kinect SDK (Windows only)
+  - Added support for translating a depth pixel to color map coordinates

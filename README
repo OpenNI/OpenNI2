@@ -1,0 +1,58 @@
+OpenNI
+------
+
+Website: www.openni.org
+
+Buliding Prerequisites
+======================
+Windows
+-------
+1) Microsoft Visual Studio 2010
+   From: http://msdn.microsoft.com/en-us/vstudio/bb984878.aspx
+2) Python 2.6+/3.x
+   From: http://www.python.org/download/
+3) PyWin32
+   From: http://sourceforge.net/projects/pywin32/files/pywin32/
+   Please make sure you download the version that matches your exact python version.
+4) WIX 3.5
+   From: http://wix.codeplex.com/releases/view/60102
+5) Doxygen
+   From: http://www.stack.nl/~dimitri/doxygen/download.html#latestsrc
+6) GraphViz
+   From: http://www.graphviz.org/Download_windows.php
+
+Linux
+-----
+1) GCC 4.x
+   From: http://gcc.gnu.org/releases.html
+   Or via apt:
+   sudo apt-get install g++
+2) Python 2.6+/3.x
+   From: http://www.python.org/download/
+   Or via apt:
+   sudo apt-get install python
+3) LibUSB 1.0.x
+   From: http://sourceforge.net/projects/libusb/files/libusb-1.0/
+   Or via apt:
+   sudo apt-get install libusb-1.0-0-dev
+4) FreeGLUT3
+   From: http://freeglut.sourceforge.net/index.php#download
+   Or via apt:
+   sudo apt-get install freeglut3-dev
+5) Doxygen
+   From: http://www.stack.nl/~dimitri/doxygen/download.html#latestsrc
+   Or via apt:
+   sudo apt-get install doxygen
+6) GraphViz
+   From: http://www.graphviz.org/Download_linux_ubuntu.php
+   Or via apt:
+   sudo apt-get install graphviz
+
+Building
+========
+For a simple build that produces the binaries, open the solution on Windows, or run the root Makefile on Linux.
+
+For creating a full installer:
+- Go into the directory 'Redist'
+- Run ReleaseVersion.py [x86|x64]
+- Installer will be placed in the 'Final' directory

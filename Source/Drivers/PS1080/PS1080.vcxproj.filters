@@ -1,0 +1,832 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{8e939bbb-560b-4742-b01a-ec3ef52df5d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Formats">
+      <UniqueIdentifier>{84e44c82-696a-46d1-a477-4c2cbec9304d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DDK">
+      <UniqueIdentifier>{52710008-96c3-4eda-9b6e-30908776ba35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sensor">
+      <UniqueIdentifier>{0e180fee-3143-4518-8461-dc4c4e6460c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DriverImpl">
+      <UniqueIdentifier>{056c2231-a841-4ed6-bb9c-02a136a9a969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Formats\LibJPEG">
+      <UniqueIdentifier>{bd2edebe-84b9-468d-bfe0-3040945cfe57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{84a4c5d6-dca7-41c2-8465-5c0d981decde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sensor\Data Processors">
+      <UniqueIdentifier>{29abbe34-fc58-482d-b562-3c6d32a23e59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sensor\Firmware">
+      <UniqueIdentifier>{fbc0f7fb-da0b-4f35-90e9-27de346080c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sensor\Algorithms">
+      <UniqueIdentifier>{0fdc9505-6a0f-40b9-8338-735940e77bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sensor\Streams">
+      <UniqueIdentifier>{6e7b92d6-07ae-4177-9e4a-1bb50add983c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\XnBuffer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\XnCore.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\XnCoreStatus.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\XnIOFileStream.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\XnIONetworkStream.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Formats\XnCodecs.cpp">
+      <Filter>Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Formats\XnFormats.cpp">
+      <Filter>Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Formats\XnFormatsMirror.cpp">
+      <Filter>Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Formats\XnFormatsStatus.cpp">
+      <Filter>Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Formats\XnStreamCompression.cpp">
+      <Filter>Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnActualGeneralProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnActualIntProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnActualPropertiesHash.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnActualRealProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnActualStringProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnAudioStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnCodecFactory.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDDK.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDDKStatus.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDepthStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDeviceBase.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDeviceModule.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDeviceModuleHolder.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnDeviceStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnFrameBufferManager.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnFrameStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnGeneralProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnImageStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnIntProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnIntPropertySynchronizer.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnIRStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnPixelStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnPropertySet.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnRealProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnShiftToDepth.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnShiftToDepthStreamHelper.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnStreamingStream.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="DDK\XnStringProperty.cpp">
+      <Filter>DDK</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnCmosInfo.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDeviceSensorInit.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDeviceSensorIO.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensor.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorFPS.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnExportedOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniDepthStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniDevice.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniMapStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcapimin.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcapistd.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jccoefct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jccolor.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcdctmgr.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jchuff.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcinit.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmainct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmarker.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmaster.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcomapi.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcparam.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcphuff.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcprepct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcsample.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jctrans.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdapimin.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdapistd.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdatadst.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdatasrc.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdcoefct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdcolor.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jddctmgr.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdhuff.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdinput.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmainct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmarker.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmaster.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmerge.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdphuff.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdpostct.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdsample.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdtrans.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jerror.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctflt.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctfst.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctint.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctflt.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctfst.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctint.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctred.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jmemmgr.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jmemnobs.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jutils.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jquant1.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jquant2.c">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniIRStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\XnOniColorStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnBayerImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnAudioProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDataProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnFrameStreamProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnGMCDebugProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnGMCProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnPSCompressedDepthProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnPSCompressedImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnPacked12DepthProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnPacked11DepthProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnJpegToRGBImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnJpegImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnIRProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedBayerProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnTecDebugProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnStreamProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedDepthProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedYUVImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedYUVtoRGBImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnWavelengthCorrectionDebugProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnWholePacketProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\Bayer.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\GMC.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\LinAlg.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\Registration.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\Uncomp.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnFirmwareCommands.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnFirmwareInfo.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnFirmwareStreams.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnHostProtocol.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDataProcessorHolder.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDeviceSensorProtocol.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorFirmware.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorFirmwareParams.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorFixedParams.cpp">
+      <Filter>Sensor\Firmware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDepthProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorAudioStream.cpp">
+      <Filter>Sensor\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorDepthStream.cpp">
+      <Filter>Sensor\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorImageStream.cpp">
+      <Filter>Sensor\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorIRStream.cpp">
+      <Filter>Sensor\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnSensorStreamHelper.cpp">
+      <Filter>Sensor\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\YUV.cpp">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnDeviceEnumeration.cpp">
+      <Filter>Sensor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\XnBuffer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\XnCoreGlobals.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\Xn8zCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\Xn16zCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\Xn16zEmbTablesCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnCodecBase.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnFormats.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnJpegCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnNiCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnStreamCompression.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Formats\XnUncompressedCodec.h">
+      <Filter>Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\IXnDevice.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnActualGeneralProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnActualIntProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnActualPropertiesHash.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnActualRealProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnActualStringProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnAudioStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnCodecFactory.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnDepthStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnDeviceBase.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnDeviceModule.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnDeviceModuleHolder.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnDeviceStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnFrameBufferManager.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnFrameStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnGeneralProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnImageStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnIntProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnIntPropertySynchronizer.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnIRStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnPixelStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnPropertySetInternal.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnRealProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnShiftToDepth.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnShiftToDepthStreamHelper.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnStreamingStream.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnStringProperty.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnCmosInfo.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDeviceSensor.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDeviceSensorInit.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDeviceSensorIO.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnParams.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensor.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorFPS.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniDepthStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniDevice.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniDriver.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniMapStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\cderror.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jchuff.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jconfig.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jdct.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jdhuff.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jerror.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jinclude.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jmemsys.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jmorecfg.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jpegint.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jpeglib.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ThirdParty\LibJPEG\jversion.h">
+      <Filter>Formats\LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniIRStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\XnOniColorStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnStreamParams.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="DDK\XnOniFramePool.h">
+      <Filter>DDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnAudioProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnBayerImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDataProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnFrameStreamProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnGMCDebugProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnGMCProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnPSCompressedImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnPSCompressedDepthProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnPacked12DepthProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnPacked11DepthProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnJpegToRGBImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnJpegImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnIRProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnTecDebugProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnStreamProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedBayerProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedDepthProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedYUVImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedYUVtoRGBImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnWavelengthCorrectionDebugProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnWholePacketProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\GMC.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\Bayer.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\LinAlg.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\Registration.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\Uncomp.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnFirmwareCommands.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnFirmwareInfo.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnFirmwareStreams.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnFirmwareTypes.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnHostProtocol.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDataProcessorHolder.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDeviceSensorProtocol.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorFirmware.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorFirmwareParams.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorFixedParams.h">
+      <Filter>Sensor\Firmware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\IXnSensorStream.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDepthProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorAudioStream.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorDepthStream.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorImageStream.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorIRStream.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnSensorStreamHelper.h">
+      <Filter>Sensor\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\YUV.h">
+      <Filter>Sensor\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Include\PS1080.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnDeviceEnumeration.h">
+      <Filter>Sensor</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\ThirdParty\LibJPEG\jconfig.lnx86">
+      <Filter>Formats\LibJPEG</Filter>
+    </None>
+    <None Include="..\..\..\ThirdParty\LibJPEG\jconfig.ps3">
+      <Filter>Formats\LibJPEG</Filter>
+    </None>
+    <None Include="..\..\..\ThirdParty\LibJPEG\jconfig.vc">
+      <Filter>Formats\LibJPEG</Filter>
+    </None>
+    <None Include="..\..\..\ThirdParty\LibJPEG\README">
+      <Filter>Formats\LibJPEG</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Resources\OpenNI.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

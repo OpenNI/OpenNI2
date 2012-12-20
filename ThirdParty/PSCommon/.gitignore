@@ -1,0 +1,8 @@
+Bin
+*.pyc
+ipch
+*.opensdf
+*.sdf
+*.suo
+*.user
+*.bak

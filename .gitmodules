@@ -1,0 +1,3 @@
+[submodule "ThirdParty/PSCommon"]
+	path = ThirdParty/PSCommon
+	url = ssh://git/localhome/GIT/Software/Common/PSCommon.git

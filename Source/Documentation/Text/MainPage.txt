@@ -1,0 +1,11 @@
+/**
+@mainpage OpenNI Overview
+
+This ovverview comprises the following major sections:
+
+- @subpage getting_started
+- @subpage conventions_cpp
+- @subpage legal
+- @subpage release_notes
+*/
+

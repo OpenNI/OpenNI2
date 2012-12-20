@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ColorKinectStream.cpp" />
+    <ClCompile Include="DepthKinectStream.cpp" />
+    <ClCompile Include="IRKinectStream.cpp" />
+    <ClCompile Include="KinectDevice.cpp" />
+    <ClCompile Include="KinectDriver.cpp" />
+    <ClCompile Include="BaseKinectStream.cpp" />
+    <ClCompile Include="KinectStreamImpl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ColorKinectStream.h" />
+    <ClInclude Include="D2S.h.h" />
+    <ClInclude Include="DepthKinectStream.h" />
+    <ClInclude Include="IRKinectStream.h" />
+    <ClInclude Include="KinectDevice.h" />
+    <ClInclude Include="KinectDriver.h" />
+    <ClInclude Include="BaseKinectStream.h" />
+    <ClInclude Include="KinectStreamImpl.h" />
+    <ClInclude Include="S2D.h.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{aede41a2-2b14-4dfc-abfa-2561ae67c9f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Resources\OpenNI.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\OniPlatform.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="OniContext.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniDevice.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniDeviceDriver.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniStream.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniCommon.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniVersion.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Driver\OniDriverAPI.h">
+      <Filter>Header files\Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Driver\OniDriverTypes.h">
+      <Filter>Header files\Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="OniDriverServices.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Win32\OniPlatformWin32.h">
+      <Filter>Header files\API\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="OniDriverHandler.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\PS1080.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniProperties.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="OniFrameHolder.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniStreamFrameHolder.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniSyncedStreamsFrameHolder.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniRecorder.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="OniDataRecords.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniCTypes.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniCAPI.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OpenNI.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="OniInternal.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniCEnums.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniCProperties.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\OniEnums.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{14208b3e-66fd-4fd9-8d16-b1876e541405}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\API">
+      <UniqueIdentifier>{70f83c54-56d4-454c-9738-553225dd0638}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{4c998421-c58c-407b-a31e-5ff3457296db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Driver">
+      <UniqueIdentifier>{f35dbd94-8647-443b-b680-76139b635008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\API\Win32">
+      <UniqueIdentifier>{5b21d064-a83c-4617-a40f-90d83f1d1577}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{55e9600f-1711-4d5e-a48e-e65dc51bdd60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Formats">
+      <UniqueIdentifier>{7f764055-6a63-460f-9d1c-1013093ce542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Formats\LibJPEG">
+      <UniqueIdentifier>{240bc040-07e2-4ff0-b823-9f95f737f8e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OpenNI.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniContext.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniStream.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniDevice.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniDeviceDriver.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniDriverHandler.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniStreamFrameHolder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniSyncedStreamsFrameHolder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniRecorder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniDataRecords.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drivers\OniFile\Formats\XnCodec.cpp">
+      <Filter>Header files\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drivers\OniFile\Formats\XnStreamCompression.cpp">
+      <Filter>Header files\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcapimin.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcapistd.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jccoefct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jccolor.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcdctmgr.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jchuff.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcinit.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcmainct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcmarker.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcmaster.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcomapi.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcparam.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcphuff.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcprepct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jcsample.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jctrans.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdapimin.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdapistd.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdatadst.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdatasrc.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdcoefct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdcolor.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jddctmgr.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdhuff.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdinput.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdmainct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdmarker.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdmaster.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdmerge.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdphuff.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdpostct.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdsample.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jdtrans.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jerror.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jfdctflt.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jfdctfst.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jfdctint.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jidctflt.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jidctfst.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jidctint.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jidctred.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jmemmgr.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jmemnobs.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jquant1.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jquant2.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\LibJPEG\jutils.c">
+      <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.txt">
+      <Filter>Header files\API</Filter>
+    </None>
+    <None Include="..\..\Config\OpenNI.ini">
+      <Filter>Header files\API</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Resources\OpenNI.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

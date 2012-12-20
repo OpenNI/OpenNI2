@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{1887c29c-3905-47c9-a31a-4d2a1c447d83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{5710a645-adf6-4ec5-b5a9-4577058dde9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\API">
+      <UniqueIdentifier>{3c2daeb7-efe8-4592-9c4b-53f6050a62b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\API\Win32">
+      <UniqueIdentifier>{b1c6bd21-c7d1-4224-9c93-543f80fe4356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Win32">
+      <UniqueIdentifier>{52fcd458-35f3-46c5-ad33-77edb75712c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CommonOS">
+      <UniqueIdentifier>{2890b0b8-ad3e-4e08-b27f-6a281ce4f1e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Log">
+      <UniqueIdentifier>{e9f8515c-cbb9-40ee-9bc2-54d170e75d4b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\XnLib.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnBox3D.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnCriticalSection.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnDataStructures.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnHash.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnList.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMath.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMemory.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOS.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOSCpp.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnQueue.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSmartPointer.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnVector3D.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMatrix3x3.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnString.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnArray.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPlatform.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Win32\XnLibWin32.h">
+      <Filter>Header Files\API\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Win32\XnPlatformWin32.h">
+      <Filter>Header Files\API\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPair.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnLog.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnProperty.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPool.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnStatus.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnStatusCodes.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnStatusRegister.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\XnWin32Internal.h">
+      <Filter>Source Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="XnLogConsoleWriter.h">
+      <Filter>Source Files\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="XnLogFileWriter.h">
+      <Filter>Source Files\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="XnDumpFileWriter.h">
+      <Filter>Source Files\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\usb200.h">
+      <Filter>Source Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\usb.h">
+      <Filter>Source Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\usb100.h">
+      <Filter>Source Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\devioctl.h">
+      <Filter>Source Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="XnEnum.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSB.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSBDevice.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnErrorLogger.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnCallStackLogger.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnLockable.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnLockGuard.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPriorityQueue.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-Neon.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-None.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-SSE.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XnSytmmetricMatrix3x3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnVector3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnStatus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32CriticalSection.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Time.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Debug.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Events.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32INI.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Keyboard.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Memory.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32OS.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32SharedLibrary.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Strings.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Threads.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="XnStrings.cpp">
+      <Filter>Source Files\CommonOS</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Files.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="XnOS.cpp">
+      <Filter>Source Files\CommonOS</Filter>
+    </ClCompile>
+    <ClCompile Include="XnFiles.cpp">
+      <Filter>Source Files\CommonOS</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32SharedMemory.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Mutex.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Network.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Processes.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnWin32Semaphore.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLog.cpp">
+      <Filter>Source Files\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLogConsoleWriter.cpp">
+      <Filter>Source Files\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLogFileWriter.cpp">
+      <Filter>Source Files\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="XnDumpFileWriter.cpp">
+      <Filter>Source Files\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="XnDump.cpp">
+      <Filter>Source Files\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="XnOSMemoryProfiling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnFPSCalculator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnProfiling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnScheduler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XnThreads.cpp">
+      <Filter>Source Files\CommonOS</Filter>
+    </ClCompile>
+    <ClCompile Include="XnUSB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\XnUSBWin32.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="XnErrorLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

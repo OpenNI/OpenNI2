@@ -1,0 +1,45 @@
+/**
+@page conventions_cpp C++ API Conventions
+
+@section classes_vs_structs Classes vs. Structs
+
+In general, classes are preferred, along with getX() / setX() methods.
+This allows extending the API in the future without breaking compatibility.
+In cases of "super-primitives" (like @ref openni::RGB888Pixel), structs are used.
+
+@section return_values Return Values from Methods
+
+- All getters return the value as their return value, and cannot fail, for example: @ref openni::VideoFrameRef::getWidth().
+  If the value is a complex type, it will be returned as const reference, for example: @ref openni::Device::getDeviceInfo().
+  If a specific property doesn't exist for the specific object, a meaningful value will be returned.
+  
+- stop / destroy / close methods does not have return values, for example: @ref openni::Device::close().
+
+- All other methods return @ref openni::Status, for example: @ref openni::VideoStream::create().
+
+@section pointers_and_refs Arguments to Methods
+
+- Output arguments, as well as in/out arguments are always passed as a pointer, for example: @ref openni::VideoStream::readFrame().
+- Input arguments:
+  - Primitives are passed by value, for example: @ref openni::VideoMode::setPixelFormat().
+  - Complex types are passed as const reference, for example: @ref openni::VideoStream::create().
+  - In the rare cases where the object identity matters, and not it's content, it will be passed as a pointer, for example: @ref openni::OpenNI::addListener().
+
+@section object_lifetime Object Lifetime
+
+Some objects have their lifetime goverened by the user. For example, a @ref openni::VideoStream is created using the @ref openni::VideoStream::create "create()" method
+and destroyed by calling @ref openni::VideoStream::destroy "destroy()". In those cases, it is important that they get destroyed in the right order. For example, if
+you create a @ref openni::VideoStream on a specific @ref openni::Device, don't close the device before destroying that video stream. In the same manner, all @ref openni::VideoFrameRef
+objects should be released before destroying the stream, and <b>all</b> OpenNI objects should be destroyed before calling @ref openni::OpenNI::shutdown().
+
+Other objects are not created by the user, but are actually members of other objects. For example, calling @ref openni::Device::getDeviceInfo() returns a reference
+to a @ref openni::DeviceInfo object. Note that once the @ref openni::Device object that was used gets closed, the @ref openni::DeviceInfo reference is no longer valid. Do
+not try to use it to access methods of the @ref openni::DeviceInfo object.
+  
+@section arrays Arrays
+
+Some methods return an array of items. We created a very simple template class, @ref openni::Array, which only holds the pointer to the underlying C array
+and the number of elements in that array. Once the array has been released, the elements are no longer accessible. Do not keep a pointer to a specific
+item in the array and use it after releasing it.
+  
+*/

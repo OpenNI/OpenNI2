@@ -1,0 +1,15 @@
+OpenNI 2.0
+Copyright (c) 2012 PrimeSense Ltd.
+
+This product is licensed under the Apache License, Version 2.0 (the "License");
+
+You should have received a copy of the Apache License
+along with OpenNI. If not, see:
+    http://www.apache.org/licenses/LICENSE-2.0  
+
+This software is based in part on the work of the Independent JPEG Group.
+
+Your use of the library may involve use of the Microsoft Kinect for Windows Software Development Kit, 
+which is currently subject to the following license: 
+	http://www.microsoft.com/en-us/kinectforwindows/develop/sdk-eula.aspx
+

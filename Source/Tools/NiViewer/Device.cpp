@@ -1,0 +1,820 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+// --------------------------------
+// Includes
+// --------------------------------
+#include "OpenNI.h"
+#include "Device.h"
+#include "Draw.h"
+#include <math.h>
+#include <XnLog.h>
+#include <PS1080.h>
+
+// --------------------------------
+// Defines
+// --------------------------------
+#define MAX_STRINGS 20
+
+// --------------------------------
+// Global Variables
+// --------------------------------
+
+DeviceParameter g_Registration;
+DeviceParameter g_Resolution;
+bool g_bIsDepthOn = false;
+bool g_bIsColorOn = false;
+bool g_bIsIROn = false;
+
+openni::Device g_device;
+openni::PlaybackControl* g_pPlaybackControl;
+
+openni::VideoStream g_depthStream;
+openni::VideoStream g_colorStream;
+openni::VideoStream g_irStream;
+
+openni::VideoFrameRef g_depthFrame;
+openni::VideoFrameRef g_colorFrame;
+openni::VideoFrameRef g_irFrame;
+
+const openni::SensorInfo* g_depthSensorInfo = NULL;
+const openni::SensorInfo* g_colorSensorInfo = NULL;
+const openni::SensorInfo* g_irSensorInfo = NULL;
+
+// --------------------------------
+// Code
+// --------------------------------
+void initConstants()
+{
+// 	// Primary Streams
+	int nIndex = 0;
+
+	// Registration
+	nIndex = 0;
+
+	g_Registration.pValues[nIndex++] = openni::IMAGE_REGISTRATION_OFF;
+	g_Registration.pValueToName[FALSE] = "Off";
+
+	g_Registration.pValues[nIndex++] = openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR;
+	g_Registration.pValueToName[TRUE] = "Depth -> Image";
+
+	g_Registration.nValuesCount = nIndex;
+}
+
+const char* getFormatName(openni::PixelFormat format)
+{
+	switch (format)
+	{
+	case openni::PIXEL_FORMAT_DEPTH_1_MM:
+		return "1 mm";
+	case openni::PIXEL_FORMAT_DEPTH_100_UM:
+		return "100 um";
+	case openni::PIXEL_FORMAT_SHIFT_9_2:
+		return "Shifts 9.2";
+	case openni::PIXEL_FORMAT_SHIFT_9_3:
+		return "Shifts 9.3";
+	case openni::PIXEL_FORMAT_RGB888:
+		return "RGB 888";
+	case openni::PIXEL_FORMAT_YUV422:
+		return "YUV 422";
+	case openni::PIXEL_FORMAT_GRAY8:
+		return "Grayscale 8-bit";
+	case openni::PIXEL_FORMAT_GRAY16:
+		return "Grayscale 16-bit";
+	case openni::PIXEL_FORMAT_JPEG:
+		return "JPEG";
+	default:
+		return "Unknown";
+	}
+}
+
+void openCommon(openni::Device& device, bool defaultRightColor)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	g_bIsDepthOn = false;
+	g_bIsColorOn = false;
+	g_bIsIROn    = false;
+
+	g_depthSensorInfo = device.getSensorInfo(openni::SENSOR_DEPTH);
+	g_colorSensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
+	g_irSensorInfo = device.getSensorInfo(openni::SENSOR_IR);
+
+	if (g_depthSensorInfo != NULL)
+	{
+		nRetVal = g_depthStream.create(device, openni::SENSOR_DEPTH);
+		if (nRetVal != openni::STATUS_OK)
+		{
+			printf("Failed to create depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+			return;
+		}
+
+		nRetVal = g_depthStream.start();
+		if (nRetVal != openni::STATUS_OK)
+		{
+			printf("Failed to start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+			g_depthStream.destroy();
+			return;
+		}
+
+		g_bIsDepthOn = true;
+	}
+
+	if (g_colorSensorInfo != NULL)
+	{
+		nRetVal = g_colorStream.create(device, openni::SENSOR_COLOR);
+		if (nRetVal != openni::STATUS_OK)
+		{
+			printf("Failed to create color stream:\n%s\n", openni::OpenNI::getExtendedError());
+			return;
+		}
+
+		if (defaultRightColor)
+		{
+			nRetVal = g_colorStream.start();
+			if (nRetVal != openni::STATUS_OK)
+			{
+				printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
+				g_colorStream.destroy();
+				return;
+			}
+
+			g_bIsColorOn = true;
+		}
+	}
+
+	if (g_irSensorInfo != NULL)
+	{
+		nRetVal = g_irStream.create(device, openni::SENSOR_IR);
+		if (nRetVal != openni::STATUS_OK)
+		{
+			printf("Failed to create IR stream:\n%s\n", openni::OpenNI::getExtendedError());
+			return;
+		}
+
+		if (!g_bIsColorOn)
+		{
+			nRetVal = g_irStream.start();
+			if (nRetVal != openni::STATUS_OK)
+			{
+				printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
+				g_irStream.destroy();
+				return;
+			}
+
+			g_bIsIROn = true;
+		}
+	}
+
+	initConstants();
+
+	readFrame();
+}
+
+class OpenNIEventListener : public openni::OpenNI::Listener
+{
+public:
+	virtual void onDeviceStateChanged(const openni::DeviceInfo* pInfo, openni::DeviceState errorState)
+	{
+		if (strcmp(pInfo->getUri(), g_device.getDeviceInfo().getUri()) == 0)
+		{
+			if (errorState != 0)
+			{
+				setErrorState("Device is in error state! (error %d)", errorState);
+			}
+			else
+			{
+				setErrorState("");
+			}
+		}
+	}
+
+	virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
+	{
+		if (strcmp(pInfo->getUri(), g_device.getDeviceInfo().getUri()) == 0)
+		{
+			setErrorState("Device disconnected!");
+		}
+	}
+};
+
+openni::Status openDevice(const char* uri, bool defaultRightColor)
+{
+	openni::Status nRetVal = openni::OpenNI::initialize();
+	if (nRetVal != openni::STATUS_OK)
+	{
+		return nRetVal;
+	}
+
+	// Register to OpenNI events.
+	static OpenNIEventListener eventListener;
+	openni::OpenNI::addListener(&eventListener);
+
+	// Open the requested device.
+	nRetVal = g_device.open(uri);
+	if (nRetVal != openni::STATUS_OK)
+	{
+		return nRetVal;
+	}
+
+	g_pPlaybackControl = g_device.getPlaybackControl();
+
+	openCommon(g_device, defaultRightColor);
+
+	return openni::STATUS_OK;
+}
+
+openni::Status openDeviceFromList(bool defaultRightColor)
+{
+	openni::Status rc = openni::OpenNI::initialize();
+	if (rc != openni::STATUS_OK)
+	{
+		return rc;
+	}
+
+	openni::Array<openni::DeviceInfo> deviceList;
+	openni::OpenNI::enumerateDevices(&deviceList);
+
+	for (int i = 0; i < deviceList.getSize(); ++i)
+	{
+		printf("[%d] %s [%s] (%s)\n", i+1, deviceList[i].getName(), deviceList[i].getVendor(), deviceList[i].getUri());
+	}
+
+	printf("\n");
+	int chosen = 1;
+
+	do
+	{
+		printf("Choose device to open (1) [0 to exit]: ");
+
+		int rc = scanf("%d", &chosen);
+
+		if (rc <= 0 || chosen == 0)
+		{
+			return openni::STATUS_ERROR;
+		}
+
+	} while (chosen < 1 || chosen > deviceList.getSize());
+
+	g_device.open(deviceList[chosen-1].getUri());
+
+	if (rc != openni::STATUS_OK)
+	{
+		return rc;
+	}
+
+	g_pPlaybackControl = g_device.getPlaybackControl();
+
+	openCommon(g_device, defaultRightColor);
+
+	return openni::STATUS_OK;
+}
+
+void closeDevice()
+{
+	g_depthStream.stop();
+	g_colorStream.stop();
+	g_irStream.stop();
+
+	g_depthStream.destroy();
+	g_colorStream.destroy();
+	g_irStream.destroy();
+
+	g_device.close();
+
+	openni::OpenNI::shutdown();
+}
+
+void readFrame()
+{
+	openni::Status rc = openni::STATUS_OK;
+
+	openni::VideoStream* streams[] = {&g_depthStream, &g_colorStream, &g_irStream};
+
+	int changedIndex = -1;
+	while (rc == openni::STATUS_OK)
+	{
+		rc = openni::OpenNI::waitForAnyStream(streams, 3, &changedIndex, 0);
+		if (rc == openni::STATUS_OK)
+		{
+			switch (changedIndex)
+			{
+			case 0:
+				g_depthStream.readFrame(&g_depthFrame); break;
+			case 1:
+				g_colorStream.readFrame(&g_colorFrame); break;
+			case 2:
+				g_irStream.readFrame(&g_irFrame); break;
+			default:
+				printf("Error in wait\n");
+			}
+		}
+	}
+}
+
+void changeRegistration(int value)
+{
+	openni::ImageRegistrationMode mode = (openni::ImageRegistrationMode)value;
+	if (!g_device.isValid() || !g_device.isImageRegistrationModeSupported(mode))
+	{
+		return;
+	}
+
+	g_device.setImageRegistrationMode(mode);
+}
+
+void toggleMirror(int )
+{
+	toggleDepthMirror(0);
+	toggleColorMirror(0);
+	toggleIRMirror(0);
+
+	displayMessage ("Mirror: %s", g_depthStream.getMirroringEnabled()?"On":"Off");	
+}
+
+void toggleCMOSAutoLoops(int )
+{
+	if (g_colorStream.getCameraSettings() == NULL)
+	{
+		displayMessage("Color stream doesn't support camera settings");
+		return;
+	}
+	toggleImageAutoExposure(0);
+	toggleImageAutoWhiteBalance(0);
+
+	displayMessage ("CMOS Auto Loops: %s", g_colorStream.getCameraSettings()->getAutoExposureEnabled()?"On":"Off");	
+}
+
+void toggleCloseRange(int )
+{
+	bool bCloseRange;
+	g_depthStream.getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &bCloseRange);
+
+	bCloseRange = !bCloseRange;
+
+	g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange);
+
+	displayMessage ("Close range: %s", bCloseRange?"On":"Off");	
+}
+
+void seekFrame(int nDiff)
+{
+	// Make sure seek is required.
+	if (nDiff == 0)
+	{
+		return;
+	}
+
+	if (g_pPlaybackControl == NULL)
+	{
+		return;
+	}
+
+	int frameId = 0, numberOfFrames = 0;
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame;
+	if (g_bIsDepthOn)
+	{
+		pCurFrame = &g_depthFrame;
+		pStream = &g_depthStream;
+	}
+	else if (g_bIsColorOn)
+	{
+		pCurFrame = &g_colorFrame;
+		pStream = &g_colorStream;
+	}
+	else if (g_bIsIROn)
+	{
+		pCurFrame = &g_irFrame;
+		pStream = &g_irStream;
+	}
+	else
+	{
+		return;
+	}
+	frameId = pCurFrame->getFrameIndex();
+
+	// Get number of frames
+	numberOfFrames = g_pPlaybackControl->getNumberOfFrames(*pStream);
+
+	// Calculate the new frame ID and seek stream.
+	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+	openni::Status rc = g_pPlaybackControl->seek(*pStream, frameId);
+	if (rc == openni::STATUS_OK)
+	{
+		// Read next frame from all streams.
+		if (g_bIsDepthOn)
+		{
+			g_depthStream.readFrame(&g_depthFrame);
+		}
+		if (g_bIsColorOn)
+		{
+			g_colorStream.readFrame(&g_colorFrame);
+		}
+		if (g_bIsIROn)
+		{
+			g_irStream.readFrame(&g_irFrame);
+		}
+		// the new frameId might be different than expected (due to clipping to edges)
+		frameId = pCurFrame->getFrameIndex();
+
+		displayMessage("Seeked to frame %u/%u", frameId, numberOfFrames);
+	}
+	else if ((rc == openni::STATUS_NOT_IMPLEMENTED) || (rc == openni::STATUS_NOT_SUPPORTED) || (rc == openni::STATUS_BAD_PARAMETER) || (rc == openni::STATUS_NO_DEVICE))
+	{
+		displayError("Seeking is not supported");
+	}
+	else
+	{
+		displayError("Error seeking to frame:\n%s", openni::OpenNI::getExtendedError());
+	}
+}
+
+void toggleDepthState(int )
+{
+	if (g_depthStream.isValid()) 
+	{
+		if(g_bIsDepthOn)
+		{
+			g_depthStream.stop();
+			g_depthFrame.release();
+		}
+		else
+		{
+			openni::Status nRetVal = g_depthStream.start();
+			if (nRetVal != openni::STATUS_OK)
+			{
+				displayError("Failed to start depth stream:\n%s", openni::OpenNI::getExtendedError());
+				return;
+			}
+		}
+
+		g_bIsDepthOn = !g_bIsDepthOn;
+	}
+}
+
+void toggleColorState(int )
+{
+	if (g_colorStream.isValid()) 
+	{
+		if(g_bIsColorOn)
+		{
+			g_colorStream.stop();
+			g_colorFrame.release();
+		}
+		else
+		{
+			openni::Status nRetVal = g_colorStream.start();
+			if (nRetVal != openni::STATUS_OK)
+			{
+				displayError("Failed to start color stream:\n%s", openni::OpenNI::getExtendedError());
+				return;
+			}
+		}
+
+		g_bIsColorOn = !g_bIsColorOn;
+	}
+}
+
+void toggleIRState(int )
+{
+	if (g_irStream.isValid()) 
+	{
+		if(g_bIsIROn)
+		{
+			g_irStream.stop();
+			g_irFrame.release();
+		}
+		else
+		{
+			openni::Status nRetVal = g_irStream.start();
+			if (nRetVal != openni::STATUS_OK)
+			{
+				displayError("Failed to start IR stream:\n%s", openni::OpenNI::getExtendedError());
+				return;
+			}
+		}
+
+		g_bIsIROn = !g_bIsIROn;
+	}
+}
+
+bool isDepthOn()
+{
+	return (g_bIsDepthOn);
+}
+
+bool isColorOn()
+{
+	return (g_bIsColorOn);
+}
+
+bool isIROn()
+{
+	return (g_bIsIROn);
+}
+
+const openni::SensorInfo* getDepthSensorInfo()
+{
+	return g_depthSensorInfo;
+}
+
+const openni::SensorInfo* getColorSensorInfo()
+{
+	return g_colorSensorInfo;
+}
+
+const openni::SensorInfo* getIRSensorInfo()
+{
+	return g_irSensorInfo;
+}
+
+void setDepthVideoMode(int mode)
+{
+	bool bIsStreamOn = g_bIsDepthOn;
+	if (bIsStreamOn)
+	{
+		g_bIsDepthOn = false;
+		g_depthStream.stop();
+	}
+
+	g_depthStream.setVideoMode(g_depthSensorInfo->getSupportedVideoModes()[mode]);
+	if (bIsStreamOn)
+	{
+		g_depthStream.start();
+		g_bIsDepthOn = true;
+	}
+}
+
+void setColorVideoMode(int mode)
+{
+	bool bIsStreamOn = g_bIsColorOn;
+	if (bIsStreamOn)
+	{
+		g_bIsColorOn = false;
+		g_colorStream.stop();
+	}
+
+	g_colorFrame.release();
+	g_colorStream.setVideoMode(g_colorSensorInfo->getSupportedVideoModes()[mode]);
+	if (bIsStreamOn)
+	{
+		g_colorStream.start();
+		g_bIsColorOn = true;
+	}
+}
+
+void setIRVideoMode(int mode)
+{
+	bool bIsStreamOn = g_bIsIROn;
+	if (bIsStreamOn)
+	{
+		g_bIsIROn = false;
+		g_irStream.stop();
+	}
+
+	g_irFrame.release();
+	g_irStream.setVideoMode(g_irSensorInfo->getSupportedVideoModes()[mode]);
+	if (bIsStreamOn)
+	{
+		g_irStream.start();
+		g_bIsIROn = true;
+	}
+}
+
+void toggleDepthMirror(int)
+{
+	g_depthStream.setMirroringEnabled(!g_depthStream.getMirroringEnabled());
+}
+
+void toggleColorMirror(int)
+{
+	g_colorStream.setMirroringEnabled(!g_colorStream.getMirroringEnabled());
+}
+
+void toggleIRMirror(int)
+{
+	g_irStream.setMirroringEnabled(g_irStream.getMirroringEnabled());
+}
+
+void toggleImageAutoExposure(int)
+{
+	g_colorStream.getCameraSettings()->setAutoExposureEnabled(!g_colorStream.getCameraSettings()->getAutoExposureEnabled());
+}
+
+void toggleImageAutoWhiteBalance(int)
+{
+	g_colorStream.getCameraSettings()->setAutoWhiteBalanceEnabled(!g_colorStream.getCameraSettings()->getAutoWhiteBalanceEnabled());
+}
+
+void setStreamCropping(openni::VideoStream& stream, int originX, int originY, int width, int height)
+{
+	if (!stream.isValid())
+	{
+		displayMessage("Stream does not exist!");
+		return;
+	}
+	
+	if (!stream.isCroppingSupported())
+	{
+		displayMessage("Stream does not support cropping!");
+		return;
+	}
+	
+	openni::Status nRetVal = stream.setCropping(originX, originY, width, height);
+	if (nRetVal != openni::STATUS_OK)
+	{
+		displayMessage("Failed to set cropping: %s", xnGetStatusString(nRetVal));
+		return;
+	}
+}
+
+
+void resetStreamCropping(openni::VideoStream& stream)
+{
+	if (!stream.isValid())
+	{
+		displayMessage("Stream does not exist!");
+		return;
+	}
+	
+	if (!stream.isCroppingSupported())
+	{
+		displayMessage("Stream does not support cropping!");
+		return;
+	}
+	
+	openni::Status nRetVal = stream.resetCropping();
+	if (nRetVal != openni::STATUS_OK)
+	{
+		displayMessage("Failed to reset cropping: %s", xnGetStatusString(nRetVal));
+		return;
+	}
+}
+
+void resetDepthCropping(int)
+{
+	getDepthStream().resetCropping();
+}
+
+void resetColorCropping(int)
+{
+	getColorStream().resetCropping();
+}
+
+void resetIRCropping(int)
+{
+	getIRStream().resetCropping();
+}
+
+void resetAllCropping(int)
+{
+	if (getDepthStream().isValid())
+		resetDepthCropping(0);
+
+	if (getColorStream().isValid())
+		resetColorCropping(0);
+
+	if (getIRStream().isValid())
+		resetIRCropping(0);
+}
+
+void togglePlaybackRepeat(int /*ignored*/)
+{
+	if (g_pPlaybackControl == NULL)
+	{
+		return;
+	}
+
+	bool bLoop = g_pPlaybackControl->getRepeatEnabled();
+	bLoop = !bLoop;
+	g_pPlaybackControl->setRepeatEnabled(bLoop);
+	char msg[100];
+	sprintf(msg,"Repeat playback: %s", (bLoop ? "ON" : "OFF"));
+	displayMessage(msg);
+}
+
+openni::Status setPlaybackSpeed(float speed)
+{
+	if (g_pPlaybackControl == NULL)
+	{
+		return openni::STATUS_NOT_SUPPORTED;
+	}
+	return g_pPlaybackControl->setSpeed(speed);
+}
+
+float getPlaybackSpeed()
+{
+	if (g_pPlaybackControl == NULL)
+	{
+		return 0.0f;
+	}
+	return g_pPlaybackControl->getSpeed();
+}
+
+void changePlaybackSpeed(int ratioDiff)
+{
+	float ratio = (float)pow(2.0, ratioDiff);
+	float speed = getPlaybackSpeed() * ratio;
+	if (speed < 0)
+	{
+		speed = 0;
+	}
+	openni::Status rc = setPlaybackSpeed(speed);
+	if (rc == openni::STATUS_OK)
+	{
+		if (speed == 0)
+		{
+			displayMessage("Playback speed set to fastest");
+		}
+		else
+		{
+			displayMessage("Playback speed set to x%.2f", speed);
+		}
+	}
+	else if ((rc == openni::STATUS_NOT_IMPLEMENTED) || (rc == openni::STATUS_NOT_SUPPORTED) || (rc == openni::STATUS_BAD_PARAMETER))
+	{
+		displayError("Playback speed is not supported");
+	}
+	else
+	{
+		displayError("Error setting playback speed:\n%s", openni::OpenNI::getExtendedError());
+	}
+}
+
+openni::Device& getDevice()
+{
+	return g_device;
+}
+
+openni::VideoStream& getDepthStream()
+{
+	return g_depthStream;
+}
+openni::VideoStream& getColorStream()
+{
+	return g_colorStream;
+}
+openni::VideoStream& getIRStream()
+{
+	return g_irStream;
+}
+
+openni::VideoFrameRef& getDepthFrame()
+{
+	return g_depthFrame;
+}
+openni::VideoFrameRef& getColorFrame()
+{
+	return g_colorFrame;
+}
+openni::VideoFrameRef& getIRFrame()
+{
+	return g_irFrame;
+}
+
+bool g_bFrameSyncOn = false;
+void toggleFrameSync(int)
+{
+	if (g_bFrameSyncOn)
+	{
+		g_device.setDepthColorSyncEnabled(false);
+		displayMessage("Frame sync off");
+	}
+	else
+	{
+		openni::Status rc = g_device.setDepthColorSyncEnabled(true);
+		if (rc != openni::STATUS_OK)
+		{
+			displayMessage("Can't frame sync");
+			return;
+		}
+		displayMessage("Frame sync on");
+	}
+	g_bFrameSyncOn = !g_bFrameSyncOn;
+}
+
+bool convertDepthPointToColor(int depthX, int depthY, openni::DepthPixel depthZ, int* pColorX, int* pColorY)
+{
+	if (!g_depthStream.isValid() || !g_colorStream.isValid())
+		return false;
+
+	return (openni::STATUS_OK == openni::CoordinateConverter::convertDepthToColor(g_depthStream, g_colorStream, depthX, depthY, depthZ, pColorX, pColorY));
+}

@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\XnCallStackLogger.h" />
+    <ClInclude Include="..\Include\XnErrorLogger.h" />
+    <ClInclude Include="..\Include\XnLib.h" />
+    <ClInclude Include="..\Include\Win32\XnLibWin32.h" />
+    <ClInclude Include="..\Include\Win32\XnPlatformWin32.h" />
+    <ClInclude Include="..\Include\XnArray.h" />
+    <ClInclude Include="..\Include\XnBox3D.h" />
+    <ClInclude Include="..\Include\XnCriticalSection.h" />
+    <ClInclude Include="..\Include\XnDataStructures.h" />
+    <ClInclude Include="..\Include\XnHash.h" />
+    <ClInclude Include="..\Include\XnList.h" />
+    <ClInclude Include="..\Include\XnLockable.h" />
+    <ClInclude Include="..\Include\XnLockGuard.h" />
+    <ClInclude Include="..\Include\XnLog.h" />
+    <ClInclude Include="..\Include\XnMath.h" />
+    <ClInclude Include="..\Include\XnMatrix3x3.h" />
+    <ClInclude Include="..\Include\XnMemory.h" />
+    <ClInclude Include="..\Include\XnOS.h" />
+    <ClInclude Include="..\Include\XnOSCpp.h" />
+    <ClInclude Include="..\Include\XnPair.h" />
+    <ClInclude Include="..\Include\XnPlatform.h" />
+    <ClInclude Include="..\Include\XnPool.h" />
+    <ClInclude Include="..\Include\XnPriorityQueue.h" />
+    <ClInclude Include="..\Include\XnProperty.h" />
+    <ClInclude Include="..\Include\XnQueue.h" />
+    <ClInclude Include="..\Include\XnSIMD-Neon.h" />
+    <ClInclude Include="..\Include\XnSIMD-None.h" />
+    <ClInclude Include="..\Include\XnSIMD-SSE.h" />
+    <ClInclude Include="..\Include\XnSIMD.h" />
+    <ClInclude Include="..\Include\XnSmartPointer.h" />
+    <ClInclude Include="..\Include\XnStatus.h" />
+    <ClInclude Include="..\Include\XnStatusCodes.h" />
+    <ClInclude Include="..\Include\XnStatusRegister.h" />
+    <ClInclude Include="..\Include\XnString.h" />
+    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h" />
+    <ClInclude Include="..\Include\XnUSB.h" />
+    <ClInclude Include="..\Include\XnUSBDevice.h" />
+    <ClInclude Include="..\Include\XnVector3D.h" />
+    <ClInclude Include="Win32\devioctl.h" />
+    <ClInclude Include="Win32\usb.h" />
+    <ClInclude Include="Win32\usb100.h" />
+    <ClInclude Include="Win32\usb200.h" />
+    <ClInclude Include="Win32\XnWin32Internal.h" />
+    <ClInclude Include="XnDumpFileWriter.h" />
+    <ClInclude Include="XnEnum.h" />
+    <ClInclude Include="XnLogConsoleWriter.h" />
+    <ClInclude Include="XnLogFileWriter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Win32\XnUSBWin32.cpp" />
+    <ClCompile Include="XnErrorLogger.cpp" />
+    <ClCompile Include="XnLib.cpp" />
+    <ClCompile Include="Win32\XnWin32CriticalSection.cpp" />
+    <ClCompile Include="Win32\XnWin32Debug.cpp" />
+    <ClCompile Include="Win32\XnWin32Events.cpp" />
+    <ClCompile Include="Win32\XnWin32Files.cpp" />
+    <ClCompile Include="Win32\XnWin32INI.cpp" />
+    <ClCompile Include="Win32\XnWin32Keyboard.cpp" />
+    <ClCompile Include="Win32\XnWin32Memory.cpp" />
+    <ClCompile Include="Win32\XnWin32Mutex.cpp" />
+    <ClCompile Include="Win32\XnWin32Network.cpp" />
+    <ClCompile Include="Win32\XnWin32OS.cpp" />
+    <ClCompile Include="Win32\XnWin32Processes.cpp" />
+    <ClCompile Include="Win32\XnWin32Semaphore.cpp" />
+    <ClCompile Include="Win32\XnWin32SharedLibrary.cpp" />
+    <ClCompile Include="Win32\XnWin32SharedMemory.cpp" />
+    <ClCompile Include="Win32\XnWin32Strings.cpp" />
+    <ClCompile Include="Win32\XnWin32Threads.cpp" />
+    <ClCompile Include="Win32\XnWin32Time.cpp" />
+    <ClCompile Include="XnDump.cpp" />
+    <ClCompile Include="XnDumpFileWriter.cpp" />
+    <ClCompile Include="XnFiles.cpp" />
+    <ClCompile Include="XnFPSCalculator.cpp" />
+    <ClCompile Include="XnLog.cpp" />
+    <ClCompile Include="XnLogConsoleWriter.cpp" />
+    <ClCompile Include="XnLogFileWriter.cpp" />
+    <ClCompile Include="XnOS.cpp" />
+    <ClCompile Include="XnOSMemoryProfiling.cpp" />
+    <ClCompile Include="XnProfiling.cpp" />
+    <ClCompile Include="XnScheduler.cpp" />
+    <ClCompile Include="XnStatus.cpp" />
+    <ClCompile Include="XnStrings.cpp" />
+    <ClCompile Include="XnSytmmetricMatrix3x3.cpp" />
+    <ClCompile Include="XnThreads.cpp" />
+    <ClCompile Include="XnUSB.cpp" />
+    <ClCompile Include="XnVector3D.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{72D595BB-8C52-449B-91DB-0E9F6AEAF5BB}</ProjectGuid>
+    <RootNamespace>XnLib</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)-$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)-$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Include;..\Driver\Win32\Build\sys;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);XnLib_EXPORT</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ProjectReference />
+    <Lib>
+      <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Include;..\Driver\Win32\Build\sys;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);XnLib_EXPORT</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ProjectReference />
+    <Lib>
+      <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);XnLib_EXPORT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include;..\Driver\Win32\Build\sys;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);XnLib_EXPORT</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include;..\Driver\Win32\Build\sys;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
