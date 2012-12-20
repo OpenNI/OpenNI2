@@ -93,7 +93,12 @@ ifneq "$(EXE_NAME)" ""
 endif
 ifneq "$(SLIB_NAME)" ""
 	OUTPUT_NAME = lib$(SLIB_NAME).a
-	OUTPUT_COMMAND = $(AR) -cq $(OUTPUT_FILE) $(OBJ_FILES)
+
+	ifneq ("$(OSTYPE)","Darwin")
+		OUTPUT_COMMAND = $(AR) -cq $(OUTPUT_FILE) $(OBJ_FILES)
+	else
+		OUTPUT_COMMAND = libtool -static -o $(OUTPUT_FILE) $(OBJ_FILES)
+	endif
 endif
 
 define CREATE_SRC_TARGETS
