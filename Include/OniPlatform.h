@@ -47,7 +47,7 @@
 #elif _ARC
 #	include "ARC/OniPlaformARC.h"
 #elif (__APPLE__)
-#	include "MacOSX/OniPlatformMacOSX"
+#	include "MacOSX/OniPlatformMacOSX.h"
 #else
 #	error Xiron Platform Abstraction Layer - Unsupported Platform!
 #endif
