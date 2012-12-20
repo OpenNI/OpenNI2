@@ -18,7 +18,12 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#include <GL/glut.h>
+#if (XN_PLATFORM == XN_PLATFORM_MACOSX)
+	#include <GLUT/glut.h>
+#else
+	#include <GL/glut.h>
+#endif
+
 #include "Viewer.h"
 #include "../Common/OniSampleUtilities.h"
 

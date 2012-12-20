@@ -22,7 +22,13 @@
 #ifndef _CRT_SECURE_NO_DEPRECATE 
 	#define _CRT_SECURE_NO_DEPRECATE 1
 #endif
-#include <GL/glut.h>
+
+#if (XN_PLATFORM == XN_PLATFORM_MACOSX)
+	#include <GLUT/glut.h>
+#else
+	#include <GL/glut.h>
+#endif
+
 #include "Viewer.h"
 #include "../Common/OniSampleUtilities.h"
 
