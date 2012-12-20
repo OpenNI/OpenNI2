@@ -29,11 +29,6 @@ namespace xnl
 
 	namespace Math
 	{
-		template <class T>
-		XnBool IsZero(T value, T tolerance)
-		{
-			return Abs(value) < tolerance;
-		}
 		inline XnInt32 Abs(XnInt32 i)
 		{
 			return abs(i);
@@ -41,6 +36,11 @@ namespace xnl
 		inline XnFloat Abs(XnFloat f)
 		{
 			return fabs(f);
+		}
+		template <class T>
+		XnBool IsZero(T value, T tolerance)
+		{
+			return Abs(value) < tolerance;
 		}
 		inline XnFloat Sqr(XnFloat f)
 		{

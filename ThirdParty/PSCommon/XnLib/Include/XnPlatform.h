@@ -59,7 +59,7 @@
 #elif _ARC
 #include "ARC/XnPlaformARC.h"
 #elif (__APPLE__)
-#include "MacOSX/XnPlatformMacOSX"
+#include "MacOSX/XnPlatformMacOSX.h"
 #else
 #error Xiron Platform Abstraction Layer - Unsupported Platform!
 #endif
