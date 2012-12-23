@@ -60,6 +60,13 @@
 //---------------------------------------------------------------------------
 // Structures & Enums
 //---------------------------------------------------------------------------
+typedef enum XnUSBDeviceConnectionState
+{
+	XN_USB_DEVICE_DISCONNECTED,
+	XN_USB_DEVICE_CONNECTED,
+	XN_USB_DEVICE_SUSPENDED,
+} XnUSBDeviceConnectionState;
+
 typedef struct XnUSBStringDescriptor
 {
 	XnUInt8 nID;
@@ -90,6 +97,7 @@ struct XnUSBDevice;
 typedef struct XnUSBDevice XnUSBDevice;
 
 typedef void (*XnUSBDeviceNewControlRequestCallback)(XnUSBDevice* pDevice, void* pCookie);
+typedef void (*XnUSBDeviceConnectivityChangedCallback)(XnUSBDevice* pDevice, XnUSBDeviceConnectionState state, void* pCookie);
 
 //---------------------------------------------------------------------------
 // API
@@ -102,6 +110,8 @@ XN_C_API XnBool XN_C_DECL xnUSBDeviceIsControlRequestPending(XnUSBDevice* pDevic
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceReceiveControlRequest(XnUSBDevice* pDevice, XnUChar* pBuffer, XnUInt32* pnRequestSize);
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceSendControlReply(XnUSBDevice* pDevice, const XnUChar* pBuffer, XnUInt32 nReplySize);
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetNewControlRequestCallback(XnUSBDevice* pDevice, XnUSBDeviceNewControlRequestCallback pFunc, void* pCookie);
+XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetConnectivityChangedCallback(XnUSBDevice* pDevice, XnUSBDeviceConnectivityChangedCallback pFunc, void* pCookie);
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceWriteEndpoint(XnUSBDevice* pDevice, XnUInt8 nAddress, const XnUChar* pData, XnUInt32 nDataSize);
+XN_C_API XnStatus XN_C_DECL xnUSBDeviceResetEndpoint(XnUSBDevice* pDevice, XnUInt8 nAddress);
 
 #endif

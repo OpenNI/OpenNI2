@@ -144,7 +144,7 @@ const XnChar* GetHostStateName(HostControlState state)
 
 void SetConnectivityState(XnUSBDevice* pDevice, XnUSBDeviceConnectionState state)
 {
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	pDevice->connectionState = state;
 	if (pDevice->pConnectivityChangedCallback != NULL)
 	{
@@ -795,7 +795,7 @@ XN_C_API XnBool XN_C_DECL xnUSBDeviceIsControlRequestPending(XnUSBDevice* pDevic
 	if (pDevice == NULL)
 		return FALSE;
 
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	return (pDevice->eDeviceControlState == DEVICE_CONTROL_REQUEST_RECEIVED);
 }
 
@@ -807,7 +807,7 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceReceiveControlRequest(XnUSBDevice* pDevic
 	XN_VALIDATE_INPUT_PTR(pBuffer);
 	XN_VALIDATE_OUTPUT_PTR(pnRequestSize);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 
 	XnUInt64 nNow;
 	xnOSGetHighResTimeStamp(&nNow);
@@ -837,7 +837,7 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSendControlReply(XnUSBDevice* pDevice, co
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	XN_VALIDATE_INPUT_PTR(pBuffer);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 
 	HostControlState prevHost = pDevice->eHostControlState;
 	DeviceControlState prevDevice = pDevice->eDeviceControlState;
@@ -929,7 +929,7 @@ static XnBool handleVendorControl(XnUSBDevice* pDevice, struct usb_ctrlrequest *
 			return FALSE;
 		}
 
-		XnAutoCSLocker locker(pDevice->hLock);
+		xnl::AutoCSLocker locker(pDevice->hLock);
 		if (pDevice->eDeviceControlState != DEVICE_CONTROL_CLEAR)
 		{
 			xnLogError(XN_MASK_OS, "Got a control request before previous one was replied!");
@@ -974,7 +974,7 @@ static XnBool handleVendorControl(XnUSBDevice* pDevice, struct usb_ctrlrequest *
 	else
 	{
 		// host requests to read.
-		XnAutoCSLocker locker(pDevice->hLock);
+		xnl::AutoCSLocker locker(pDevice->hLock);
 
 		HostControlState prevHost = pDevice->eHostControlState;
 		DeviceControlState prevDevice = pDevice->eDeviceControlState;
@@ -1051,7 +1051,7 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetNewControlRequestCallback(XnUSBDevice*
 	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	
 	pDevice->pNewControlRequestCallback = pFunc;
 	pDevice->pNewControlRequestCallbackCookie = pCookie;
@@ -1065,7 +1065,7 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetConnectivityChangedCallback(XnUSBDevic
 	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	
 	pDevice->pConnectivityChangedCallback = pFunc;
 	pDevice->pConnectivityChangedCallbackCookie = pCookie;
