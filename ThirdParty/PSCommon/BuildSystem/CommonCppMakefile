@@ -82,7 +82,7 @@ ifneq "$(LIB_NAME)" ""
 	else
 		LDFLAGS += -undefined error
 		OUTPUT_NAME = lib$(LIB_NAME).dylib
-		OUTPUT_COMMAND = $(CXX) -o $(OUTPUT_FILE) $(OBJ_FILES) $(LDFLAGS) -dynamiclib -headerpad_max_install_names
+		OUTPUT_COMMAND = $(CXX) -o $(OUTPUT_FILE) $(OBJ_FILES) $(LDFLAGS) -dynamiclib -headerpad_max_install_names -install_name $(OUTPUT_NAME)
 	endif
 endif
 ifneq "$(EXE_NAME)" ""
