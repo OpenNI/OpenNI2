@@ -97,10 +97,15 @@ if platform.system() == 'Windows':
 
     shutil.copy('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
         
-elif platform.system() == 'Linux':
+elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     import Redist
     config = Redist.Config()
-    config.Platform = 'Linux'
+
+    if platform.system() == 'Darwin':
+        config.Platform = "MacOS"
+    else:
+        config.Platform = platform.system()
+
     if plat == 'x86':
         config.bits = '32'
     elif plat == 'x64':
@@ -111,7 +116,7 @@ elif platform.system() == 'Linux':
         print 'Unknown platform: ', plat
         sys.exit(1)
 
-    outFile = 'Final/OpenNI-Linux-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
+    outFile = 'Final/OpenNI-' + config.Platform + '-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
     dirName = 'OpenNI-' + strVersion
         
     config.path = '..'

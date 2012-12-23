@@ -538,6 +538,10 @@ class OSLinux(OS):
     def isIllegalSampleBinFile(self, file):
         return not any((file.startswith(sample) or file.startswith('lib'+sample)) for sample in self.getExportedSamples())
 
+class OSMac(OSLinux):
+    def isIllegalBinDriverFile(self, file):
+        return not any(file=="lib"+driver+".dylib" for driver in self.getExportedDrivers())
+
 class Platform:
     def __init__(self):
         print "Bla"
@@ -648,6 +652,8 @@ def Redist(myConfig):
         myOS = OSWin()
     elif plat == 'Linux':
         myOS = OSLinux()
+    elif plat == 'Darwin':
+         myOS = OSMac()
     else:
         print "Unsupported OS: " + platform.system()
         sys.exit(1)
