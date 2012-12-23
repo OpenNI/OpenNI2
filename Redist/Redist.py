@@ -511,9 +511,9 @@ class OSLinux(OS):
             return 1
         outfile = origDir+'/build.'+configuration+'.'+platform+'.txt'
         
-        compilation_cmd = "make -j8 CFG=" + configuration + " > " + outfile + " 2>&1"
+        compilation_cmd = "make -j8 CFG=" + configuration + " PLATFORM=" + platform + " > " + outfile + " 2>&1"
         if compilationMode == 'Rebuild':
-            compilation_cmd = "make CFG=" + configuration + " clean > /dev/null && " + compilation_cmd
+            compilation_cmd = "make CFG=" + configuration + " PLATFORM=" + platform + " clean > /dev/null && " + compilation_cmd
         
         print(compilation_cmd)
         rc = os.system(compilation_cmd)
@@ -565,6 +565,11 @@ class Platform64(Platform):
         self.generalPlatformString = 'x64'
         self.bits = '64'
 
+class PlatformArm(Platform):
+    def __init__(self):
+        self.platformString = 'arm'
+        self.generalPlatformString = 'Arm'
+        self.bits = 'arm'
 
 def boolean(string):
     string = string.lower()
@@ -588,7 +593,7 @@ class Config:
         parser = argparse.ArgumentParser(prog=sys.argv[0])
         parser.add_argument('-path', default='..')
         parser.add_argument('-output', default='')
-        parser.add_argument('-platform', default='32', choices=['32', '64', 'both', 'x86', 'x64'])
+        parser.add_argument('-platform', default='32', choices=['32', '64', 'both', 'x86', 'x64', 'arm'])
         parser.add_argument('-compile', default='Rebuild', choices=['Rebuild', 'Build', 'None'])
         parser.add_argument('-docs', default = True, const=True, nargs='?', type=boolean)
         parser.add_argument('-tools', default = False, const=True, nargs='?', type=boolean)
@@ -620,6 +625,8 @@ class Config:
             platforms.append(Platform32())
         elif self.bits == '64':
             platforms.append(Platform64())
+        elif self.bits == 'arm':
+            platforms.append(PlatformArm())
         elif self.bits == 'both':
             platforms.append(Platform32())
             platforms.append(Platform64())

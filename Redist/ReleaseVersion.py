@@ -32,7 +32,7 @@ import stat
 import UpdateVersion
 
 if len(sys.argv) < 2:
-    print "usage: " + sys.argv[0] + " <x86|x64> [UpdateVersion]"
+    print "usage: " + sys.argv[0] + " <x86|x64|arm> [UpdateVersion]"
     sys.exit(1)
     
 plat = sys.argv[1]
@@ -105,6 +105,8 @@ elif platform.system() == 'Linux':
         config.bits = '32'
     elif plat == 'x64':
         config.bits = '64'
+    elif plat == 'arm':
+        config.bits = 'arm'
     else:
         print 'Unknown platform: ', plat
         sys.exit(1)
