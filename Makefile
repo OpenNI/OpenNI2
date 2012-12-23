@@ -25,8 +25,7 @@ ALL_DRIVERS = \
 	Source/Drivers/OniFile
 
 # list all tools
-ALL_TOOLS = \
-	Source/Tools/NiViewer
+ALL_TOOLS = 
 
 # list all core projects
 ALL_CORE_PROJS = \
@@ -44,6 +43,9 @@ CORE_SAMPLES = \
 	Samples/MWClosestPointApp 
 	
 ifeq "$(GLUT_SUPPORTED)" "1"
+	ALL_TOOLS += \
+		Source/Tools/NiViewer
+
 	CORE_SAMPLES += \
 		Samples/SimpleViewer \
 		Samples/MultiDepthViewer \
