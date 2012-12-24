@@ -301,7 +301,7 @@ OniStatus XnOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 			}
 			else
 			{
-				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVersion));
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d or %d or %d\n", *pDataSize, sizeof(short), sizeof(int), sizeof(uint64_t));
 				return ONI_STATUS_ERROR;
 			}
 			break;
