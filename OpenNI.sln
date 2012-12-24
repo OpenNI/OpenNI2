@@ -1,13 +1,13 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenNI", "Source\Core\OpenNI.vcxproj", "{72D595BB-8C52-449B-91DB-0E9F6AEAF53A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{72D595BB-8C52-449B-91DB-0E9F6AEAF5BB} = {72D595BB-8C52-449B-91DB-0E9F6AEAF5BB}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleRead", "Samples\SimpleRead\SimpleRead.vcxproj", "{BDA3BF24-550A-4BF9-83E5-7B56134EDD40}"
 	ProjectSection(ProjectDependencies) = postProject
 		{72D595BB-8C52-449B-91DB-0E9F6AEAF53A} = {72D595BB-8C52-449B-91DB-0E9F6AEAF53A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenNI", "Source\Core\OpenNI.vcxproj", "{72D595BB-8C52-449B-91DB-0E9F6AEAF53A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{72D595BB-8C52-449B-91DB-0E9F6AEAF5BB} = {72D595BB-8C52-449B-91DB-0E9F6AEAF5BB}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XnLib", "ThirdParty\PSCommon\XnLib\Source\XnLib.vcxproj", "{72D595BB-8C52-449B-91DB-0E9F6AEAF5BB}"
