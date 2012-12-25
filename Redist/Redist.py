@@ -396,6 +396,10 @@ class OSLinux(OS):
                     shutil.copy(r+'/'+file, where+'/OpenNI2/Drivers')
 
     def createTools(self):
+        # Arm redist does not provide Tools:
+	if isinstance(self.config.getPlatforms()[0], PlatformArm):
+	    return
+
         supplyTools = OS.createTools(self)
 
         # Copy NiViewer required files.
