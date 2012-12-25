@@ -260,7 +260,7 @@ XN_C_API XnStatus xnOSWriteFile(const XN_FILE_HANDLE File, const void* pBuffer, 
 	ssize_t nBytesWritten = write(File, pBuffer, nBufferSize);
 	
 	// Make sure it succeeded (return value is not -1) and that the correct number of bytes were written
-	if ((nBytesWritten == -1) || (nBufferSize != nBytesWritten))
+	if ((nBytesWritten == -1) || (nBufferSize != (XnUInt32)nBytesWritten))
 	{
 		return XN_STATUS_OS_FILE_WRITE_FAILED;
 	}
