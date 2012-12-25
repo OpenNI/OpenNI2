@@ -266,6 +266,8 @@ void Context::shutdown()
 	m_newFrameAvailableEvent.Close();
 
 	m_cs.Unlock();
+
+	xnLogClose();
 }
 
 OniStatus Context::registerDeviceConnectedCallback(OniDeviceInfoCallback handler, void* pCookie, OniCallbackHandle& handle)
