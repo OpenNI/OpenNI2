@@ -95,7 +95,7 @@ if platform.system() == 'Windows':
     else:
         print "Error"
 
-    shutil.copy('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
+    shutil.move('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
         
 elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     import Redist
