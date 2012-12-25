@@ -31,7 +31,7 @@ import stat
 
 import UpdateVersion
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 2 or sys.argv[1] in ('-h','--help'):
     print "usage: " + sys.argv[0] + " <x86|x64|arm> [UpdateVersion]"
     sys.exit(1)
     

@@ -26,6 +26,7 @@ import subprocess
 import platform
 import argparse
 import stat
+from commands import getoutput as gop
 
 import UpdateVersion
 
@@ -85,7 +86,7 @@ class OS:
         for platform in self.config.getPlatforms():
             # Build
             if self.config.compile != 'None':
-                rc = self.compile("Release", platform.getGeneralPlatformString(), self.config.compile)
+                rc = self.compile("Release", platform.getPlatformString(), self.config.compile)
                 if rc != 0:
                     return rc
             
@@ -155,7 +156,7 @@ class OS:
 
     def getBinDir(self):
         for platform in self.config.getPlatforms():
-            return 'Bin/'+platform.getPlatformString()+'-Release'
+            return 'Bin/'+platform.getBinDirString()+'-Release'
         return ""
     def isBaseDirValid(self, path):
         return False
@@ -410,9 +411,9 @@ class OSLinux(OS):
         if not supplyTools:
             return
 
-        #'Bin/'+platform.getPlatformString()+'-Release'
+        #'Bin/'+platform.getBinDirString()+'-Release'
         #os.makedirs(self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
-        shutil.copytree('ThirdParty/PSCommon/XnLib/Bin/'+self.config.getPlatforms()[0].getPlatformString()+'-Release', self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
+        shutil.copytree('ThirdParty/PSCommon/XnLib/Bin/'+self.config.getPlatforms()[0].getBinDirString()+'-Release', self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
 
     def createSamples(self):
         OS.createSamples(self)
@@ -505,13 +506,28 @@ class OSLinux(OS):
                     os.remove(r+'/'+file)
 
     def compile(self, configuration, platform, compilationMode):
+        def calc_jobs_number():
+            cores = 1
+            
+            try:
+                if isinstance(self, OSMac):
+                    txt = gop('sysctl -n hw.physicalcpu')
+                else:		
+                    txt = gop('grep "processor\W:" /proc/cpuinfo | wc -l')
+        			
+                cores = int(txt)
+            except:
+                pass
+               
+            return str(cores * 2)
+
         # make sure platform is valid (linux compilation can only be done on platform machine's type).
         if self.config.machine == 'x86_64' and platform == 'x86':
             print('Error: Building x86 platform requires 32bit operating system')
             return 1
         outfile = origDir+'/build.'+configuration+'.'+platform+'.txt'
         
-        compilation_cmd = "make -j8 CFG=" + configuration + " PLATFORM=" + platform + " > " + outfile + " 2>&1"
+        compilation_cmd = "make -j" + calc_jobs_number() + " CFG=" + configuration + " PLATFORM=" + platform + " > " + outfile + " 2>&1"
         if compilationMode == 'Rebuild':
             compilation_cmd = "make CFG=" + configuration + " PLATFORM=" + platform + " clean > /dev/null && " + compilation_cmd
         
@@ -545,12 +561,10 @@ class OSMac(OSLinux):
 class Platform:
     def __init__(self):
         print "Bla"
-    def getPlatformString(self):
+    def getBinDirString(self):
         return self.platformString
-    def getGeneralPlatformString(self):
+    def getPlatformString(self):
         return self.generalPlatformString
-    def getBinaryDirectory(self):
-        return self.binDir
     def getBits(self):
         return self.bits
         
@@ -571,7 +585,7 @@ class Platform64(Platform):
 
 class PlatformArm(Platform):
     def __init__(self):
-        self.platformString = 'arm'
+        self.platformString = 'Arm'
         self.generalPlatformString = 'Arm'
         self.bits = 'arm'
 

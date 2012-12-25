@@ -21,7 +21,8 @@ os.mkdir("Temp")
 create_page("../../NOTICE", "legal", "Legal Stuff & Acknowledgments")
 create_page("../../ReleaseNotes.txt", "release_notes", "Release Notes")
 
-rc = subprocess.call(["doxygen", "Doxyfile"])
+errfile = "Temp/doxy_error"
+rc = subprocess.call(["doxygen", "Doxyfile"], stdout=open(os.devnull,"w"), stderr=open(errfile,"w"))
 if rc != 0:
-    print "Failed running doxygen!"
+    print "Failed running doxygen! stderr is in '%s'" % errfile
     sys.exit(1)
