@@ -27,7 +27,7 @@ namespace openni
 // Device properties
 enum
 {
-	DEVICE_PROPERTY_FIRMWARE_VERSION		= 0, // By implementation
+	DEVICE_PROPERTY_FIRMWARE_VERSION		= 0, // string
 	DEVICE_PROPERTY_DRIVER_VERSION			= 1, // OniVersion
 	DEVICE_PROPERTY_HARDWARE_VERSION		= 2, // int
 	DEVICE_PROPERTY_SERIAL_NUMBER			= 3, // string

@@ -266,21 +266,16 @@ OniStatus XnOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 	{
 	case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:
 		{
-			if (*pDataSize == sizeof(OniVersion))
+			XnVersions &versions = m_sensor.GetDevicePrivateData()->Version;
+			XnUInt32 nCharsWritten = 0;
+			XnStatus rc = xnOSStrFormat((XnChar*)data, *pDataSize, &nCharsWritten, "%d.%d.%d", versions.nMajor, versions.nMinor, versions.nBuild);
+			if (rc != XN_STATUS_OK)
 			{
-				OniVersion* version = (OniVersion*)data;
-				XnVersions &versions = m_sensor.GetDevicePrivateData()->Version;
+				m_driverServices.errorLoggerAppend("Couldn't get firmware version: %s\n", xnGetStatusString(rc));
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+			*pDataSize = nCharsWritten+1;
 
-				version->major = versions.nMajor;
-				version->minor = versions.nMinor;
-				version->maintenance = 0;
-				version->build = versions.nBuild;
-			}
-			else
-			{
-				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVersion));
-				return ONI_STATUS_ERROR;
-			}
 			break;
 		}
 	case ONI_DEVICE_PROPERTY_HARDWARE_VERSION:
