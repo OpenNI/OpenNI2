@@ -50,9 +50,22 @@ Linux
 
 Building
 ========
-For a simple build that produces the binaries, open the solution on Windows, or run the root Makefile on Linux.
+Building on Windows:
+  Open the solution OpenNI.sln
+  
+Building on Linux:
+  Run:
+  $ make
 
-For creating a full installer:
+Cross-Compiling for arm on Linux:
+  The following environment variables should be defined:
+  - ARM_CXX=<path to cross-compilation g++>
+  - ARM_STAGING=<path to cross-compilation staging dir>
+  Then, run:
+  $ PLATFORM=Arm make
+
+Creating the installer:
 - Go into the directory 'Redist'
-- Run ReleaseVersion.py [x86|x64]
+- Run ReleaseVersion.py [x86|x64|arm]
 - Installer will be placed in the 'Final' directory
+
