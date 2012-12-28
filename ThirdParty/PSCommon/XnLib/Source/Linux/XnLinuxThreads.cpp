@@ -154,7 +154,7 @@ XN_C_API XnStatus xnOSSetThreadPriority(XN_THREAD_HANDLE ThreadHandle, XnThreadP
 		memset(&param, 0, sizeof(param));
 	
 #ifndef XN_PLATFORM_HAS_NO_SCHED_PARAM
-		param.__sched_priority = 5;
+		param.sched_priority = 5;
 #endif
 		nPolicy = SCHED_RR;
 	}
@@ -166,7 +166,7 @@ XN_C_API XnStatus xnOSSetThreadPriority(XN_THREAD_HANDLE ThreadHandle, XnThreadP
 	rc = pthread_setschedparam(*ThreadHandle, nPolicy, &param);
 	if (rc != 0)
 	{
-		xnLogWarning(XN_MASK_OS, "Failed to set thread priority (%d)", errno);
+		xnLogWarning(XN_MASK_OS, "Failed to set thread priority (%d)", rc);
 		return (XN_STATUS_OS_THREAD_SET_PRIORITY_FAILED);
 	}
 	
