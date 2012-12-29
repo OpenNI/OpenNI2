@@ -20,9 +20,10 @@ XNLIB  = ThirdParty/PSCommon/XnLib/Source
 
 # list all drivers
 ALL_DRIVERS = \
-	Source/Drivers/DummyDevice   \
+	Source/Drivers/DummyDevice \
 	Source/Drivers/PS1080 \
-	Source/Drivers/OniFile
+	Source/Drivers/OniFile \
+	Source/Drivers/Kinect
 
 # list all tools
 ALL_TOOLS = \
