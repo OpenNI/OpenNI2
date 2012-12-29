@@ -97,6 +97,7 @@ Source/Drivers/DummyDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/RawDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/PS1080:		$(OPENNI) $(XNLIB)
 Source/Drivers/OniFile:		$(OPENNI) $(XNLIB)
+Source/Drivers/freenect:		$(XNLIB)
 
 Source/Tools/NiViewer:		$(OPENNI) $(XNLIB)
 

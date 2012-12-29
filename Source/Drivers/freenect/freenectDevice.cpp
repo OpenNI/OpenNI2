@@ -22,20 +22,22 @@
 *****************************************************************************/
 /*
  * This implementation of KinectDevice serves as a bridge to libfreenect.h
- * It allows OpenNI 2.x to use libfreenect for Kinect and Kinect for Windows (k4w)
+ * It allows OpenNI 2.x to use libfreenect as a device for Kinect and Kinect for Windows (k4w)
  * This effectively brings Kinect support to OpenNI2 on Linux; please test on OSX!
  * 
  * 
  */
 
 
-#include "KinectDevice.h"
-#include "DepthKinectStream.h"
-#include "ColorKinectStream.h"
-#include "IRKinectStream.h"
-#include <Shlobj.h>
-#include "NuiApi.h"
+#include "Drivers/OniDriverAPI.h"
+
+
+//#include "KinectDevice.h"
+//#include "DepthKinectStream.h"
+//#include "ColorKinectStream.h"
+//#include "IRKinectStream.h"
 #include "XnLog.h"
+
 
 using namespace kinect_device;
 using namespace oni::driver;
