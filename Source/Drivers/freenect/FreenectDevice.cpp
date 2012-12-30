@@ -21,9 +21,8 @@
 *
 *****************************************************************************/
 /*
- * This implementation of KinectDevice serves as a bridge to libfreenect.h
- * It allows OpenNI 2.x to use libfreenect as a device for Kinect and Kinect for Windows (k4w)
- * This effectively brings Kinect support to OpenNI2 on Linux; please test on OSX!
+ * This implementation of KinectDevice serves as a bridge to libfreenect
+ * It brings Kinect and Kinect for Windows (k4w) support to OpenNI 2.x on Linux; please test on OSX!
  * 
  * 
  */

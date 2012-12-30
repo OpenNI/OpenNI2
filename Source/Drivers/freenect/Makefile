@@ -7,7 +7,7 @@ INC_DIRS = \
 	../../../ThirdParty/PSCommon/XnLib/Include
 
 SRC_FILES = \
-	freenectDevice.cpp
+	*.cpp
 
 ifeq ("$(OSTYPE)","Darwin")
 	INC_DIRS += /opt/local/include
