@@ -24,8 +24,6 @@
 
 // Includes
 #include "Bayer.h"
-#include <sstream>
-#include <iostream>
 
 #define AVG(a,b) (((int)(a) + (int)(b)) >> 1)
 #define AVG3(a,b,c) (((int)(a) + (int)(b) + (int)(c)) / 3)

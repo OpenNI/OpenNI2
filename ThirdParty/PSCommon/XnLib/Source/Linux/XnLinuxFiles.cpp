@@ -122,7 +122,7 @@ XN_C_API XnStatus xnOSCountFiles(const XnChar* cpSearchPattern, XnInt32* pnFound
 }
 
 
-XN_C_API XnStatus xnOSGetFileList(const XnChar* cpSearchPattern, const XnChar* cpPrefixPath, XnChar cpFileList[][XN_FILE_MAX_PATH], const XnUInt32 nMaxFiles, XnUInt32* pnFoundFiles)
+XN_C_API XnStatus xnOSGetFileList(const XnChar* cpSearchPattern, const XnChar* cpPrefixPath, XnChar cpFileList[][XN_FILE_MAX_PATH], const XnInt32 nMaxFiles, XnInt32* pnFoundFiles)
 {
 	XN_ASSERT(FALSE);
 	return XN_STATUS_OS_FILE_NOT_FOUND;

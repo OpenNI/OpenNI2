@@ -269,26 +269,6 @@ inline void ApplyGramSchmidt(Matrix3x3 &A)
 	A.Set(c[0], c[1], c[2]);
 }
 
-//===========================================================================
-// I/O
-//===========================================================================
-
-inline std::ostream &operator<<(std::ostream &os, const Matrix3x3 &mat)
-{
-	for(XnInt32 i=0; i<3; i++) {
-		for(XnInt32 j=0; j<3; j++) os << "\t" << mat(i,j) << " ";
-		os << std::endl;
-	}
-	return os;
-}
-
-inline std::istream &operator>>(std::istream &is, Matrix3x3 &mat)
-{
-	for(XnInt32 i=0; i<3; i++) for(XnInt32 j=0; j<3; j++) is >> mat(i,j);
-	return is;
-}
-
-
 } // xnl
 
 

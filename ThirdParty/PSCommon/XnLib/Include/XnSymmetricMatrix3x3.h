@@ -264,13 +264,6 @@ public:
 
 		return m_x00;
 	}
-	friend std::ostream& operator<<(std::ostream& ostr, const SymmetricMatrix3x3& mat)
-	{
-		ostr << mat.m_x00 << "\t" << mat.m_x01 << "\t" << mat.m_x02 << "\n" 
-			<< mat.m_x01 << "\t" << mat.m_x11 << "\t" << mat.m_x12 << "\n"
-			<< mat.m_x02 << "\t" << mat.m_x12 << "\t" << mat.m_x22;
-		return ostr;
-	}
 private:
 	Vector3D GetEigenValuesNoScaling() const;
 	void SolveEigenProblemNoScaling(Vector3D& eigenValues, Matrix3x3& eigenVectors, float tolerance=1e-8) const;

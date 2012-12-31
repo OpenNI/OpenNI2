@@ -50,6 +50,11 @@ Linux
     Or via apt:
     sudo apt-get install graphviz
 
+Android
+-------
+- Android NDK r8d
+    From: http://developer.android.com/tools/sdk/ndk/index.html#Downloads
+
 Building
 ========
 Building on Windows:
@@ -58,7 +63,7 @@ Building on Windows:
 Building on Linux:
   Run:
   $ make
-
+  
 Cross-Compiling for arm on Linux:
   The following environment variables should be defined:
   - ARM_CXX=<path to cross-compilation g++>
@@ -66,8 +71,13 @@ Cross-Compiling for arm on Linux:
   Then, run:
   $ PLATFORM=Arm make
 
-Creating the installer:
-- Go into the directory 'Redist'
-- Run ReleaseVersion.py [x86|x64|arm]
-- Installer will be placed in the 'Final' directory
+Building on Android:
+  - Place the OpenNI root directory under your application jni folder
+  - OpenNI root folder contains a sample Application.mk. You don't have to use it, but if you want to, place it
+    directly under your jni directory.
+
+Creating the installer (not available for Android):
+  - Go into the directory 'Redist'
+  - Run ReleaseVersion.py [x86|x64|arm]
+  - Installer will be placed in the 'Final' directory
 

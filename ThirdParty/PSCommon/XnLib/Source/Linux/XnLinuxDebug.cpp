@@ -69,7 +69,7 @@ XN_C_API XnStatus xnOSGetCurrentCallStack(XnInt32 nFramesToSkip, XnChar** astrFr
 
 #else
 
-XN_C_API XnStatus xnOSGetCurrentCallStack(XnUInt32 nFramesToSkip, XnChar** astrFrames, XnUInt32 nMaxNameLength, XnUInt32* pnFrames)
+XN_C_API XnStatus xnOSGetCurrentCallStack(XnInt32 nFramesToSkip, XnChar** astrFrames, XnUInt32 nMaxNameLength, XnInt32* pnFrames)
 {
 	*pnFrames = 0;
 	return (XN_STATUS_OK);

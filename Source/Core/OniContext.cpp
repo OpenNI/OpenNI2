@@ -144,6 +144,14 @@ OniStatus Context::initialize()
 XnStatus Context::loadLibraries(const char* directoryName)
 {
 	XnStatus nRetVal;
+
+	// Get a file list of Xiron devices
+
+	XnInt32 nFileCount = 0;
+	typedef XnChar FileName[XN_FILE_MAX_PATH];
+	FileName* acsFileList = NULL;
+
+#if (ONI_PLATFORM != ONI_PLATFORM_ANDROID_ARM)
 	XnChar cpSearchString[XN_FILE_MAX_PATH] = "";
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "Looking for drivers in drivers repository '%s'", directoryName);
@@ -155,9 +163,6 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	XN_VALIDATE_STR_APPEND(cpSearchString, XN_FILE_ALL_WILDCARD, XN_FILE_MAX_PATH, nRetVal);
 	XN_VALIDATE_STR_APPEND(cpSearchString, XN_SHARED_LIBRARY_POSTFIX, XN_FILE_MAX_PATH, nRetVal);
 
-	// Get a file list of Xiron devices
-
-	XnInt32 nFileCount = 0;
 	nRetVal = xnOSCountFiles(cpSearchString, &nFileCount);
 	if (nRetVal != XN_STATUS_OK || nFileCount == 0)
 	{
@@ -166,9 +171,15 @@ XnStatus Context::loadLibraries(const char* directoryName)
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
 
-	typedef XnChar FileName[XN_FILE_MAX_PATH];
-	FileName* acsFileList = XN_NEW_ARR(FileName, nFileCount);
+	acsFileList = XN_NEW_ARR(FileName, nFileCount);
 	nRetVal = xnOSGetFileList(cpSearchString, NULL, acsFileList, nFileCount, &nFileCount);
+#else
+	// Android
+	nFileCount = 2;
+	acsFileList = XN_NEW_ARR(FileName, nFileCount);
+	strcpy(acsFileList[0], "libPS1080.so");
+	strcpy(acsFileList[1], "libOniFile.so");
+#endif
 
 	// Save directory
 	XnChar workingDir[XN_FILE_MAX_PATH];

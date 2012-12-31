@@ -71,7 +71,7 @@ public:
 		ostr << "[" << box.m_bottomLeftNear << "-" << box.m_topRightFar << "]";
 		return ostr;
 	}
-private:
+
 	Point3D m_bottomLeftNear;
 	Point3D m_topRightFar;
 };
