@@ -181,3 +181,7 @@ OniStatus KinectDevice::tryManualTrigger()
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
+OniBool KinectDevice::isImageRegistrationModeSupported(OniImageRegistrationMode mode)
+{
+	return (mode == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR || mode == ONI_IMAGE_REGISTRATION_OFF);
+}
