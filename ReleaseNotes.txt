@@ -1,15 +1,19 @@
-OpenNI 2.0.0 Build 32
-December 19 2012
+OpenNI 2.1.0 Build 1
+December 31 2012
 
 Minimum Requirements:
 ---------------------
-- Operating System: 
+- Operating Systems: 
   - Windows XP (32/64) with SP2 and above, Windows 7 (32/64)
-  - Ubuntu 12.04 (32/64) and above
-- Processor: Pentium 4, 1.4GHz and above or AMD Athlon 64/FX 1GHz and above.
+  - Ubuntu 12.04 (32/64/arm) and above
+  - Android 2.3 and above
+  - Mac OSX 10.7 and above
+- Processors: 
+  - Pentium 4, 1.4GHz and above 
+  - AMD Athlon 64/FX 1GHz and above
+  - Arm Cortex A8 and above
 - Memory: at least 64MB available.
 - 250MB free hard disk space.
-- CD-ROM drive.
 - Available USB 2.0 high-speed port.
 - Development Environment: 
   - Microsoft Visual Studio 2008 and 2010. The compiler can be MSVC compiler or an Intel Compiler 11 and above.
@@ -19,6 +23,28 @@ Minimum Requirements:
 Change Log:
 -----------
 
+OpenNI 2.1.0:
+  - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.
+  - Support for Mac OSX
+  - Support for Linux on Arm
+  - Support for Android (native only)
+  - Kinect: implementing convertDepthToColorCoordinates()
+  - Kinect: implementing CameraSettings
+  - Kinect Bug Fix: can now switch between color and IR streams
+  - Kinect Bug Fix: wrong mirror value was returned
+  - PS1080 Bug Fix: trying to open more than 8 devices will crash
+  - PS1080 Bug Fix: on Linux 64-bit, color frames are sometimes corrupt
+  - PS1080 Bug Fix: a potential crash with older firmwares
+  - NiViewer now browses whenever a recording is started
+  - NiViewer: added 'i' key for toggling image-registration (also added current status in the status bar)
+  - Minor memory leak fixes
+  - EventBasedRead Sample Bug Fix: will not get device events
+  - EventBasedRead Sample now prints the list of connected devices and every change that occurs
+  - Recordings are now also compatible with OpenNI 1.x and NiTE 1.x
+  - Potential starvation bug fix when application takes much time handling events
+  - Log file now closes on shutdown(), and a new one is created on initialize()
+  - SimpleRead is now the default project in the VS solution (thanks eranws)
+  
 OpenNI 2.0.0:
   - Brand new API (see documentation)
   - Algorithms API were removed, and are now part of middleware libraries (such as NiTE)
