@@ -310,8 +310,9 @@ void XnFirmwareStreams::ProcessPacketChunk(XnSensorProtocolResponseHeader* pHead
 		m_pDevicePrivateData->pSensor->SetErrorState(XN_STATUS_DEVICE_OVERHEAT);
 		break;
 	default:
-		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Unknown packet type (0x%x)!!!", pHeader->nType);
-		break;
+		{
+			xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Unknown packet type (0x%x)!!!", pHeader->nType);
+		}
 	}
 
 	if (pStreamProcessor != NULL)
