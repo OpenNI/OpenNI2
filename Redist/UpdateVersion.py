@@ -28,7 +28,7 @@ from datetime import date
 VERSION_MAJOR = 2
 VERSION_MINOR = 1
 VERSION_MAINTENANCE = 0
-VERSION_BUILD = 2
+VERSION_BUILD = 3
 
 class UpdateVersion:
     def main(self):
