@@ -157,6 +157,11 @@ XN_C_API XnStatus xnOSSetThreadPriority(XN_THREAD_HANDLE ThreadHandle, XnThreadP
 		param.__sched_priority = 5;
 #endif
 		nPolicy = SCHED_RR;
+		
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+		//Note: It's only going to work if it runs as root! (but if not it fails anyway...)		
+		param.sched_priority = sched_get_priority_max(nPolicy) - 1;
+#endif
 	}
 	else
 	{
@@ -166,13 +171,25 @@ XN_C_API XnStatus xnOSSetThreadPriority(XN_THREAD_HANDLE ThreadHandle, XnThreadP
 	rc = pthread_setschedparam(*ThreadHandle, nPolicy, &param);
 	if (rc != 0)
 	{
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+		//This should also work as a non-root user...
+		xnLogWarning(XN_MASK_OS, "Failed to use pthread_setschedparam (%d). Trying setpriority instead...", errno);
+
+		rc = setpriority(PRIO_PROCESS, gettid(), -8); //-8 is defined as ANDROID_PRIORITY_URGENT_DISPLAY.
+		if (rc < 0)
+		{
+				xnLogWarning(XN_MASK_OS, "Failed to use setpriority (%d)", rc);
+				return (XN_STATUS_OS_THREAD_SET_PRIORITY_FAILED);
+		}
+#else
 		xnLogWarning(XN_MASK_OS, "Failed to set thread priority (%d)", errno);
 		return (XN_STATUS_OS_THREAD_SET_PRIORITY_FAILED);
+#endif
+
 	}
 	
 	return (XN_STATUS_OK);
 }
-
 XN_C_API XnStatus xnOSGetCurrentThreadID(XN_THREAD_ID* pThreadID)
 {
 	// Validate the input/output pointers (to make sure none of them is NULL)
