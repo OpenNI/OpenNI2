@@ -21,6 +21,10 @@ public:
 
 	virtual void notifyAllProperties();
 
+private:
+	void populateFrameImageMetadata(OniDriverFrame* pFrame, int dataUnitSize);
+	void copyDepthPixelsStraight(void* source, int numPoints, OniDriverFrame* pFrame);
+	void copyDepthPixelsWithImageRegistration(void* source, int numPoints, OniDriverFrame* pFrame);
 };
 } // namespace kinect_device
 #endif //_DEPTH_KINECT_STREAM_H_
