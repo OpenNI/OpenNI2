@@ -1,5 +1,5 @@
 /**
-*  freenectDevice.cpp
+*  FreenectDeviceNI.cpp
 *  Copyright 2012 Benn Snyder <benn.snyder@gmail.com>
 *  
 *  OpenNI 2.x Alpha
@@ -27,17 +27,14 @@
  * 
  */
 
-
-#include "Drivers/OniDriverAPI.h"
-
-
-//#include "KinectDevice.h"
-//#include "DepthKinectStream.h"
-//#include "ColorKinectStream.h"
-//#include "IRKinectStream.h"
-#include "XnLog.h"
+#include "FreenectDeviceNI.h"
 
 
+
+
+
+// REFERENCE FROM KinectDevice.cpp
+/*
 using namespace kinect_device;
 using namespace oni::driver;
 #define DEFAULT_FPS 30
@@ -217,3 +214,6 @@ void KinectDevice::notifyAllProperties()
 {
 	return;
 }
+*/
+
+// END REFERENCE

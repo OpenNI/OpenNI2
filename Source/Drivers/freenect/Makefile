@@ -3,11 +3,12 @@ include ../../../ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
 BIN_DIR = ../../../Bin
 
 INC_DIRS = \
+	/usr/include/libfreenect \
 	../../../Include \
 	../../../ThirdParty/PSCommon/XnLib/Include
 
 SRC_FILES = \
-	*.cpp
+	FreenectDriver.cpp
 
 ifeq ("$(OSTYPE)","Darwin")
 	INC_DIRS += /opt/local/include
@@ -18,7 +19,7 @@ endif
 LIB_NAME = freenectDriver
 
 LIB_DIRS = ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = XnLib dl pthread
+USED_LIBS = XnLib dl pthread freenect
 ifneq ("$(OSTYPE)","Darwin")
         USED_LIBS += rt  
 endif
