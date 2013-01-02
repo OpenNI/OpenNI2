@@ -80,7 +80,7 @@ int main()
 			rc = depth.start();
 			if (rc != STATUS_OK)
 			{
-				printf("Couldn't start the color stream\n%s\n", OpenNI::getExtendedError());
+				printf("Couldn't start depth stream\n%s\n", OpenNI::getExtendedError());
 			}
 		}
 		else
@@ -97,7 +97,7 @@ int main()
 			rc = color.start();
 			if (rc != STATUS_OK)
 			{
-				printf("Couldn't start the color stream\n%s\n", OpenNI::getExtendedError());
+				printf("Couldn't start color stream\n%s\n", OpenNI::getExtendedError());
 			}
 		}
 		else

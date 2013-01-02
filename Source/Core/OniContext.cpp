@@ -112,7 +112,7 @@ OniStatus Context::initialize()
 	// Use path specified in ini file
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", repositoryFromINI, ONI_CONFIGURATION_FILE);
 		rc = loadLibraries(repositoryFromINI);
 		return OniStatusFromXnStatus(rc);
 	}
@@ -144,19 +144,20 @@ OniStatus Context::initialize()
 XnStatus Context::loadLibraries(const char* directoryName)
 {
 	XnStatus nRetVal;
+	XnChar cpSearchPath[XN_FILE_MAX_PATH] = "";
+	XnChar cpSearchPattern[XN_FILE_MAX_PATH] = "";
 	XnChar cpSearchString[XN_FILE_MAX_PATH] = "";
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Looking for drivers in drivers repository '%s'", directoryName);
-
-	// Build the search pattern string
-	XN_VALIDATE_STR_APPEND(cpSearchString, directoryName, XN_FILE_MAX_PATH, nRetVal);
-	XN_VALIDATE_STR_APPEND(cpSearchString, XN_FILE_DIR_SEP, XN_FILE_MAX_PATH, nRetVal);
-	XN_VALIDATE_STR_APPEND(cpSearchString, XN_SHARED_LIBRARY_PREFIX, XN_FILE_MAX_PATH, nRetVal);
-	XN_VALIDATE_STR_APPEND(cpSearchString, XN_FILE_ALL_WILDCARD, XN_FILE_MAX_PATH, nRetVal);
-	XN_VALIDATE_STR_APPEND(cpSearchString, XN_SHARED_LIBRARY_POSTFIX, XN_FILE_MAX_PATH, nRetVal);
+	// Build the search pattern strings
+	XN_VALIDATE_STR_APPEND(cpSearchPath, directoryName, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchPath, XN_FILE_DIR_SEP, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchPattern, XN_SHARED_LIBRARY_PREFIX, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchPattern, XN_FILE_ALL_WILDCARD, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchPattern, XN_SHARED_LIBRARY_POSTFIX, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchString, cpSearchPath, XN_FILE_MAX_PATH, nRetVal);
+	XN_VALIDATE_STR_APPEND(cpSearchString, cpSearchPattern, XN_FILE_MAX_PATH, nRetVal);	
 
 	// Get a file list of Xiron devices
-
 	XnInt32 nFileCount = 0;
 	nRetVal = xnOSCountFiles(cpSearchString, &nFileCount);
 	if (nRetVal != XN_STATUS_OK || nFileCount == 0)
@@ -165,16 +166,16 @@ XnStatus Context::loadLibraries(const char* directoryName)
 		m_errorLogger.Append("Found no files matching '%s'", cpSearchString);
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
-
-	typedef XnChar FileName[XN_FILE_MAX_PATH];
-	FileName* acsFileList = XN_NEW_ARR(FileName, nFileCount);
-	nRetVal = xnOSGetFileList(cpSearchString, NULL, acsFileList, nFileCount, &nFileCount);
-
+	
 	// Save directory
 	XnChar workingDir[XN_FILE_MAX_PATH];
 	xnOSGetCurrentDir(workingDir, XN_FILE_MAX_PATH);
 	// Change directory
-	xnOSSetCurrentDir(directoryName);
+	xnOSSetCurrentDir(cpSearchPath);
+
+	typedef XnChar FileName[XN_FILE_MAX_PATH];
+	FileName* acsFileList = XN_NEW_ARR(FileName, nFileCount);
+	nRetVal = xnOSGetFileList(cpSearchPattern, cpSearchPath, acsFileList, nFileCount, &nFileCount);
 
 	for (int i = 0; i < nFileCount; ++i)
 	{
