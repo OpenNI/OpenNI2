@@ -45,20 +45,24 @@ public:
 		m_sensors[0].pSupportedVideoModes[1].resolutionX = 320;
 		m_sensors[0].pSupportedVideoModes[1].resolutionY = 240;
 	
+
 		// COLOR
 		m_sensors[1].pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, 3);
 		m_sensors[1].sensorType = ONI_SENSOR_COLOR;
-		m_sensors[1].numSupportedVideoModes = 2;
+		m_sensors[1].numSupportedVideoModes = 1;
+		
+		/*
 		m_sensors[1].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
 		m_sensors[1].pSupportedVideoModes[0].fps         = 12; // correct?
 		m_sensors[1].pSupportedVideoModes[0].resolutionX = 1280;
 		//m_sensors[1].pSupportedVideoModes[0].resolutionY = 960;
 		m_sensors[1].pSupportedVideoModes[0].resolutionY = 1024;
+		*/
 	
-		m_sensors[1].pSupportedVideoModes[1].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-		m_sensors[1].pSupportedVideoModes[1].fps = 30;
-		m_sensors[1].pSupportedVideoModes[1].resolutionX = 640;
-		m_sensors[1].pSupportedVideoModes[1].resolutionY = 480;
+		m_sensors[1].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
+		m_sensors[1].pSupportedVideoModes[0].fps = 30;
+		m_sensors[1].pSupportedVideoModes[0].resolutionX = 640;
+		m_sensors[1].pSupportedVideoModes[0].resolutionY = 480;
 	
 		/*
 		m_sensors[1].pSupportedVideoModes[2].pixelFormat = ONI_PIXEL_FORMAT_YUV422;
@@ -101,14 +105,14 @@ public:
 		switch(sensorType)
 		{
 			case ONI_SENSOR_DEPTH:
+				startDepth();
 				if (depth_stream == NULL)
 					depth_stream = XN_NEW(FreenectDepthStream, this);
-				startDepth();
 				return depth_stream;
 			case ONI_SENSOR_COLOR:
+				startVideo();
 				if (image_stream == NULL)
 					image_stream = XN_NEW(FreenectImageStream, this);
-				startVideo();
 				return image_stream;
 			// todo: IR
 			default:
@@ -138,12 +142,12 @@ public:
 	// Do not call directly even in child
 	void VideoCallback(void *image, uint32_t timestamp)
 	{
-		image_stream->buildFrame(image, timestamp);
+		image_stream->acquireFrame(image, timestamp);
 	}
 	// Do not call directly even in child
 	void DepthCallback(void *depth, uint32_t timestamp)
 	{
-		depth_stream->buildFrame(depth, timestamp);
+		depth_stream->acquireFrame(depth, timestamp);
 	}
 };
 

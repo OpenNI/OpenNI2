@@ -17,13 +17,16 @@ oni::driver::StreamBase* f_depth;
 void shutdown(int s) {
 	std::cout << "Caught signal " << s << std::endl;
 
-	f_device->destroyStream(f_depth);
-	f_driver->deviceClose(f_device);
+	if (f_device != NULL) {
+		f_device->destroyStream(f_depth);
+		f_driver->deviceClose(f_device);
+	}
 	
 	exit(1);
 }
 
 int alt();
+void analyzeFrame(const openni::VideoFrameRef& frame);
 
 
 int main(int argc, char **argv)
@@ -38,8 +41,7 @@ int main(int argc, char **argv)
 	
 	return alt();
 	
-	
-	//FreenectDriver* driver = new FreenectDriver(NULL);
+
 	f_driver->initialize(NULL, NULL, NULL, NULL);
 	f_device = f_driver->deviceOpen("freenect:0");
 	f_depth = f_device->createStream(ONI_SENSOR_DEPTH);
@@ -64,18 +66,15 @@ int alt()
 		printf("Initialize failed\n%s\n", OpenNI::getExtendedError());
 		return 1;
 	}
-	
-	std::cout << "NEXT!" << std::endl;
 
 	Device device;
 	rc = device.open(ANY_DEVICE);
+	//rc = device.open("freenect:0");
 	if (rc != STATUS_OK)
 	{
 		printf("Couldn't open device\n%s\n", OpenNI::getExtendedError());
 		return 2;
 	}
-	
-	std::cout << "got here" << std::endl;
 	
 	VideoStream depth, color;
 
@@ -112,16 +111,8 @@ int alt()
 			printf("Couldn't create color stream\n%s\n", OpenNI::getExtendedError());
 		}
 	}
-
 	
 	
-	
-	return 0;
-}
-
-/*
-int MSR()
-{	
 	VideoFrameRef frame;
 
 	VideoStream* streams[] = {&depth, &color};
@@ -153,14 +144,16 @@ int MSR()
 		analyzeFrame(frame);
 	}
 
+
 	depth.stop();
 	color.stop();
 	depth.destroy();
 	color.destroy();
 	device.close();
-	OpenNI::shutdown();
+	OpenNI::shutdown();	
+	
+	return 0;
 }
-*/
 
 
 void analyzeFrame(const VideoFrameRef& frame)
@@ -169,6 +162,21 @@ void analyzeFrame(const VideoFrameRef& frame)
 	RGB888Pixel* pColor;
 
 	int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
+	
+	
+	
+	std::cout << "frame width = " << frame.getWidth() << "; frame height = " << frame.getHeight() << std::endl;
+	/*
+	pDepth = (DepthPixel*)frame.getData();
+	for (int x = 0; x < frame.getWidth(); x++) {
+		for (int y = 0; y < frame.getHeight(); y++) {
+			std::cout << pDepth[x*y+x] << " ";
+		}
+		std::cout << std::endl;
+	}
+	*/
+
+
 
 	switch (frame.getVideoMode().getPixelFormat())
 	{

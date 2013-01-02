@@ -3,14 +3,18 @@
 
 #include "libfreenect.h"
 #include "Driver/OniDriverAPI.h"
-#include "XnLib.h"
-#include "XnHash.h"
-#include "XnEvent.h"
-#include "XnPlatform.h"
-#include "PS1080.h"
-#include "XnMath.h"
+//#include "XnLib.h"
+//#include "XnHash.h"
+//#include "XnEvent.h"
+//#include "XnPlatform.h"
+//#include "PS1080.h"
+//#include "XnMath.h"
 
 #include "XnPair.h"
+
+
+// todo : change video mode on the fly
+
 
 typedef struct  
 {
@@ -22,26 +26,27 @@ class FreenectStream : public oni::driver::StreamBase
 {
 private:
 	virtual int getBytesPerPixel() = 0;
-	virtual OniStatus getVideoMode(OniVideoMode* pVideoMode) = 0;
 
 protected:
 	Freenect::FreenectDevice* device;
-	int frameId; // number frames starting with 1
+	OniVideoMode video_mode; // derived classes should set this up in constructor
+	int frame_id; // number each frame
 	bool running;
 	
 public:
 	FreenectStream(Freenect::FreenectDevice* pDevice)
 	{
 		device = pDevice;
-		frameId = 1;
+		frame_id = 1;
 	}
 	~FreenectStream()
 	{
 		stop();
 	}
 	
-	virtual void buildFrame(void* data, uint32_t timestamp) = 0;
+	virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
 	
+
 	OniStatus start()
 	{
 		running = true;
@@ -50,7 +55,21 @@ public:
 	void stop()
 	{
 		running = false;
-	}	
+	}
+	
+	
+	static xnl::Pair<int, int> convertResolution(freenect_resolution resolution)
+	{
+		switch(resolution)
+		{
+			case FREENECT_RESOLUTION_LOW:
+				return xnl::Pair<int, int>(320, 240);
+			case FREENECT_RESOLUTION_MEDIUM:
+				return xnl::Pair<int, int>(640, 480);
+			case FREENECT_RESOLUTION_HIGH:
+				return xnl::Pair<int, int>(1280, 1024);
+		}
+	}
 	
 	
 	/*
@@ -74,7 +93,7 @@ public:
 		ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE		= 100, // OniBool
 		ONI_STREAM_PROPERTY_AUTO_EXPOSURE			= 101, // OniBool
 	};
-	*/	
+	*/
 	OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
 		switch(propertyId)
@@ -87,25 +106,67 @@ public:
 					printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVideoMode));
 					return ONI_STATUS_ERROR;
 				}
-				return getVideoMode((OniVideoMode*)data);			
-		}
-	}
-
-	// freenect_resolution (libfreenect.h) to (x,y)
-	//int* resolution_convert(freenect_resolution resolution) {
-	xnl::Pair<int, int> resolution_convert(freenect_resolution resolution)
-	{
-		switch(resolution)
-		{
-			case FREENECT_RESOLUTION_LOW:
-				return xnl::Pair<int, int>(320, 240);
-			case FREENECT_RESOLUTION_MEDIUM:
-				return xnl::Pair<int, int>(640, 480);
-			case FREENECT_RESOLUTION_HIGH:
-				return xnl::Pair<int, int>(1280, 1024);
+				OniVideoMode* pVideoMode = static_cast<OniVideoMode*>(data);
+				pVideoMode->pixelFormat = video_mode.pixelFormat;
+				pVideoMode->fps = video_mode.fps;
+				pVideoMode->resolutionX = video_mode.resolutionX;
+				pVideoMode->resolutionY = video_mode.resolutionY;
+				return ONI_STATUS_OK;
 		}
 	}
 	
+	
+	
+	
+	
+	OniStatus setProperty(int propertyId, const void* data, int dataSize)
+	{
+		switch(propertyId)
+		{
+			default:
+				return ONI_STATUS_NOT_IMPLEMENTED;
+			case ONI_STREAM_PROPERTY_VIDEO_MODE:
+				if (dataSize != sizeof(OniVideoMode))
+				{
+					printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
+					return ONI_STATUS_ERROR;
+				}
+			
+			return ONI_STATUS_NOT_IMPLEMENTED;
+		}
+	}
+	
+	void acquireFrame(void* data, uint32_t timestamp)
+	{
+		if (!running)
+			return;
+			
+		//if (frame_id == 1)
+			
+		
+		OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
+		if (pFrame == NULL)
+		{
+			XN_ASSERT(FALSE);
+			return;
+		}
+		pFrame->pDriverCookie = xnOSMalloc(sizeof(FreenectStreamFrameCookie));
+		((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
+
+		pFrame->frame.frameIndex = frame_id++;
+		//pFrame->frame.timestamp = m_frameId*33000;
+		pFrame->frame.timestamp = timestamp;
+
+		pFrame->frame.videoMode = video_mode;
+		pFrame->frame.width = video_mode.resolutionX;
+		pFrame->frame.height = video_mode.resolutionY;
+		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
+		pFrame->frame.croppingEnabled = FALSE;
+		
+		
+		buildFrame(data, pFrame);
+		raiseNewFrame(pFrame);
+	}
 	
 	void addRefToFrame(OniDriverFrame* pFrame)
 	{

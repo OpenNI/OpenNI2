@@ -28,7 +28,7 @@ public:
 	
 	FreenectDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
 	{
-		freenect_set_log_level(m_ctx, FREENECT_LOG_DEBUG);
+		freenect_set_log_level(m_ctx, FREENECT_LOG_NOTICE);
 		// MOTOR doesn't work with k4w branch; todo: fix it
 		//freenect_select_subdevices(m_ctx, static_cast<freenect_device_flags>(FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA));
 		freenect_select_subdevices(m_ctx, static_cast<freenect_device_flags>(FREENECT_DEVICE_CAMERA));
@@ -49,8 +49,8 @@ public:
 			xnOSStrCopy(pInfo->vendor, VENDOR_VAL, ONI_MAX_STR);
 			xnOSStrCopy(pInfo->name, NAME_VAL, ONI_MAX_STR);
 			devices[pInfo] = NULL;
-			//deviceConnected(pInfo);
-			//deviceStateChanged(pInfo, 0);	
+			deviceConnected(pInfo);
+			deviceStateChanged(pInfo, 0);	
 		}
 		return ONI_STATUS_OK;
 	}	
@@ -238,3 +238,5 @@ public:
 	void StatusUpdate(const OLECHAR* instanceName, bool isConnected);
 	*/
 //};
+
+ONI_EXPORT_DRIVER(FreenectDriver);
