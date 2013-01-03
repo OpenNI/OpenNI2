@@ -9,16 +9,16 @@
 class FreenectImageStream : public FreenectStream
 {
 public:
-	FreenectImageStream(Freenect::FreenectDevice* pDevice, freenect_video_format format = FREENECT_VIDEO_YUV_RAW) : FreenectStream(pDevice)
+	FreenectImageStream(Freenect::FreenectDevice* pDevice, freenect_video_format format = FREENECT_VIDEO_RGB) : FreenectStream(pDevice)
 	{
+		setFormat(format, FREENECT_RESOLUTION_MEDIUM);
+		
 		xnl::Pair<int, int> res = convertResolution(device->getVideoResolution());
-		
-		setFormat(format, FREENECT_RESOLUTION_LOW);
-		
-		video_mode.pixelFormat = ONI_PIXEL_FORMAT_RGB888;
 		video_mode.fps = 30;			
 		video_mode.resolutionX = res.first;
-		video_mode.resolutionY = res.second;	
+		video_mode.resolutionY = res.second;
+		
+		//printf("FreenectImageStream: resolutionX = %d; resolutionY = %d\n", video_mode.resolutionX, video_mode.resolutionY);
 	}
 	
 	int getBytesPerPixel() { return sizeof(OniRGB888Pixel); }
@@ -47,21 +47,42 @@ public:
 	OniStatus setFormat(freenect_video_format format, freenect_resolution resolution = FREENECT_RESOLUTION_MEDIUM)
 	{
 		switch(format)
-		{
+		{			
 			default:
-				video_mode.pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-				break;
 			case FREENECT_VIDEO_BAYER:
-				//video_mode.pixelFormat = ONI_PIXEL_FORMAT_
-				//break;
 			case FREENECT_VIDEO_IR_8BIT:
 			case FREENECT_VIDEO_IR_10BIT:
 			case FREENECT_VIDEO_IR_10BIT_PACKED:
-			case FREENECT_VIDEO_YUV_RAW:
 				return ONI_STATUS_NOT_IMPLEMENTED;
+				
+			case FREENECT_VIDEO_RGB:
+			case FREENECT_VIDEO_YUV_RGB:
+			case FREENECT_VIDEO_YUV_RAW:
+				try { device->setVideoFormat(format, resolution); }
+				catch (std::runtime_error e)
+				{
+					printf("format-resolution combination not supported: %d-%d\ntrying format with default freenect resolution\n", format, resolution);	
+					try { device->setVideoFormat(format); } catch (std::runtime_error e) { printf("format not supported %d\n", format); }
+					return ONI_STATUS_NOT_SUPPORTED;
+				}
+
+				video_mode.pixelFormat = ONI_PIXEL_FORMAT_RGB888;
+				return ONI_STATUS_OK;		
 		}
-		device->setVideoFormat(format, resolution);
-		return ONI_STATUS_OK;
+		
+		switch(resolution)
+		{
+			default:
+				break;
+			case FREENECT_RESOLUTION_LOW:
+				break;
+			case FREENECT_RESOLUTION_MEDIUM:
+				break;
+			case FREENECT_RESOLUTION_HIGH:
+			//	video_mode.resolutionX = 1280;
+			//	video_mode.resolutionY = 1024; // 960 ?
+				break;
+		}
 	}
 	
 	

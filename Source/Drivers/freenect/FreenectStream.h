@@ -3,7 +3,7 @@
 
 #include "libfreenect.h"
 #include "Driver/OniDriverAPI.h"
-//#include "XnLib.h"
+#include "XnLib.h"
 //#include "XnHash.h"
 //#include "XnEvent.h"
 //#include "XnPlatform.h"
@@ -30,6 +30,7 @@ private:
 protected:
 	Freenect::FreenectDevice* device;
 	OniVideoMode video_mode; // derived classes should set this up in constructor
+	static const OniVideoMode* supported_modes;
 	int frame_id; // number each frame
 	bool running;
 	
@@ -46,15 +47,38 @@ public:
 	
 	virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
 	
-
-	OniStatus start()
+	
+	OniStatus start() {	running = true;	return ONI_STATUS_OK;	}
+	void stop() { running = false; }
+	
+	OniBool isPropertySupported(int propertyId) {	return (getProperty(propertyId, NULL, NULL) == ONI_STATUS_NOT_SUPPORTED) ? false : true; }
+	OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
-		running = true;
-		return ONI_STATUS_OK;		
-	}
-	void stop()
-	{
-		running = false;
+		switch(propertyId)
+		{
+			default:
+			case ONI_STREAM_PROPERTY_CROPPING:						// OniCropping*
+			case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:			// float: radians
+			case ONI_STREAM_PROPERTY_VERTICAL_FOV:				// float: radians
+			case ONI_STREAM_PROPERTY_MAX_VALUE:						// int
+			case ONI_STREAM_PROPERTY_MIN_VALUE:						// int
+			case ONI_STREAM_PROPERTY_STRIDE:							// int
+			case ONI_STREAM_PROPERTY_MIRRORING:						// OniBool
+			case ONI_STREAM_PROPERTY_NUMBER_OF_FRAMES:		// int
+			// camera
+			case ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE:	// OniBool
+			case ONI_STREAM_PROPERTY_AUTO_EXPOSURE:				// OniBool
+				return ONI_STATUS_NOT_SUPPORTED;
+				
+			case ONI_STREAM_PROPERTY_VIDEO_MODE:					// OniVideoMode*
+				if (*pDataSize != sizeof(OniVideoMode))
+				{
+					printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVideoMode));
+					return ONI_STATUS_ERROR;
+				}				
+				*(static_cast<OniVideoMode*>(data)) = video_mode;
+				return ONI_STATUS_OK;
+		}
 	}
 	
 	
@@ -70,71 +94,9 @@ public:
 				return xnl::Pair<int, int>(1280, 1024);
 		}
 	}
+
+
 	
-	
-	/*
-	// Stream properties
-	enum
-	{
-		ONI_STREAM_PROPERTY_CROPPING			= 0, // OniCropping*
-		ONI_STREAM_PROPERTY_HORIZONTAL_FOV		= 1, // float: radians
-		ONI_STREAM_PROPERTY_VERTICAL_FOV		= 2, // float: radians
-		ONI_STREAM_PROPERTY_VIDEO_MODE			= 3, // OniVideoMode*
-	
-		ONI_STREAM_PROPERTY_MAX_VALUE			= 4, // int
-		ONI_STREAM_PROPERTY_MIN_VALUE			= 5, // int
-	
-		ONI_STREAM_PROPERTY_STRIDE			= 6, // int
-		ONI_STREAM_PROPERTY_MIRRORING			= 7, // OniBool
-	
-		ONI_STREAM_PROPERTY_NUMBER_OF_FRAMES		= 8, // int
-	
-		// Camera
-		ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE		= 100, // OniBool
-		ONI_STREAM_PROPERTY_AUTO_EXPOSURE			= 101, // OniBool
-	};
-	*/
-	OniStatus getProperty(int propertyId, void* data, int* pDataSize)
-	{
-		switch(propertyId)
-		{
-			default:
-				return ONI_STATUS_NOT_SUPPORTED;
-			case ONI_STREAM_PROPERTY_VIDEO_MODE:
-				if (*pDataSize != sizeof(OniVideoMode))
-				{
-					printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVideoMode));
-					return ONI_STATUS_ERROR;
-				}
-				OniVideoMode* pVideoMode = static_cast<OniVideoMode*>(data);
-				pVideoMode->pixelFormat = video_mode.pixelFormat;
-				pVideoMode->fps = video_mode.fps;
-				pVideoMode->resolutionX = video_mode.resolutionX;
-				pVideoMode->resolutionY = video_mode.resolutionY;
-				return ONI_STATUS_OK;
-		}
-	}
-	
-	
-	
-	
-	
-	OniStatus setProperty(int propertyId, const void* data, int dataSize)
-	{
-		switch(propertyId)
-		{
-			default:
-				return ONI_STATUS_NOT_IMPLEMENTED;
-			case ONI_STREAM_PROPERTY_VIDEO_MODE:
-				if (dataSize != sizeof(OniVideoMode))
-				{
-					printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
-					return ONI_STATUS_ERROR;
-				}
-			
-			return ONI_STATUS_NOT_IMPLEMENTED;
-		}
-	}
 	
 	void acquireFrame(void* data, uint32_t timestamp)
 	{
@@ -154,24 +116,18 @@ public:
 		((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
 
 		pFrame->frame.frameIndex = frame_id++;
-		//pFrame->frame.timestamp = m_frameId*33000;
 		pFrame->frame.timestamp = timestamp;
-
 		pFrame->frame.videoMode = video_mode;
 		pFrame->frame.width = video_mode.resolutionX;
 		pFrame->frame.height = video_mode.resolutionY;
 		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
 		pFrame->frame.croppingEnabled = FALSE;
 		
-		
 		buildFrame(data, pFrame);
 		raiseNewFrame(pFrame);
 	}
 	
-	void addRefToFrame(OniDriverFrame* pFrame)
-	{
-		++((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-	}
+	void addRefToFrame(OniDriverFrame* pFrame) { ++((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount; }
 	void releaseFrame(OniDriverFrame* pFrame)
 	{
 		if (0 == --((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
@@ -181,68 +137,17 @@ public:
 			xnOSFree(pFrame);
 		}
 	}
+	
+	
+	/* unimplemented from StreamBase
+	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize) {return ONI_STATUS_NOT_IMPLEMENTED;}	
+	virtual OniStatus invoke(int commandId, const void* data, int dataSize) {return ONI_STATUS_NOT_IMPLEMENTED;}
+	virtual OniBool isCommandSupported(int commandId) {return FALSE;}
+	virtual void setNewFrameCallback(NewFrameCallback handler, void* pCookie) { m_newFrameCallback = handler; m_newFrameCallbackCookie = pCookie; }
+	virtual void setPropertyChangedCallback(PropertyChangedCallback handler, void* pCookie) { m_propertyChangedCallback = handler; m_propertyChangedCookie = pCookie; }
+	virtual void notifyAllProperties() { return; }
+	virtual OniStatus convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY) { return ONI_STATUS_NOT_SUPPORTED; }	
+	*/
 };
-
-
-
-// PARTIAL REFERENCE FROM TestDevice.cpp
-/*
-class TestStream : public oni::driver::StreamBase
-{
-public:
-	TestStream() : oni::driver::StreamBase()
-	{
-		m_osEvent.Create(TRUE);
-		m_sendCount = 0;
-	}
-
-	virtual OniStatus SetVideoMode(OniVideoMode*) = 0;
-	virtual OniStatus GetVideoMode(OniVideoMode* pVideoMode) = 0;
-
-
-	OniStatus setProperty(int propertyId, const void* data, int dataSize)
-	{
-		if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
-		{
-			if (dataSize != sizeof(OniVideoMode))
-			{
-				printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
-				return ONI_STATUS_ERROR;
-			}
-			return SetVideoMode((OniVideoMode*)data);
-		}
-		else if (propertyId == 666)
-		{
-			if (dataSize != sizeof(int))
-			{
-				printf("Unexpected size: %d != %d\n", dataSize, sizeof(int));
-				return ONI_STATUS_ERROR;
-			}
-
-			// Increment the send count.
-			m_cs.Lock();
-			m_sendCount += *((int*)data);
-			m_cs.Unlock();
-
-			// Raise the OS event, to allow thread to start working.
-			m_osEvent.Set();
-		}
-
-		return ONI_STATUS_NOT_IMPLEMENTED;
-	}
-
-protected:
-
-	int singleRes(int x, int y) {return y*TEST_RESOLUTION_X+x;}
-	int m_sendCount;
-
-	xnl::CriticalSection m_cs;
-	xnl::OSEvent m_osEvent;
-};
-*/
-
-// END REFERENCE
-
-
 
 #endif // _FREENECT_STREAM_H_
