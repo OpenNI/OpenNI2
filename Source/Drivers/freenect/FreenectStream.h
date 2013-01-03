@@ -13,19 +13,25 @@
 #include "XnPair.h"
 
 
-// todo : change video mode on the fly
-
+#define SIZE(array) sizeof array / sizeof 0[array]
 
 typedef struct  
 {
 	int refCount;
 } FreenectStreamFrameCookie;
 
+static bool operator==(const OniVideoMode& left, const OniVideoMode& right)
+{
+	return (left.pixelFormat == right.pixelFormat && left.resolutionX == right.resolutionX
+					&& left.resolutionY == right.resolutionY && left.fps == right.fps) ? true : false;
+}
+
+
 
 class FreenectStream : public oni::driver::StreamBase
 {
 private:
-	virtual int getBytesPerPixel() = 0;
+	//virtual int getBytesPerPixel() = 0;
 
 protected:
 	Freenect::FreenectDevice* device;
@@ -45,7 +51,8 @@ public:
 		stop();
 	}
 	
-	virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
+	//virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
+	virtual void buildFrame(void* data, OniDriverFrame* pFrame) {};
 	
 	
 	OniStatus start() {	running = true;	return ONI_STATUS_OK;	}

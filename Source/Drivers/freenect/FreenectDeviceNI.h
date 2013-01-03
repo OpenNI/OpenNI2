@@ -4,8 +4,11 @@
 #include "libfreenect.hpp"
 #include "Driver/OniDriverAPI.h"
 #include "XnLog.h"
+
 #include "FreenectDepthStream.h"
 #include "FreenectImageStream.h"
+
+#include "FreenectStream.h"
 
 
 using namespace oni::driver;
@@ -14,8 +17,10 @@ using namespace oni::driver;
 class FreenectDeviceNI : public oni::driver::DeviceBase, public Freenect::FreenectDevice
 {
 private:
-	FreenectDepthStream* depth_stream;
-	FreenectImageStream* image_stream;	
+	//FreenectDepthStream* depth_stream;
+	//FreenectImageStream* image_stream;	
+	FreenectStream *depth_stream, *image_stream;
+
 
 public:
 	FreenectDeviceNI(freenect_context *_ctx, int _index) : Freenect::FreenectDevice(_ctx, _index)

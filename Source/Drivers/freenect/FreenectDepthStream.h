@@ -3,22 +3,13 @@
 
 #include "FreenectStream.h"
 
-#define SIZE(array) sizeof array / sizeof 0[array]
-
-
-static bool operator==(const OniVideoMode& left, const OniVideoMode& right)
-{
-	return (left.pixelFormat == right.pixelFormat && left.resolutionX == right.resolutionX
-					&& left.resolutionY == right.resolutionY && left.fps == right.fps) ? true : false;
-}
-
 
 class FreenectDepthStream : public FreenectStream
 {	
 public:
 	FreenectDepthStream(Freenect::FreenectDevice* pDevice, freenect_depth_format format = FREENECT_DEPTH_11BIT) : FreenectStream(pDevice)
 	{
-		setFormat(format, FREENECT_RESOLUTION_MEDIUM);
+		setVideoMode(getSupportedModes()[0]);
 		
 		xnl::Pair<int, int> res = convertResolution(device->getDepthResolution());
 		video_mode.fps = 30;
@@ -45,34 +36,32 @@ public:
 	ONI_PIXEL_FORMAT_SHIFT_9_2 = 102,
 	ONI_PIXEL_FORMAT_SHIFT_9_3 = 103,
 	*/
-	freenect_depth_format getFormat()
+	
+	OniStatus setVideoMode(OniVideoMode requested_mode)
 	{
-		return device->getDepthFormat();
-	}
-	OniStatus setFormat(freenect_depth_format format, freenect_resolution resolution = FREENECT_RESOLUTION_MEDIUM)
-	{
-		switch(format)
+		OniVideoMode* supported_modes = getSupportedModes();
+		freenect_depth_format format;
+		freenect_resolution resolution;
+		
+		if (video_mode == supported_modes[0])
 		{
-			default:
-			case FREENECT_DEPTH_11BIT_PACKED:
-			case FREENECT_DEPTH_10BIT_PACKED:
-				return ONI_STATUS_NOT_SUPPORTED;
-			
-			case FREENECT_DEPTH_11BIT:
-			case FREENECT_DEPTH_10BIT:
-			case FREENECT_DEPTH_REGISTERED:
-			case FREENECT_DEPTH_MM:
-				try { device->setDepthFormat(format, resolution); }
-				catch (std::runtime_error e)
-				{
-					printf("format-resolution combination not supported: %d-%d\ntrying requested format with default freenect resolution\n", format, resolution);	
-					try { device->setDepthFormat(format); } catch (std::runtime_error e) { printf("format not supported %d\n", format); }
-					return ONI_STATUS_NOT_SUPPORTED;
-				}
-
-				video_mode.pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-				return ONI_STATUS_OK;				
+			format = FREENECT_DEPTH_11BIT;
+			resolution = FREENECT_RESOLUTION_MEDIUM;
 		}
+		else
+		{
+			return ONI_STATUS_NOT_SUPPORTED;
+		}
+		
+		try { device->setDepthFormat(format, resolution); }
+		catch (std::runtime_error e)
+		{
+			printf("format-resolution combination not supported: %d-%d\n", format, resolution);
+			return ONI_STATUS_NOT_SUPPORTED;
+		}
+		
+		video_mode = requested_mode;
+		return ONI_STATUS_OK;
 	}
 	
 	
@@ -88,19 +77,7 @@ public:
 					printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
 					return ONI_STATUS_ERROR;
 				}
-				OniVideoMode requested_mode = *(reinterpret_cast<const OniVideoMode*>(data));
-
-				OniVideoMode* supported_modes = getSupportedModes();
-				for (unsigned int i = 0; i < SIZE(supported_modes); i++)
-				{
-					if (requested_mode == supported_modes[i])
-					{
-						video_mode = requested_mode;
-						return ONI_STATUS_OK;
-					}
-				}
-				return ONI_STATUS_NOT_SUPPORTED;
-
+				return setVideoMode(*(reinterpret_cast<const OniVideoMode*>(data)));
 		}
 	}
 	
