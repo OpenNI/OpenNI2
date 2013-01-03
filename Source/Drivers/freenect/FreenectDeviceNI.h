@@ -15,82 +15,37 @@ class FreenectDeviceNI : public oni::driver::DeviceBase, public Freenect::Freene
 {
 private:
 	FreenectDepthStream* depth_stream;
-	FreenectImageStream* image_stream;
-	
-	// OpenNI
-	int m_numSensors;
-	OniSensorInfo m_sensors[3];
-	
+	FreenectImageStream* image_stream;	
 
 public:
 	FreenectDeviceNI(freenect_context *_ctx, int _index) : Freenect::FreenectDevice(_ctx, _index)
 	{
 		depth_stream = NULL;
 		image_stream = NULL;
-		
-		m_numSensors = 2;
-
-		
-		// DEPTH
-		m_sensors[0].pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, 1);
-		m_sensors[0].sensorType = ONI_SENSOR_DEPTH;
-		m_sensors[0].numSupportedVideoModes = 1;
-		
-		m_sensors[0].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
-		m_sensors[0].pSupportedVideoModes[0].fps = 30;
-		m_sensors[0].pSupportedVideoModes[0].resolutionX = 640;
-		m_sensors[0].pSupportedVideoModes[0].resolutionY = 480;
-
-		// COLOR
-		m_sensors[1].pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, 1);
-		m_sensors[1].sensorType = ONI_SENSOR_COLOR;
-		m_sensors[1].numSupportedVideoModes = 1;
-
-		m_sensors[1].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-		m_sensors[1].pSupportedVideoModes[0].fps = 30;
-		m_sensors[1].pSupportedVideoModes[0].resolutionX = 640;
-		m_sensors[1].pSupportedVideoModes[0].resolutionY = 480;
-	
-		/*
-		m_sensors[1].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-		m_sensors[1].pSupportedVideoModes[0].fps         = 12; // correct?
-		m_sensors[1].pSupportedVideoModes[0].resolutionX = 1280;
-		//m_sensors[1].pSupportedVideoModes[0].resolutionY = 960;
-		m_sensors[1].pSupportedVideoModes[0].resolutionY = 1024;
-
-		m_sensors[1].pSupportedVideoModes[2].pixelFormat = ONI_PIXEL_FORMAT_YUV422;
-		m_sensors[1].pSupportedVideoModes[2].fps         = 15;
-		m_sensors[1].pSupportedVideoModes[2].resolutionX = 640;
-		m_sensors[1].pSupportedVideoModes[2].resolutionY = 480;
-		*/
-		
-		/*
-		m_sensors[2].pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, 3);
-		m_sensors[2].sensorType = ONI_SENSOR_IR;
-		m_sensors[2].numSupportedVideoModes = 3;
-		m_sensors[2].pSupportedVideoModes[0].pixelFormat = ONI_PIXEL_FORMAT_RGB888;
-		m_sensors[2].pSupportedVideoModes[0].fps = DEFAULT_FPS;
-		m_sensors[2].pSupportedVideoModes[0].resolutionX = 640;
-		m_sensors[2].pSupportedVideoModes[0].resolutionY = 480;
-	
-		m_sensors[2].pSupportedVideoModes[1].pixelFormat = ONI_PIXEL_FORMAT_GRAY16;
-		m_sensors[2].pSupportedVideoModes[1].fps = DEFAULT_FPS;
-		m_sensors[2].pSupportedVideoModes[1].resolutionX = 640;
-		m_sensors[2].pSupportedVideoModes[1].resolutionY = 480;
-	
-		m_sensors[2].pSupportedVideoModes[2].pixelFormat = ONI_PIXEL_FORMAT_GRAY8;
-		m_sensors[2].pSupportedVideoModes[2].fps = DEFAULT_FPS;
-		m_sensors[2].pSupportedVideoModes[2].resolutionX = 640;
-		m_sensors[2].pSupportedVideoModes[2].resolutionY = 480;
-		*/
 	}
 	
 	
 	// OpenNI
 	OniStatus getSensorInfoList(OniSensorInfo** pSensors, int* numSensors)
 	{
-		*numSensors = m_numSensors;
-		*pSensors = m_sensors;
+		*numSensors = 2;
+		
+		OniSensorInfo * sensors = new OniSensorInfo[*numSensors];
+		
+		// DEPTH
+		OniVideoMode* supported_modes = FreenectDepthStream::getSupportedModes();
+		sensors[0].sensorType = ONI_SENSOR_DEPTH;		
+		sensors[0].numSupportedVideoModes = SIZE(supported_modes);
+		sensors[0].pSupportedVideoModes = supported_modes;
+		
+		// COLOR
+		supported_modes = FreenectImageStream::getSupportedModes();
+		sensors[1].sensorType = ONI_SENSOR_COLOR;
+		sensors[1].numSupportedVideoModes = SIZE(supported_modes);
+		sensors[1].pSupportedVideoModes = supported_modes;
+		
+		
+		*pSensors = sensors;
 		return ONI_STATUS_OK;
 	}
 

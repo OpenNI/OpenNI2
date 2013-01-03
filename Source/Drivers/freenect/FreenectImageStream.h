@@ -86,6 +86,16 @@ public:
 	}
 	
 	
+	// todo : represent this as static const in implementation
+	static OniVideoMode* getSupportedModes()
+	{
+		OniVideoMode * supported_modes = new OniVideoMode[1];
+		// pixelFormat, resolutionX, resolutionY, fps
+		supported_modes[0] = { ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 };
+		return supported_modes;
+	}
+	
+	
 	void buildFrame(void* image, OniDriverFrame* pFrame)
 	{
 		pFrame->frame.sensorType = ONI_SENSOR_COLOR;

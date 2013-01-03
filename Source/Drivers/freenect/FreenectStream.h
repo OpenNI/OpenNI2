@@ -1,7 +1,7 @@
 #ifndef _FREENECT_STREAM_H_
 #define _FREENECT_STREAM_H_
 
-#include "libfreenect.h"
+#include "libfreenect.hpp"
 #include "Driver/OniDriverAPI.h"
 #include "XnLib.h"
 //#include "XnHash.h"
@@ -30,7 +30,7 @@ private:
 protected:
 	Freenect::FreenectDevice* device;
 	OniVideoMode video_mode; // derived classes should set this up in constructor
-	static const OniVideoMode* supported_modes;
+	static const OniVideoMode* supported_modes[];
 	int frame_id; // number each frame
 	bool running;
 	
