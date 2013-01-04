@@ -99,10 +99,27 @@ void DepthKinectStream::copyDepthPixelsStraight(void* source, int numPoints, Oni
 // with applying cropping and depth-to-image registration.
 void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int numPoints, OniDriverFrame* pFrame)
 {
-	LONG* mappedCoords = (LONG*) xnOSMalloc(sizeof(LONG) * numPoints * 2); // Need review: maybe we'd better avoid allocating each time
-
 	NUI_IMAGE_RESOLUTION nuiResolution =
 		m_pStreamImpl->getNuiImagResolution(pFrame->frame.videoMode.resolutionX, pFrame->frame.videoMode.resolutionY);
+
+	int minX = pFrame->frame.cropOriginX;
+	int minY = pFrame->frame.cropOriginY;
+	int maxX = minX + pFrame->frame.width;
+	int maxY = minY + pFrame->frame.height;
+
+	unsigned short* targetBase =(unsigned short*) pFrame->frame.data;
+
+	xnOSMemSet(targetBase, 0, pFrame->frame.dataSize);
+
+	const NUI_DEPTH_IMAGE_PIXEL* sourceBase = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(source);
+
+	// It seems NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
+	// (Kinect SDK function to perform depth-to-color translation on a frame at once)
+	// does not do its job correctly. We observe horizontal deviation of the coordinates,
+	// for unknown reasons.
+	// We work around this issue by using pixel-by-pixel conversion instead.
+#if 0
+	LONG* mappedCoords = (LONG*) xnOSMalloc(sizeof(LONG) * numPoints * 2); // Need review: maybe we'd better avoid allocating each time
 
 	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
 	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
@@ -113,17 +130,6 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int n
 		numPoints * 2,
 		mappedCoords
 		);
-
-	unsigned short* targetBase =(unsigned short*) pFrame->frame.data;
-
-	xnOSMemSet(targetBase, 0, pFrame->frame.dataSize);
-
-	const NUI_DEPTH_IMAGE_PIXEL* sourceBase = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(source);
-
-	int minX = pFrame->frame.cropOriginX;
-	int minY = pFrame->frame.cropOriginY;
-	int maxX = minX + pFrame->frame.width;
-	int maxY = minY + pFrame->frame.height;
 
 	for (int i = 0; i < numPoints; i++)
 	{
@@ -136,6 +142,28 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int n
 	}
 
 	xnOSFree(mappedCoords); // Need review: maybe we'd better avoid allocating each time
+#else
+	int i = 0;
+	for (LONG dy = 0; dy < pFrame->frame.videoMode.resolutionY; dy++) {
+		for (LONG dx = 0; dx < pFrame->frame.videoMode.resolutionX; dx++, i++) {
+			LONG cx, cy;
+			m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution(
+				nuiResolution,
+				nuiResolution,
+				NULL,
+				dx,
+				dy,
+				(sourceBase+i)->depth << 3,
+				&cx,
+				&cy
+				);
+			if (cx >= minX && cx < maxX - 1 && cy >= minY && cy < maxY) {
+				unsigned short* p = targetBase + (cx - minX) + (cy - minY) * pFrame->frame.width;
+				*p = *(p+1) = filterReliableDepthValue((sourceBase+i)->depth);
+			}
+		}
+	}
+#endif
 }
 
 
