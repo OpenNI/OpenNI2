@@ -113,23 +113,25 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int n
 
 	const NUI_DEPTH_IMAGE_PIXEL* sourceBase = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(source);
 
-	// It seems NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
-	// (Kinect SDK function to perform depth-to-color translation on a frame at once)
-	// does not do its job correctly. We observe horizontal deviation of the coordinates,
-	// for unknown reasons.
-	// We work around this issue by using pixel-by-pixel conversion instead.
-#if 0
 	LONG* mappedCoords = (LONG*) xnOSMalloc(sizeof(LONG) * numPoints * 2); // Need review: maybe we'd better avoid allocating each time
+	USHORT* depthSource = (USHORT*) xnOSMalloc(sizeof(USHORT) * numPoints); // Need review: maybe we'd better avoid allocating each time
+
+	// pack depth data
+	for (int i = 0; i < numPoints; i++) {
+		*(depthSource + i) = (sourceBase + i)->depth << 3;
+	}
 
 	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
 	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
 		nuiResolution, // assume the target image with the same resolution as the source.
 		nuiResolution,
 		numPoints,
-		(USHORT*)source,
+		depthSource,
 		numPoints * 2,
 		mappedCoords
 		);
+
+	xnOSFree(depthSource);
 
 	for (int i = 0; i < numPoints; i++)
 	{
@@ -142,28 +144,6 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int n
 	}
 
 	xnOSFree(mappedCoords); // Need review: maybe we'd better avoid allocating each time
-#else
-	int i = 0;
-	for (LONG dy = 0; dy < pFrame->frame.videoMode.resolutionY; dy++) {
-		for (LONG dx = 0; dx < pFrame->frame.videoMode.resolutionX; dx++, i++) {
-			LONG cx, cy;
-			m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution(
-				nuiResolution,
-				nuiResolution,
-				NULL,
-				dx,
-				dy,
-				(sourceBase+i)->depth << 3,
-				&cx,
-				&cy
-				);
-			if (cx >= minX && cx < maxX - 1 && cy >= minY && cy < maxY) {
-				unsigned short* p = targetBase + (cx - minX) + (cy - minY) * pFrame->frame.width;
-				*p = *(p+1) = filterReliableDepthValue((sourceBase+i)->depth);
-			}
-		}
-	}
-#endif
 }
 
 
