@@ -38,13 +38,13 @@ public:
 		OniSensorInfo * sensors = new OniSensorInfo[*numSensors];
 		
 		// DEPTH
-		OniVideoMode* supported_modes = FreenectDepthStream::getSupportedModes();
+		OniVideoMode* supported_modes = FreenectDepthStream::getSupportedVideoModes();
 		sensors[0].sensorType = ONI_SENSOR_DEPTH;		
 		sensors[0].numSupportedVideoModes = SIZE(supported_modes);
 		sensors[0].pSupportedVideoModes = supported_modes;
 		
 		// COLOR
-		supported_modes = FreenectImageStream::getSupportedModes();
+		supported_modes = FreenectImageStream::getSupportedVideoModes();
 		sensors[1].sensorType = ONI_SENSOR_COLOR;
 		sensors[1].numSupportedVideoModes = SIZE(supported_modes);
 		sensors[1].pSupportedVideoModes = supported_modes;
@@ -92,7 +92,7 @@ public:
 	}
 	
 	
-	// freenect
+	// freenect callbacks
 	// Do not call directly even in child
 	void DepthCallback(void *depth, uint32_t timestamp)
 	{
