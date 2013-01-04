@@ -98,52 +98,76 @@ void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* sou
 // with applying cropping and depth-to-image registration.
 void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
 {
+	// Note: We evaluated another implementation using INuiCoordinateMapper*::MapColorFrameToDepthFrame,
+	// but, counterintuitively, that was slower than this implementation. We reverted it back.
+
+	// For benchmarking purpose
+	//static LARGE_INTEGER accTime;
+	//static LONG accTimeCount;
+	//LARGE_INTEGER startTime;
+	//QueryPerformanceCounter(&startTime);
+
 	NUI_IMAGE_RESOLUTION nuiResolution =
 		m_pStreamImpl->getNuiImagResolution(pFrame->frame.videoMode.resolutionX, pFrame->frame.videoMode.resolutionY);
 
 	unsigned short* target =(unsigned short*) pFrame->frame.data;
+	xnOSMemSet(target, 0, pFrame->frame.dataSize);
 
-	// Need review: maybe we'd better avoid allocating each time
-	NUI_DEPTH_IMAGE_POINT* mappedCoords = (NUI_DEPTH_IMAGE_POINT*) xnOSMalloc(sizeof(NUI_DEPTH_IMAGE_POINT) * numPoints);
+	m_depthValuesBuffer.SetSize(numPoints);
+	USHORT* depthValues = m_depthValuesBuffer.GetData();
+	m_mappedCoordsBuffer.SetSize(numPoints * 2);
+	LONG* mappedCoords = m_mappedCoordsBuffer.GetData();
+
+	// pack depth data
+	for (int i = 0; i < numPoints; i++) {
+		*(depthValues + i) = (source + i)->depth << 3;
+	}
 
 	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
-	INuiCoordinateMapper* pMapper;
-	m_pStreamImpl->getNuiSensor()->NuiGetCoordinateMapper(&pMapper);
-
-	pMapper->MapColorFrameToDepthFrame(
-		NUI_IMAGE_TYPE_COLOR,
+	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
 		nuiResolution, // assume the target image with the same resolution as the source.
 		nuiResolution,
 		numPoints,
-		const_cast<NUI_DEPTH_IMAGE_PIXEL*>(source),
-		numPoints,
+		depthValues,
+		numPoints * 2,
 		mappedCoords
 		);
-
-	pMapper->Release(); // Need review: do we really need this?
 
 	int minX = pFrame->frame.cropOriginX;
 	int minY = pFrame->frame.cropOriginY;
 	int maxX = minX + pFrame->frame.width;
 	int maxY = minY + pFrame->frame.height;
 
-	unsigned short* targetIter = target;
-	for (int y = minY; y < maxY; y++)
+	for (int i = 0; i < numPoints; i++)
 	{
-		for (int x = minX; x < maxX; x++)
-		{
-			const NUI_DEPTH_IMAGE_POINT* dp = mappedCoords + (m_videoMode.resolutionX * y + x);
-			*(targetIter++) = filterReliableDepthValue((unsigned short) dp->depth);
+		int x = *(mappedCoords + i*2);
+		int y = *(mappedCoords + i*2 + 1);
+		if (x >= minX && x < maxX - 1 && y >= minY && y < maxY) {
+			unsigned short d = filterReliableDepthValue((source+i)->depth);
+
+			unsigned short* p = target + (x - minX) + (y - minY) * pFrame->frame.width;
+			if (*p == 0 || *p > d) {
+				*p = d;
+			}
+
+			p++;
+			if (*p == 0 || *p > d) {
+				*p = d;
+			}
 		}
 	}
 
-	xnOSFree(mappedCoords); // Need review: maybe we'd better avoid allocating each time
+	// For benchmarking purpose
+	//LARGE_INTEGER endTime;
+	//QueryPerformanceCounter(&endTime);
+	//accTime.QuadPart += endTime.QuadPart - startTime.QuadPart;
+	//accTimeCount++;
+	//printf("ImageRegistration: %lld\n", accTime.QuadPart / accTimeCount);
 }
 
 
 void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT& LockedRect)
 {
-
 	OniDriverFrame* pFrame = NULL;
 
 	// calculate the data size and allocate the buffer

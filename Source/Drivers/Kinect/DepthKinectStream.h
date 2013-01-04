@@ -2,6 +2,7 @@
 #define _DEPTH_KINECT_STREAM_H_
 
 #include "BaseKinectStream.h"
+#include "XnArray.h"
 
 struct INuiSensor;
 namespace kinect_device {
@@ -22,6 +23,9 @@ public:
 	virtual void notifyAllProperties();
 
 private:
+	xnl::Array<USHORT> m_depthValuesBuffer;
+	xnl::Array<LONG> m_mappedCoordsBuffer;
+
 	void populateFrameImageMetadata(OniDriverFrame* pFrame, int dataUnitSize);
 	void copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame);
 	void copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame);
