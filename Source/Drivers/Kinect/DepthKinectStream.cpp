@@ -66,16 +66,15 @@ void DepthKinectStream::populateFrameImageMetadata(OniDriverFrame* pFrame, int d
 
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping but NO depth-to-image registration.
-void DepthKinectStream::copyDepthPixelsStraight(void* source, int numPoints, OniDriverFrame* pFrame)
+void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
 {
-	unsigned short* targetBase = (unsigned short*) pFrame->frame.data;
-	const NUI_DEPTH_IMAGE_PIXEL* sourceBase = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(source);
+	unsigned short* target = (unsigned short*) pFrame->frame.data;
 
 	if (!m_cropping.enabled) {
 		// optimization for the most typical case
 		for (int i = 0; i < numPoints; i++)
 		{
-			*(targetBase+i) = filterReliableDepthValue((sourceBase+i)->depth);
+			*(target+i) = filterReliableDepthValue((source+i)->depth);
 		}
 	} else {
 		int minX = pFrame->frame.cropOriginX;
@@ -83,12 +82,12 @@ void DepthKinectStream::copyDepthPixelsStraight(void* source, int numPoints, Oni
 		int maxX = minX + pFrame->frame.width;
 		int maxY = minY + pFrame->frame.height;
 
-		unsigned short* targetIter = targetBase;
+		unsigned short* targetIter = target;
 		for (int y = minY; y < maxY; y++)
 		{
 			for (int x = minX; x < maxX; x++)
 			{
-				const NUI_DEPTH_IMAGE_PIXEL *sourceIter = sourceBase + (m_videoMode.resolutionX * y + x);
+				const NUI_DEPTH_IMAGE_PIXEL *sourceIter = source + (m_videoMode.resolutionX * y + x);
 				*(targetIter++)= filterReliableDepthValue(sourceIter->depth);
 			}
 		}
@@ -97,49 +96,44 @@ void DepthKinectStream::copyDepthPixelsStraight(void* source, int numPoints, Oni
 
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping and depth-to-image registration.
-void DepthKinectStream::copyDepthPixelsWithImageRegistration(void* source, int numPoints, OniDriverFrame* pFrame)
+void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
 {
 	NUI_IMAGE_RESOLUTION nuiResolution =
 		m_pStreamImpl->getNuiImagResolution(pFrame->frame.videoMode.resolutionX, pFrame->frame.videoMode.resolutionY);
+
+	unsigned short* target =(unsigned short*) pFrame->frame.data;
+
+	// Need review: maybe we'd better avoid allocating each time
+	NUI_DEPTH_IMAGE_POINT* mappedCoords = (NUI_DEPTH_IMAGE_POINT*) xnOSMalloc(sizeof(NUI_DEPTH_IMAGE_POINT) * numPoints);
+
+	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
+	INuiCoordinateMapper* pMapper;
+	m_pStreamImpl->getNuiSensor()->NuiGetCoordinateMapper(&pMapper);
+
+	pMapper->MapColorFrameToDepthFrame(
+		NUI_IMAGE_TYPE_COLOR,
+		nuiResolution, // assume the target image with the same resolution as the source.
+		nuiResolution,
+		numPoints,
+		const_cast<NUI_DEPTH_IMAGE_PIXEL*>(source),
+		numPoints,
+		mappedCoords
+		);
+
+	pMapper->Release(); // Need review: do we really need this?
 
 	int minX = pFrame->frame.cropOriginX;
 	int minY = pFrame->frame.cropOriginY;
 	int maxX = minX + pFrame->frame.width;
 	int maxY = minY + pFrame->frame.height;
 
-	unsigned short* targetBase =(unsigned short*) pFrame->frame.data;
-
-	xnOSMemSet(targetBase, 0, pFrame->frame.dataSize);
-
-	const NUI_DEPTH_IMAGE_PIXEL* sourceBase = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(source);
-
-	LONG* mappedCoords = (LONG*) xnOSMalloc(sizeof(LONG) * numPoints * 2); // Need review: maybe we'd better avoid allocating each time
-	USHORT* depthSource = (USHORT*) xnOSMalloc(sizeof(USHORT) * numPoints); // Need review: maybe we'd better avoid allocating each time
-
-	// pack depth data
-	for (int i = 0; i < numPoints; i++) {
-		*(depthSource + i) = (sourceBase + i)->depth << 3;
-	}
-
-	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
-	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
-		nuiResolution, // assume the target image with the same resolution as the source.
-		nuiResolution,
-		numPoints,
-		depthSource,
-		numPoints * 2,
-		mappedCoords
-		);
-
-	xnOSFree(depthSource);
-
-	for (int i = 0; i < numPoints; i++)
+	unsigned short* targetIter = target;
+	for (int y = minY; y < maxY; y++)
 	{
-		int x = *(mappedCoords + i*2);
-		int y = *(mappedCoords + i*2 + 1);
-		if (x >= minX && x < maxX - 1 && y >= minY && y < maxY) {
-			unsigned short* p = targetBase + (x - minX) + (y - minY) * pFrame->frame.width;
-			*p = *(p+1) = filterReliableDepthValue((sourceBase+i)->depth);
+		for (int x = minX; x < maxX; x++)
+		{
+			const NUI_DEPTH_IMAGE_POINT* dp = mappedCoords + (m_videoMode.resolutionX * y + x);
+			*(targetIter++) = filterReliableDepthValue((unsigned short) dp->depth);
 		}
 	}
 
@@ -176,9 +170,9 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 
 	// populate the pixel data
 	if (m_pStreamImpl->getImageRegistrationMode() == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR) {
-		copyDepthPixelsWithImageRegistration(LockedRect.pBits, numPoints, pFrame);
+		copyDepthPixelsWithImageRegistration((NUI_DEPTH_IMAGE_PIXEL*)LockedRect.pBits, numPoints, pFrame);
 	} else {
-		copyDepthPixelsStraight(LockedRect.pBits, numPoints, pFrame);
+		copyDepthPixelsStraight((NUI_DEPTH_IMAGE_PIXEL*)LockedRect.pBits, numPoints, pFrame);
 	}
 
 	raiseNewFrame(pFrame);

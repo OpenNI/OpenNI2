@@ -23,8 +23,8 @@ public:
 
 private:
 	void populateFrameImageMetadata(OniDriverFrame* pFrame, int dataUnitSize);
-	void copyDepthPixelsStraight(void* source, int numPoints, OniDriverFrame* pFrame);
-	void copyDepthPixelsWithImageRegistration(void* source, int numPoints, OniDriverFrame* pFrame);
+	void copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame);
+	void copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame);
 };
 } // namespace kinect_device
 #endif //_DEPTH_KINECT_STREAM_H_
