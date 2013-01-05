@@ -1,26 +1,26 @@
-#ifndef _FREENECT_IMAGE_STREAM_H_
-#define _FREENECT_IMAGE_STREAM_H_
+#ifndef _FREENECT_DEPTH_STREAM_H_
+#define _FREENECT_DEPTH_STREAM_H_
 
 #include "FreenectStream.h"
 
 
-class FreenectVideoStream : public FreenectStream
+class FreenectDepthStream : public FreenectStream
 {	
 private:
-	static const OniSensorType sensor_type;
+	static const OniSensorType sensor_type = ONI_SENSOR_DEPTH;
 	static const OniVideoMode supported_video_modes[];
-	void buildFrame(void* data, OniDriverFrame* pFrame);
+	virtual void buildFrame(void* data, OniDriverFrame* pFrame);
 	
-protected:	
+protected:
 	OniVideoMode video_mode;
 	static OniSensorType getSensorType() { return sensor_type; }
 	static OniVideoMode* getSupportedVideoModes();
-	inline const OniVideoMode getVideoMode() const { return video_mode; }
+	const OniVideoMode getVideoMode() const { return video_mode; }
 	OniStatus setVideoMode(OniVideoMode requested_mode);
 	
 public:
-	FreenectVideoStream(Freenect::FreenectDevice* pDevice);
-	~FreenectVideoStream() { }
+	FreenectDepthStream(Freenect::FreenectDevice* pDevice);
+	~FreenectDepthStream() { }	
 
 	static OniSensorInfo getSensorInfo()
 	{
@@ -28,10 +28,10 @@ public:
 		//       sensorType, numSupportedVideoModes, pSupportedVideoModes
 		return { getSensorType(), SIZE(modes), modes };
 	}
-	
+
 	// from StreamBase
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
 };
 
-#endif // _FREENECT_IMAGE_STREAM_H_
+#endif // _FREENECT_DEPTH_STREAM_H_

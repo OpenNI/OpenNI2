@@ -16,7 +16,7 @@ ifeq ("$(OSTYPE)","Darwin")
 	LDFLAGS += -framework CoreFoundation -framework IOKit
 endif
 
-LIB_NAME = freenectDriver
+LIB_NAME = FreenectDriver
 
 LIB_DIRS = ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
 USED_LIBS = XnLib dl pthread freenect
@@ -24,7 +24,7 @@ ifneq ("$(OSTYPE)","Darwin")
         USED_LIBS += rt  
 endif
 
-#CFLAGS += -Wall
+CFLAGS += -Wall
 
 OUT_DIR := $(OUT_DIR)/OpenNI2/Drivers
 

@@ -1,0 +1,55 @@
+FreenectDriver is a translation layer to libfreenect implemented as an OpenNI2 driver.
+It is currently capable of providing depth and video streams at 640x480 @ 30 fps.
+Copyright information appears in FreenectDriver.h
+The Apache 2.0 license is available in the root of this project.
+
+
+	dependencies:
+libfreenect										-	https://github.com/OpenKinect/libfreenect
+libfreenect with K4W support 	- https://github.com/zarvox/libfreenect/tree/k4w-wip
+
+	build:
+make USE_FREENECT=1
+
+
+	structure:
+This module is modeled heavily on TestDevice.cpp and Drivers/Kinect/
+It ties together the C++ interfaces of OpenNI2 and libfreenect using multiple inheritance.
+FreenectDriver inherits publically from DriverBase and privately from Freenect::Freenect.
+A custom libfreenect.hpp allows protected access to the Freenect context, so that FreenectDriver can call the Freenect's C API.
+As a DriverBase, FreenectDriver manages devices and sets up device state callbacks.
+
+FreenectDeviceNI inherits publically from DeviceBase and Freenect::FreenectDevice.
+Because of this, it can be built by Freenect::Freenect::createDevice() and it can define FreenectDevice's depth and video callbacks.
+Those callbacks trigger acquireFrame in FreenectStream.
+
+FreenectStream is a virtual base class inheriting from StreamBase.
+It does generic frame setup in acquireFrame() and then calls pure virtual buildFrame() to let derived classes finish the frame.
+It also provides a skeleton for setting and getting properties.
+Only properties that are generically true for all streams should be set there.
+Derived classes implementing getProperty() should call FreenectStream::getProperty() in their default case.
+
+FreenectDepthStream and FreenectVideoStream are nearly identical in definition and implementation.
+They differ mostly in the formats they use to process data - depth comes in uint8_t and video in sets of 3 unsigned char
+These two stream implementations also offer a system to report supported video modes - after implementing a new mode, simply add it to supported_video_modes[] in the corresponding .cpp
+
+
+NOTE: This is beta software, tested as yet by no one but myself.
+It's a good, clean start but it leaves a log of libfreenect untouched.
+Suggestions, bug reports, and insights on Freenect and OpenNI formats are welcome. 
+
+
+TODO:
+
+provide more OniVideoMode and OniStreamProperty
+support more FREENECT_RESOLUTION and FREENECT_VIDEO
+mirrored mode support
+FreenectIRStream
+polish and publish Gentoo ebuilds
+acquire and test with original Kinect (within 2 weeks) - please report issues!
+PROPER LOGGING!
+improve K4W support in libfreenect
+implement interesting derived functions
+tilt motor support
+audio stream
+OSX support - please hack!

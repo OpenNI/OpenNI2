@@ -18,14 +18,7 @@
 *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
-*
 */
-/*
- * FreenectDriver serves as a bridge to libfreenect
- * It brings Kinect and Kinect for Windows (k4w) support to OpenNI 2.x on Linux; please test on OSX!
- * 
- * 
- */
 
 #ifndef _FREENECT_DRIVER_H_
 #define _FREENECT_DRIVER_H_
@@ -41,8 +34,6 @@ using namespace oni::driver;
 class FreenectDriver : public DriverBase, private Freenect::Freenect
 {
 private:
-	//Freenect::Freenect freenect;
-	// from Freenect::Freenect - freenect_context* m_ctx
 	xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*> devices;
 
 public:
@@ -53,6 +44,7 @@ public:
 	OniStatus initialize(DeviceConnectedCallback connectedCallback, DeviceDisconnectedCallback disconnectedCallback, DeviceStateChangedCallback deviceStateChangedCallback, void* pCookie);
 	DeviceBase* deviceOpen(const char* uri);
 	void deviceClose(DeviceBase* pDevice);
+	OniStatus tryDevice(const char* uri);
 	void shutdown()
 	{
 		for (xnl::Hash<OniDeviceInfo*, DeviceBase*>::Iterator iter = devices.Begin(); iter != devices.End(); iter++)
@@ -60,10 +52,9 @@ public:
 			deviceClose(iter->Value());
 		}
 	}
-	OniStatus tryDevice(const char* uri);
 
 
-	/* unimplemented from DriverBase
+	/* todo : from DriverBase
 	virtual void* enableFrameSync(oni::driver::StreamBase** pStreams, int streamCount);
 	virtual void disableFrameSync(void* frameSyncGroup);
 	*/

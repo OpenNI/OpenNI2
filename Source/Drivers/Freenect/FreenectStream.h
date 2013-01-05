@@ -123,7 +123,7 @@ public:
 	}
 	
 
-	/* todo : unimplemented from StreamBase
+	/* todo : from StreamBase
 	virtual OniStatus convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY) { return ONI_STATUS_NOT_SUPPORTED; }	
 	*/
 };

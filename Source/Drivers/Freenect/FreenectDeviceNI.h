@@ -32,7 +32,7 @@ public:
 		switch(propertyId)
 		{
 			default:
-			case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:				// By implementation
+			case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:				// string
 			case ONI_DEVICE_PROPERTY_DRIVER_VERSION:					// OniVersion
 			case ONI_DEVICE_PROPERTY_HARDWARE_VERSION:				// int
 			case ONI_DEVICE_PROPERTY_SERIAL_NUMBER:						// string
@@ -84,7 +84,7 @@ public:
 	}
 	
 	
-	/* todo : unimplemented from DeviceBase
+	/* todo : from DeviceBase
 	virtual OniStatus tryManualTrigger() {return ONI_STATUS_OK;}
 	virtual OniBool isImageRegistrationModeSupported(OniImageRegistrationMode mode) { return (mode == ONI_IMAGE_REGISTRATION_OFF); }
 	*/

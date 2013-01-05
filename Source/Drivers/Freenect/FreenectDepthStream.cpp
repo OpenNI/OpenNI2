@@ -3,7 +3,6 @@
 #include "libfreenect.hpp"
 
 
-const OniSensorType FreenectDepthStream::sensor_type = ONI_SENSOR_DEPTH;
 //	pixelFormat, resolutionX, resolutionY, fps
 const OniVideoMode FreenectDepthStream::supported_video_modes[] = {
 	{ ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30 },

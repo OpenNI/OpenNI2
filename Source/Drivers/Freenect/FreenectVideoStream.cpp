@@ -3,7 +3,6 @@
 #include "libfreenect.hpp"
 
 
-const OniSensorType FreenectVideoStream::sensor_type = ONI_SENSOR_COLOR;
 //	pixelFormat, resolutionX, resolutionY, fps
 const OniVideoMode FreenectVideoStream::supported_video_modes[] = {
 	{ ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 },
