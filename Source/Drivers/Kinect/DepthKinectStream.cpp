@@ -35,10 +35,10 @@ DepthKinectStream::DepthKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
 }
 
-// discard the portion of the depth that contains only the player index
-static inline unsigned short filterReliableDepthValue(unsigned short value)
+// Discard the depth value equal or greater than the max value.
+inline unsigned short filterReliableDepthValue(unsigned short value)
 {
-	return (value > 0 && value < DEVICE_MAX_DEPTH_VAL) ? value : 0;
+	return value < DEVICE_MAX_DEPTH_VAL ? value : 0;
 }
 
 // Populate the image-related metadata (resolution, cropping, etc.) to OniDriverFrame.
@@ -64,63 +64,81 @@ void DepthKinectStream::populateFrameImageMetadata(OniDriverFrame* pFrame, int d
 	pFrame->frame.videoMode.fps = m_videoMode.fps;
 }
 
+// FIXME: For preliminary benchmarking purpose. Should not belong here.
+static void recordAverageProcessTime(const char* message, LARGE_INTEGER* pAccTime, LARGE_INTEGER* pAccCount, const LARGE_INTEGER& startTime)
+{
+#if 0 // set to 1 to display the process time
+	LARGE_INTEGER endTime;
+	QueryPerformanceCounter(&endTime);
+	pAccTime->QuadPart += endTime.QuadPart - startTime.QuadPart;
+	pAccCount->QuadPart++;
+	printf("%s: %lld\n", message, pAccTime->QuadPart / pAccCount->QuadPart);
+#endif
+}
+
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping but NO depth-to-image registration.
 void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
 {
+	// Note: The local variable assignments and const qualifiers are carefully designed to generate
+	// a high performance code with VC 2010. We recommend check the performance when changing the code
+	// even if it was a trivial change.
+
+	// For benchmarking purpose
+	LARGE_INTEGER startTime;
+	QueryPerformanceCounter(&startTime);
+
 	unsigned short* target = (unsigned short*) pFrame->frame.data;
 
-	if (!m_cropping.enabled) {
-		// optimization for the most typical case
-		for (int i = 0; i < numPoints; i++)
-		{
-			*(target+i) = filterReliableDepthValue((source+i)->depth);
-		}
-	} else {
-		int minX = pFrame->frame.cropOriginX;
-		int minY = pFrame->frame.cropOriginY;
-		int maxX = minX + pFrame->frame.width;
-		int maxY = minY + pFrame->frame.height;
+	const unsigned int width = pFrame->frame.width;
+	const unsigned int height = pFrame->frame.height;
+	const unsigned int skipWidth = m_videoMode.resolutionX - width;
 
-		unsigned short* targetIter = target;
-		for (int y = minY; y < maxY; y++)
+	// Offset the starting position
+	source += pFrame->frame.cropOriginX + pFrame->frame.cropOriginY * m_videoMode.resolutionX;
+
+	for (unsigned int y = 0; y < height; y++)
+	{
+		for (unsigned int x = 0; x < width; x++)
 		{
-			for (int x = minX; x < maxX; x++)
-			{
-				const NUI_DEPTH_IMAGE_PIXEL *sourceIter = source + (m_videoMode.resolutionX * y + x);
-				*(targetIter++)= filterReliableDepthValue(sourceIter->depth);
-			}
+			*(target++) = filterReliableDepthValue((source++)->depth);
 		}
+		source += skipWidth;
 	}
+
+	// FIXME: for preliminary benchmarking purpose
+	static LARGE_INTEGER accTime, accCount;
+	recordAverageProcessTime("No Image Reg", &accTime, &accCount, startTime);
 }
 
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping and depth-to-image registration.
 void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
 {
-	// Note: We evaluated another implementation using INuiCoordinateMapper*::MapColorFrameToDepthFrame,
-	// but, counterintuitively, that was slower than this implementation. We reverted it back.
+	// Note: We evaluated another possible implementation using INuiCoordinateMapper*::MapColorFrameToDepthFrame,
+	// but, counterintuitively, it turned out to be slower than this implementation. We reverted it back.
+
+	// Note: The local variable assignments and const qualifiers are carefully designed to generate
+	// a high performance code with VC 2010. We recommend check the performance when changing the code
+	// even if it was a trivial change.
 
 	// For benchmarking purpose
-	//static LARGE_INTEGER accTime;
-	//static LONG accTimeCount;
-	//LARGE_INTEGER startTime;
-	//QueryPerformanceCounter(&startTime);
+	LARGE_INTEGER startTime;
+	QueryPerformanceCounter(&startTime);
 
 	NUI_IMAGE_RESOLUTION nuiResolution =
 		m_pStreamImpl->getNuiImagResolution(pFrame->frame.videoMode.resolutionX, pFrame->frame.videoMode.resolutionY);
 
-	unsigned short* target =(unsigned short*) pFrame->frame.data;
+	unsigned short* const target = (unsigned short*) pFrame->frame.data;
 	xnOSMemSet(target, 0, pFrame->frame.dataSize);
 
 	m_depthValuesBuffer.SetSize(numPoints);
-	USHORT* depthValues = m_depthValuesBuffer.GetData();
 	m_mappedCoordsBuffer.SetSize(numPoints * 2);
-	LONG* mappedCoords = m_mappedCoordsBuffer.GetData();
 
-	// pack depth data
+	// Pack depth data for NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
+	USHORT* depthValuesIter = m_depthValuesBuffer.GetData();
 	for (int i = 0; i < numPoints; i++) {
-		*(depthValues + i) = (source + i)->depth << 3;
+		*(depthValuesIter++) = (source + i)->depth << 3;
 	}
 
 	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
@@ -128,41 +146,33 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMA
 		nuiResolution, // assume the target image with the same resolution as the source.
 		nuiResolution,
 		numPoints,
-		depthValues,
+		m_depthValuesBuffer.GetData(),
 		numPoints * 2,
-		mappedCoords
+		m_mappedCoordsBuffer.GetData()
 		);
 
-	int minX = pFrame->frame.cropOriginX;
-	int minY = pFrame->frame.cropOriginY;
-	int maxX = minX + pFrame->frame.width;
-	int maxY = minY + pFrame->frame.height;
+	const unsigned int minX = pFrame->frame.cropOriginX;
+	const unsigned int minY = pFrame->frame.cropOriginY;
+	const unsigned int width = pFrame->frame.width;
+	const unsigned int height = pFrame->frame.height;
+	const LONG* mappedCoordsIter = m_mappedCoordsBuffer.GetData();
 
 	for (int i = 0; i < numPoints; i++)
 	{
-		int x = *(mappedCoords + i*2);
-		int y = *(mappedCoords + i*2 + 1);
-		if (x >= minX && x < maxX - 1 && y >= minY && y < maxY) {
-			unsigned short d = filterReliableDepthValue((source+i)->depth);
-
-			unsigned short* p = target + (x - minX) + (y - minY) * pFrame->frame.width;
-			if (*p == 0 || *p > d) {
-				*p = d;
-			}
-
+		const unsigned int x = *mappedCoordsIter++ - minX;
+		const unsigned int y = *mappedCoordsIter++ - minY;
+		if (x < width - 1 && y < height) {
+			const unsigned short d = filterReliableDepthValue((source+i)->depth);
+			unsigned short* p = target + x + y * width;
+			if (*p == 0 || *p > d) *p = d;
 			p++;
-			if (*p == 0 || *p > d) {
-				*p = d;
-			}
+			if (*p == 0 || *p > d) *p = d;
 		}
 	}
 
-	// For benchmarking purpose
-	//LARGE_INTEGER endTime;
-	//QueryPerformanceCounter(&endTime);
-	//accTime.QuadPart += endTime.QuadPart - startTime.QuadPart;
-	//accTimeCount++;
-	//printf("ImageRegistration: %lld\n", accTime.QuadPart / accTimeCount);
+	// FIXME: for preliminary benchmarking purpose
+	static LARGE_INTEGER accTime, accCount;
+	recordAverageProcessTime("With Image Reg", &accTime, &accCount, startTime);
 }
 
 
