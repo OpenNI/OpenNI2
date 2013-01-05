@@ -1,27 +1,32 @@
 #include "FreenectDepthStream.h"
 #include "XnLib.h"
+#include "libfreenect.hpp"
 
+
+const OniSensorType FreenectDepthStream::sensor_type = ONI_SENSOR_DEPTH;
+//	pixelFormat, resolutionX, resolutionY, fps
+const OniVideoMode FreenectDepthStream::supported_video_modes[] = {
+	{ ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30 },
+};
 
 FreenectDepthStream::FreenectDepthStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice)
-{
+{	
 	setVideoMode(getSupportedVideoModes()[0]);
 }
 
 OniVideoMode* FreenectDepthStream::getSupportedVideoModes()
 {
-	OniVideoMode* supported_video_modes = new OniVideoMode[1] {
-		{ ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30 },
-	};
-	return supported_video_modes;
+	// make a copy to avoid need for const
+	OniVideoMode* modes = new OniVideoMode[SIZE(supported_video_modes)];
+	std::copy(supported_video_modes, supported_video_modes+SIZE(supported_video_modes), modes);
+	return modes;
 }
-
 OniStatus FreenectDepthStream::setVideoMode(OniVideoMode requested_mode)
-{
-	OniVideoMode* supported_modes = getSupportedVideoModes();
+{	
 	freenect_depth_format format;
 	freenect_resolution resolution;
 	
-	if (requested_mode == supported_modes[0])
+	if (requested_mode == supported_video_modes[0])
 	{
 		format = FREENECT_DEPTH_11BIT;
 		resolution = FREENECT_RESOLUTION_MEDIUM;
@@ -47,15 +52,16 @@ OniStatus FreenectDepthStream::setVideoMode(OniVideoMode requested_mode)
 	video_mode = requested_mode;
 	return ONI_STATUS_OK;
 }
-
 void FreenectDepthStream::buildFrame(void* depth, OniDriverFrame* pFrame)
 {
 	pFrame->frame.sensorType = ONI_SENSOR_DEPTH;
 	pFrame->frame.videoMode = video_mode;
+	pFrame->frame.dataSize = device->getDepthBufferSize();
 	pFrame->frame.width = video_mode.resolutionX;
 	pFrame->frame.height = video_mode.resolutionY;
 	pFrame->frame.stride = video_mode.resolutionX*sizeof(OniDepthPixel);
-	pFrame->frame.dataSize = device->getDepthBufferSize();
+	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
+	pFrame->frame.croppingEnabled = FALSE;	
 
 	// copy stream buffer from freenect
 	pFrame->frame.data = xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
@@ -69,9 +75,7 @@ void FreenectDepthStream::buildFrame(void* depth, OniDriverFrame* pFrame)
 	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
 }
 
-
-// for oni::driver::StreamBase
-
+// for StreamBase
 OniStatus FreenectDepthStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
 	switch(propertyId)

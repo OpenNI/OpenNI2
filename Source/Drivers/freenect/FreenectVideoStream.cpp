@@ -1,20 +1,27 @@
-#include "FreenectImageStream.h"
+#include "FreenectVideoStream.h"
+#include "XnLib.h"
+#include "libfreenect.hpp"
 
 
-FreenectImageStream::FreenectImageStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice)
+const OniSensorType FreenectVideoStream::sensor_type = ONI_SENSOR_COLOR;
+//	pixelFormat, resolutionX, resolutionY, fps
+const OniVideoMode FreenectVideoStream::supported_video_modes[] = {
+	{ ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 },
+};
+
+FreenectVideoStream::FreenectVideoStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice)
 {
 	setVideoMode(getSupportedVideoModes()[0]);
 }
 
-OniVideoMode* FreenectImageStream::getSupportedVideoModes()
+OniVideoMode* FreenectVideoStream::getSupportedVideoModes()
 {
-	OniVideoMode* supported_video_modes = new OniVideoMode[1] {
-		{ ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 },
-	};
-	return supported_video_modes;
+	// make a copy to avoid need for const
+	OniVideoMode* modes = new OniVideoMode[SIZE(supported_video_modes)];
+	std::copy(supported_video_modes, supported_video_modes+SIZE(supported_video_modes), modes);
+	return modes;
 }
-
-OniStatus FreenectImageStream::setVideoMode(OniVideoMode requested_mode)
+OniStatus FreenectVideoStream::setVideoMode(OniVideoMode requested_mode)
 {
 	OniVideoMode* supported_modes = getSupportedVideoModes();
 	freenect_video_format format;
@@ -46,15 +53,16 @@ OniStatus FreenectImageStream::setVideoMode(OniVideoMode requested_mode)
 	video_mode = requested_mode;
 	return ONI_STATUS_OK;
 }
-
-void FreenectImageStream::buildFrame(void* image, OniDriverFrame* pFrame)
+void FreenectVideoStream::buildFrame(void* image, OniDriverFrame* pFrame)
 {
 	pFrame->frame.sensorType = ONI_SENSOR_COLOR;
 	pFrame->frame.videoMode = video_mode;
+	pFrame->frame.dataSize = device->getVideoBufferSize();
 	pFrame->frame.width = video_mode.resolutionX;
 	pFrame->frame.height = video_mode.resolutionY;
 	pFrame->frame.stride = video_mode.resolutionX*3;
-	pFrame->frame.dataSize = device->getVideoBufferSize();
+	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
+	pFrame->frame.croppingEnabled = FALSE;	
 	
 	// copy stream buffer from freenect
 	pFrame->frame.data = xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
@@ -68,10 +76,8 @@ void FreenectImageStream::buildFrame(void* image, OniDriverFrame* pFrame)
 	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);		
 }
 
-
-// for oni::driver::StreamBase
-
-OniStatus FreenectImageStream::getProperty(int propertyId, void* data, int* pDataSize)
+// for StreamBase
+OniStatus FreenectVideoStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
 	switch(propertyId)
 	{
@@ -88,7 +94,7 @@ OniStatus FreenectImageStream::getProperty(int propertyId, void* data, int* pDat
 			return ONI_STATUS_OK;
 	}
 }
-OniStatus FreenectImageStream::setProperty(int propertyId, const void* data, int dataSize)
+OniStatus FreenectVideoStream::setProperty(int propertyId, const void* data, int dataSize)
 {
 	switch(propertyId)
 	{

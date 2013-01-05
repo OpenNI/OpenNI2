@@ -4,11 +4,6 @@
 #include "libfreenect.hpp"
 #include "Driver/OniDriverAPI.h"
 #include "XnLib.h"
-//#include "XnHash.h"
-//#include "XnEvent.h"
-//#include "XnPlatform.h"
-//#include "PS1080.h"
-//#include "XnMath.h"
 
 
 #define SIZE(array) sizeof array / sizeof 0[array]
@@ -21,18 +16,20 @@ typedef struct
 static bool operator==(const OniVideoMode& left, const OniVideoMode& right)
 {
 	return (left.pixelFormat == right.pixelFormat && left.resolutionX == right.resolutionX
-					&& left.resolutionY == right.resolutionY && left.fps == right.fps) ? true : false;
+					&& left.resolutionY == right.resolutionY && left.fps == right.fps);
 }
 
 
-class FreenectStream : public oni::driver::StreamBase
+using namespace oni::driver;
+
+class FreenectStream : public StreamBase
 {
 private:
+	int frame_id; // number each frame
 	virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
 	
 protected:
 	Freenect::FreenectDevice* device;
-	int frame_id; // number each frame
 	bool running; // acquireFrame() does something iff true
 
 public:
@@ -45,17 +42,11 @@ public:
 	{
 		stop();
 	}
-	
-	
-	// local functions
-	
+
 	virtual void acquireFrame(void* data, uint32_t timestamp)
 	{
 		if (!running)
-			return;
-			
-		//if (frame_id == 1)
-			
+			return;			
 		
 		OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
 		if (pFrame == NULL)
@@ -68,23 +59,28 @@ public:
 
 		pFrame->frame.frameIndex = frame_id++;
 		pFrame->frame.timestamp = timestamp;
-		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
-		pFrame->frame.croppingEnabled = FALSE;
 		
 		buildFrame(data, pFrame);
 		raiseNewFrame(pFrame);
 	}
-	
 
-	// partial default implementation inheriting oni::driver::StreamBase
-	
+	// from StreamBase
 	OniStatus start() {	running = true;	return ONI_STATUS_OK;	}
 	void stop() { running = false; }
-	
-	OniBool isPropertySupported(int propertyId) { return (getProperty(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
+	virtual void addRefToFrame(OniDriverFrame* pFrame) { ++((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount; }
+	virtual void releaseFrame(OniDriverFrame* pFrame)
+	{
+		if (0 == --((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
+		{
+			xnOSFree(pFrame->pDriverCookie);
+			xnOSFreeAligned(pFrame->frame.data);
+			xnOSFree(pFrame);
+		}
+	}
 	// property handlers are empty skeletons by default
-	// only add here if the property is generic to all children of FreenectStream
+	// only add here if the property is generic to all children
 	// otherwise, implement in child and call these in default case (see FreenectDepthStream.h)
+	OniBool isPropertySupported(int propertyId) { return (getProperty(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
 		switch(propertyId)
@@ -126,26 +122,11 @@ public:
 		}
 	}
 	
-	void addRefToFrame(OniDriverFrame* pFrame) { ++((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount; }
-	void releaseFrame(OniDriverFrame* pFrame)
-	{
-		if (0 == --((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-		{
-			xnOSFree(pFrame->pDriverCookie);
-			xnOSFreeAligned(pFrame->frame.data);
-			xnOSFree(pFrame);
-		}
-	}
-	
 
-	/* unimplemented from oni::driver::StreamBase
-	virtual OniStatus invoke(int commandId, const void* data, int dataSize) {return ONI_STATUS_NOT_IMPLEMENTED;}
-	virtual OniBool isCommandSupported(int commandId) {return FALSE;}
-	virtual void setNewFrameCallback(NewFrameCallback handler, void* pCookie) { m_newFrameCallback = handler; m_newFrameCallbackCookie = pCookie; }
-	virtual void setPropertyChangedCallback(PropertyChangedCallback handler, void* pCookie) { m_propertyChangedCallback = handler; m_propertyChangedCookie = pCookie; }
-	virtual void notifyAllProperties() { return; }
+	/* todo : unimplemented from StreamBase
 	virtual OniStatus convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY) { return ONI_STATUS_NOT_SUPPORTED; }	
 	*/
 };
+
 
 #endif // _FREENECT_STREAM_H_
