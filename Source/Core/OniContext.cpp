@@ -112,7 +112,7 @@ OniStatus Context::initialize()
 	// Use path specified in ini file
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", repositoryFromINI, ONI_CONFIGURATION_FILE);
 		rc = loadLibraries(repositoryFromINI);
 		return OniStatusFromXnStatus(rc);
 	}
