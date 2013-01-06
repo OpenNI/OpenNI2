@@ -397,8 +397,8 @@ class OSLinux(OS):
 
     def createTools(self):
         # Arm redist does not provide Tools:
-	if isinstance(self.config.getPlatforms()[0], PlatformArm):
-	    return
+        if isinstance(self.config.getPlatforms()[0], PlatformArm):
+            return
 
         supplyTools = OS.createTools(self)
 
@@ -516,9 +516,9 @@ class OSLinux(OS):
             try:
                 if isinstance(self, OSMac):
                     txt = gop('sysctl -n hw.physicalcpu')
-                else:		
+                else:
                     txt = gop('grep "processor\W:" /proc/cpuinfo | wc -l')
-        			
+
                 cores = int(txt)
             except:
                 pass
