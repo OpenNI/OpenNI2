@@ -48,6 +48,7 @@ private:
 	}
 	
 protected:
+	typedef std::map< OniVideoMode, std::pair<freenect_video_format, freenect_resolution> > FreenectVideoModeMap;
 	OniVideoMode video_mode;
 	
 public:

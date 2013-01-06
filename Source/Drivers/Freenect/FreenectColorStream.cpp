@@ -4,7 +4,7 @@
 const OniVideoMode FreenectColorStream::default_video_mode = makeOniVideoMode(ONI_PIXEL_FORMAT_RGB888, 640, 480, 30);
 
 // Add video modes here as you implement them
-FreenectVideoModeMap FreenectColorStream::getSupportedVideoModes()
+FreenectVideoStream::FreenectVideoModeMap FreenectColorStream::getSupportedVideoModes()
 {
 	FreenectVideoModeMap modes;
 	//										pixelFormat, resolutionX, resolutionY, fps		freenect_video_format, freenect_resolution											

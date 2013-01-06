@@ -6,8 +6,6 @@
 #include "libfreenect.hpp"
 
 
-typedef std::map< OniVideoMode, std::pair<freenect_video_format, freenect_resolution> > FreenectVideoModeMap;
-
 class FreenectColorStream : public FreenectVideoStream
 {
 private:

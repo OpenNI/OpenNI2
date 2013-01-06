@@ -4,7 +4,7 @@
 const OniVideoMode FreenectDepthStream::default_video_mode = makeOniVideoMode(ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30);
 
 // Add video modes here as you implement them
-FreenectDepthModeMap FreenectDepthStream::getSupportedVideoModes()
+FreenectDepthStream::FreenectDepthModeMap FreenectDepthStream::getSupportedVideoModes()
 {
 	FreenectDepthModeMap modes;
 	//										pixelFormat, resolutionX, resolutionY, fps		freenect_video_format, freenect_resolution											

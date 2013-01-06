@@ -6,10 +6,11 @@
 #include "libfreenect.hpp"
 
 
-typedef std::map< OniVideoMode, std::pair<freenect_depth_format, freenect_resolution> > FreenectDepthModeMap;
-
 class FreenectDepthStream : public FreenectVideoStream
 {
+protected:
+	typedef std::map< OniVideoMode, std::pair<freenect_depth_format, freenect_resolution> > FreenectDepthModeMap;
+	
 private:
 	static const OniSensorType sensor_type = ONI_SENSOR_DEPTH;
 	static const OniVideoMode default_video_mode;
