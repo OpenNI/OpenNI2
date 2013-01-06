@@ -117,7 +117,7 @@ elif platform.system() == 'Linux' or platform.system() == 'Darwin':
         sys.exit(1)
 
     outFile = 'Final/OpenNI-' + config.Platform + '-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
-    dirName = 'OpenNI-' + strVersion
+    dirName = 'OpenNI-' + strVersion + '-' + plat
         
     config.path = '..'
     config.output_dir = origDir + '/'+ dirName
