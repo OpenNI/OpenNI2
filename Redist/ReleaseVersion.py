@@ -32,7 +32,7 @@ import stat
 import UpdateVersion
 
 if len(sys.argv) < 2 or sys.argv[1] in ('-h','--help'):
-    print "usage: " + sys.argv[0] + " <x86|x64|arm> [UpdateVersion]"
+    print "usage: " + sys.argv[0] + " <x86|x64|arm|android> [UpdateVersion]"
     sys.exit(1)
     
 plat = sys.argv[1]
@@ -78,7 +78,42 @@ finalDir = "Final"
 if not os.path.isdir(finalDir):
     os.mkdir(finalDir)
     
-if platform.system() == 'Windows':
+if plat == 'android':
+    if not 'NDK_ROOT' in os.environ:
+        print 'Please define NDK_ROOT!'
+        sys.exit(2)
+
+    ndkDir = os.environ['NDK_ROOT']
+
+    buildDir = 'AndroidBuild'
+    if os.path.isdir(buildDir):
+        shutil.rmtree(buildDir)
+
+    outputDir = 'OpenNI-android-' + strVersion
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)
+
+    os.makedirs(buildDir + '/jni')
+    os.symlink('../../../', buildDir + '/jni/OpenNI2')
+    shutil.copy('../Android.mk', buildDir + '/jni')
+    shutil.copy('../Application.mk', buildDir + '/jni')
+    rc = subprocess.call([ ndkDir + '/ndk-build', '-C', buildDir, '-j8' ])
+    if rc != 0:
+        print 'Build failed!'
+        sys.exit(3)
+
+    outFile = 'Final/' + outputDir + '.tar'
+    
+    shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
+
+    print('Creating archive ' + outFile)
+
+    rc = subprocess.call(['tar', '-cf', outFile, outputDir])
+    if rc != 0:
+        print 'Tar failed!'
+        sys.exit(3)
+
+elif platform.system() == 'Windows':
     import win32con,pywintypes,win32api
 
     MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0")
