@@ -5,12 +5,12 @@
 FreenectDeviceNI::FreenectDeviceNI(freenect_context *_ctx, int _index) : Freenect::FreenectDevice(_ctx, _index)
 {
 	depth_stream = NULL;
-	video_stream = NULL;
+	color_stream = NULL;
 }
 FreenectDeviceNI::~FreenectDeviceNI()
 {
 	destroyStream(depth_stream);
-	destroyStream(video_stream);
+	destroyStream(color_stream);
 }
 
 // for DeviceBase
@@ -19,7 +19,7 @@ OniStatus FreenectDeviceNI::getSensorInfoList(OniSensorInfo** pSensors, int* num
 	*numSensors = 2;
 	OniSensorInfo * sensors = new OniSensorInfo[*numSensors];
 	sensors[0] = depth_stream->getSensorInfo();
-	sensors[1] = video_stream->getSensorInfo();
+	sensors[1] = color_stream->getSensorInfo();
 	*pSensors = sensors;
 	return ONI_STATUS_OK;
 }
@@ -34,9 +34,9 @@ StreamBase* FreenectDeviceNI::createStream(OniSensorType sensorType)
 			return depth_stream;
 		case ONI_SENSOR_COLOR:
 			Freenect::FreenectDevice::startVideo();
-			if (video_stream == NULL)
-				video_stream = XN_NEW(FreenectVideoStream, this);
-			return video_stream;
+			if (color_stream == NULL)
+				color_stream = XN_NEW(FreenectColorStream, this);
+			return color_stream;
 		// todo: IR
 		default:
 			//m_driverServices.errorLoggerAppend("FreenectDeviceNI: Can't create a stream of type %d", sensorType);
@@ -50,10 +50,10 @@ void FreenectDeviceNI::destroyStream(StreamBase* pStream)
 		Freenect::FreenectDevice::stopDepth();
 		depth_stream = NULL;
 	}
-	if (pStream == video_stream)
+	if (pStream == color_stream)
 	{
 		Freenect::FreenectDevice::stopVideo();
-		video_stream = NULL;
+		color_stream = NULL;
 	}
 	
 	XN_DELETE(pStream);

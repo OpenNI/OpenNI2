@@ -22,16 +22,6 @@ typedef struct
 	int refCount;
 } FreenectStreamFrameCookie;
 
-static bool operator==(const OniVideoMode& left, const OniVideoMode& right)
-{
-	return (left.pixelFormat == right.pixelFormat && left.resolutionX == right.resolutionX
-					&& left.resolutionY == right.resolutionY && left.fps == right.fps);
-}
-static bool operator<(const OniVideoMode& left, const OniVideoMode& right)
-{
-	return (left.resolutionX*left.resolutionY < right.resolutionX*right.resolutionY);
-}
-
 
 using namespace oni::driver;
 
@@ -39,9 +29,10 @@ class FreenectStream : public StreamBase
 {
 private:
 	int frame_id; // number each frame
-	virtual void buildFrame(void* data, OniDriverFrame* pFrame) = 0;
+	virtual void buildFrame(void* data, OniDriverFrame* pFrame) const = 0;
 	
 protected:
+	static const OniSensorType sensor_type;
 	Freenect::FreenectDevice* device;
 	bool running; // acquireFrame() does something iff true
 
@@ -51,10 +42,7 @@ public:
 		device = pDevice;
 		frame_id = 1;
 	}
-	~FreenectStream()
-	{
-		stop();
-	}
+	~FreenectStream() { stop();	}
 
 	virtual void acquireFrame(void* data, uint32_t timestamp)
 	{
@@ -69,7 +57,6 @@ public:
 		}
 		pFrame->pDriverCookie = xnOSMalloc(sizeof(FreenectStreamFrameCookie));
 		((FreenectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
-
 		pFrame->frame.frameIndex = frame_id++;
 		pFrame->frame.timestamp = timestamp;
 		

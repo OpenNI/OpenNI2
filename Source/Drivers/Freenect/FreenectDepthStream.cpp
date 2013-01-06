@@ -1,115 +1,29 @@
 #include "FreenectDepthStream.h"
-#include "XnLib.h"
-#include "libfreenect.hpp"
 
 
-//	pixelFormat, resolutionX, resolutionY, fps
-const OniVideoMode FreenectDepthStream::supported_video_modes[] = {
-	{ ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30 },
-};
+const OniVideoMode FreenectDepthStream::default_video_mode = makeOniVideoMode(ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30);
 
-FreenectDepthStream::FreenectDepthStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice)
-{	
-	setVideoMode(getSupportedVideoModes()[0]);
-}
-
-OniVideoMode* FreenectDepthStream::getSupportedVideoModes()
+// Add video modes here as you implement them
+FreenectDepthModeMap FreenectDepthStream::getSupportedVideoModes()
 {
-	// make a copy to avoid need for const
-	OniVideoMode* modes = new OniVideoMode[SIZE(supported_video_modes)];
-	std::copy(supported_video_modes, supported_video_modes+SIZE(supported_video_modes), modes);
+	FreenectDepthModeMap modes;
+	//										pixelFormat, resolutionX, resolutionY, fps		freenect_video_format, freenect_resolution											
+	modes[makeOniVideoMode(ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30)] = { FREENECT_DEPTH_11BIT, FREENECT_RESOLUTION_MEDIUM };
+	
+	
 	return modes;
 }
-OniStatus FreenectDepthStream::setVideoMode(OniVideoMode requested_mode)
-{	
-	freenect_depth_format format;
-	freenect_resolution resolution;
-	
-	if (requested_mode == supported_video_modes[0])
-	{
-		format = FREENECT_DEPTH_11BIT;
-		resolution = FREENECT_RESOLUTION_MEDIUM;
-		
-		/* working format possiblities
-		FREENECT_DEPTH_10BIT
-		FREENECT_DEPTH_REGISTERED
-		FREENECT_DEPTH_MM
-		*/
-	}
-	else
-	{
-		return ONI_STATUS_NOT_SUPPORTED;
-	}
-	
-	try { device->setDepthFormat(format, resolution); }
-	catch (std::runtime_error e)
-	{
-		printf("format-resolution combination not supported: %d-%d\n", format, resolution);
-		return ONI_STATUS_NOT_SUPPORTED;
-	}
-	
-	video_mode = requested_mode;
-	return ONI_STATUS_OK;
-}
-void FreenectDepthStream::buildFrame(void* depth, OniDriverFrame* pFrame)
+void FreenectDepthStream::populateFrame(void* depth, OniDriverFrame* pFrame) const
 {
-	pFrame->frame.sensorType = ONI_SENSOR_DEPTH;
-	pFrame->frame.videoMode = video_mode;
-	pFrame->frame.dataSize = device->getDepthBufferSize();
-	pFrame->frame.width = video_mode.resolutionX;
-	pFrame->frame.height = video_mode.resolutionY;
+	pFrame->frame.sensorType = sensor_type;
 	pFrame->frame.stride = video_mode.resolutionX*sizeof(OniDepthPixel);
 	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
 	pFrame->frame.croppingEnabled = FALSE;	
-
 	// copy stream buffer from freenect
-	pFrame->frame.data = xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-	if (pFrame->frame.data == NULL)
-	{
-		XN_ASSERT(FALSE);
-		return;
-	}
 	uint8_t* _data = static_cast<uint8_t*>(depth);
 	uint8_t* frame_data = static_cast<uint8_t*>(pFrame->frame.data);
 	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
 }
-
-// for StreamBase
-OniStatus FreenectDepthStream::getProperty(int propertyId, void* data, int* pDataSize)
-{
-	switch(propertyId)
-	{
-		default:
-			return FreenectStream::getProperty(propertyId, data, pDataSize);
-
-		case ONI_STREAM_PROPERTY_VIDEO_MODE:					// OniVideoMode*
-			if (*pDataSize != sizeof(OniVideoMode))
-			{
-				printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVideoMode));
-				return ONI_STATUS_ERROR;
-			}				
-			*(static_cast<OniVideoMode*>(data)) = video_mode;
-			return ONI_STATUS_OK;
-	}
-}
-OniStatus FreenectDepthStream::setProperty(int propertyId, const void* data, int dataSize)
-{
-	switch(propertyId)
-	{
-		default:
-			return FreenectStream::setProperty(propertyId, data, dataSize);
-
-		case ONI_STREAM_PROPERTY_VIDEO_MODE:					// OniVideoMode*
-			if (dataSize != sizeof(OniVideoMode))
-			{
-				printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
-				return ONI_STATUS_ERROR;
-			}
-			raisePropertyChanged(propertyId, data, dataSize);
-			return setVideoMode(*(reinterpret_cast<const OniVideoMode*>(data)));
-	}
-}
-
 
 /* depth video modes reference
 

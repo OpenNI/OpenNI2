@@ -4,7 +4,7 @@
 #include "libfreenect.hpp"
 #include "Driver/OniDriverAPI.h"
 #include "FreenectDepthStream.h"
-#include "FreenectVideoStream.h"
+#include "FreenectColorStream.h"
 
 
 using namespace oni::driver;
@@ -13,7 +13,7 @@ class FreenectDeviceNI : public DeviceBase, public Freenect::FreenectDevice
 {
 protected:
 	FreenectDepthStream* depth_stream;
-	FreenectVideoStream* video_stream;
+	FreenectColorStream* color_stream;
 
 public:
 	FreenectDeviceNI(freenect_context *_ctx, int _index);
@@ -80,7 +80,7 @@ public:
 	}
 	void VideoCallback(void *image, uint32_t timestamp)
 	{
-		video_stream->acquireFrame(image, timestamp);
+		color_stream->acquireFrame(image, timestamp);
 	}
 	
 	
