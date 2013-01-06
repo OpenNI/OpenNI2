@@ -14,16 +14,21 @@ private:
 	static const OniSensorType sensor_type = ONI_SENSOR_DEPTH;
 	static const OniVideoMode default_video_mode;
 	static FreenectDepthModeMap getSupportedVideoModes();
-	virtual void populateFrame(void* image, OniDriverFrame* pFrame) const;
+	virtual void populateFrame(void* data, OniDriverFrame* pFrame) const;
 	OniStatus setVideoMode(OniVideoMode requested_mode)
 	{
-		FreenectDepthModeMap::const_iterator matched_mode_iter = getSupportedVideoModes().find(requested_mode);
-		if (matched_mode_iter == getSupportedVideoModes().end())
-			return ONI_STATUS_NOT_SUPPORTED;
-		try { device->setDepthFormat(matched_mode_iter->second.first, matched_mode_iter->second.second); }
+		FreenectDepthModeMap supported_video_modes = getSupportedVideoModes();
+		FreenectDepthModeMap::const_iterator matched_mode_iter = supported_video_modes.find(requested_mode);
+		if (matched_mode_iter == supported_video_modes.end())
+			return ONI_STATUS_NOT_SUPPORTED;			
+		
+		freenect_depth_format format = matched_mode_iter->second.first;
+		freenect_resolution resolution = matched_mode_iter->second.second;
+		
+		try { device->setDepthFormat(format, resolution); }
 		catch (std::runtime_error e)
 		{
-			printf("format-resolution combination not supported by libfreenect: %d-%d\n", matched_mode_iter->second.first, matched_mode_iter->second.second);
+			printf("format-resolution combination not supported by libfreenect: %d-%d\n", format, resolution);
 			return ONI_STATUS_NOT_SUPPORTED;
 		}
 		video_mode = requested_mode;

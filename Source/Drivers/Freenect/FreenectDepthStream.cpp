@@ -8,21 +8,23 @@ FreenectDepthModeMap FreenectDepthStream::getSupportedVideoModes()
 {
 	FreenectDepthModeMap modes;
 	//										pixelFormat, resolutionX, resolutionY, fps		freenect_video_format, freenect_resolution											
-	modes[makeOniVideoMode(ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30)] = { FREENECT_DEPTH_11BIT, FREENECT_RESOLUTION_MEDIUM };
-	
+	modes[makeOniVideoMode(ONI_PIXEL_FORMAT_DEPTH_1_MM, 640, 480, 30)] = { FREENECT_DEPTH_REGISTERED, FREENECT_RESOLUTION_MEDIUM };
+		
 	
 	return modes;
 }
-void FreenectDepthStream::populateFrame(void* depth, OniDriverFrame* pFrame) const
+void FreenectDepthStream::populateFrame(void* data, OniDriverFrame* pFrame) const
 {
 	pFrame->frame.sensorType = sensor_type;
 	pFrame->frame.stride = video_mode.resolutionX*sizeof(OniDepthPixel);
 	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
 	pFrame->frame.croppingEnabled = FALSE;	
 	// copy stream buffer from freenect
-	uint8_t* _data = static_cast<uint8_t*>(depth);
+	uint8_t* _data = static_cast<uint8_t*>(data);
 	uint8_t* frame_data = static_cast<uint8_t*>(pFrame->frame.data);
 	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+	
+	//printf("size of frame data = %d\n", pFrame->frame.dataSize);
 }
 
 /* depth video modes reference
