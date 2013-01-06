@@ -1,51 +1,51 @@
 #include "FreenectVideoStream.h"
 #include "XnLib.h"
 #include "libfreenect.hpp"
+#include <algorithm>
 
 
-//	pixelFormat, resolutionX, resolutionY, fps
-const OniVideoMode FreenectVideoStream::supported_video_modes[] = {
-	{ ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 },
-};
+// Video mode handling - add modes to getSupportedVideoModes() as you implement them
+const std::map< OniVideoMode, std::pair<freenect_video_format, freenect_resolution> > FreenectVideoStream::supported_video_modes = FreenectVideoStream::getSupportedVideoModes();
+FreenectVideoModeMap FreenectVideoStream::getSupportedVideoModes()
+{
+	FreenectVideoModeMap modes;
+	//										pixelFormat, resolutionX, resolutionY, fps		freenect_video_format, freenect_resolution											
+	modes[makeOniVideoMode(ONI_PIXEL_FORMAT_RGB888, 640, 480, 30)] = { FREENECT_VIDEO_RGB, FREENECT_RESOLUTION_MEDIUM };
+	
+	
+	return modes;	
+
+	/* working format possiblities
+	FREENECT_VIDEO_RGB
+	FREENECT_VIDEO_YUV_RGB
+	FREENECT_VIDEO_YUV_RAW
+	*/
+}
+
 
 FreenectVideoStream::FreenectVideoStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice)
 {
-	setVideoMode(getSupportedVideoModes()[0]);
+	setVideoMode(makeOniVideoMode( ONI_PIXEL_FORMAT_RGB888, 640, 480, 30 ));
 }
 
-OniVideoMode* FreenectVideoStream::getSupportedVideoModes()
+OniSensorInfo FreenectVideoStream::getSensorInfo()
 {
-	// make a copy to avoid need for const
-	OniVideoMode* modes = new OniVideoMode[SIZE(supported_video_modes)];
-	std::copy(supported_video_modes, supported_video_modes+SIZE(supported_video_modes), modes);
-	return modes;
+	OniVideoMode* modes = new OniVideoMode[supported_video_modes.size()];
+	std::transform(supported_video_modes.begin(), supported_video_modes.end(), modes, RetrieveKey());
+	//       sensorType, numSupportedVideoModes, pSupportedVideoModes
+	return { sensor_type, SIZE(modes), modes };
 }
 OniStatus FreenectVideoStream::setVideoMode(OniVideoMode requested_mode)
 {
-	OniVideoMode* supported_modes = getSupportedVideoModes();
-	freenect_video_format format;
-	freenect_resolution resolution;
+	FreenectVideoModeMap::const_iterator matched_mode = supported_video_modes.find(requested_mode);
 	
-	if (requested_mode == supported_modes[0])
-	{
-		format = FREENECT_VIDEO_RGB;
-		resolution = FREENECT_RESOLUTION_MEDIUM;
-	
-		/* working format possiblities
-		FREENECT_VIDEO_RGB
-		FREENECT_VIDEO_YUV_RGB
-		FREENECT_VIDEO_YUV_RAW
-		*/
-	}
-	else
-	{
+	if (matched_mode == supported_video_modes.end())
 		return ONI_STATUS_NOT_SUPPORTED;
-	}
 	
-	try { device->setVideoFormat(format, resolution); }
+	try { device->setVideoFormat(matched_mode->second.first, matched_mode->second.second); }
 	catch (std::runtime_error e)
 	{
-		printf("format-resolution combination not supported: %d-%d\n", format, resolution);
+		printf("format-resolution combination not supported by libfreenect: %d-%d\n", matched_mode->second.first, matched_mode->second.second);
 		return ONI_STATUS_NOT_SUPPORTED;
 	}
 	
@@ -54,7 +54,7 @@ OniStatus FreenectVideoStream::setVideoMode(OniVideoMode requested_mode)
 }
 void FreenectVideoStream::buildFrame(void* image, OniDriverFrame* pFrame)
 {
-	pFrame->frame.sensorType = ONI_SENSOR_COLOR;
+	pFrame->frame.sensorType = sensor_type;
 	pFrame->frame.videoMode = video_mode;
 	pFrame->frame.dataSize = device->getVideoBufferSize();
 	pFrame->frame.width = video_mode.resolutionX;

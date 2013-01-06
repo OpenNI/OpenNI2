@@ -61,7 +61,7 @@ public:
 				return ONI_STATUS_NOT_SUPPORTED;
 		}
 	}
-	virtual OniBool isCommandSupported(int propertyId) { return (invoke(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
+	OniBool isCommandSupported(int propertyId) { return (invoke(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
 	virtual OniStatus invoke(int commandId, const void* data, int dataSize)
 	{
 		switch (commandId)

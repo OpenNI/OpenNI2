@@ -24,7 +24,7 @@ ifneq ("$(OSTYPE)","Darwin")
         USED_LIBS += rt  
 endif
 
-CFLAGS += -Wall
+CFLAGS += -Wall -w
 
 OUT_DIR := $(OUT_DIR)/OpenNI2/Drivers
 

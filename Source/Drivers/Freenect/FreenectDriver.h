@@ -25,8 +25,8 @@
 
 #include "libfreenect.hpp"
 #include "Driver/OniDriverAPI.h"
-#include "FreenectDeviceNI.h"
 #include "XnHash.h"
+#include "FreenectDeviceNI.h"
 
 
 using namespace oni::driver;
@@ -47,7 +47,7 @@ public:
 	OniStatus tryDevice(const char* uri);
 	void shutdown()
 	{
-		for (xnl::Hash<OniDeviceInfo*, DeviceBase*>::Iterator iter = devices.Begin(); iter != devices.End(); iter++)
+		for (xnl::Hash<OniDeviceInfo*, DeviceBase*>::Iterator iter = devices.Begin(); iter != devices.End(); ++iter)
 		{
 			deviceClose(iter->Value());
 		}

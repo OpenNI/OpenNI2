@@ -21,7 +21,7 @@ As a DriverBase, FreenectDriver manages devices and sets up device state callbac
 
 FreenectDeviceNI inherits publically from DeviceBase and Freenect::FreenectDevice.
 Because of this, it can be built by Freenect::Freenect::createDevice() and it can define FreenectDevice's depth and video callbacks.
-Those callbacks trigger acquireFrame in FreenectStream.
+Those callbacks trigger acquireFrame() in FreenectStream.
 
 FreenectStream is a virtual base class inheriting from StreamBase.
 It does generic frame setup in acquireFrame() and then calls pure virtual buildFrame() to let derived classes finish the frame.
@@ -35,7 +35,7 @@ These two stream implementations also offer a system to report supported video m
 
 
 NOTE: This is beta software, tested as yet by no one but myself.
-It's a good, clean start but it leaves a log of libfreenect untouched.
+It's a good, clean start but it leaves a lot of libfreenect untouched.
 Suggestions, bug reports, and insights on Freenect and OpenNI formats are welcome. 
 
 
@@ -52,4 +52,5 @@ improve K4W support in libfreenect
 implement interesting derived functions
 tilt motor support
 audio stream
+create C++ versions of OniCTypes (with constructors and overloaded comparison operators)
 OSX support - please hack!

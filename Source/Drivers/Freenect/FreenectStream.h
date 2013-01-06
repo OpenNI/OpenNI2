@@ -8,6 +8,15 @@
 
 #define SIZE(array) sizeof array / sizeof 0[array]
 
+struct RetrieveKey
+{
+	template <typename T>
+	typename T::first_type operator()(T pair) const
+	{
+		return pair.first;
+	}
+};
+
 typedef struct  
 {
 	int refCount;
@@ -17,6 +26,10 @@ static bool operator==(const OniVideoMode& left, const OniVideoMode& right)
 {
 	return (left.pixelFormat == right.pixelFormat && left.resolutionX == right.resolutionX
 					&& left.resolutionY == right.resolutionY && left.fps == right.fps);
+}
+static bool operator<(const OniVideoMode& left, const OniVideoMode& right)
+{
+	return (left.resolutionX*left.resolutionY < right.resolutionX*right.resolutionY);
 }
 
 
