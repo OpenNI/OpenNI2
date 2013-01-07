@@ -55,7 +55,12 @@
 #include <assert.h>
 #include <float.h>
 #include <crtdbg.h>
+#if _MSC_VER < 1600 // Visual Studio 2008 and older doesn't have stdint.h...
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+#else
 #include <stdint.h>
+#endif
 
 //---------------------------------------------------------------------------
 // Platform Basic Definition
