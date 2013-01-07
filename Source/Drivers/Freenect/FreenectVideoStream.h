@@ -50,6 +50,7 @@ private:
 protected:
 	typedef std::map< OniVideoMode, std::pair<freenect_video_format, freenect_resolution> > FreenectVideoModeMap;
 	OniVideoMode video_mode;
+	bool mirroring;
 	
 public:
 	FreenectVideoStream(Freenect::FreenectDevice* pDevice) : FreenectStream(pDevice) { }
@@ -58,11 +59,11 @@ public:
 	// from StreamBase
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 				return FreenectStream::getProperty(propertyId, data, pDataSize);
-			case ONI_STREAM_PROPERTY_VIDEO_MODE:					// OniVideoMode*
+			case ONI_STREAM_PROPERTY_VIDEO_MODE:	// OniVideoMode*
 				if (*pDataSize != sizeof(OniVideoMode))
 				{
 					printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVideoMode));
@@ -70,25 +71,34 @@ public:
 				}				
 				*(static_cast<OniVideoMode*>(data)) = video_mode;
 				return ONI_STATUS_OK;
+			case ONI_STREAM_PROPERTY_MIRRORING:		// OniBool
+				if (*pDataSize != sizeof(OniBool))
+				{
+					printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniBool));
+					return ONI_STATUS_ERROR;
+				}
+				*(static_cast<OniBool*>(data)) = mirroring;						
+				return ONI_STATUS_OK;
 		}
 	}
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 				return FreenectStream::setProperty(propertyId, data, dataSize);
-			case ONI_STREAM_PROPERTY_VIDEO_MODE:					// OniVideoMode*
+			case ONI_STREAM_PROPERTY_VIDEO_MODE:	// OniVideoMode*
 				if (dataSize != sizeof(OniVideoMode))
 				{
 					printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniVideoMode));
 					return ONI_STATUS_ERROR;
 				}
-				if (ONI_STATUS_OK == setVideoMode(*(reinterpret_cast<const OniVideoMode*>(data))))
+				if (ONI_STATUS_OK != setVideoMode(*(static_cast<const OniVideoMode*>(data))))
 				{
-					raisePropertyChanged(propertyId, data, dataSize);
-					return ONI_STATUS_OK;
+					return ONI_STATUS_NOT_SUPPORTED;
 				}
+				raisePropertyChanged(propertyId, data, dataSize);
+				return ONI_STATUS_OK;
 		}
 	}
 };

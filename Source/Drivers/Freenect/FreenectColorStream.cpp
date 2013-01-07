@@ -28,7 +28,41 @@ void FreenectColorStream::populateFrame(void* data, OniDriverFrame* pFrame) cons
 	// copy stream buffer from freenect
 	unsigned char* _data = static_cast<unsigned char*>(data);
 	unsigned char* frame_data = static_cast<unsigned char*>(pFrame->frame.data);
-	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+	if (mirroring)
+	{
+		for (unsigned int i = 0; i < pFrame->frame.dataSize; i += 3)
+		{
+			// find corresponding mirrored pixel
+			int pixel = i / 3;
+			int row = pixel / video_mode.resolutionX;
+			int col = video_mode.resolutionX - (pixel % video_mode.resolutionX);
+			int target = 3 * (row * video_mode.resolutionX + col);
+			// copy it to this pixel
+			frame_data[i] = _data[target];
+			frame_data[i+1] = _data[target+1];
+			frame_data[i+2] = _data[target+2];
+		}
+	}
+	else
+		std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+}
+
+// for StreamBase
+OniStatus FreenectColorStream::setProperty(int propertyId, const void* data, int dataSize)
+{
+	switch (propertyId)
+	{
+		default:
+			return FreenectVideoStream::setProperty(propertyId, data, dataSize);
+		case ONI_STREAM_PROPERTY_MIRRORING:		// OniBool
+			if (dataSize != sizeof(OniBool))
+			{
+				printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniBool));
+				return ONI_STATUS_ERROR;
+			}
+			mirroring = *(static_cast<const OniBool*>(data));
+			return ONI_STATUS_OK;
+	}
 }
 
 

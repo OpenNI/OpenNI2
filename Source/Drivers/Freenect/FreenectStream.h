@@ -79,11 +79,11 @@ public:
 	}
 	// property handlers are empty skeletons by default
 	// only add here if the property is generic to all children
-	// otherwise, implement in child and call these in default case (see FreenectDepthStream.h)
+	// otherwise, implement in child and call these in default case (see FreenectVideoStream.h)
 	OniBool isPropertySupported(int propertyId) { return (getProperty(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 			case ONI_STREAM_PROPERTY_CROPPING:						// OniCropping*
@@ -103,7 +103,7 @@ public:
 	}
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 			case ONI_STREAM_PROPERTY_CROPPING:						// OniCropping*

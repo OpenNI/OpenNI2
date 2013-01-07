@@ -39,13 +39,14 @@ To implement a new mode, simply add it to getSupportedVideoModes() and modify po
 
 
 	TODO:
-provide more OniVideoMode and OniStreamProperty
-support more FREENECT_RESOLUTION and FREENECT_VIDEO
 mirrored mode support
 FreenectIRStream
 polish and publish Gentoo ebuilds
 acquire and test with original Kinect (within 2 weeks) - please report issues!
+support more FREENECT_RESOLUTION and FREENECT_VIDEO
+allow toggling image registration
 PROPER LOGGING!
+provide more OniVideoMode and OniStreamProperty
 improve K4W support in libfreenect
 implement interesting derived functions
 tilt motor support

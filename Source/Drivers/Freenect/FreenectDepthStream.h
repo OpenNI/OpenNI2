@@ -47,6 +47,9 @@ public:
 		std::transform(supported_modes.begin(), supported_modes.end(), modes, RetrieveKey());
 		return { sensor_type, SIZE(modes), modes }; // sensorType, numSupportedVideoModes, pSupportedVideoModes
 	}
+	
+	// from StreamBase
+	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
 };
 
 

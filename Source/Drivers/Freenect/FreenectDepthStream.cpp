@@ -14,7 +14,7 @@ FreenectDepthStream::FreenectDepthModeMap FreenectDepthStream::getSupportedVideo
 	return modes;
 }
 void FreenectDepthStream::populateFrame(void* data, OniDriverFrame* pFrame) const
-{
+{	
 	pFrame->frame.sensorType = sensor_type;
 	pFrame->frame.stride = video_mode.resolutionX*sizeof(OniDepthPixel);
 	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
@@ -22,10 +22,32 @@ void FreenectDepthStream::populateFrame(void* data, OniDriverFrame* pFrame) cons
 	// copy stream buffer from freenect
 	uint8_t* _data = static_cast<uint8_t*>(data);
 	uint8_t* frame_data = static_cast<uint8_t*>(pFrame->frame.data);
-	std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
-	
+	//if (mirroring)
+	//	std::reverse_copy(_data, _data+pFrame->frame.dataSize, frame_data);
+	//else
+		std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+
 	//printf("size of frame data = %d\n", pFrame->frame.dataSize);
 }
+
+// for StreamBase
+OniStatus FreenectDepthStream::setProperty(int propertyId, const void* data, int dataSize)
+{
+	switch (propertyId)
+	{
+		default:
+			return FreenectVideoStream::setProperty(propertyId, data, dataSize);
+		case ONI_STREAM_PROPERTY_MIRRORING:		// OniBool
+			if (dataSize != sizeof(OniBool))
+			{
+				printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniBool));
+				return ONI_STATUS_ERROR;
+			}
+			mirroring = *(static_cast<const OniBool*>(data));
+			return ONI_STATUS_OK;
+	}
+}
+
 
 /* depth video modes reference
 

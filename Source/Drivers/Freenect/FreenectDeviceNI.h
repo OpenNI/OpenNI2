@@ -21,6 +21,7 @@ public:
 
 	// from DeviceBase
 	OniStatus getSensorInfoList(OniSensorInfo** pSensors, int* numSensors);
+	virtual OniBool isImageRegistrationModeSupported(OniImageRegistrationMode mode) { return (mode == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR); }
 	StreamBase* createStream(OniSensorType sensorType);
 	void destroyStream(StreamBase* pStream);
 	// property and command handlers are empty skeletons by default
@@ -29,7 +30,7 @@ public:
 	OniBool isPropertySupported(int propertyId) { return (getProperty(propertyId, NULL, NULL) != ONI_STATUS_NOT_SUPPORTED); }
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 			case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:				// string
@@ -46,7 +47,7 @@ public:
 	}
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize)
 	{
-		switch(propertyId)
+		switch (propertyId)
 		{
 			default:
 			case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:				// By implementation
@@ -86,7 +87,6 @@ public:
 	
 	/* todo : from DeviceBase
 	virtual OniStatus tryManualTrigger() {return ONI_STATUS_OK;}
-	virtual OniBool isImageRegistrationModeSupported(OniImageRegistrationMode mode) { return (mode == ONI_IMAGE_REGISTRATION_OFF); }
 	*/
 };
 
