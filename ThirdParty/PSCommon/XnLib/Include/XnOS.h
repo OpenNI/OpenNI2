@@ -463,6 +463,15 @@ XN_C_API XnStatus XN_C_DECL xnOSGetFileName(const XnChar* cpFilePath, XnChar* cp
 XN_C_API XnStatus XN_C_DECL xnOSGetFullPathName(const XnChar* strFilePath, XnChar* strFullPath, XnUInt32 nBufferSize);
 XN_C_API XnStatus XN_C_DECL xnOSGetCurrentDir(XnChar* cpDirName, const XnUInt32 nBufferSize);
 XN_C_API XnStatus XN_C_DECL xnOSSetCurrentDir(const XnChar* cpDirName);
+/**
+ * Strips the directory separator at the end of the specified path by directly modifying the given string.
+ * Always returns XN_STATUS_OK.
+ */
+XN_C_API XnStatus XN_C_DECL xnOSStripDirSep(XnChar* strDirName);
+/**
+ * Checks if the specified character works as a directory separator.
+ */
+XN_C_API XnBool XN_C_DECL xnOSIsDirSep(XnChar c);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteFile(const XnChar* cpFileName);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteEmptyDirectory(const XnChar* strDirName);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteDirectoryTree(const XnChar* strDirName);

@@ -37,6 +37,7 @@ typedef HANDLE	XN_FILE_HANDLE;
 
 /** The file directory separator. */ 
 #define XN_FILE_DIR_SEP "\\"
+#define XN_FILE_DIR_SEPS "\\/" // Win32 accepts '/' also
 
 /** The file extension separator. */ 
 #define XN_FILE_EXT_SEP "."

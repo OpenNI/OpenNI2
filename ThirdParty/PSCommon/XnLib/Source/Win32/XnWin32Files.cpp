@@ -704,6 +704,7 @@ XN_C_API XnStatus xnOSGetDirName(const XnChar* cpFilePath, XnChar* cpDirName, co
 	}
 
 	pFileName[0] = '\0';
+	xnOSStripDirSep(strFullPath);
 	strcpy(cpDirName, strFullPath);
 
 	return XN_STATUS_OK;
