@@ -120,3 +120,18 @@ XN_C_API XnBool xnOSIsDirSep(XnChar c)
 {
 	return strchr(XN_FILE_DIR_SEPS, c) != NULL;
 }
+
+XN_C_API XnStatus XN_C_DECL xnOSAppendFilePath(XnChar* strDestPath, const XnChar* strPathComponentToAppend, const XnUInt32 nBufferSize)
+{
+	XnStatus rc;
+	if (xnOSIsAbsoluteFilePath(strPathComponentToAppend)) {
+		// If the path to append is absolute, use it entirely.
+		XN_VALIDATE_STR_COPY(strDestPath, strPathComponentToAppend, nBufferSize, rc);
+	} else {
+		// If the path to append is relative, append it after applyling the separator as needed.
+		xnOSStripDirSep(strDestPath);
+		XN_VALIDATE_STR_APPEND(strDestPath, XN_FILE_DIR_SEP, nBufferSize, rc);
+		XN_VALIDATE_STR_APPEND(strDestPath, strPathComponentToAppend, nBufferSize, rc);
+	}
+	return XN_STATUS_OK;
+}

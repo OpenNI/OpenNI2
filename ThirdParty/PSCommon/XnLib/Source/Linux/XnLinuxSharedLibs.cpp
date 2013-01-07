@@ -81,3 +81,12 @@ XN_C_API XnStatus xnOSGetProcAddress(const XN_LIB_HANDLE LibHandle, const XnChar
 	// All is good...
 	return (XN_STATUS_OK);
 }
+
+// Need review: NOT IMPLEMENTED YET
+XN_C_API XnStatus xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strModulePath)
+{
+	// PLEASE IMPLEMENT. Probably you can use dladdr() function.
+	// Here's a dummy implementation that should not break existing things at least.
+	strcpy(strModulePath, "./dummy");
+	return XN_STATUS_OK;
+}

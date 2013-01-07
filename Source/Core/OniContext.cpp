@@ -22,13 +22,13 @@
 #include "OniStreamFrameHolder.h"
 #include <XnLog.h>
 
-static const char* ONI_CONFIGURATION_FILE = XN_FILE_LOCAL_DIR "OpenNI.ini";
+static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
 #if (XN_PLATFORM == XN_PLATFORM_WIN32) && (_M_X64)
 static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH64";
 #else
 static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH";
 #endif
-static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = XN_FILE_LOCAL_DIR "OpenNI2" XN_FILE_DIR_SEP "Drivers";
+static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
@@ -44,6 +44,9 @@ Context::~Context()
 	s_valid = FALSE;
 }
 
+// Dummy function used only for taking its address for the sake of xnOSGetModulePathForProcAddress.
+static void dummyFunctionToTakeAddress() {}
+
 OniStatus Context::initialize()
 {
 	XnBool repositoryOverridden = FALSE;
@@ -58,6 +61,21 @@ OniStatus Context::initialize()
 
 	XnStatus rc;
 
+	XnChar modulePath[XN_FILE_MAX_PATH];
+	rc = xnOSGetModulePathForProcAddress(&dummyFunctionToTakeAddress, modulePath);
+	if (rc != XN_STATUS_OK) {
+		m_errorLogger.Append("Couldn't get the OpenNI shared library module's path: %s", xnGetStatusString(rc));
+		return OniStatusFromXnStatus(rc);
+	}
+
+	XnChar baseDir[XN_FILE_MAX_PATH];
+	rc = xnOSGetDirName(modulePath, baseDir, XN_FILE_MAX_PATH);
+	if (rc != XN_STATUS_OK) {
+		// Very unlikely to happen, but just in case.
+		m_errorLogger.Append("Couldn't get the OpenNI shared library module's directory: %s", xnGetStatusString(rc));
+		return OniStatusFromXnStatus(rc);
+	}
+
 	rc = m_newFrameAvailableEvent.Create(FALSE);
 	if (rc != XN_STATUS_OK)
 	{
@@ -69,68 +87,116 @@ OniStatus Context::initialize()
 
 	// Read configuration file
 
+	XnChar oniConfigurationFile[XN_FILE_MAX_PATH];
 	XnBool configurationFileExists = FALSE;
-	rc = xnOSDoesFileExist(ONI_CONFIGURATION_FILE, &configurationFileExists);
+
+	// Need review:
+	// I (Tomoto) think it is not necessary to search the current directory for OpenNI.ini
+	// because it could be counter-intuitive rather than beneficial that the current directory
+	// might affect on the OpenNI behavior.
+	// I left it only for the backward compatibility, but probably we'd better remove it.
+
+	// Check the current directory first.
+	xnOSStrCopy(oniConfigurationFile, XN_FILE_LOCAL_DIR, XN_FILE_MAX_PATH);
+	xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+	xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
+
+	// Check the module directory next.
+	if (!configurationFileExists) {
+		xnOSStrCopy(oniConfigurationFile, baseDir, XN_FILE_MAX_PATH);
+		rc = xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+		if (rc == XN_STATUS_OK) {
+			xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
+		}
+	}
+
 	if (configurationFileExists)
 	{
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
-		if (rc != XN_STATUS_OK)
-		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
-		}
+		// First, we should process the log related configuration as early as possible.
 
 		XnInt32 nValue;
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "Verbosity", &nValue);
+		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "Verbosity", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nValue);
 		}
 
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToConsole", &nValue);
+		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "LogToConsole", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetConsoleOutput(nValue == 1);
 		}
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToFile", &nValue);
+		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "LogToFile", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetFileOutput(nValue == 1);
 		}
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
+
+		// Then, process the other device configurations.
+
+		rc = xnOSReadStringFromINI(oniConfigurationFile, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
+		if (rc != XN_STATUS_OK)
+		{
+			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
+		}
+
+		rc = xnOSReadStringFromINI(oniConfigurationFile, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
 		if (rc == XN_STATUS_OK)
 		{
 			repositoryOverridden = TRUE;
 		}
+
+		xnLogVerbose(XN_LOG_MASK_ALL, "Configuration has been read from '%s'", oniConfigurationFile);
 	}
 	else
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", oniConfigurationFile);
 	}
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
 
-	// Use path specified in ini file
+	XnChar driverPath[XN_FILE_MAX_PATH];
+
+	// Use driver path specified in ini file
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", ONI_CONFIGURATION_FILE);
-		rc = loadLibraries(repositoryFromINI);
+		// Resolve the path based on the module's directory.
+		xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
+		rc = xnOSAppendFilePath(driverPath, repositoryFromINI, XN_FILE_MAX_PATH);
+		if (rc != XN_STATUS_OK) {
+			m_errorLogger.Append("The specified driver path '%s' in the configuration file '%s' makes the path too long", repositoryFromINI, oniConfigurationFile);
+			return OniStatusFromXnStatus(rc);
+		}
+		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", driverPath, oniConfigurationFile);
+		rc = loadLibraries(driverPath);
 		return OniStatusFromXnStatus(rc);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", ONI_DEFAULT_DRIVERS_REPOSITORY);
-	// Use default path
-	rc = loadLibraries(ONI_DEFAULT_DRIVERS_REPOSITORY);
+	// Use default driver path, resolved based on the module's directory
+	xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
+	rc = xnOSAppendFilePath(driverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
+	if (rc != XN_STATUS_OK) {
+		m_errorLogger.Append("The driver path is too long");
+		return OniStatusFromXnStatus(rc);
+	}
+
+	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", driverPath);
+	rc = loadLibraries(driverPath);
 	if (rc != XN_STATUS_OK)
 	{
-		// Can't find through default - try environment variable
-		xnLogVerbose(XN_LOG_MASK_ALL, "Can't load drivers from default directory '%s'.", ONI_DEFAULT_DRIVERS_REPOSITORY);
+		// Need review:
+		// I (Tomoto) think it is not necessary to search the drivers based on the environment variable.
+		// It could be just confusing by introducing the inconsistency between OpenNI DLL and drivers.
+		// I left it only for the backward compatibility, but probably we'd better remove it.
 
-		char dirName[XN_FILE_MAX_PATH];
-		XnStatus envrc = xnOSGetEnvironmentVariable(ONI_ENV_VAR_DRIVERS_REPOSITORY, dirName, XN_FILE_MAX_PATH);
+		// Can't find through default - try environment variable
+		xnLogVerbose(XN_LOG_MASK_ALL, "Can't load drivers from default directory '%s'.", driverPath);
+
+		XnStatus envrc = xnOSGetEnvironmentVariable(ONI_ENV_VAR_DRIVERS_REPOSITORY, driverPath, XN_FILE_MAX_PATH);
 		if (envrc == XN_STATUS_OK)
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured by environment variable '%s'", dirName, ONI_ENV_VAR_DRIVERS_REPOSITORY);
-			rc = loadLibraries(dirName);
+			xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured by environment variable '%s'", driverPath, ONI_ENV_VAR_DRIVERS_REPOSITORY);
+			rc = loadLibraries(driverPath);
 		}
 	}
 

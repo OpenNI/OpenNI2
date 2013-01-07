@@ -82,3 +82,19 @@ XN_C_API XnStatus xnOSGetProcAddress(const XN_LIB_HANDLE LibHandle, const XnChar
 	// All is good...
 	return (XN_STATUS_OK);
 }
+
+XN_C_API XnStatus xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strModulePath)
+{
+	HMODULE hModule;
+	BOOL rc = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCSTR)procAddr, &hModule);
+	if (!rc) {
+		return XN_STATUS_ERROR;
+	}
+
+	DWORD len = GetModuleFileName(hModule, strModulePath, XN_FILE_MAX_PATH);
+	if (len == 0) {
+		return XN_STATUS_ERROR;
+	}
+
+	return XN_STATUS_OK;
+}
