@@ -746,8 +746,8 @@ public:
 	}
 
 	/**
-	Adds a new Listener to recieve this VideoStream onNewFrame event.  See @ref VideoStream::NewFrameListener for
-	more information on implementing an event driven frame reading architecture.
+	Adds a new Listener to receive this VideoStream onNewFrame event.  See @ref VideoStream::NewFrameListener for
+	more information on implementing an event driven frame reading architecture. An instance of a listener can be added to only one source.
 
 	@param [in] pListener Pointer to a @ref VideoStream::NewFrameListener object (or a derivative) that will respond to this event.
 	@returns Status code indicating success or failure of the operation.
