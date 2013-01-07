@@ -33,9 +33,6 @@
 #		if _MSC_VER < 1300
 #			error OpenNI Platform Abstraction Layer - Win32 - Microsoft Visual Studio version below 2003 (7.0) are not supported!
 #		endif
-#		if _MSC_VER > 1600
-#			error OpenNI Platform Abstraction Layer - Win32 - Microsoft Visual Studio version above 2010 (10.0) are not supported!
-#		endif
 #	endif
 #	include "Win32/OniPlatformWin32.h"
 #elif defined (ANDROID) && defined (__arm__)
