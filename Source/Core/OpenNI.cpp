@@ -275,6 +275,14 @@ void ONI_CALLBACK_TYPE OniNewFrameTranslationHandler(void* pCookie)
 ONI_C_API OniStatus oniStreamRegisterNewFrameCallback(OniStreamHandle stream, OniNewFrameCallback handler, void* pCookie, OniCallbackHandle* pHandle)
 {
 	g_Context.clearErrorLogger();
+
+	if (*pHandle != NULL)
+	{
+		// Already registered to something
+		g_Context.addToLogger("Can't register same listener instance to multiple events");
+		return ONI_STATUS_ERROR;
+	}
+
 	OniNewFrameCookie* pNewFrameCookie = XN_NEW(OniNewFrameCookie);
 	XN_VALIDATE_PTR(pNewFrameCookie, ONI_STATUS_ERROR);
 

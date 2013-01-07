@@ -758,10 +758,6 @@ public:
 		{
 			return STATUS_ERROR;
 		}
-		if (pListener->m_callbackHandle != NULL)
-		{
-			return STATUS_ERROR;
-		}
 
 		return (Status)oniStreamRegisterNewFrameCallback(m_stream, pListener->callback, pListener, &pListener->m_callbackHandle);
 	}

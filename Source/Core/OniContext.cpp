@@ -949,4 +949,12 @@ void Context::clearErrorLogger()
 	m_errorLogger.Clear();
 }
 
+void Context::addToLogger(const XnChar* cpFormat, ...)
+{
+	va_list args;
+	va_start(args, cpFormat);
+	m_errorLogger.AppendV(cpFormat, args);
+	va_end(args);
+}
+
 ONI_NAMESPACE_IMPLEMENTATION_END
