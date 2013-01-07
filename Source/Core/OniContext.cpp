@@ -23,11 +23,6 @@
 #include <XnLog.h>
 
 static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
-#if (XN_PLATFORM == XN_PLATFORM_WIN32) && (_M_X64)
-static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH64";
-#else
-static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH";
-#endif
 static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
@@ -90,24 +85,11 @@ OniStatus Context::initialize()
 	XnChar oniConfigurationFile[XN_FILE_MAX_PATH];
 	XnBool configurationFileExists = FALSE;
 
-	// Need review:
-	// I (Tomoto) think it is not necessary to search the current directory for OpenNI.ini
-	// because it could be counter-intuitive rather than beneficial that the current directory
-	// might affect on the OpenNI behavior.
-	// I left it only for the backward compatibility, but probably we'd better remove it.
-
-	// Check the current directory first.
-	xnOSStrCopy(oniConfigurationFile, XN_FILE_LOCAL_DIR, XN_FILE_MAX_PATH);
-	xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
-	xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
-
-	// Check the module directory next.
-	if (!configurationFileExists) {
-		xnOSStrCopy(oniConfigurationFile, baseDir, XN_FILE_MAX_PATH);
-		rc = xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
-		if (rc == XN_STATUS_OK) {
-			xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
-		}
+	// Search the module directory for OpenNI.ini.
+	xnOSStrCopy(oniConfigurationFile, baseDir, XN_FILE_MAX_PATH);
+	rc = xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+	if (rc == XN_STATUS_OK) {
+		xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
 	}
 
 	if (configurationFileExists)
@@ -155,50 +137,26 @@ OniStatus Context::initialize()
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
 
+	// Resolve the drive path based on the module's directory.
 	XnChar driverPath[XN_FILE_MAX_PATH];
+	xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
 
-	// Use driver path specified in ini file
 	if (repositoryOverridden)
 	{
-		// Resolve the path based on the module's directory.
-		xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, oniConfigurationFile);
 		rc = xnOSAppendFilePath(driverPath, repositoryFromINI, XN_FILE_MAX_PATH);
-		if (rc != XN_STATUS_OK) {
-			m_errorLogger.Append("The specified driver path '%s' in the configuration file '%s' makes the path too long", repositoryFromINI, oniConfigurationFile);
-			return OniStatusFromXnStatus(rc);
-		}
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", driverPath, oniConfigurationFile);
-		rc = loadLibraries(driverPath);
-		return OniStatusFromXnStatus(rc);
+	} else {
+		rc = xnOSAppendFilePath(driverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
 	}
 
-	// Use default driver path, resolved based on the module's directory
-	xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
-	rc = xnOSAppendFilePath(driverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
-	if (rc != XN_STATUS_OK) {
-		m_errorLogger.Append("The driver path is too long");
+	if (rc != XN_STATUS_OK)
+	{
+		m_errorLogger.Append("The driver path gets too long");
 		return OniStatusFromXnStatus(rc);
 	}
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", driverPath);
 	rc = loadLibraries(driverPath);
-	if (rc != XN_STATUS_OK)
-	{
-		// Need review:
-		// I (Tomoto) think it is not necessary to search the drivers based on the environment variable.
-		// It could be just confusing by introducing the inconsistency between OpenNI DLL and drivers.
-		// I left it only for the backward compatibility, but probably we'd better remove it.
-
-		// Can't find through default - try environment variable
-		xnLogVerbose(XN_LOG_MASK_ALL, "Can't load drivers from default directory '%s'.", driverPath);
-
-		XnStatus envrc = xnOSGetEnvironmentVariable(ONI_ENV_VAR_DRIVERS_REPOSITORY, driverPath, XN_FILE_MAX_PATH);
-		if (envrc == XN_STATUS_OK)
-		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured by environment variable '%s'", driverPath, ONI_ENV_VAR_DRIVERS_REPOSITORY);
-			rc = loadLibraries(driverPath);
-		}
-	}
 
 	if (rc == XN_STATUS_OK)
 	{
