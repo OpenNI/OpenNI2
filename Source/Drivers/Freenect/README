@@ -1,0 +1,53 @@
+FreenectDriver is a translation layer to libfreenect implemented as an OpenNI2 driver.
+It allows use of Kinect hardware as supported by libfreenect.
+It is currently capable of providing depth and video streams at 640x480 @ 30 fps.
+Copyright information appears in FreenectDriver.h
+The Apache 2.0 license is available in the root of this project.
+
+
+	dependencies:
+libfreenect                  - https://github.com/OpenKinect/libfreenect
+libfreenect with K4W support - https://github.com/zarvox/libfreenect/tree/k4w-wip
+
+	build:
+make USE_FREENECT=1
+
+
+	structure:
+This module is modeled heavily on TestDevice.cpp and Drivers/Kinect/
+It ties together the C++ interfaces of OpenNI2 and libfreenect using multiple inheritance.
+
+FreenectDriver inherits publically from DriverBase and privately from Freenect::Freenect.
+A custom libfreenect.hpp allows protected access to the Freenect context, so that FreenectDriver can call the Freenect's C API.
+As a DriverBase, FreenectDriver manages devices and sets up device state callbacks.
+
+FreenectDeviceNI inherits publically from DeviceBase and Freenect::FreenectDevice.
+Because of this, it can be built by Freenect::Freenect::createDevice() and it can define FreenectDevice's depth and video callbacks.
+Those callbacks trigger acquireFrame() in FreenectStream.
+
+FreenectStream is a virtual base class inheriting from StreamBase.
+It does generic frame setup in acquireFrame() and then calls pure virtual buildFrame() to let derived classes finish the frame.
+It also provides the base skeleton for setting and getting properties, which cascades down the inheritance tree.
+
+FreenectVideoStream is another virtual base that extends FreenectStream to be specific to visual data.
+
+FreenectDepthStream and FreenectColorStream are nearly identical in definition and implementation, both inheriting from FreenectVideoStream.
+They differ mostly in the formats they use to process data and the video modes they support.
+These two implementations offer a system to store and report supported video modes.
+To implement a new mode, simply add it to getSupportedVideoModes() and modify populateFrame() if necessary.
+
+
+
+	TODO:
+FreenectIRStream
+polish and publish Gentoo ebuilds
+acquire and test with original Kinect (within 2 weeks) - please report issues!
+support more FREENECT_RESOLUTION and FREENECT_VIDEO
+allow toggling image registration
+PROPER LOGGING!
+provide more OniVideoMode and OniStreamProperty
+improve K4W support in libfreenect
+implement interesting derived functions
+tilt motor support
+OSX support - please hack!
+audio stream

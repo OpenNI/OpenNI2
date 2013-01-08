@@ -11,6 +11,8 @@
 # To force CLR projects use:
 #   make FORCE_BUILD_CLR=1
 #
+# To enable the beta FreenectDriver that uses libfreenect for Kinect support:
+# 	make USE_FREENECT=1
 #############################################################################
 
 include ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
@@ -20,9 +22,14 @@ XNLIB  = ThirdParty/PSCommon/XnLib/Source
 
 # list all drivers
 ALL_DRIVERS = \
-	Source/Drivers/DummyDevice   \
+	Source/Drivers/DummyDevice \
 	Source/Drivers/PS1080 \
 	Source/Drivers/OniFile
+	
+ifeq "$(USE_FREENECT)" "1"
+	ALL_DRIVERS += \
+		Source/Drivers/Freenect
+endif
 
 # list all tools
 ALL_TOOLS = \
@@ -41,7 +48,7 @@ CORE_SAMPLES = \
 	Samples/EventBasedRead \
 	Samples/MultipleStreamRead \
 	Samples/MWClosestPoint \
-	Samples/MWClosestPointApp 
+	Samples/MWClosestPointApp
 	
 ifeq "$(GLUT_SUPPORTED)" "1"
 	CORE_SAMPLES += \
@@ -96,6 +103,7 @@ Source/Drivers/DummyDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/RawDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/PS1080:		$(OPENNI) $(XNLIB)
 Source/Drivers/OniFile:		$(OPENNI) $(XNLIB)
+Source/Drivers/Freenect:	$(OPENNI) $(XNLIB)
 
 Source/Tools/NiViewer:		$(OPENNI) $(XNLIB)
 
