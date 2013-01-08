@@ -39,7 +39,6 @@ To implement a new mode, simply add it to getSupportedVideoModes() and modify po
 
 
 	TODO:
-mirrored mode support
 FreenectIRStream
 polish and publish Gentoo ebuilds
 acquire and test with original Kinect (within 2 weeks) - please report issues!

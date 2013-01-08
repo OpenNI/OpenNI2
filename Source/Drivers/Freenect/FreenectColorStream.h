@@ -34,7 +34,7 @@ private:
 	}
 
 public:
-	FreenectColorStream(Freenect::FreenectDevice* pDevice) : FreenectVideoStream(pDevice) { setVideoMode(default_video_mode); }
+	FreenectColorStream(Freenect::FreenectDevice* pDevice) : FreenectVideoStream(pDevice) { mirroring = false; setVideoMode(default_video_mode); }
 	~FreenectColorStream() { }
 	
 	static OniSensorInfo getSensorInfo()

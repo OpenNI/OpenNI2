@@ -16,18 +16,34 @@ FreenectDepthStream::FreenectDepthModeMap FreenectDepthStream::getSupportedVideo
 void FreenectDepthStream::populateFrame(void* data, OniDriverFrame* pFrame) const
 {	
 	pFrame->frame.sensorType = sensor_type;
-	pFrame->frame.stride = video_mode.resolutionX*sizeof(OniDepthPixel);
+	pFrame->frame.stride = video_mode.resolutionX*sizeof(uint16_t);
 	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
 	pFrame->frame.croppingEnabled = FALSE;	
+	pFrame->frame.dataSize = device->getDepthBufferSize();
+	pFrame->frame.data = xnOSMallocAligned(sizeof(uint16_t)*pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
+	if (pFrame->frame.data == NULL)
+	{
+		XN_ASSERT(FALSE);
+		return;
+	}
+	
 	// copy stream buffer from freenect
-	uint8_t* _data = static_cast<uint8_t*>(data);
-	uint8_t* frame_data = static_cast<uint8_t*>(pFrame->frame.data);
-	//if (mirroring)
-	//	std::reverse_copy(_data, _data+pFrame->frame.dataSize, frame_data);
-	//else
+	uint16_t* _data = static_cast<uint16_t*>(data);
+	uint16_t* frame_data = static_cast<uint16_t*>(pFrame->frame.data);
+	if (mirroring)
+	{
+		for (unsigned int i = 0; i < pFrame->frame.dataSize; i++)
+		{
+			// find corresponding mirrored pixel
+			unsigned int row = i / video_mode.resolutionX;
+			unsigned int col = video_mode.resolutionX - (i % video_mode.resolutionX);
+			unsigned int target = (row * video_mode.resolutionX + col);
+			// copy it to this pixel
+			frame_data[i] = _data[target];
+		}
+	}
+	else
 		std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
-
-	//printf("size of frame data = %d\n", pFrame->frame.dataSize);
 }
 
 // for StreamBase

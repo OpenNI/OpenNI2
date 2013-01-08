@@ -24,27 +24,42 @@ void FreenectColorStream::populateFrame(void* data, OniDriverFrame* pFrame) cons
 	pFrame->frame.sensorType = sensor_type;
 	pFrame->frame.stride = video_mode.resolutionX*3;
 	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
-	pFrame->frame.croppingEnabled = FALSE;	
-	// copy stream buffer from freenect
-	unsigned char* _data = static_cast<unsigned char*>(data);
-	unsigned char* frame_data = static_cast<unsigned char*>(pFrame->frame.data);
-	if (mirroring)
+	pFrame->frame.croppingEnabled = FALSE;
+	pFrame->frame.dataSize = device->getVideoBufferSize();
+	pFrame->frame.data = xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
+	if (pFrame->frame.data == NULL)
 	{
-		for (unsigned int i = 0; i < pFrame->frame.dataSize; i += 3)
-		{
-			// find corresponding mirrored pixel
-			int pixel = i / 3;
-			int row = pixel / video_mode.resolutionX;
-			int col = video_mode.resolutionX - (pixel % video_mode.resolutionX);
-			int target = 3 * (row * video_mode.resolutionX + col);
-			// copy it to this pixel
-			frame_data[i] = _data[target];
-			frame_data[i+1] = _data[target+1];
-			frame_data[i+2] = _data[target+2];
-		}
+		XN_ASSERT(FALSE);
+		return;
 	}
-	else
-		std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+	// copy stream buffer from freenect
+	switch (video_mode.pixelFormat)
+	{
+		default:
+			printf("pixelFormat %s not supported by populateFrame\n", video_mode.pixelFormat);
+			return;  
+		case ONI_PIXEL_FORMAT_RGB888:
+			unsigned char* _data = static_cast<unsigned char*>(data);
+			unsigned char* frame_data = static_cast<unsigned char*>(pFrame->frame.data);
+			if (mirroring)
+			{
+				for (unsigned int i = 0; i < pFrame->frame.dataSize; i += 3)
+				{
+					// find corresponding mirrored pixel
+					unsigned int pixel = i / 3;
+					unsigned int row = pixel / video_mode.resolutionX;
+					unsigned int col = video_mode.resolutionX - (pixel % video_mode.resolutionX);
+					unsigned int target = 3 * (row * video_mode.resolutionX + col);
+					// copy it to this pixel
+					frame_data[i] = _data[target];
+					frame_data[i+1] = _data[target+1];
+					frame_data[i+2] = _data[target+2];
+				}
+			}
+			else
+				std::copy(_data, _data+pFrame->frame.dataSize, frame_data);
+			return;
+	}
 }
 
 // for StreamBase

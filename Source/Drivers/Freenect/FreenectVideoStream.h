@@ -35,15 +35,8 @@ private:
 	virtual void buildFrame(void* data, OniDriverFrame* pFrame) const
 	{
 		pFrame->frame.videoMode = video_mode;
-		pFrame->frame.dataSize = device->getVideoBufferSize();
 		pFrame->frame.width = video_mode.resolutionX;
 		pFrame->frame.height = video_mode.resolutionY;
-		pFrame->frame.data = xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-		if (pFrame->frame.data == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return;
-		}
 		populateFrame(data, pFrame);
 	}
 	
