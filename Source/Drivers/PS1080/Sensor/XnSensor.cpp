@@ -576,7 +576,7 @@ XnStatus XnSensor::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 n
 	// If strConfigDir is NULL, tries to resolve the config file based on the driver's directory
 	XnChar baseDir[XN_FILE_MAX_PATH];
 	if (strConfigDir == NULL) {
-		if (xnOSGetModulePathForProcAddress(ResolveGlobalConfigFileName, baseDir) == XN_STATUS_OK &&
+		if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&XnSensor::ResolveGlobalConfigFileName), baseDir) == XN_STATUS_OK &&
 				xnOSGetDirName(baseDir, baseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK) {
 			// Successfully obtained the driver's path
 			strConfigDir = baseDir;

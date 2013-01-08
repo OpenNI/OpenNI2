@@ -57,7 +57,7 @@ OniStatus Context::initialize()
 	XnStatus rc;
 
 	XnChar modulePath[XN_FILE_MAX_PATH];
-	rc = xnOSGetModulePathForProcAddress(&dummyFunctionToTakeAddress, modulePath);
+	rc = xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&dummyFunctionToTakeAddress), modulePath);
 	if (rc != XN_STATUS_OK) {
 		m_errorLogger.Append("Couldn't get the OpenNI shared library module's path: %s", xnGetStatusString(rc));
 		return OniStatusFromXnStatus(rc);
