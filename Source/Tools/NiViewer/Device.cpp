@@ -634,7 +634,7 @@ void toggleColorMirror(int)
 
 void toggleIRMirror(int)
 {
-	g_irStream.setMirroringEnabled(g_irStream.getMirroringEnabled());
+	g_irStream.setMirroringEnabled(!g_irStream.getMirroringEnabled());
 }
 
 void toggleImageAutoExposure(int)
