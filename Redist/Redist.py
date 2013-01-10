@@ -360,7 +360,7 @@ class OSWin(OS):
             return True
         return False
     def isIllegalSampleFile(self, file):
-        return file.endswith('.user') or file == 'Makefile'
+        return file.endswith('.user') or file == 'Makefile' or file == 'Android.mk'
     def isIllegalBinFile(self, file):
         return not file.endswith('.exe') and not file.endswith('.dll') and not file.endswith('.pdb') and not file.endswith('.lib') or (not self.config.supplyTools and file == 'XnLib.lib')
     def isIllegalBinDriverFile(self, file):
@@ -552,7 +552,7 @@ class OSLinux(OS):
     def isIllegalBinDriverFile(self, file):
         return not any(file=="lib"+driver+".so" for driver in self.getExportedDrivers())
     def isIllegalSampleFile(self, file):
-        return any(file.endswith(ext) for ext in ['.vcxproj', '.vcxproj.filters'])
+        return any(file.endswith(ext) for ext in ['.vcxproj', '.vcxproj.filters', 'Android.mk'])
     def isIllegalToolFile(self, file):
         return not any(file.startswith(tool) for tool in self.getExportedTools())
     def isIllegalSampleBinFile(self, file):

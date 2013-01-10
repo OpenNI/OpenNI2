@@ -66,8 +66,8 @@ public:
 			Math::IsBetween(point.z, m_topRightFar.z, m_bottomLeftNear.z);
 	}
 
-	Point3D m_bottomLeftNear;
 	Point3D m_topRightFar;
+	Point3D m_bottomLeftNear;
 };
 
 
