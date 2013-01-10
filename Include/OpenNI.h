@@ -139,6 +139,15 @@ private:
 	bool m_owner;
 };
 
+// Forward declaration of all
+class SensorInfo;
+class VideoStream;
+class VideoFrameRef;
+class Device;
+class OpenNI;
+class CameraSettings;
+class PlaybackControl;
+
 /**
 Encapsulates a group of settings for a @ref VideoStream.  Settings stored include
 frame rate, resolution, and pixel format.
@@ -574,9 +583,6 @@ private:
 	OniFrame* m_pFrame; // const!!?
 };
 
-
-class Device;
-
 /**
 The @ref VideoStream object encapsulates a single video stream from a device.  Once created, it is used to start data flow
 from the device, and to read individual frames of data.  This is the central class used to obtain data in OpenNI.  It
@@ -598,8 +604,6 @@ While some device might allow different streams
 from the same sensor to have different configurations, most devices will have a single configuration for the sensor, 
 shared by all streams.
 */
-class CameraSettings;
-
 class VideoStream
 {
 public:
@@ -1121,8 +1125,6 @@ private:
 	SensorInfo m_sensorInfo;
 	CameraSettings* m_pCameraSettings;
 };
-
-class PlaybackControl;
 
 /**
 The Device object abstracts a specific device; either a single hardware device, or a file
