@@ -94,12 +94,9 @@ class OS:
 
     def copyOpenNI(self, where):
         # Copy config content to Redist
-        for f in os.listdir('Config'):
-            p = 'Config/' + f;
-            if os.path.isdir(p):
-                shutil.copytree(p, where+'/'+f);
-            else:
-                shutil.copy(p, where+'/'+f);
+        for r, d, f in os.walk('Config'):
+            for file in f:
+                shutil.copy(r+'/'+file, where)
 
         return
 
