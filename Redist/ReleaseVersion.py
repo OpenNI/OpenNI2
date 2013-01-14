@@ -105,6 +105,10 @@ if plat == 'android':
     outFile = 'Final/' + outputDir + '.tar'
     
     shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
+    
+    # add config files
+    shutil.copy('../Config/OpenNI.ini', outputDir)
+    shutil.copy('../Config/PS1080.ini', outputDir)
 
     print('Creating archive ' + outFile)
 
