@@ -20,6 +20,13 @@ Minimum Requirements:
   - GCC 4.x
 - Some of the sample applications require a graphics card equivalent to: ATI RADEON x1300 or NVIDIA GeForce 7300.
 
+Notes:
+------
+- On Android, only native support (and samples) is currently provided. Please note that as bionic (Android linker) does not
+  support the rpath option, the samples cannot start as is. To solve this, do one of the following:
+  - Copy OpenNI libraries (libOpenNI2.so, libPS1080.so and libOniFile.so) to /system/lib - or -
+  - run `export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH` before starting the native executeable
+
 Change Log:
 -----------
 
