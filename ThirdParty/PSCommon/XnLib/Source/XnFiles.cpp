@@ -118,7 +118,7 @@ XN_C_API XnStatus xnOSStripDirSep(XnChar* strDirName)
 
 XN_C_API XnBool xnOSIsDirSep(XnChar c)
 {
-	return strchr(XN_FILE_DIR_SEPS, c) != NULL;
+	return (c != '\0') && (strchr(XN_FILE_DIR_SEPS, c) != NULL);
 }
 
 XN_C_API XnStatus XN_C_DECL xnOSAppendFilePath(XnChar* strDestPath, const XnChar* strPathComponentToAppend, const XnUInt32 nBufferSize)
