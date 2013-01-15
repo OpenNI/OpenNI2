@@ -1,5 +1,5 @@
-OpenNI 2.1.0 Build 3
-December 31 2012
+OpenNI 2.1.0 Build 4
+January 15 2013
 
 Minimum Requirements:
 ---------------------
@@ -24,7 +24,7 @@ Notes:
 ------
 - On Android, only native support (and samples) is currently provided. Please note that as bionic (Android linker) does not
   support the rpath option, the samples cannot start as is. To solve this, do one of the following:
-  - Copy OpenNI libraries (libOpenNI2.so, libPS1080.so and libOniFile.so) to /system/lib - or -
+  - Copy OpenNI libraries (libOpenNI2.so, libPS1080.so and libOniFile.so) to /system/lib (requires root) - or -
   - run `export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH` before starting the native executeable
 
 Change Log:
@@ -51,6 +51,14 @@ OpenNI 2.1.0:
   - Potential starvation bug fix when application takes much time handling events
   - Log file now closes on shutdown(), and a new one is created on initialize()
   - SimpleRead is now the default project in the VS solution (thanks eranws)
+  - Bug Fix: did not support Visual Studio 2008 and older
+  - Bug Fix: did not support Visual Studio 2012 and newer
+  - Bug Fix: did not support Visual Studio Express (thanks rh-galaxy)
+  - NiViewer Bug Fix: Mirror did not change IR state
+  - Kinect: providing Kinect for Windows PID and VID in the device info struct
+  - ONI files: providing driver name in the device info struct
+  - Bug Fix: ReleaseVersion script did not work on 32-bit machines
+  - Linux Bug Fix: log timestamps did not start from 0.
   
 OpenNI 2.0.0:
   - Brand new API (see documentation)
