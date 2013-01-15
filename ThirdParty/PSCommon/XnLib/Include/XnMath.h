@@ -29,11 +29,7 @@ namespace xnl
 
 	namespace Math
 	{
-		template <class T>
-		XnBool IsZero(T value, T tolerance)
-		{
-			return Abs(value) < tolerance;
-		}
+		
 		inline XnInt32 Abs(XnInt32 i)
 		{
 			return abs(i);
@@ -53,6 +49,11 @@ namespace xnl
 		inline XnDouble Sqrt(XnDouble f)
 		{
 			return sqrt(f);
+		}
+		template <class T>
+		XnBool IsZero(T value, T tolerance)
+		{
+			return Abs(value) < tolerance;
 		}
 		template <class T>
 		T Min(T value1, T value2)
