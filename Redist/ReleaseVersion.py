@@ -118,9 +118,17 @@ if plat == 'android':
         sys.exit(3)
 
 elif platform.system() == 'Windows':
-    import win32con,pywintypes,win32api
+    import win32con,pywintypes,win32api,platform
+    
+    (bits,linkage) = platform.architecture()
+    matchObject = re.search('64',bits)
+    is_64_bit_machine = matchObject is not None
 
-    MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0")
+    if is_64_bit_machine:
+        MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0")
+    else:
+        MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\10.0")
+    
     MSVC_VALUES = [("InstallDir", win32con.REG_SZ)]
     VS_INST_DIR = get_reg_values(MSVC_KEY, MSVC_VALUES)[0]
     PROJECT_SLN = "..\OpenNI.sln"
