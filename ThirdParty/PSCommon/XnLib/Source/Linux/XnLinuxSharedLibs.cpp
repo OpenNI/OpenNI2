@@ -38,7 +38,8 @@ XN_C_API XnStatus xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibH
 	// we need to get the absolute path of this library by dladdr() later.
 	// Note dladdr() seems to return the path specified to dlopen() "as it is".
 	XnChar* strAbsoluteFileName = realpath(cpFileName, NULL);
-	if (strAbsoluteFileName == NULL) {
+	if (strAbsoluteFileName == NULL)
+	{
 		// error
 		xnLogWarning(XN_MASK_OS, "Failed to get absolute path for lib: %s\n", cpFileName);
 		return XN_STATUS_OS_CANT_LOAD_LIB;
@@ -96,7 +97,8 @@ XN_C_API XnStatus xnOSGetProcAddress(const XN_LIB_HANDLE LibHandle, const XnChar
 XN_C_API XnStatus xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strModulePath)
 {
 	Dl_info info;
-	if (!dladdr(procAddr, &info)) {
+	if (!dladdr(procAddr, &info))
+	{
 		xnLogWarning(XN_MASK_OS, "Failed to get the dl info: %s\n", dlerror());
 		return XN_STATUS_ERROR;
 	}

@@ -56,16 +56,18 @@ OniStatus Context::initialize()
 
 	XnStatus rc;
 
-	XnChar modulePath[XN_FILE_MAX_PATH];
-	rc = xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&dummyFunctionToTakeAddress), modulePath);
-	if (rc != XN_STATUS_OK) {
+	XnChar strModulePath[XN_FILE_MAX_PATH];
+	rc = xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&dummyFunctionToTakeAddress), strModulePath);
+	if (rc != XN_STATUS_OK)
+	{
 		m_errorLogger.Append("Couldn't get the OpenNI shared library module's path: %s", xnGetStatusString(rc));
 		return OniStatusFromXnStatus(rc);
 	}
 
-	XnChar baseDir[XN_FILE_MAX_PATH];
-	rc = xnOSGetDirName(modulePath, baseDir, XN_FILE_MAX_PATH);
-	if (rc != XN_STATUS_OK) {
+	XnChar strBaseDir[XN_FILE_MAX_PATH];
+	rc = xnOSGetDirName(strModulePath, strBaseDir, XN_FILE_MAX_PATH);
+	if (rc != XN_STATUS_OK)
+	{
 		// Very unlikely to happen, but just in case.
 		m_errorLogger.Append("Couldn't get the OpenNI shared library module's directory: %s", xnGetStatusString(rc));
 		return OniStatusFromXnStatus(rc);
@@ -82,14 +84,15 @@ OniStatus Context::initialize()
 
 	// Read configuration file
 
-	XnChar oniConfigurationFile[XN_FILE_MAX_PATH];
+	XnChar strOniConfigurationFile[XN_FILE_MAX_PATH];
 	XnBool configurationFileExists = FALSE;
 
 	// Search the module directory for OpenNI.ini.
-	xnOSStrCopy(oniConfigurationFile, baseDir, XN_FILE_MAX_PATH);
-	rc = xnOSAppendFilePath(oniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
-	if (rc == XN_STATUS_OK) {
-		xnOSDoesFileExist(oniConfigurationFile, &configurationFileExists);
+	xnOSStrCopy(strOniConfigurationFile, strBaseDir, XN_FILE_MAX_PATH);
+	rc = xnOSAppendFilePath(strOniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+	if (rc == XN_STATUS_OK)
+	{
+		xnOSDoesFileExist(strOniConfigurationFile, &configurationFileExists);
 	}
 
 	if (configurationFileExists)
@@ -97,18 +100,18 @@ OniStatus Context::initialize()
 		// First, we should process the log related configuration as early as possible.
 
 		XnInt32 nValue;
-		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "Verbosity", &nValue);
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "Verbosity", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nValue);
 		}
 
-		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "LogToConsole", &nValue);
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "LogToConsole", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetConsoleOutput(nValue == 1);
 		}
-		rc = xnOSReadIntFromINI(oniConfigurationFile, "Log", "LogToFile", &nValue);
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "LogToFile", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetFileOutput(nValue == 1);
@@ -116,37 +119,39 @@ OniStatus Context::initialize()
 
 		// Then, process the other device configurations.
 
-		rc = xnOSReadStringFromINI(oniConfigurationFile, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
 		if (rc != XN_STATUS_OK)
 		{
 			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
 		}
 
-		rc = xnOSReadStringFromINI(oniConfigurationFile, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
 		if (rc == XN_STATUS_OK)
 		{
 			repositoryOverridden = TRUE;
 		}
 
-		xnLogVerbose(XN_LOG_MASK_ALL, "Configuration has been read from '%s'", oniConfigurationFile);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Configuration has been read from '%s'", strOniConfigurationFile);
 	}
 	else
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", oniConfigurationFile);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", strOniConfigurationFile);
 	}
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
 
 	// Resolve the drive path based on the module's directory.
-	XnChar driverPath[XN_FILE_MAX_PATH];
-	xnOSStrCopy(driverPath, baseDir, XN_FILE_MAX_PATH);
+	XnChar strDriverPath[XN_FILE_MAX_PATH];
+	xnOSStrCopy(strDriverPath, strBaseDir, XN_FILE_MAX_PATH);
 
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, oniConfigurationFile);
-		rc = xnOSAppendFilePath(driverPath, repositoryFromINI, XN_FILE_MAX_PATH);
-	} else {
-		rc = xnOSAppendFilePath(driverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, strOniConfigurationFile);
+		rc = xnOSAppendFilePath(strDriverPath, repositoryFromINI, XN_FILE_MAX_PATH);
+	}
+	else
+	{
+		rc = xnOSAppendFilePath(strDriverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
 	}
 
 	if (rc != XN_STATUS_OK)
@@ -155,8 +160,8 @@ OniStatus Context::initialize()
 		return OniStatusFromXnStatus(rc);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", driverPath);
-	rc = loadLibraries(driverPath);
+	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", strDriverPath);
+	rc = loadLibraries(strDriverPath);
 
 	if (rc == XN_STATUS_OK)
 	{

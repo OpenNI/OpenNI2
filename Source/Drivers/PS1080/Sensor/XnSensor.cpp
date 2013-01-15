@@ -574,13 +574,17 @@ XnStatus XnSensor::ValidateSensorID(XnChar* csSensorID)
 XnStatus XnSensor::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir)
 {
 	// If strConfigDir is NULL, tries to resolve the config file based on the driver's directory
-	XnChar baseDir[XN_FILE_MAX_PATH];
-	if (strConfigDir == NULL) {
-		if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&XnSensor::ResolveGlobalConfigFileName), baseDir) == XN_STATUS_OK &&
-				xnOSGetDirName(baseDir, baseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK) {
+	XnChar strBaseDir[XN_FILE_MAX_PATH];
+	if (strConfigDir == NULL)
+	{
+		if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&XnSensor::ResolveGlobalConfigFileName), strBaseDir) == XN_STATUS_OK &&
+				xnOSGetDirName(strBaseDir, strBaseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK)
+		{
 			// Successfully obtained the driver's path
-			strConfigDir = baseDir;
-		} else {
+			strConfigDir = strBaseDir;
+		}
+		else
+		{
 			// Something wrong happened. Use the current directory as the fallback.
 			strConfigDir = ".";
 		}

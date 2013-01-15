@@ -87,12 +87,14 @@ XN_C_API XnStatus xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strMod
 {
 	HMODULE hModule;
 	BOOL rc = GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCSTR)procAddr, &hModule);
-	if (!rc) {
+	if (!rc)
+	{
 		return XN_STATUS_ERROR;
 	}
 
 	DWORD len = GetModuleFileName(hModule, strModulePath, XN_FILE_MAX_PATH);
-	if (len == 0) {
+	if (len == 0)
+	{
 		return XN_STATUS_ERROR;
 	}
 

@@ -681,7 +681,6 @@ XN_C_API XnStatus xnOSDoesDirectoryExist(const XnChar* cpDirName, XnBool* pbResu
 	return (XN_STATUS_OK);
 }
 
-// Need review: NOT TESTED YET
 XN_C_API XnBool xnOSIsAbsoluteFilePath(const XnChar* strFilePath)
 {
 	return xnOSIsDirSep(strFilePath[0]);
