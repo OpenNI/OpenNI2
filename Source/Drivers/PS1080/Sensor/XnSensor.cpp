@@ -39,7 +39,7 @@
 #define XN_SENSOR_FRAME_SYNC_MAX_DIFF					3
 #define XN_SENSOR_DEFAULT_CLOSE_STREAMS_ON_SHUTDOWN		TRUE
 #define XN_SENSOR_DEFAULT_HOST_TIMESTAMPS				FALSE
-#define XN_GLOBAL_CONFIG_FILE_NAME						"./PS1080.ini"
+#define XN_GLOBAL_CONFIG_FILE_NAME						"PS1080.ini"
 
 #define FRAME_SYNC_MAX_FRAME_TIME_DIFF					3000
 
@@ -100,7 +100,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 {
 	// reset all data
 	xnOSMemSet(&m_DevicePrivateData, 0, sizeof(XnDevicePrivateData));
-	xnOSStrCopy(m_strGlobalConfigFile, XN_GLOBAL_CONFIG_FILE_NAME, sizeof(m_strGlobalConfigFile));
+	ResolveGlobalConfigFileName(m_strGlobalConfigFile, sizeof(m_strGlobalConfigFile), NULL);
 
 	m_ResetSensorOnStartup.UpdateSetCallbackToDefault();
 	m_LeanInit.UpdateSetCallbackToDefault();
@@ -573,8 +573,26 @@ XnStatus XnSensor::ValidateSensorID(XnChar* csSensorID)
 
 XnStatus XnSensor::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir)
 {
-	XnUInt32 nWritten = 0;
-	return xnOSStrFormat(strConfigFile, nBufSize, &nWritten, "%s%s%s", strConfigDir, XN_FILE_DIR_SEP, XN_GLOBAL_CONFIG_FILE_NAME);
+	// If strConfigDir is NULL, tries to resolve the config file based on the driver's directory
+	XnChar strBaseDir[XN_FILE_MAX_PATH];
+	if (strConfigDir == NULL)
+	{
+		if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&XnSensor::ResolveGlobalConfigFileName), strBaseDir) == XN_STATUS_OK &&
+				xnOSGetDirName(strBaseDir, strBaseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK)
+		{
+			// Successfully obtained the driver's path
+			strConfigDir = strBaseDir;
+		}
+		else
+		{
+			// Something wrong happened. Use the current directory as the fallback.
+			strConfigDir = ".";
+		}
+	}
+
+	XnStatus rc;
+	XN_VALIDATE_STR_COPY(strConfigFile, strConfigDir, nBufSize, rc);
+	return xnOSAppendFilePath(strConfigFile, XN_GLOBAL_CONFIG_FILE_NAME, nBufSize);
 }
 
 XnStatus XnSensor::SetGlobalConfigFile(const XnChar* strConfigFile)
