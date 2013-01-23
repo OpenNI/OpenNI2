@@ -89,7 +89,7 @@ typedef	LPTHREAD_START_ROUTINE XN_THREAD_PROC_PROTO;
 #define	XN_THREAD_PROC DWORD WINAPI
 
 /** The thread return function. */
-#define	XN_THREAD_PROC_RETURN(ret) return(ret)
+#define	XN_THREAD_PROC_RETURN(ret) return((DWORD)ret)
 
 /** The thread passable data pointer type. */ 
 typedef	LPVOID XN_THREAD_PARAM;

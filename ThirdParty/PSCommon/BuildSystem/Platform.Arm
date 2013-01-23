@@ -7,6 +7,8 @@ ifeq "$(CFG)" "Release"
     CFLAGS += -O3 -fno-tree-pre -fno-strict-aliasing
 
     # More optimization flags
-    CFLAGS += -ftree-vectorize -ffast-math -funsafe-math-optimizations -fsingle-precision-constant
+    CFLAGS += -ftree-vectorize -ffast-math -funsafe-math-optimizations #-fsingle-precision-constant
 
+    DEFINES += XN_NEON
+    CFLAGS += -flax-vector-conversions
 endif

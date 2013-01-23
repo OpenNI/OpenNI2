@@ -75,6 +75,7 @@ ONI_C_API OniStatus oniDeviceCreateStream(OniDeviceHandle device, OniSensorType 
 
 ONI_C_API OniStatus oniDeviceEnableDepthColorSync(OniDeviceHandle device);
 ONI_C_API void oniDeviceDisableDepthColorSync(OniDeviceHandle device);
+ONI_C_API OniBool oniDeviceGetDepthColorSyncEnabled(OniDeviceHandle device);
 
 /** Set property in the device. Use the properties listed in OniTypes.h: ONI_DEVICE_PROPERTY_..., or specific ones supplied by the device. */
 ONI_C_API OniStatus oniDeviceSetProperty(OniDeviceHandle device, int propertyId, const void* data, int dataSize);

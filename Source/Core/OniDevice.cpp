@@ -237,6 +237,11 @@ void Device::disableDepthColorSync()
 	m_syncEnabled = FALSE;
 }
 
+OniBool Device::isDepthColorSyncEnabled()
+{
+	return m_syncEnabled;
+}
+
 void ONI_CALLBACK_TYPE Device::stream_PropertyChanged(void* /*deviceHandle*/, int /*propertyId*/, const void* /*data*/, int /*dataSize*/, void* pCookie)
 {
 	Device* pStream = (Device*)pCookie;

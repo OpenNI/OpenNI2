@@ -23,10 +23,6 @@
 
 #include <XnPlatform.h>
 
-#if XN_PLATFORM == XN_PLATFORM_WIN32
-#include "Win32\XnLibWin32.h"
-#endif
-
 #include "XnStatus.h"
 #include "XnStatusCodes.h"
 #include "XnOS.h"

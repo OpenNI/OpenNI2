@@ -186,6 +186,11 @@ ONI_C_API void oniDeviceDisableDepthColorSync(OniDeviceHandle device)
 	g_Context.clearErrorLogger();
 	device->pDevice->disableDepthColorSync();
 }
+ONI_C_API OniBool oniDeviceGetDepthColorSyncEnabled(OniDeviceHandle device)
+{
+	g_Context.clearErrorLogger();
+	return device->pDevice->isDepthColorSyncEnabled();
+}
 
 ONI_C_API OniStatus oniDeviceSetProperty(OniDeviceHandle device, int propertyId, const void* data, int dataSize)
 {

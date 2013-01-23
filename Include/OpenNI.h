@@ -1426,6 +1426,11 @@ public:
 		return rc;
 	}
 
+	bool getDepthColorSyncEnabled()
+	{
+		return oniDeviceGetDepthColorSyncEnabled(m_device) == TRUE;
+	}
+
 	/**
 	Sets a property that takes an arbitrary data type as its input.  It is not expected that
 	application code will need this function frequently, as all commonly used properties have

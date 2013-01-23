@@ -64,6 +64,7 @@ public:
 
 	OniStatus enableDepthColorSync(Context* pContext);
 	void disableDepthColorSync();
+	OniBool isDepthColorSyncEnabled();
 
 	void refreshDepthColorSyncState();
 private:
