@@ -53,7 +53,6 @@ private:
 	SampleViewer(const SampleViewer&);
 	SampleViewer& operator=(SampleViewer&);
 
-	void calculateHistogram(const openni::VideoFrameRef& frame);
 	void displayFrame(const openni::VideoFrameRef& frame);
 	void displayBothFrames();
 

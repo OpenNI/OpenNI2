@@ -285,6 +285,7 @@ void createKeyboardMap()
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
 			registerKey('a', "CMOS Auto Loops", toggleCMOSAutoLoops, 0);
 			registerKey('x', "Close Range", toggleCloseRange, 0);
+			registerKey('i', "Toggle Image Registration", toggleImageRegistration, 0);
  		}
  		endKeyboardGroup();
  		startKeyboardGroup(KEYBOARD_GROUP_CAPTURE);

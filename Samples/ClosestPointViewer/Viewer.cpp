@@ -18,8 +18,15 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#include <GL/glut.h>
 #include "Viewer.h"
+
+#if (ONI_PLATFORM == ONI_PLATFORM_MACOSX)
+        #include <GLUT/glut.h>
+#else
+        #include <GL/glut.h>
+#endif
+
+#include "../Common/OniSampleUtilities.h"
 
 #define GL_WIN_SIZE_X	1280
 #define GL_WIN_SIZE_Y	1024
@@ -129,37 +136,7 @@ void SampleViewer::display()
 
 	if (depthFrame.isValid())
 	{
-		const openni::DepthPixel* pDepth = (const openni::DepthPixel*)depthFrame.getData();
-		// Calculate the accumulative histogram (the yellow display...)
-		memset(m_pDepthHist, 0, MAX_DEPTH*sizeof(float));
-		int restOfRow = depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel) - depthFrame.getWidth();
-		int width = depthFrame.getWidth();
-		int height = depthFrame.getHeight();
-
-		unsigned int nNumberOfPoints = 0;
-		for (int y = 0; y < height; ++y)
-		{
-			for (int x = 0; x < width; ++x, ++pDepth)
-			{
-				if (*pDepth != 0)
-				{
-					m_pDepthHist[*pDepth]++;
-					nNumberOfPoints++;
-				}
-			}
-			pDepth += restOfRow;
-		}
-		for (int nIndex=1; nIndex<MAX_DEPTH; nIndex++)
-		{
-			m_pDepthHist[nIndex] += m_pDepthHist[nIndex-1];
-		}
-		if (nNumberOfPoints)
-		{
-			for (int nIndex=1; nIndex<MAX_DEPTH; nIndex++)
-			{
-				m_pDepthHist[nIndex] = (unsigned int)(256 * (1.0f - (m_pDepthHist[nIndex] / nNumberOfPoints)));
-			}
-		}
+		calculateHistogram(m_pDepthHist, MAX_DEPTH, depthFrame);
 	}
 
 	memset(m_pTexMap, 0, m_nTexMapX*m_nTexMapY*sizeof(openni::RGB888Pixel));

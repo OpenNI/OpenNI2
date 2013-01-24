@@ -471,7 +471,6 @@ XN_C_API void xnLogUnregisterLogWriter(XnLogWriter* pWriter)
 
 	xnl::AutoCSLocker locker(logData.hLock);
 	nRetVal = logData.writers.Remove(pWriter);
-	XN_ASSERT(nRetVal == XN_STATUS_OK);
 
 	logData.anyWriters = !logData.writers.IsEmpty();
 }

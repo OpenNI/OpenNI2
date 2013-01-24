@@ -39,7 +39,7 @@ XnOniDevice::~XnOniDevice()
 	// free the allocated arrays
 	for(int i=0; i < m_numSensors; ++i)
 	{
-		XN_DELETE(m_sensors[i].pSupportedVideoModes);
+		XN_DELETE_ARR(m_sensors[i].pSupportedVideoModes);
 	}
 	m_sensor.Destroy();
 }
@@ -264,6 +264,54 @@ OniStatus XnOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 {
 	switch (propertyId)
 	{
+	case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:
+		{
+			XnVersions &versions = m_sensor.GetDevicePrivateData()->Version;
+			XnUInt32 nCharsWritten = 0;
+			XnStatus rc = xnOSStrFormat((XnChar*)data, *pDataSize, &nCharsWritten, "%d.%d.%d", versions.nMajor, versions.nMinor, versions.nBuild);
+			if (rc != XN_STATUS_OK)
+			{
+				m_driverServices.errorLoggerAppend("Couldn't get firmware version: %s\n", xnGetStatusString(rc));
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+			*pDataSize = nCharsWritten+1;
+
+			break;
+		}
+	case ONI_DEVICE_PROPERTY_HARDWARE_VERSION:
+		{
+			XnVersions &versions = m_sensor.GetDevicePrivateData()->Version;
+			int hwVer = versions.HWVer;
+			if (*pDataSize == sizeof(int))
+			{
+				(*((int*)data)) = hwVer;
+			}
+			else if (*pDataSize == sizeof(short))
+			{
+				(*((short*)data)) = (short)hwVer;
+			}
+			else if (*pDataSize == sizeof(uint64_t))
+			{
+				(*((uint64_t*)data)) = (uint64_t)hwVer;
+			}
+			else
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d or %d or %d\n", *pDataSize, sizeof(short), sizeof(int), sizeof(uint64_t));
+				return ONI_STATUS_ERROR;
+			}
+			break;
+		}
+	case ONI_DEVICE_PROPERTY_SERIAL_NUMBER:
+		{
+			XnStatus rc = m_sensor.DeviceModule()->GetProperty(XN_MODULE_PROPERTY_SERIAL_NUMBER, data, pDataSize);
+			if (rc != XN_STATUS_OK)
+			{
+				m_driverServices.errorLoggerAppend("Couldn't get serial number: %s\n", xnGetStatusString(rc));
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			break;
+		}
 	case ONI_DEVICE_PROPERTY_DRIVER_VERSION:
 		{
 			if (*pDataSize == sizeof(OniVersion))

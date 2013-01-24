@@ -99,23 +99,9 @@ StreamBase* KinectDevice::createStream(OniSensorType sensorType)
 		if (m_pColorStream == NULL)
 		{
 			m_pColorStream = XN_NEW(KinectStreamImpl, m_pNuiSensor, sensorType);
-			pImage = XN_NEW(ColorKinectStream, m_pColorStream);
-		}		
-		else
-		{
-			if (m_pColorStream->getSensorType() != sensorType)
-			{
-				if (!m_pColorStream->isRunning())
-				{
-					m_pColorStream->setSensorType(sensorType);
-					pImage = XN_NEW(ColorKinectStream, m_pColorStream);
-				}
-			}
-			else
-			{
-				pImage = XN_NEW(ColorKinectStream, m_pColorStream);
-			}
-		}
+			
+		}	
+		pImage = XN_NEW(ColorKinectStream, m_pColorStream);
 	}
 	else if (sensorType == ONI_SENSOR_DEPTH )
 	{
@@ -130,23 +116,9 @@ StreamBase* KinectDevice::createStream(OniSensorType sensorType)
 		if (m_pColorStream == NULL)
 		{
 			m_pColorStream = XN_NEW(KinectStreamImpl, m_pNuiSensor, sensorType);
-			pImage = XN_NEW(IRKinectStream, m_pColorStream);
 		}		
-		else
-		{
-			if (m_pColorStream->getSensorType() != sensorType)
-			{
-				if (!m_pColorStream->isRunning())
-				{
-					m_pColorStream->setSensorType(sensorType);
-					pImage = XN_NEW(IRKinectStream, m_pColorStream);
-				}
-			}
-			else
-			{
-				pImage = XN_NEW(IRKinectStream, m_pColorStream);
-			}
-		}
+		pImage = XN_NEW(IRKinectStream, m_pColorStream);
+		
 	}
 	return pImage;
 }
@@ -181,7 +153,3 @@ OniStatus KinectDevice::tryManualTrigger()
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
-void KinectDevice::notifyAllProperties() 
-{ 
-	return; 
-}

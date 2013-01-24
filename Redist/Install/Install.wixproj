@@ -7,7 +7,7 @@
     <ProductVersion>3.5</ProductVersion>
     <ProjectGuid>{baeb9c48-562c-4d56-a6cd-18932265480a}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>OpenNI-Windows-$(Platform)-2.0.0</OutputName>
+    <OutputName>OpenNI-Windows-$(Platform)-2.1.0</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
@@ -179,11 +179,11 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PostBuildEvent>"$(WIX)bin\setupbld.exe" -out "$(TargetName).exe" -msu "!(TargetPath)" -setup "$(ProjectDir)setup.exe" -title "OpenNI setup"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
     <PreBuildEvent>"$(ProjectDir)\..\Redist.py" -platform $(platformName) -compile None -path $(SolutionDir) -output $(ProjectDir)\..\Output_$(PlatformName)
 "$(WIX)\bin\heat" dir "$(ProjectDir)\..\Output_$(PlatformName)" -ag -scom -sfrag -srd -dr INSTALLLOCATION -cg RedistComponentGroup -var var.RedistDir -out "$(ProjectDir)\Fragments\RedistFragments.wxs" -sw5150</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent />
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -21,7 +21,6 @@
 #ifndef _XN_VECTOR3D_H_
 #define _XN_VECTOR3D_H_
 
-#include <iostream>
 #include "XnLib.h"
 #include "XnMath.h"
 
@@ -33,12 +32,6 @@ struct Point3D
 	Point3D(const Point3D& other) : x(other.x), y(other.y), z(other.z) {}
 	Point3D(XnFloat x, XnFloat y, XnFloat z) : x(x), y(y), z(z) {}
 	Point3D& operator=(const Point3D& other) {x = other.x; y = other.y; z = other.z; return *this;}
-
-	friend std::ostream& operator<<(std::ostream& ostr, const Point3D& vector)
-	{
-		ostr << "(" << vector.x << "," << vector.y << "," << vector.z << ")";
-		return ostr;
-	}
 
 	XnFloat x;
 	XnFloat y;

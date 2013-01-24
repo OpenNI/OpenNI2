@@ -26,9 +26,9 @@ import stat
 from datetime import date
 
 VERSION_MAJOR = 2
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 VERSION_MAINTENANCE = 0
-VERSION_BUILD = 29
+VERSION_BUILD = 4
 
 class UpdateVersion:
     def main(self):

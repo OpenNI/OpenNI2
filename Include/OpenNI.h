@@ -139,6 +139,15 @@ private:
 	bool m_owner;
 };
 
+// Forward declaration of all
+class SensorInfo;
+class VideoStream;
+class VideoFrameRef;
+class Device;
+class OpenNI;
+class CameraSettings;
+class PlaybackControl;
+
 /**
 Encapsulates a group of settings for a @ref VideoStream.  Settings stored include
 frame rate, resolution, and pixel format.
@@ -574,9 +583,6 @@ private:
 	OniFrame* m_pFrame; // const!!?
 };
 
-
-class Device;
-
 /**
 The @ref VideoStream object encapsulates a single video stream from a device.  Once created, it is used to start data flow
 from the device, and to read individual frames of data.  This is the central class used to obtain data in OpenNI.  It
@@ -598,56 +604,40 @@ While some device might allow different streams
 from the same sensor to have different configurations, most devices will have a single configuration for the sensor, 
 shared by all streams.
 */
-class CameraSettings;
-
 class VideoStream
 {
 public:
 	/**
-	The @ref VideoStream::Listener class is provided to allow the implementation of event driven frame reading.  To use
+	The @ref VideoStream::NewFrameListener class is provided to allow the implementation of event driven frame reading.  To use
 	it, create a class that inherits from it and implement override the onNewFrame() method.  Then, register
-	your created class with an active @ref VideoStream using the @ref VideoStream::addListener() function.  Once this is done, the
+	your created class with an active @ref VideoStream using the @ref VideoStream::addNewFrameListener() function.  Once this is done, the
 	event handler function you implemented will be called whenever a new frame becomes available. You may call 
 	@ref VideoStream::readFrame() from within the event handler.
 	*/
-	class Listener
+	class NewFrameListener
 	{
 	public:
 		/**
 		Default constructor.
 		*/
-		Listener()
+		NewFrameListener() : m_callbackHandle(NULL)
 		{
-			m_newFrameCallback = newFrame_Callback;
 		}
 
 		/**
 		Derived classes should implement this function to handle new frames.
 		*/
-		virtual void onNewFrame(VideoStream&) {}
+		virtual void onNewFrame(VideoStream&) = 0;
 
 	private:
-		OniNewFrameCallback m_newFrameCallback;
-
 		friend class VideoStream;
-		OniNewFrameCallback getNewFrameCallback()
+
+		static void ONI_CALLBACK_TYPE callback(OniStreamHandle streamHandle, void* pCookie)
 		{
-			return m_newFrameCallback;
-		}
-		OniCallbackHandle getCallbackHandle()
-		{
-			return m_callbackHandle;
-		}
-		void setCallbackHandle(OniCallbackHandle handle)
-		{
-			m_callbackHandle = handle;
-		}
-		static void ONI_CALLBACK_TYPE newFrame_Callback(OniStreamHandle streamHandle, void* pCookie)
-		{
-			Listener* pCallbacks = (Listener*)pCookie;
+			NewFrameListener* pListener = (NewFrameListener*)pCookie;
 			VideoStream stream;
 			stream._setHandle(streamHandle);
-			pCallbacks->onNewFrame(stream);
+			pListener->onNewFrame(stream);
 			stream._setHandle(NULL);
 		}
 		OniCallbackHandle m_callbackHandle;
@@ -760,41 +750,35 @@ public:
 	}
 
 	/**
-	Adds a new Listener to recieve this VideoStream onNewFrame event.  See @ref VideoStream::Listener for
-	more information on implementing an event driven frame reading architecture.
+	Adds a new Listener to receive this VideoStream onNewFrame event.  See @ref VideoStream::NewFrameListener for
+	more information on implementing an event driven frame reading architecture. An instance of a listener can be added to only one source.
 
-	@param [in] pListener Pointer to a @ref VideoStream::Listener object (or a derivative) that will respond to this event.
+	@param [in] pListener Pointer to a @ref VideoStream::NewFrameListener object (or a derivative) that will respond to this event.
 	@returns Status code indicating success or failure of the operation.
 	*/
-	Status addListener(Listener* pListener)
+	Status addNewFrameListener(NewFrameListener* pListener)
 	{
 		if (!isValid())
 		{
 			return STATUS_ERROR;
 		}
 
-		OniCallbackHandle handle;
-		Status rc = (Status)oniStreamRegisterNewFrameCallback(m_stream, pListener->getNewFrameCallback(), pListener, &handle);
-		if (rc == STATUS_OK)
-		{
-			pListener->setCallbackHandle(handle);
-		}
-		return rc;
+		return (Status)oniStreamRegisterNewFrameCallback(m_stream, pListener->callback, pListener, &pListener->m_callbackHandle);
 	}
 
 	/**
 	Removes a Listener from this video stream list.  The listener removed will no longer receive new frame events from this stream.
 	@param [in] pListener Pointer to the listener object to be removed.
 	*/
-	void removeListener(Listener* pListener)
+	void removeNewFrameListener(NewFrameListener* pListener)
 	{
 		if (!isValid())
 		{
 			return;
 		}
 
-		oniStreamUnregisterNewFrameCallback(m_stream, pListener->getCallbackHandle());
-		pListener->setCallbackHandle(NULL);
+		oniStreamUnregisterNewFrameCallback(m_stream, pListener->m_callbackHandle);
+		pListener->m_callbackHandle = NULL;
 	}
 
 	/**
@@ -1141,8 +1125,6 @@ private:
 	SensorInfo m_sensorInfo;
 	CameraSettings* m_pCameraSettings;
 };
-
-class PlaybackControl;
 
 /**
 The Device object abstracts a specific device; either a single hardware device, or a file
@@ -1823,46 +1805,32 @@ private:
 class OpenNI
 {
 public:
+
 	/**
-	 * The OpenNI::Listener class provides a means of registering for, and responding to three 
-	 * event types: onDeviceConnected, onDeviceDisconnected, and onDeviceStateChanged.
+	 * The OpenNI::DeviceConnectedListener class provides a means of registering for, and responding to  
+	 * when a device is connected.
 	 *
 	 * onDeviceConnected is called whenever a new device is connected to the system (ie this event
 	 * would be triggered when a new sensor is manually plugged into the host system running the 
 	 * application)
 	 *
-	 * onDeviceDisconnected is called when a device is removed from the system.  Note that once a 
-	 * device is removed, if it was opened by a @ref Device object, that object can no longer be
-	 * used to access the device, even if it was reconnected. Once a device was reconnected, 
-	 * @ref Device::open() should be called again in order to use this device.
-	 *
-	 * onDeviceStateChanged is triggered whenever the state of a connected device is changed.
-	 *
-	 * To use this class, you should write a new class that inherits from it, and override each
-	 * event handler that you wish to act upon.  Once you instantiate your class, use the
-	 * OpenNI::addListener() function to add your listener object to OpenNI's list of listeners.  Your
-	 * handler functions will then be called whenever one of the defined events occurs.  A @ref removeListener()
+	 * To use this class, you should write a new class that inherits from it, and override the
+	 * onDeviceConnected method.  Once you instantiate your class, use the
+	 * OpenNI::addDeviceConnectedListener() function to add your listener object to OpenNI's list of listeners.  Your
+	 * handler function will then be called whenever the event occurs.  A OpenNI::removeDeviceConnectedListener()
 	 * function is also provided, if you want to have your class stop listening to these events for any
 	 * reason.
 	*/
-	class Listener
+	class DeviceConnectedListener
 	{
 	public:
-		Listener()
+		DeviceConnectedListener()
 		{
-			m_deviceCallbacks.deviceConnected = contextListener_DeviceConnected;
-			m_deviceCallbacks.deviceDisconnected = contextListener_DeviceDisconnected;
-			m_deviceCallbacks.deviceStateChanged = contextListener_DeviceStateChanged;
+			m_deviceConnectedCallbacks.deviceConnected = deviceConnectedCallback;
+			m_deviceConnectedCallbacks.deviceDisconnected = NULL;
+			m_deviceConnectedCallbacks.deviceStateChanged = NULL;
+			m_deviceConnectedCallbacksHandle = NULL;
 		}
-
-		/**
-		* Callback function for the onDeviceStateChanged event.  This function will be 
-		* called whenever this event occurs.  When this happens, a pointer to a DeviceInfo
-		* object for the affected device will be supplied, as well as the new DeviceState 
-		* value of that device.
-		*/
-		virtual void onDeviceStateChanged(const DeviceInfo*, DeviceState /*state*/) {}
-		
 		/**
 		* Callback function for the onDeviceConnected event.  This function will be 
 		* called whenever this event occurs.  When this happens, a pointer to the @ref DeviceInfo
@@ -1874,8 +1842,45 @@ public:
 		* If you wish to open the new device as it is connected, simply query the provided DeviceInfo
 		* object to obtain the URI of the device, and pass this URI to the Device.Open() function.
 		*/
-		virtual void onDeviceConnected(const DeviceInfo*) {}
-	
+		virtual void onDeviceConnected(const DeviceInfo*) = 0;
+	private:
+		static void ONI_CALLBACK_TYPE deviceConnectedCallback(const OniDeviceInfo* pInfo, void* pCookie)
+		{
+			DeviceConnectedListener* pListener = (DeviceConnectedListener*)pCookie;
+			pListener->onDeviceConnected(static_cast<const DeviceInfo*>(pInfo));
+		}
+
+ 		friend class OpenNI;
+		OniDeviceCallbacks m_deviceConnectedCallbacks;
+		OniCallbackHandle m_deviceConnectedCallbacksHandle;
+
+	};
+	/**
+	 * The OpenNI::DeviceDisconnectedListener class provides a means of registering for, and responding to  
+	 * when a device is disconnected.
+	 *
+	 * onDeviceDisconnected is called when a device is removed from the system.  Note that once a 
+	 * device is removed, if it was opened by a @ref Device object, that object can no longer be
+	 * used to access the device, even if it was reconnected. Once a device was reconnected, 
+	 * @ref Device::open() should be called again in order to use this device.
+	 *
+	 * To use this class, you should write a new class that inherits from it, and override the
+	 * onDeviceDisconnected method.  Once you instantiate your class, use the
+	 * OpenNI::addDeviceDisconnectedListener() function to add your listener object to OpenNI's list of listeners.  Your
+	 * handler function will then be called whenever the event occurs.  A OpenNI::removeDeviceDisconnectedListener()
+	 * function is also provided, if you want to have your class stop listening to these events for any
+	 * reason.
+	*/
+	class DeviceDisconnectedListener
+	{
+	public:
+		DeviceDisconnectedListener()
+		{
+			m_deviceDisconnectedCallbacks.deviceConnected = NULL;
+			m_deviceDisconnectedCallbacks.deviceDisconnected = deviceDisconnectedCallback;
+			m_deviceDisconnectedCallbacks.deviceStateChanged = NULL;
+			m_deviceDisconnectedCallbacksHandle = NULL;
+		}
 		/**
 		 * Callback function for the onDeviceDisconnected event. This function will be
 		 * called whenever this event occurs.  When this happens, a pointer to the DeviceInfo
@@ -1884,29 +1889,58 @@ public:
 	 	 * used to access the device, even if it was reconnected. Once a device was reconnected, 
 	 	 * @ref Device::open() should be called again in order to use this device.
 		*/
-		virtual void onDeviceDisconnected(const DeviceInfo*) {}
-
+		virtual void onDeviceDisconnected(const DeviceInfo*) = 0;
 	private:
-		static void ONI_CALLBACK_TYPE contextListener_DeviceConnected(const OniDeviceInfo* pInfo, void* pCookie)
+		static void ONI_CALLBACK_TYPE deviceDisconnectedCallback(const OniDeviceInfo* pInfo, void* pCookie)
 		{
-			Listener* pCallbacks = (Listener*)pCookie;
-			pCallbacks->onDeviceConnected(static_cast<const DeviceInfo*>(pInfo));
-		}
-		static void ONI_CALLBACK_TYPE contextListener_DeviceDisconnected(const OniDeviceInfo* pInfo, void* pCookie)
-		{
-			Listener* pCallbacks = (Listener*)pCookie;
-			pCallbacks->onDeviceDisconnected(static_cast<const DeviceInfo*>(pInfo));
-		}
-		static void ONI_CALLBACK_TYPE contextListener_DeviceStateChanged(const OniDeviceInfo* pInfo, OniDeviceState deviceState, void* pCookie)
-		{
-			Listener* pListener = (Listener*)pCookie;
-			pListener->onDeviceStateChanged(static_cast<const DeviceInfo*>(pInfo), (DeviceState)deviceState);
+			DeviceDisconnectedListener* pListener = (DeviceDisconnectedListener*)pCookie;
+			pListener->onDeviceDisconnected(static_cast<const DeviceInfo*>(pInfo));
 		}
 
 		friend class OpenNI;
+		OniDeviceCallbacks m_deviceDisconnectedCallbacks;
+		OniCallbackHandle m_deviceDisconnectedCallbacksHandle;
+	};
+	/**
+	 * The OpenNI::DeviceStateChangedListener class provides a means of registering for, and responding to  
+	 * when a device's state is changed.
+	 *
+	 * onDeviceStateChanged is triggered whenever the state of a connected device is changed.
+	 *
+	 * To use this class, you should write a new class that inherits from it, and override the
+	 * onDeviceStateChanged method.  Once you instantiate your class, use the
+	 * OpenNI::addDeviceStateChangedListener() function to add your listener object to OpenNI's list of listeners.  Your
+	 * handler function will then be called whenever the event occurs.  A OpenNI::removeDeviceStateChangedListener()
+	 * function is also provided, if you want to have your class stop listening to these events for any
+	 * reason.
+	*/
+	class DeviceStateChangedListener
+	{
+	public:
+		DeviceStateChangedListener()
+		{
+			m_deviceStateChangedCallbacks.deviceConnected = NULL;
+			m_deviceStateChangedCallbacks.deviceDisconnected = NULL;
+			m_deviceStateChangedCallbacks.deviceStateChanged = deviceStateChangedCallback;
+			m_deviceStateChangedCallbacksHandle = NULL;
+		}
+		/**
+		* Callback function for the onDeviceStateChanged event.  This function will be 
+		* called whenever this event occurs.  When this happens, a pointer to a DeviceInfo
+		* object for the affected device will be supplied, as well as the new DeviceState 
+		* value of that device.
+		*/
+		virtual void onDeviceStateChanged(const DeviceInfo*, DeviceState) = 0;
+	private:
+		static void ONI_CALLBACK_TYPE deviceStateChangedCallback(const OniDeviceInfo* pInfo, OniDeviceState state, void* pCookie)
+		{
+			DeviceStateChangedListener* pListener = (DeviceStateChangedListener*)pCookie;
+			pListener->onDeviceStateChanged(static_cast<const DeviceInfo*>(pInfo), DeviceState(state));
+		}
 
-		OniDeviceCallbacks m_deviceCallbacks;
-		OniCallbackHandle m_callbackHandle;
+		friend class OpenNI;
+		OniDeviceCallbacks m_deviceStateChangedCallbacks;
+		OniCallbackHandle m_deviceStateChangedCallbacksHandle;
 	};
 
 	/**
@@ -2005,30 +2039,86 @@ public:
 	}
 
 	/**
-	* Add a listener to the list of objects that receive the events generated by @ref OpenNI.  See the 
-	* @ref OpenNI::Listener class for details on utilizing the events provided by OpenNI.
+	* Add a listener to the list of objects that receive the event when a device is connected.  See the 
+	* @ref OpenNI::DeviceConnectedListener class for details on utilizing the events provided by OpenNI.
 	* 
 	* @param pListener Pointer to the Listener to be added to the list
 	* @returns Status code indicating success or failure of this operation.
 	*/
-	static Status addListener(Listener* pListener)
+	static Status addDeviceConnectedListener(DeviceConnectedListener* pListener)
 	{
-		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceCallbacks, pListener, &pListener->m_callbackHandle);
+		if (pListener->m_deviceConnectedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
+		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceConnectedCallbacks, pListener, &pListener->m_deviceConnectedCallbacksHandle);
 	}
-
 	/**
-	* Remove a listener from the list of objects that receive the events generated by @ref OpenNI.  See
-	* the @ref OpenNI::Listener class for details on utilizing the events provided by OpenNI.
+	* Add a listener to the list of objects that receive the event when a device is disconnected.  See the 
+	* @ref OpenNI::DeviceDisconnectedListener class for details on utilizing the events provided by OpenNI.
+	* 
+	* @param pListener Pointer to the Listener to be added to the list
+	* @returns Status code indicating success or failure of this operation.
+	*/
+	static Status addDeviceDisconnectedListener(DeviceDisconnectedListener* pListener)
+	{
+		if (pListener->m_deviceDisconnectedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
+		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceDisconnectedCallbacks, pListener, &pListener->m_deviceDisconnectedCallbacksHandle);
+	}
+	/**
+	* Add a listener to the list of objects that receive the event when a device's state changes.  See the 
+	* @ref OpenNI::DeviceStateChangedListener class for details on utilizing the events provided by OpenNI.
+	* 
+	* @param pListener Pointer to the Listener to be added to the list
+	* @returns Status code indicating success or failure of this operation.
+	*/
+	static Status addDeviceStateChangedListener(DeviceStateChangedListener* pListener)
+	{
+		if (pListener->m_deviceStateChangedCallbacksHandle != NULL)
+		{
+			return STATUS_ERROR;
+		}
+		return (Status)oniRegisterDeviceCallbacks(&pListener->m_deviceStateChangedCallbacks, pListener, &pListener->m_deviceStateChangedCallbacksHandle);
+	}
+	/**
+	* Remove a listener from the list of objects that receive the event when a device is connected.  See
+	* the @ref OpenNI::DeviceConnectedListener class for details on utilizing the events provided by OpenNI.
 	*
 	* @param pListener Pointer to the Listener to be removed from the list
 	* @returns Status code indicating the success or failure of this operation.
 	*/
-	static void removeListener(Listener* pListener)
+	static void removeDeviceConnectedListener(DeviceConnectedListener* pListener)
 	{
-		oniUnregisterDeviceCallbacks(pListener->m_callbackHandle);
-		pListener->m_callbackHandle = NULL;
+		oniUnregisterDeviceCallbacks(pListener->m_deviceConnectedCallbacksHandle);
+		pListener->m_deviceConnectedCallbacksHandle = NULL;
 	}
-
+	/**
+	* Remove a listener from the list of objects that receive the event when a device is disconnected.  See
+	* the @ref OpenNI::DeviceDisconnectedListener class for details on utilizing the events provided by OpenNI.
+	*
+	* @param pListener Pointer to the Listener to be removed from the list
+	* @returns Status code indicating the success or failure of this operation.
+	*/
+	static void removeDeviceDisconnectedListener(DeviceDisconnectedListener* pListener)
+	{
+		oniUnregisterDeviceCallbacks(pListener->m_deviceDisconnectedCallbacksHandle);
+		pListener->m_deviceDisconnectedCallbacksHandle = NULL;
+	}
+	/**
+	* Remove a listener from the list of objects that receive the event when a device's state changes.  See
+	* the @ref OpenNI::DeviceStateChangedListener class for details on utilizing the events provided by OpenNI.
+	*
+	* @param pListener Pointer to the Listener to be removed from the list
+	* @returns Status code indicating the success or failure of this operation.
+	*/
+	static void removeDeviceStateChangedListener(DeviceStateChangedListener* pListener)
+	{
+		oniUnregisterDeviceCallbacks(pListener->m_deviceStateChangedCallbacksHandle);
+		pListener->m_deviceStateChangedCallbacksHandle = NULL;
+	}
 private:
 	OpenNI()
 	{

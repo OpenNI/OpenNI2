@@ -144,7 +144,7 @@ const XnChar* GetHostStateName(HostControlState state)
 
 void SetConnectivityState(XnUSBDevice* pDevice, XnUSBDeviceConnectionState state)
 {
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	pDevice->connectionState = state;
 	if (pDevice->pConnectivityChangedCallback != NULL)
 	{
@@ -157,8 +157,6 @@ void SetConnectivityState(XnUSBDevice* pDevice, XnUSBDeviceConnectionState state
 //---------------------------------------------------------------------------
 static XnStatus buildGadgetFSInterfaceDescriptor(const XnUSBInterfaceDescriptorHolder* pInterface, XnChar*& buf)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	// write interface descriptor
 	WRITE_OBJ_TO_BUF(buf, pInterface->descriptor);
 	
@@ -173,8 +171,6 @@ static XnStatus buildGadgetFSInterfaceDescriptor(const XnUSBInterfaceDescriptorH
 
 static XnStatus buildGadgetFSConfigDescriptor(const XnUSBConfigDescriptorHolder* pConfig, XnChar*& buf)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	struct usb_config_descriptor* pTarget = (struct usb_config_descriptor*)buf;
 
 	// write configuration descriptor
@@ -244,8 +240,6 @@ static int openEndpointFile(struct usb_endpoint_descriptor* pDesc)
 	WRITE_OBJ_TO_BUF(buf, nFormatID);
 	
 	// now we should write the full-speed descriptor. Take high-speed one and reduce speed
-	struct usb_endpoint_descriptor* pFSDesc = (struct usb_endpoint_descriptor*)buf;
-
 	WRITE_TO_BUF(buf, pDesc, USB_DT_ENDPOINT_SIZE);
 	
 	// now write the real one (high-speed)
@@ -448,7 +442,7 @@ static XnBool handleGetStringDescriptor(XnUSBDevice* pDevice, __u16 nMaxLength, 
 		else
 			perror ("write string data");
 	}
-	else if (status != nReplySize)
+	else if (status != (int)nReplySize)
 	{
 		fprintf (stderr, "short string write, %d\n", status);
 	}
@@ -673,7 +667,6 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceInit(const XnUSBDeviceDescriptorHolder* p
 	
 	// build descriptors buffer
 	XnChar bufDescriptors[4096];
-	XnUInt32 nBufSize = 4096;
 	XnChar* buf = bufDescriptors;
 	nRetVal = buildGadgetFSDescriptors(pDescriptors, buf);
 	XN_IS_STATUS_OK(nRetVal);
@@ -795,19 +788,17 @@ XN_C_API XnBool XN_C_DECL xnUSBDeviceIsControlRequestPending(XnUSBDevice* pDevic
 	if (pDevice == NULL)
 		return FALSE;
 
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	return (pDevice->eDeviceControlState == DEVICE_CONTROL_REQUEST_RECEIVED);
 }
 
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceReceiveControlRequest(XnUSBDevice* pDevice, XnUChar* pBuffer, XnUInt32* pnRequestSize)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	XN_VALIDATE_INPUT_PTR(pBuffer);
 	XN_VALIDATE_OUTPUT_PTR(pnRequestSize);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 
 	XnUInt64 nNow;
 	xnOSGetHighResTimeStamp(&nNow);
@@ -837,7 +828,7 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSendControlReply(XnUSBDevice* pDevice, co
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	XN_VALIDATE_INPUT_PTR(pBuffer);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 
 	HostControlState prevHost = pDevice->eHostControlState;
 	DeviceControlState prevDevice = pDevice->eDeviceControlState;
@@ -929,7 +920,7 @@ static XnBool handleVendorControl(XnUSBDevice* pDevice, struct usb_ctrlrequest *
 			return FALSE;
 		}
 
-		XnAutoCSLocker locker(pDevice->hLock);
+		xnl::AutoCSLocker locker(pDevice->hLock);
 		if (pDevice->eDeviceControlState != DEVICE_CONTROL_CLEAR)
 		{
 			xnLogError(XN_MASK_OS, "Got a control request before previous one was replied!");
@@ -974,7 +965,7 @@ static XnBool handleVendorControl(XnUSBDevice* pDevice, struct usb_ctrlrequest *
 	else
 	{
 		// host requests to read.
-		XnAutoCSLocker locker(pDevice->hLock);
+		xnl::AutoCSLocker locker(pDevice->hLock);
 
 		HostControlState prevHost = pDevice->eHostControlState;
 		DeviceControlState prevDevice = pDevice->eDeviceControlState;
@@ -1047,11 +1038,9 @@ static XnBool handleVendorControl(XnUSBDevice* pDevice, struct usb_ctrlrequest *
 
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetNewControlRequestCallback(XnUSBDevice* pDevice, XnUSBDeviceNewControlRequestCallback pFunc, void* pCookie)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	
 	pDevice->pNewControlRequestCallback = pFunc;
 	pDevice->pNewControlRequestCallbackCookie = pCookie;
@@ -1061,11 +1050,9 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetNewControlRequestCallback(XnUSBDevice*
 
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetConnectivityChangedCallback(XnUSBDevice* pDevice, XnUSBDeviceConnectivityChangedCallback pFunc, void* pCookie)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	
-	XnAutoCSLocker locker(pDevice->hLock);
+	xnl::AutoCSLocker locker(pDevice->hLock);
 	
 	pDevice->pConnectivityChangedCallback = pFunc;
 	pDevice->pConnectivityChangedCallbackCookie = pCookie;
@@ -1079,8 +1066,6 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceSetConnectivityChangedCallback(XnUSBDevic
 
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceWriteEndpoint(XnUSBDevice* pDevice, XnUInt8 nEndpointID, const XnUChar* pData, XnUInt32 nDataSize)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 	XN_VALIDATE_INPUT_PTR(pData);
 	
@@ -1145,8 +1130,6 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceWriteEndpoint(XnUSBDevice* pDevice, XnUIn
 
 XN_C_API XnStatus XN_C_DECL xnUSBDeviceResetEndpoint(XnUSBDevice* pDevice, XnUInt8 nEndpointID)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-	
 	XN_VALIDATE_INPUT_PTR(pDevice);
 
 	if ((nEndpointID & 0x7F) >= XN_USB_DEVICE_ENDPOINT_MAX_COUNT)
@@ -1161,6 +1144,8 @@ XN_C_API XnStatus XN_C_DECL xnUSBDeviceResetEndpoint(XnUSBDevice* pDevice, XnUIn
 	aio_cancel(pDevice->endpoints[nIndex].fd, NULL);
 	pDevice->endpoints[nIndex].nQueued = 0;
 	pDevice->endpoints[nIndex].nFirst = 0;
+	
+	return XN_STATUS_OK;
 }
 
 #endif // XN_PLATFORM == XN_PLATFORM_LINUX_ARM

@@ -35,11 +35,24 @@ public:
 	void setSensorType(OniSensorType sensorType);
 	
 	void mainLoop();
+
+	OniStatus setAutoWhiteBalance(BOOL val);
+
+	OniStatus getAutoWhitBalance(BOOL *val);
+
+	OniStatus setAutoExposure(BOOL val);
+
+	OniStatus getAutoExposure(BOOL *val);
+	
+	OniStatus convertDepthToColorCoordinates(oni::driver::StreamBase* colorStream, 
+								int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
+
+	static NUI_IMAGE_RESOLUTION getNuiImagResolution(int resolutionX, int resolutionY);
 	
 private:
 		
 	void setDefaultVideoMode();
-	NUI_IMAGE_RESOLUTION getNuiImagResolution();
+	
 	NUI_IMAGE_TYPE getNuiImageType();
 
 	static XN_THREAD_PROC threadFunc(XN_THREAD_PARAM pThreadParam);

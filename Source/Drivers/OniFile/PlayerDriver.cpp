@@ -36,6 +36,7 @@ namespace {
 
 // A string that stores device vendor name.
 const xnl::String kVendorString("PrimeSense, Ltd.");
+const xnl::String kDeviceName("oni File");
 
 } // namespace
 
@@ -96,6 +97,7 @@ OniStatus PlayerDriver::tryDevice(const char* strUri)
 		xnOSMemSet(pInfo, 0, sizeof(*pInfo));
 		xnOSStrCopy(pInfo->uri,    strUri,               ONI_MAX_STR);
 		xnOSStrCopy(pInfo->vendor, kVendorString.Data(), ONI_MAX_STR);
+		xnOSStrCopy(pInfo->name,   kDeviceName.Data(),   ONI_MAX_STR);
 		deviceConnected(pInfo);
 		return ONI_STATUS_OK;
 	}
@@ -133,6 +135,7 @@ void XN_CALLBACK_TYPE PlayerDriver::EOFReached(void* pCookie, const char *strUri
 	xnOSMemSet(pInfo, 0, sizeof(*pInfo));
 	xnOSStrCopy(pInfo->uri,    strUri,               ONI_MAX_STR);
 	xnOSStrCopy(pInfo->vendor, kVendorString.Data(), ONI_MAX_STR);
+	xnOSStrCopy(pInfo->name,   kDeviceName.Data(),   ONI_MAX_STR);
 
 	pThis->deviceStateChanged(pInfo, ONI_DEVICE_STATE_EOF);
 }

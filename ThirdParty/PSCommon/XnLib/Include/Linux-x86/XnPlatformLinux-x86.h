@@ -34,6 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <float.h>
 
 //---------------------------------------------------------------------------
 // Platform Basic Definition

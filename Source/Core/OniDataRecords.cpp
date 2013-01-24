@@ -430,4 +430,25 @@ OniStatus RecordAssembler::emit_RECORD_INT_PROPERTY(
     return status;
 }
 
+OniStatus RecordAssembler::emit_RECORD_REAL_PROPERTY(
+	XnUInt32    nodeId,
+	XnUInt64    undoRecordPos,
+	const char* propertyName,
+	XnDouble    data)
+{
+	MUST_BE_INITIALIZED(ONI_STATUS_ERROR)
+
+		OniStatus status = emit_RECORD_GENERAL_PROPERTY(
+		nodeId,
+		undoRecordPos,    
+		propertyName,
+		&data,
+		sizeof(data));
+	if (ONI_STATUS_OK == status)
+	{
+		m_header->recordType = RECORD_REAL_PROPERTY;
+	}
+	return status;
+}
+
 ONI_NAMESPACE_IMPLEMENTATION_END

@@ -27,6 +27,10 @@
 // Global Variables
 //---------------------------------------------------------------------------
 XnOSTimer g_xnOSHighResGlobalTimer;
+bool g_xnOSInitialized = false;
+
+XnStatus xnOSTimeInit();
+static XnStatus g_initalizeStatus = xnOSTimeInit();
 
 //---------------------------------------------------------------------------
 // Macros
@@ -112,6 +116,17 @@ XN_C_API XnStatus xnOSStartHighResTimer(XnOSTimer* pTimer)
 	// now make it high-res
 	pTimer->bHighRes = true;
 	
+	return XN_STATUS_OK;
+}
+
+XnStatus xnOSTimeInit()
+{
+	if (!g_xnOSInitialized)
+	{
+		xnOSStartHighResTimer(&g_xnOSHighResGlobalTimer);
+		g_xnOSInitialized = true;
+	}
+
 	return XN_STATUS_OK;
 }
 

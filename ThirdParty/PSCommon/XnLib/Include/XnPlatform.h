@@ -45,9 +45,6 @@
 #if _MSC_VER < 1300
 #error OpenNI Platform Abstraction Layer - Win32 - Microsoft Visual Studio version below 2003 (7.0) are not supported!
 #endif
-#if _MSC_VER > 1600
-#error OpenNI Platform Abstraction Layer - Win32 - Microsoft Visual Studio version above 2010 (10.0) are not supported!
-#endif
 #endif
 #include "Win32/XnPlatformWin32.h"
 #elif defined (ANDROID) && defined (__arm__)
@@ -55,11 +52,11 @@
 #elif (linux && (i386 || __x86_64__))
 #include "Linux-x86/XnPlatformLinux-x86.h"
 #elif (linux && __arm__)
-#include "Linux-x86/XnPlatformLinux-Arm.h"
+#include "Linux-Arm/XnPlatformLinux-Arm.h"
 #elif _ARC
 #include "ARC/XnPlaformARC.h"
 #elif (__APPLE__)
-#include "MacOSX/XnPlatformMacOSX"
+#include "MacOSX/XnPlatformMacOSX.h"
 #else
 #error Xiron Platform Abstraction Layer - Unsupported Platform!
 #endif

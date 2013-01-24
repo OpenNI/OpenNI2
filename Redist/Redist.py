@@ -26,6 +26,7 @@ import subprocess
 import platform
 import argparse
 import stat
+from commands import getoutput as gop
 
 import UpdateVersion
 
@@ -85,7 +86,7 @@ class OS:
         for platform in self.config.getPlatforms():
             # Build
             if self.config.compile != 'None':
-                rc = self.compile("Release", platform.getGeneralPlatformString(), self.config.compile)
+                rc = self.compile("Release", platform.getPlatformString(), self.config.compile)
                 if rc != 0:
                     return rc
             
@@ -155,7 +156,7 @@ class OS:
 
     def getBinDir(self):
         for platform in self.config.getPlatforms():
-            return 'Bin/'+platform.getPlatformString()+'-Release'
+            return 'Bin/'+platform.getBinDirString()+'-Release'
         return ""
     def isBaseDirValid(self, path):
         return False
@@ -359,7 +360,7 @@ class OSWin(OS):
             return True
         return False
     def isIllegalSampleFile(self, file):
-        return file.endswith('.user') or file == 'Makefile'
+        return file.endswith('.user') or file == 'Makefile' or file == 'Android.mk'
     def isIllegalBinFile(self, file):
         return not file.endswith('.exe') and not file.endswith('.dll') and not file.endswith('.pdb') and not file.endswith('.lib') or (not self.config.supplyTools and file == 'XnLib.lib')
     def isIllegalBinDriverFile(self, file):
@@ -395,6 +396,10 @@ class OSLinux(OS):
                     shutil.copy(r+'/'+file, where+'/OpenNI2/Drivers')
 
     def createTools(self):
+        # Arm redist does not provide Tools:
+        if isinstance(self.config.getPlatforms()[0], PlatformArm):
+            return
+
         supplyTools = OS.createTools(self)
 
         # Copy NiViewer required files.
@@ -410,9 +415,9 @@ class OSLinux(OS):
         if not supplyTools:
             return
 
-        #'Bin/'+platform.getPlatformString()+'-Release'
+        #'Bin/'+platform.getBinDirString()+'-Release'
         #os.makedirs(self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
-        shutil.copytree('ThirdParty/PSCommon/XnLib/Bin/'+self.config.getPlatforms()[0].getPlatformString()+'-Release', self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
+        shutil.copytree('ThirdParty/PSCommon/XnLib/Bin/'+self.config.getPlatforms()[0].getBinDirString()+'-Release', self.config.output_dir+'/ThirdParty/PSCommon/XnLib/Bin')
 
     def createSamples(self):
         OS.createSamples(self)
@@ -505,15 +510,30 @@ class OSLinux(OS):
                     os.remove(r+'/'+file)
 
     def compile(self, configuration, platform, compilationMode):
+        def calc_jobs_number():
+            cores = 1
+            
+            try:
+                if isinstance(self, OSMac):
+                    txt = gop('sysctl -n hw.physicalcpu')
+                else:
+                    txt = gop('grep "processor\W:" /proc/cpuinfo | wc -l')
+
+                cores = int(txt)
+            except:
+                pass
+               
+            return str(cores * 2)
+
         # make sure platform is valid (linux compilation can only be done on platform machine's type).
         if self.config.machine == 'x86_64' and platform == 'x86':
             print('Error: Building x86 platform requires 32bit operating system')
             return 1
         outfile = origDir+'/build.'+configuration+'.'+platform+'.txt'
         
-        compilation_cmd = "make -j8 CFG=" + configuration + " > " + outfile + " 2>&1"
+        compilation_cmd = "make -j" + calc_jobs_number() + " CFG=" + configuration + " PLATFORM=" + platform + " > " + outfile + " 2>&1"
         if compilationMode == 'Rebuild':
-            compilation_cmd = "make CFG=" + configuration + " clean > /dev/null && " + compilation_cmd
+            compilation_cmd = "make CFG=" + configuration + " PLATFORM=" + platform + " clean > /dev/null && " + compilation_cmd
         
         print(compilation_cmd)
         rc = os.system(compilation_cmd)
@@ -532,21 +552,23 @@ class OSLinux(OS):
     def isIllegalBinDriverFile(self, file):
         return not any(file=="lib"+driver+".so" for driver in self.getExportedDrivers())
     def isIllegalSampleFile(self, file):
-        return any(file.endswith(ext) for ext in ['.vcxproj', '.vcxproj.filters'])
+        return any(file.endswith(ext) for ext in ['.vcxproj', '.vcxproj.filters', 'Android.mk'])
     def isIllegalToolFile(self, file):
         return not any(file.startswith(tool) for tool in self.getExportedTools())
     def isIllegalSampleBinFile(self, file):
         return not any((file.startswith(sample) or file.startswith('lib'+sample)) for sample in self.getExportedSamples())
 
+class OSMac(OSLinux):
+    def isIllegalBinDriverFile(self, file):
+        return not any(file=="lib"+driver+".dylib" for driver in self.getExportedDrivers())
+
 class Platform:
     def __init__(self):
         print "Bla"
-    def getPlatformString(self):
+    def getBinDirString(self):
         return self.platformString
-    def getGeneralPlatformString(self):
+    def getPlatformString(self):
         return self.generalPlatformString
-    def getBinaryDirectory(self):
-        return self.binDir
     def getBits(self):
         return self.bits
         
@@ -565,6 +587,11 @@ class Platform64(Platform):
         self.generalPlatformString = 'x64'
         self.bits = '64'
 
+class PlatformArm(Platform):
+    def __init__(self):
+        self.platformString = 'Arm'
+        self.generalPlatformString = 'Arm'
+        self.bits = 'arm'
 
 def boolean(string):
     string = string.lower()
@@ -588,7 +615,7 @@ class Config:
         parser = argparse.ArgumentParser(prog=sys.argv[0])
         parser.add_argument('-path', default='..')
         parser.add_argument('-output', default='')
-        parser.add_argument('-platform', default='32', choices=['32', '64', 'both', 'x86', 'x64'])
+        parser.add_argument('-platform', default='32', choices=['32', '64', 'both', 'x86', 'x64', 'arm'])
         parser.add_argument('-compile', default='Rebuild', choices=['Rebuild', 'Build', 'None'])
         parser.add_argument('-docs', default = True, const=True, nargs='?', type=boolean)
         parser.add_argument('-tools', default = False, const=True, nargs='?', type=boolean)
@@ -620,6 +647,8 @@ class Config:
             platforms.append(Platform32())
         elif self.bits == '64':
             platforms.append(Platform64())
+        elif self.bits == 'arm':
+            platforms.append(PlatformArm())
         elif self.bits == 'both':
             platforms.append(Platform32())
             platforms.append(Platform64())
@@ -641,6 +670,8 @@ def Redist(myConfig):
         myOS = OSWin()
     elif plat == 'Linux':
         myOS = OSLinux()
+    elif plat == 'Darwin':
+         myOS = OSMac()
     else:
         print "Unsupported OS: " + platform.system()
         sys.exit(1)

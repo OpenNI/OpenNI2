@@ -62,7 +62,9 @@ public:
 	*/
 	inline void UnsafeWrite(const XnUChar* pData, XnUInt32 nDataSize)
 	{
-		xnOSMemCopy(m_pData + m_nSize, pData, nDataSize);
+		// Some of my callers copy data from within my buffer after Reset()ing.
+		// So safely "slide" the to-be-copied chunk back to the buffer's beginning.
+		xnOSMemMove(m_pData + m_nSize, pData, nDataSize);
 		m_nSize += nDataSize;
 	}
 

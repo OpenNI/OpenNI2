@@ -205,16 +205,13 @@ void captureBrowse(int)
 
 void captureStart(int nDelay)
 {
+    captureBrowse(0);
+
+    // On some platforms a user can cancel capturing. Whenever he cancels
+    // capturing, the gs_filePath[0] remains empty.
     if ('\0' == g_Capture.csFileName[0])
     {
-        captureBrowse(0);
-
-        // On some platforms a user can cancel capturing. Whenever he cancels
-        // capturing, the gs_filePath[0] remains empty.
-        if ('\0' == g_Capture.csFileName[0])
-        {
-            return;
-        }
+        return;
     }
 
     openni::Status rc = g_Capture.recorder.create(g_Capture.csFileName);

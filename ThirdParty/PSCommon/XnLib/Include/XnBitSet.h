@@ -127,7 +127,7 @@ public:
 	}
 	
 private:
-	XnArray<XnUInt32> m_array;
+	xnl::Array<XnUInt32> m_array;
 	XnUInt32 m_nSize;
 };
 
