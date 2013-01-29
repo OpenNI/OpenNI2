@@ -16,7 +16,7 @@
   Path to the resources directory. resources don't really need to be included
   in the project structure but I like to include them for for clarity 
   -->
-  <?define ResourcesDir="$(var.SolutionDir)\Redist\Install\Resources" ?>
+  <?define ResourcesDir="$(var.SolutionDir)\Packaging\Install\Resources" ?>
 
   <?define MinOpenNIVersion="1.0.0"?>
 

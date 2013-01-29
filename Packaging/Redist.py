@@ -638,7 +638,7 @@ class Config:
         if options.output != '':
             self.output_dir = options.output
         else:
-            self.output_dir = 'Redist/Output'
+            self.output_dir = 'Packaging/Output'
             if (len(self.getPlatforms()) == 1):
                 self.output_dir = self.output_dir + self.getPlatforms()[0].getBits()
         

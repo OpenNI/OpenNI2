@@ -16,7 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Platform)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>RedistDir=$(SolutionDir)\Redist\Output_$(Platform)</DefineConstants>
+    <DefineConstants>RedistDir=$(SolutionDir)\Packaging\Output_$(Platform)</DefineConstants>
     <WixVariables>
     </WixVariables>
     <SuppressAllWarnings>False</SuppressAllWarnings>
@@ -27,7 +27,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\$(Platform)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>RedistDir=$(SolutionDir)\Redist\Output_$(Platform)</DefineConstants>
+    <DefineConstants>RedistDir=$(SolutionDir)\Packaging\Output_$(Platform)</DefineConstants>
     <WixVariables>
     </WixVariables>
     <SuppressAllWarnings>False</SuppressAllWarnings>

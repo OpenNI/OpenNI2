@@ -72,7 +72,7 @@ Cross-Compiling for ARM on Linux:
   $ PLATFORM=Arm make
 
 Creating OpenNI2 package:
-  - Go into the directory 'Redist'
+  - Go into the directory 'Packaging'
   - Run ReleaseVersion.py [x86|x64|arm|android]
     NOTE: for android, NDK_ROOT must be defined, pointing to the NDK installation dir.
   - Installer will be placed in the 'Final' directory
