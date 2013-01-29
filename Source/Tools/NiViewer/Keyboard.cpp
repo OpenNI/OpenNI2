@@ -78,7 +78,7 @@ void registerKey(unsigned char key, const char* Description, ActionFunc func, in
 	pKey->nCallbackArg = arg;
 }
 
-void registerSpecialKey(int key, const char* Description, ActionFunc func, int arg)
+void registerSpecialKey(char key, const char* Description, ActionFunc func, int arg)
 {
 	XnKeyboardAction* pKey = &g_KeyboardSpecialMap[g_nRegisteredSpecialKeys++];
 	pKey->key = key;

@@ -70,6 +70,7 @@ endif
 
 CFLAGS += $(INC_DIRS_OPTION) $(DEFINES_OPTION)
 CFLAGS += -fPIC -fvisibility=hidden
+CFLAGS += -Werror
 LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
 
 # some lib / exe specifics

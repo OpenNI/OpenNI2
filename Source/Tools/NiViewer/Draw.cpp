@@ -1155,7 +1155,7 @@ void drawPointerMode(IntPair* pPointer)
 			xnOSStrAppend(buf, " | ", sizeof(buf));
 		}
 
-		xnOSStrFormat(buf + strlen(buf), sizeof(buf) - strlen(buf), &chars, "%s - Frame %4u, Timestamp %.3f", "Color", pImageMD->getFrameIndex(), (double)pImageMD->getTimestamp()/dTimestampDivider);
+		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "Color", pImageMD->getFrameIndex(), (double)pImageMD->getTimestamp()/dTimestampDivider);
 	}
 
 	openni::VideoFrameRef* pIRMD = &getIRFrame();
@@ -1166,7 +1166,7 @@ void drawPointerMode(IntPair* pPointer)
 			xnOSStrAppend(buf, " | ", sizeof(buf));
 		}
 
-		xnOSStrFormat(buf + strlen(buf), sizeof(buf) - strlen(buf), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
+		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
 	}
 
 	int nYLocation = WIN_SIZE_Y - 88;

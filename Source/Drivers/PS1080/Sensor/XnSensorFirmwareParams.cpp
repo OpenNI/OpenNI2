@@ -600,7 +600,7 @@ XnStatus XnSensorFirmwareParams::RecalculateReferenceResolution()
 		nRes = XN_RESOLUTION_VGA;
 	}
 
-	if (nRes != m_ReferenceResolution.GetValue())
+	if (nRes != (XnResolutions)m_ReferenceResolution.GetValue())
 	{
 		nRetVal = m_ReferenceResolution.UnsafeUpdateValue(nRes);
 		XN_IS_STATUS_OK(nRetVal);

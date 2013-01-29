@@ -42,7 +42,7 @@ typedef void (*ActionFunc)(int);
 void startKeyboardMap();
 void startKeyboardGroup(const char* csName);
 void registerKey(unsigned char key, const char* Description, ActionFunc func, int arg);
-void registerSpecialKey(int key, const char* Description, ActionFunc func, int arg);
+void registerSpecialKey(char key, const char* Description, ActionFunc func, int arg);
 void endKeyboardGroup();
 void endKeyboardMap();
 char getRegisteredKey(ActionFunc func, int arg);

@@ -624,6 +624,10 @@ public:
 		{
 		}
 
+		virtual ~NewFrameListener()
+		{
+		}
+
 		/**
 		Derived classes should implement this function to handle new frames.
 		*/

@@ -142,6 +142,8 @@ static const char* EatNonWhiteSpace(const char *str)
     return str;
 }
 
+// Suppress VS warning on using strdup
+#pragma warning(disable: 4996)
 int glh_init_extensions(const char *origReqExts)
 {
     // Length of requested extensions string
@@ -220,6 +222,7 @@ int glh_init_extensions(const char *origReqExts)
     free(reqExts);
     return success;
 }
+#pragma warning(default: 4996)
 
 const char* glh_get_unsupported_extensions()
 {
