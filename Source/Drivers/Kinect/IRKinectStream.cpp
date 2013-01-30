@@ -17,8 +17,8 @@ IRKinectStream::IRKinectStream(KinectStreamImpl* pStreamImpl):
 {
 	m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_GRAY8;
 	m_videoMode.fps = DEFAULT_FPS;
-	m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+	m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+	m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 }
 
 OniStatus IRKinectStream::start()

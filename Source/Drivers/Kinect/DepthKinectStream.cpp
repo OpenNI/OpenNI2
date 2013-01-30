@@ -31,8 +31,8 @@ DepthKinectStream::DepthKinectStream(KinectStreamImpl* pStreamImpl):
 {
 	m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
 	m_videoMode.fps = DEFAULT_FPS;
-	m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+	m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+	m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 }
 
 void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT& LockedRect)

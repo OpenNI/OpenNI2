@@ -10,14 +10,14 @@ namespace kinect_device {
 
 class KinectStreamImpl;
 
-static const int KINNECT_RESOLUTION_X_80 = 80;
-static const int KINNECT_RESOLUTION_Y_60 = 60;
-static const int KINNECT_RESOLUTION_X_320 = 320;
-static const int KINNECT_RESOLUTION_Y_240 = 240;
-static const int KINNECT_RESOLUTION_X_640 = 640;
-static const int KINNECT_RESOLUTION_Y_480 = 480;
-static const int KINNECT_RESOLUTION_X_1280 = 1280;
-static const int KINNECT_RESOLUTION_Y_960 = 960;
+static const int KINECT_RESOLUTION_X_80 = 80;
+static const int KINECT_RESOLUTION_Y_60 = 60;
+static const int KINECT_RESOLUTION_X_320 = 320;
+static const int KINECT_RESOLUTION_Y_240 = 240;
+static const int KINECT_RESOLUTION_X_640 = 640;
+static const int KINECT_RESOLUTION_Y_480 = 480;
+static const int KINECT_RESOLUTION_X_1280 = 1280;
+static const int KINECT_RESOLUTION_Y_960 = 960;
 
 typedef struct  
 {
