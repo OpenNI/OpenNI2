@@ -98,7 +98,7 @@ OniStatus Context::initialize()
 #ifdef ONI_PLATFORM_ANDROID_OS
 	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)0);
 	xnLogSetAndroidOutput(TRUE);
-#else
+#endif
 	
 	if (configurationFileExists)
 	{
