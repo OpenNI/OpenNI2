@@ -6,3 +6,7 @@ ipch
 *.suo
 *.user
 *.bak
+*.log
+*.wrn
+objfre_win7_amd64
+objfre_win7_x86
