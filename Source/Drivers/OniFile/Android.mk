@@ -34,8 +34,9 @@ LOCAL_LDFLAGS := -Wl,--export-dynamic -llog
 
 LOCAL_PREBUILT_LIBS := libc
 LOCAL_STATIC_LIBRARIES := XnLib
+LOCAL_SHARED_LIBRARIES += libgabi++ 
 
-LOCAL_MODULE:= OniFile
+LOCAL_MODULE:= libOniFile
 
 include $(BUILD_SHARED_LIBRARY)
 
