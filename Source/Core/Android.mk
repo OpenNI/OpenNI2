@@ -10,10 +10,10 @@ MY_PREFIX := $(LOCAL_PATH)/
 
 # list all source files
 MY_SRC_FILES := \
+	$(MY_PREFIX)../../ThirdParty/LibJPEG/*.c \
 	$(MY_PREFIX)*.cpp \
 	$(MY_PREFIX)../Drivers/OniFile/Formats/XnCodec.cpp \
-	$(MY_PREFIX)../Drivers/OniFile/Formats/XnStreamCompression.cpp \
-	$(MY_PREFIX)../../ThirdParty/LibJPEG/*.c
+	$(MY_PREFIX)../Drivers/OniFile/Formats/XnStreamCompression.cpp
 
 # expand the wildcards
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))

@@ -10,13 +10,13 @@ MY_PREFIX := $(LOCAL_PATH)/
 
 # list all source files
 MY_SRC_FILES := \
+	$(MY_PREFIX)../../../ThirdParty/LibJPEG/*.c	\
 	$(MY_PREFIX)Core/*.cpp	\
 	$(MY_PREFIX)DDK/*.cpp 	\
 	$(MY_PREFIX)DriverImpl/*.cpp\
 	$(MY_PREFIX)Formats/*.cpp	\
 	$(MY_PREFIX)Include/*.cpp	\
-	$(MY_PREFIX)Sensor/*.cpp	\
-	$(MY_PREFIX)../../../ThirdParty/LibJPEG/*.c	
+	$(MY_PREFIX)Sensor/*.cpp
 
 # expand the wildcards
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))

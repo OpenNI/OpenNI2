@@ -10,10 +10,10 @@ MY_PREFIX := $(LOCAL_PATH)/
 
 # list all source files
 MY_SRC_FILES := \
+	$(MY_PREFIX)../../../ThirdParty/LibJPEG/*.c \
 	$(MY_PREFIX)*.cpp \
 	$(MY_PREFIX)Formats/*.cpp \
-	$(MY_PREFIX)XnLibExtensions/*.cpp \
-	$(MY_PREFIX)../../../ThirdParty/LibJPEG/*.c
+	$(MY_PREFIX)XnLibExtensions/*.cpp
 
 # expand the wildcards
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
