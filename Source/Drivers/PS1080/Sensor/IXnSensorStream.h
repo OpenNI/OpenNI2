@@ -38,7 +38,7 @@ class XnDataProcessor;
 class IXnSensorStream
 {
 public:
-	~IXnSensorStream() {}
+	virtual ~IXnSensorStream() {}
 
 	virtual void GetFirmwareStreamConfig(XnResolutions* pnRes, XnUInt32* pnFPS) = 0;
 	virtual XnStatus ConfigureStreamImpl() = 0;

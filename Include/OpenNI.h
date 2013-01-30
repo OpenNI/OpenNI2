@@ -1840,6 +1840,11 @@ public:
 			m_deviceConnectedCallbacks.deviceStateChanged = NULL;
 			m_deviceConnectedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceConnectedListener()
+		{
+		}
+		
 		/**
 		* Callback function for the onDeviceConnected event.  This function will be 
 		* called whenever this event occurs.  When this happens, a pointer to the @ref DeviceInfo
@@ -1890,6 +1895,11 @@ public:
 			m_deviceDisconnectedCallbacks.deviceStateChanged = NULL;
 			m_deviceDisconnectedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceDisconnectedListener()
+		{
+		}
+		
 		/**
 		 * Callback function for the onDeviceDisconnected event. This function will be
 		 * called whenever this event occurs.  When this happens, a pointer to the DeviceInfo
@@ -1933,6 +1943,11 @@ public:
 			m_deviceStateChangedCallbacks.deviceStateChanged = deviceStateChangedCallback;
 			m_deviceStateChangedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceStateChangedListener()
+		{
+		}
+		
 		/**
 		* Callback function for the onDeviceStateChanged event.  This function will be 
 		* called whenever this event occurs.  When this happens, a pointer to a DeviceInfo
