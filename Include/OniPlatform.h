@@ -43,7 +43,7 @@
 #elif (linux && (i386 || __x86_64__))
 #	include "Linux-x86/OniPlatformLinux-x86.h"
 #elif (linux && __arm__)
-#	include "Linux-x86/OniPlatformLinux-Arm.h"
+#	include "Linux-Arm/OniPlatformLinux-Arm.h"
 #elif _ARC
 #	include "ARC/OniPlaformARC.h"
 #elif (__APPLE__)
