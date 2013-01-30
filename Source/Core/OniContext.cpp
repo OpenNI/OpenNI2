@@ -95,6 +95,11 @@ OniStatus Context::initialize()
 		xnOSDoesFileExist(strOniConfigurationFile, &configurationFileExists);
 	}
 
+#ifdef ONI_PLATFORM_ANDROID_OS
+	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)0);
+	xnLogSetAndroidOutput(TRUE);
+#else
+	
 	if (configurationFileExists)
 	{
 		// First, we should process the log related configuration as early as possible.
