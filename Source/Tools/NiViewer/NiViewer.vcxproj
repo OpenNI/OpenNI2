@@ -85,11 +85,14 @@
       <WarningLevel>Level4</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Comdlg32.lib;OpenNI2.lib;XnLib.lib;glut32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\ThirdParty\GL</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\..\Include</AdditionalIncludeDirectories>
@@ -103,11 +106,14 @@
       <WarningLevel>Level4</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Comdlg32.lib;OpenNI2.lib;XnLib.lib;glut64.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\ThirdParty\GL</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\..\Include</AdditionalIncludeDirectories>
@@ -135,6 +141,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Comdlg32.lib;OpenNI2.lib;XnLib.lib;glut32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\ThirdParty\GL</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\..\Include</AdditionalIncludeDirectories>
@@ -162,6 +169,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Comdlg32.lib;OpenNI2.lib;XnLib.lib;glut64.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\ThirdParty\GL</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\..\Include</AdditionalIncludeDirectories>
