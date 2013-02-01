@@ -26,10 +26,12 @@ endif
 
 LIB_NAME = PS1080
 
-LIB_DIRS = ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = XnLib dl pthread usb-1.0
+LIB_DIRS += ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
+USED_LIBS = XnLib dl pthread
 ifneq ("$(OSTYPE)","Darwin")
-        USED_LIBS += rt  
+        USED_LIBS += rt usb-1.0
+else
+	USED_LIBS += usb-1.0.0
 endif
 
 CFLAGS += -Wall

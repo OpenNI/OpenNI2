@@ -18,7 +18,7 @@ SRC_FILES = \
 	Capture.cpp
 
 ifeq ("$(OSTYPE)","Darwin")
-	CFLAGS += MACOS
+	CFLAGS += -DMACOS
 	LDFLAGS += -framework OpenGL -framework GLUT
 else
 	CFLAGS += -DUNIX -DGLX_GLXEXT_LEGACY

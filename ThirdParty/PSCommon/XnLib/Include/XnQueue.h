@@ -43,7 +43,7 @@ public:
 	}
 	~Queue() {}
 
-	using Base::ConstIterator;
+	using typename Base::ConstIterator;
 	using Base::IsEmpty;
 	using Base::Begin;
 	using Base::End;

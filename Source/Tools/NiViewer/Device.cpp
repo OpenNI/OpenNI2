@@ -188,7 +188,8 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 	readFrame();
 }
 
-class OpenNIEventListener : public openni::OpenNI::Listener
+class OpenNIDeviceListener : public openni::OpenNI::DeviceStateChangedListener,
+							public openni::OpenNI::DeviceDisconnectedListener
 {
 public:
 	virtual void onDeviceStateChanged(const openni::DeviceInfo* pInfo, openni::DeviceState errorState)
@@ -205,7 +206,6 @@ public:
 			}
 		}
 	}
-
 	virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
 	{
 		if (strcmp(pInfo->getUri(), g_device.getDeviceInfo().getUri()) == 0)
@@ -224,8 +224,10 @@ openni::Status openDevice(const char* uri, bool defaultRightColor)
 	}
 
 	// Register to OpenNI events.
-	static OpenNIEventListener eventListener;
-	openni::OpenNI::addListener(&eventListener);
+	static OpenNIDeviceListener deviceListener;
+	
+	openni::OpenNI::addDeviceDisconnectedListener(&deviceListener);
+	openni::OpenNI::addDeviceStateChangedListener(&deviceListener);
 
 	// Open the requested device.
 	nRetVal = g_device.open(uri);
@@ -372,6 +374,27 @@ void toggleCloseRange(int )
 	g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange);
 
 	displayMessage ("Close range: %s", bCloseRange?"On":"Off");	
+}
+
+void toggleImageRegistration(int)
+{
+	openni::ImageRegistrationMode mode = g_device.getImageRegistrationMode();
+
+	openni::ImageRegistrationMode newMode = openni::IMAGE_REGISTRATION_OFF;
+	if (mode == openni::IMAGE_REGISTRATION_OFF)
+	{
+		newMode = openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR;
+	}
+
+	if (g_device.isImageRegistrationModeSupported(newMode))
+	{
+		g_device.setImageRegistrationMode(newMode);
+	}
+	else
+	{
+		displayError("Couldn't change image registration to unsupported mode");
+	}
+
 }
 
 void seekFrame(int nDiff)
@@ -611,7 +634,7 @@ void toggleColorMirror(int)
 
 void toggleIRMirror(int)
 {
-	g_irStream.setMirroringEnabled(g_irStream.getMirroringEnabled());
+	g_irStream.setMirroringEnabled(!g_irStream.getMirroringEnabled());
 }
 
 void toggleImageAutoExposure(int)

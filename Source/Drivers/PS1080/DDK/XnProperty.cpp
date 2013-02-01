@@ -51,7 +51,9 @@ XnProperty::~XnProperty()
 void XnProperty::UpdateName(const XnChar* strModule, const XnChar* strName)
 {
 	strncpy(m_strModule, strModule, XN_DEVICE_MAX_STRING_LENGTH);
-	strncpy(m_strName, strName, XN_DEVICE_MAX_STRING_LENGTH);
+	if (m_strName != strName) {
+		strncpy(m_strName, strName, XN_DEVICE_MAX_STRING_LENGTH);
+	}
 }
 
 XnStatus XnProperty::SetValue(const void* pValue)

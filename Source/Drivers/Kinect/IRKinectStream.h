@@ -12,6 +12,8 @@ class IRKinectStream : public BaseKinectStream
 public:
 	IRKinectStream(KinectStreamImpl* pStreamImpl);
 
+	virtual OniStatus start();
+
 	virtual void frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect);
 
 };

@@ -50,7 +50,7 @@ struct ClosestPointInternal
 	ClosestPoint* m_pClosesPoint;
 };
 
-class StreamListener : public VideoStream::Listener
+class StreamListener : public VideoStream::NewFrameListener
 {
 public:
 	StreamListener(ClosestPointInternal* pClosestPoint) : m_pClosestPoint(pClosestPoint)
@@ -116,14 +116,14 @@ void ClosestPoint::initialize()
 		printf("Start failed:\n%s\n", OpenNI::getExtendedError());
 	}
 
-	m_pInternal->m_pDepthStream->addListener(m_pInternal->m_pStreamListener);
+	m_pInternal->m_pDepthStream->addNewFrameListener(m_pInternal->m_pStreamListener);
 }
 
 ClosestPoint::~ClosestPoint()
 {
 	if (m_pInternal->m_pDepthStream != NULL)
 	{
-		m_pInternal->m_pDepthStream->removeListener(m_pInternal->m_pStreamListener);
+		m_pInternal->m_pDepthStream->removeNewFrameListener(m_pInternal->m_pStreamListener);
 
 		m_pInternal->m_pDepthStream->stop();
 		m_pInternal->m_pDepthStream->destroy();

@@ -66,14 +66,8 @@ public:
 			Math::IsBetween(point.z, m_topRightFar.z, m_bottomLeftNear.z);
 	}
 
-	friend std::ostream& operator<<(std::ostream& ostr, const Box3D& box)
-	{
-		ostr << "[" << box.m_bottomLeftNear << "-" << box.m_topRightFar << "]";
-		return ostr;
-	}
-private:
-	Point3D m_bottomLeftNear;
 	Point3D m_topRightFar;
+	Point3D m_bottomLeftNear;
 };
 
 

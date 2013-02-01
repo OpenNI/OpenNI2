@@ -21,82 +21,17 @@
 #ifndef _ONI_PLATFORM_LINUX_ARM_H_
 #define _ONI_PLATFORM_LINUX_ARM_H_
 
-//---------------------------------------------------------------------------
-// Prerequisites
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <limits.h>
-#include <stdint.h>
+// Start with Linux-x86, and override what's different
+#include "../Linux-x86/OniPlatformLinux-x86.h"
 
 //---------------------------------------------------------------------------
 // Platform Basic Definition
 //---------------------------------------------------------------------------
-#define ONI_PLATFORM ONI_PLATFORM_LINUX_X86
-#define ONI_PLATFORM_STRING "Linux-arm"
+#undef ONI_PLATFORM
+#undef ONI_PLATFORM_STRING
+#define ONI_PLATFORM ONI_PLATFORM_LINUX_ARM
+#define ONI_PLATFORM_STRING "Linux-Arm"
 
-//---------------------------------------------------------------------------
-// Platform Capabilities
-//---------------------------------------------------------------------------
-#define ONI_PLATFORM_ENDIAN_TYPE ONI_PLATFORM_IS_LITTLE_ENDIAN
+#endif //_ONI_PLATFORM_LINUX_ARM_H_
 
-#define ONI_PLATFORM_SUPPORTS_DYNAMIC_LIBS 1
-
-//---------------------------------------------------------------------------
-// Memory
-//---------------------------------------------------------------------------
-/** The default memory alignment. */ 
-#define ONI_DEFAULT_MEM_ALIGN 16
-
-/** The thread static declarator (using TLS). */
-#define ONI_THREAD_STATIC __thread
-
-//---------------------------------------------------------------------------
-// Files
-//---------------------------------------------------------------------------
-/** The maximum allowed file path size (in bytes). */ 
-#define ONI_FILE_MAX_PATH 256
-
-//---------------------------------------------------------------------------
-// Call back
-//---------------------------------------------------------------------------
-/** The std call type. */ 
-#define ONI_STDCALL __stdcall
-
-/** The call back calling convention. */ 
-#define ONI_CALLBACK_TYPE 
-
-/** The C and C++ calling convension. */
-#define ONI_C_DECL
-
-//---------------------------------------------------------------------------
-// Macros
-//---------------------------------------------------------------------------
-/** Returns the date and time at compile time. */ 
-#define ONI_TIMESTAMP __DATE__ " " __TIME__
-
-/** Converts n into a pre-processor string.  */ 
-#define ONI_STRINGIFY(n) ONI_STRINGIFY_HELPER(n)
-#define ONI_STRINGIFY_HELPER(n) #n
-
-//---------------------------------------------------------------------------
-// API Export/Import Macros
-//---------------------------------------------------------------------------
-/** Indicates an exported shared library function. */ 
-#define ONI_API_EXPORT __attribute__ ((visibility("default")))
-
-/** Indicates an imported shared library function. */ 
-#define ONI_API_IMPORT 
-
-/** Indicates a deprecated function */
-#define ONI_API_DEPRECATED(msg) __attribute__((warning("This function is deprecated: " msg)))
-
-#endif //_ONI_PLATFORM_LINUX_X86_H_
 

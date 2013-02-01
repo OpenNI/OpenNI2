@@ -62,7 +62,10 @@ XnUSBEventCallbackList g_connectivityEvent;
 //---------------------------------------------------------------------------
 DWORD __stdcall DevDetectThread(LPVOID Arg)
 {
-	g_xnUsbhDevDetectWnd = CreateWindow("xnUsbDeviceDetector", "", WS_POPUP, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
+	char className[MAX_PATH];
+	sprintf_s(className, "xnUsbDeviceDetector%x", &g_xnUsbhModule);
+
+	g_xnUsbhDevDetectWnd = CreateWindow(className, "", WS_POPUP, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
 
 	SetEvent((HANDLE)Arg);
 
@@ -296,7 +299,11 @@ XnStatus xnUSBGetDeviceSpeedInternal(XN_USB_DEV_HANDLE pDevHandle, XnUSBDeviceSp
 XnStatus xnUSBPlatformSpecificInit()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
-	
+
+	// give a unique class name (there might be multiple instances of this code in multiple DLLs)
+	char className[MAX_PATH];
+	sprintf_s(className, "xnUsbDeviceDetector%x", &g_xnUsbhModule);
+
 	WNDCLASS wc;
 	wc.style = 0;
 	wc.cbClsExtra = 0;
@@ -304,7 +311,7 @@ XnStatus xnUSBPlatformSpecificInit()
 	wc.hInstance = (HINSTANCE)g_xnUsbhModule;
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "xnUsbDeviceDetector";
+	wc.lpszClassName = className;
 	wc.lpfnWndProc = DevDetectWndProc;
 	wc.hIcon = NULL;
 	wc.hCursor = NULL;
@@ -502,14 +509,8 @@ XnStatus xnUSBOpenDeviceImpl(const XnChar* strDevicePath, XN_USB_DEV_HANDLE* pDe
 	XnStatus nRetVal = XN_STATUS_OK;
 	LPCGUID pInterfaceGuid = NULL;
 	XN_USB_DEV_HANDLE pDevHandle = NULL;
-	ULONG nNumberDevices = 0;
 	HDEVINFO hDevInfo = NULL;
-	BOOLEAN bDone = FALSE;
 	SP_DEVICE_INTERFACE_DATA devInterfaceData;
-	PUSB_DEVICE_DESCRIPTOR  pUsbDeviceInst = NULL;
-	PUSB_DEVICE_DESCRIPTOR* ppUsbDevices = &pUsbDeviceInst;
-	PUSB_DEVICE_DESCRIPTOR  pTempDevDesc = NULL;
-	ULONG nIdx = 0;
 	HANDLE hSelectedDevice = INVALID_HANDLE_VALUE;
 	PSUSBDRV_DRIVER_VERSION UsbDriverVersion;
 	PSUSBDRV_INTERFACE_PROPERTY pInterfaceProp;
@@ -536,83 +537,42 @@ XnStatus xnUSBOpenDeviceImpl(const XnChar* strDevicePath, XN_USB_DEV_HANDLE* pDe
 		return (XN_STATUS_USB_DRIVER_NOT_FOUND);
 	}
 
-	// Guess how much devices we're going to have. If it's too little, we'll realloc it soon.
-	nNumberDevices = 4;
-
 	// Scan the hardware for any devices that are attached to our driver. Stop only after we have successfully opened a device.
 	devInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-	nIdx = 0;
-	bDone = FALSE;
+	bool bDone = FALSE;
+	ULONG nIdx = 0;
+
+	// Scan all the devices that are attached to the driver. Stop when one of them open successfully.
 	while (!bDone)
 	{
-		// Allocate enough memory for all the devices that are attached to the driver
-		nNumberDevices *= 2;
-
-		if (*ppUsbDevices)
+		// Get information about the device
+		if (SetupDiEnumDeviceInterfaces (hDevInfo, 0, pInterfaceGuid, nIdx, &devInterfaceData))
 		{
-			pTempDevDesc = (USB_DEVICE_DESCRIPTOR*)realloc(*ppUsbDevices, (nNumberDevices * sizeof (USB_DEVICE_DESCRIPTOR)));
-			if(pTempDevDesc)
+			// Try to open this device
+			hSelectedDevice = xnUSBOpenOneDevice(hDevInfo, &devInterfaceData, pDevHandle->cpDeviceName, strDevicePath);
+			if (hSelectedDevice != INVALID_HANDLE_VALUE)
 			{
-				// We have enough memory!
-				*ppUsbDevices = pTempDevDesc;
-				pTempDevDesc = NULL;
-			}
-			else
-			{
-				// Out of memory... realloc failed...
-				free(*ppUsbDevices);
-				*ppUsbDevices = NULL;
+				// Success! We have a valid device handle.
+				bDone = TRUE;
+				break;
 			}
 		}
 		else
 		{
-			*ppUsbDevices = (USB_DEVICE_DESCRIPTOR*)calloc (nNumberDevices, sizeof (USB_DEVICE_DESCRIPTOR));
-		}
-
-		// Make sure we have found some devices
-		if (NULL == *ppUsbDevices)
-		{
-			SetupDiDestroyDeviceInfoList(hDevInfo);
-			XN_ALIGNED_FREE_AND_NULL(pDevHandle);
-			return (XN_STATUS_USB_DEVICE_GETINFO_FAILED);
-		}
-
-		pUsbDeviceInst = *ppUsbDevices + nIdx;
-
-		// Scan all the devices that are attached to the driver. Stop when one of them open successfully.
-		for (; nIdx < nNumberDevices; nIdx++)
-		{
-			// Get information about the device
-			if (SetupDiEnumDeviceInterfaces (hDevInfo, 0, pInterfaceGuid, nIdx, &devInterfaceData))
+			// Did we reach the end?
+			if (ERROR_NO_MORE_ITEMS == GetLastError())
 			{
-				// Try to open this device
-				hSelectedDevice = xnUSBOpenOneDevice(hDevInfo, &devInterfaceData, pDevHandle->cpDeviceName, strDevicePath);
-				if (hSelectedDevice != INVALID_HANDLE_VALUE)
-				{
-					// Success! We have a valid device handle.
-					bDone = TRUE;
-					break;
-				}
-			}
-			else
-			{
-				// Did we reach the end?
-				if (ERROR_NO_MORE_ITEMS == GetLastError())
-				{
-					// Yup... and we didn't find any devices...
-					bDone = TRUE;
-					break;
-				}
+				// Yup... and we didn't find any devices...
+				bDone = TRUE;
+				break;
 			}
 		}
+
+		++nIdx;
 	}
-
-	// Save the number of devices
-	nNumberDevices = nIdx;
 
 	// Cleanup memory
 	SetupDiDestroyDeviceInfoList (hDevInfo);
-	free (*ppUsbDevices);
 
 	// Do we have a valid device?
 	if (hSelectedDevice == INVALID_HANDLE_VALUE)

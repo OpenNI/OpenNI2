@@ -15,6 +15,7 @@ BaseKinectStream::BaseKinectStream(KinectStreamImpl* pStreamImpl):
 	m_pStreamImpl(pStreamImpl)
 {
 	m_running = false;
+	m_cropping.enabled = FALSE;
 	pStreamImpl->addStream(this);
 }
 
@@ -49,7 +50,15 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 	switch (propertyId)
 	{
 	case ONI_STREAM_PROPERTY_CROPPING:
-		status = ONI_STATUS_NOT_IMPLEMENTED;
+		if (*pDataSize != sizeof(OniCropping))
+		{
+			printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniCropping));
+			status = ONI_STATUS_ERROR;
+		}
+		else
+		{
+			status = GetCropping((OniCropping*)data);
+		}
 		break;
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
 		{
@@ -100,7 +109,16 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 OniStatus BaseKinectStream::setProperty(int propertyId, const void* data, int dataSize)
 {
 	OniStatus status = ONI_STATUS_NOT_SUPPORTED;
-	if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
+	if (propertyId == ONI_STREAM_PROPERTY_CROPPING)
+	{
+		if (dataSize != sizeof(OniCropping))
+		{
+			printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniCropping));
+			status = ONI_STATUS_ERROR;
+		}
+		status = SetCropping((OniCropping*)data);
+	}
+	else if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
 	{
 		if (dataSize != sizeof(OniVideoMode))
 		{
@@ -117,32 +135,17 @@ OniBool BaseKinectStream::isPropertySupported(int propertyId)
 	OniBool status = FALSE;
 	switch (propertyId)
 	{
+	case ONI_STREAM_PROPERTY_CROPPING:
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
 	case ONI_STREAM_PROPERTY_VERTICAL_FOV:
 	case ONI_STREAM_PROPERTY_VIDEO_MODE:
 		status = TRUE;
+		break;
 	default:
 		status = FALSE;
 		break;
 	}
 	return status;
-}
-
-void BaseKinectStream::notifyAllProperties()
-{
-	XnFloat nDouble;
-	int size = sizeof(nDouble);
-	getProperty(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &nDouble, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &nDouble, size);
-
-	getProperty(ONI_STREAM_PROPERTY_VERTICAL_FOV, &nDouble, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_VERTICAL_FOV, &nDouble, size);
-	
-	OniVideoMode videoMode;
-	size = sizeof(videoMode);
-
-	getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
-	raisePropertyChanged(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, size);	
 }
 
 OniStatus BaseKinectStream::SetVideoMode(OniVideoMode* videoMode)
@@ -160,6 +163,18 @@ OniStatus BaseKinectStream::SetVideoMode(OniVideoMode* videoMode)
 OniStatus BaseKinectStream::GetVideoMode(OniVideoMode* pVideoMode)
 {
 	*pVideoMode = m_videoMode;
+	return ONI_STATUS_OK;
+}
+
+OniStatus BaseKinectStream::SetCropping(OniCropping* cropping)
+{
+	m_cropping = *cropping;
+	return ONI_STATUS_OK;
+}
+
+OniStatus BaseKinectStream::GetCropping(OniCropping* cropping)
+{
+	*cropping = m_cropping;
 	return ONI_STATUS_OK;
 }
 

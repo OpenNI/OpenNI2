@@ -12,6 +12,8 @@ public:
 	DepthKinectStream(KinectStreamImpl* pStreamImpl);
 
 	virtual void frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect);
+
+	virtual OniStatus convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 	
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 

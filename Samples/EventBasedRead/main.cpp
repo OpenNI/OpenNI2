@@ -52,7 +52,7 @@ void analyzeFrame(const VideoFrameRef& frame)
 	}
 }
 
-class PrintCallback : public VideoStream::Listener
+class PrintCallback : public VideoStream::NewFrameListener
 {
 public:
 	void onNewFrame(VideoStream& stream)
@@ -65,20 +65,22 @@ private:
 	VideoFrameRef m_frame;
 };
 
-class OpenNIEventListener : public OpenNI::Listener
+class OpenNIDeviceListener : public OpenNI::DeviceConnectedListener,
+									public OpenNI::DeviceDisconnectedListener,
+									public OpenNI::DeviceStateChangedListener
 {
 public:
-	virtual void onDeviceStateChanged(DeviceInfo* pInfo, int errorState) 
+	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
 	{
-		printf("Device \"%s\" error state changed to %d\n", pInfo->getUri(), errorState);
+		printf("Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
 	}
 
-	virtual void onDeviceConnected(DeviceInfo* pInfo)
+	virtual void onDeviceConnected(const DeviceInfo* pInfo)
 	{
 		printf("Device \"%s\" connected\n", pInfo->getUri());
 	}
 
-	virtual void onDeviceDisconnected(DeviceInfo* pInfo)
+	virtual void onDeviceDisconnected(const DeviceInfo* pInfo)
 	{
 		printf("Device \"%s\" disconnected\n", pInfo->getUri());
 	}
@@ -93,8 +95,18 @@ int main()
 		return 1;
 	}
 
-	OpenNIEventListener eventPrinter;
-	OpenNI::addListener(&eventPrinter);
+	OpenNIDeviceListener devicePrinter;
+
+	OpenNI::addDeviceConnectedListener(&devicePrinter);
+	OpenNI::addDeviceDisconnectedListener(&devicePrinter);
+	OpenNI::addDeviceStateChangedListener(&devicePrinter);
+
+	openni::Array<openni::DeviceInfo> deviceList;
+	openni::OpenNI::enumerateDevices(&deviceList);
+	for (int i = 0; i < deviceList.getSize(); ++i)
+	{
+		printf("Device \"%s\" already connected\n", deviceList[i].getUri());
+	}
 
 	Device device;
 	rc = device.open(ANY_DEVICE);
@@ -124,7 +136,7 @@ int main()
 	PrintCallback depthPrinter;
 
 	// Register to new frame
-	depth.addListener(&depthPrinter);
+	depth.addNewFrameListener(&depthPrinter);
 
 	// Wait while we're getting frames through the printer
 	while (!wasKeyboardHit())
@@ -132,7 +144,7 @@ int main()
 		Sleep(100);
 	}
 
-	depth.removeListener(&depthPrinter);
+	depth.removeNewFrameListener(&depthPrinter);
 
 
 	depth.stop();

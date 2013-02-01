@@ -21,9 +21,9 @@
 #include "OniPlatform.h"
 
 #define ONI_VERSION_MAJOR	2
-#define ONI_VERSION_MINOR	0
+#define ONI_VERSION_MINOR	1
 #define ONI_VERSION_MAINTENANCE	0
-#define ONI_VERSION_BUILD	29
+#define ONI_VERSION_BUILD	4
 
 /** OpenNI version (in brief string format): "Major.Minor.Maintenance (Build)" */ 
 #define ONI_BRIEF_VERSION_STRING \

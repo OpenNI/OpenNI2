@@ -545,6 +545,7 @@
     <ClCompile Include="Sensor\XnFirmwareInfo.cpp" />
     <ClCompile Include="Sensor\XnFirmwareStreams.cpp" />
     <ClCompile Include="Sensor\XnFrameStreamProcessor.cpp" />
+    <ClCompile Include="Sensor\XnGeneralDebugProcessor.cpp" />
     <ClCompile Include="Sensor\XnGMCDebugProcessor.cpp" />
     <ClCompile Include="Sensor\XnGMCProcessor.cpp" />
     <ClCompile Include="Sensor\XnHostProtocol.cpp" />
@@ -552,6 +553,7 @@
     <ClCompile Include="Sensor\XnIRProcessor.cpp" />
     <ClCompile Include="Sensor\XnJpegImageProcessor.cpp" />
     <ClCompile Include="Sensor\XnJpegToRGBImageProcessor.cpp" />
+    <ClCompile Include="Sensor\XnNesaDebugProcessor.cpp" />
     <ClCompile Include="Sensor\XnPacked11DepthProcessor.cpp" />
     <ClCompile Include="Sensor\XnPacked12DepthProcessor.cpp" />
     <ClCompile Include="Sensor\XnPSCompressedDepthProcessor.cpp" />
@@ -661,6 +663,7 @@
     <ClInclude Include="Sensor\XnFirmwareStreams.h" />
     <ClInclude Include="Sensor\XnFirmwareTypes.h" />
     <ClInclude Include="Sensor\XnFrameStreamProcessor.h" />
+    <ClInclude Include="Sensor\XnGeneralDebugProcessor.h" />
     <ClInclude Include="Sensor\XnGMCDebugProcessor.h" />
     <ClInclude Include="Sensor\XnGMCProcessor.h" />
     <ClInclude Include="Sensor\XnHostProtocol.h" />
@@ -668,6 +671,7 @@
     <ClInclude Include="Sensor\XnIRProcessor.h" />
     <ClInclude Include="Sensor\XnJpegImageProcessor.h" />
     <ClInclude Include="Sensor\XnJpegToRGBImageProcessor.h" />
+    <ClInclude Include="Sensor\XnNesaDebugProcessor.h" />
     <ClInclude Include="Sensor\XnPacked11DepthProcessor.h" />
     <ClInclude Include="Sensor\XnPacked12DepthProcessor.h" />
     <ClInclude Include="Sensor\XnParams.h" />

@@ -9,6 +9,8 @@ using namespace oni::driver;
 using namespace kinect_device;
 static const char VENDOR_VAL[] = "Microsoft";
 static const char NAME_VAL[] = "Kinect";
+#define MICROSOFT_VENDOR_ID 0x045e
+#define KINECT_FOR_WINDOWS_PRODUCT_ID 0x02bf
 
 KinectDriver::KinectDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
 {
@@ -201,6 +203,8 @@ void KinectDriver::StatusUpdate(const OLECHAR* instanceName, bool isConnected)
 		strcpy((char*)pInfo->uri, str);
 		xnOSStrCopy(pInfo->vendor, VENDOR_VAL, ONI_MAX_STR);
 		xnOSStrCopy(pInfo->name, NAME_VAL, ONI_MAX_STR);
+		pInfo->usbVendorId = MICROSOFT_VENDOR_ID;
+		pInfo->usbProductId = KINECT_FOR_WINDOWS_PRODUCT_ID;
 		m_devices[pInfo] = NULL;
 		deviceConnected(pInfo);
 		deviceStateChanged(pInfo, hr);

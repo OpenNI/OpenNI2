@@ -88,6 +88,7 @@ public:
 	XnBool bGetImageCmosTypeSupported;
 	XnBool bImageSupported;
 	XnBool bIncreasedFpsCropSupported;
+	XnBool bHasFilesystemLock;
 
 	xnl::Array<XnCmosPreset> depthModes;
 	xnl::Array<XnCmosPreset> _imageBulkModes;

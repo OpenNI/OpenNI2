@@ -21,7 +21,7 @@
 #ifndef _XN_SMART_POINTER_H_
 #define _XN_SMART_POINTER_H_
 
-#include <stdio.H>
+#include <stdio.h>
 
 namespace xnl
 {

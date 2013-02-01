@@ -44,6 +44,7 @@ DriverHandler::DriverHandler(const char* library, xnl::ErrorLogger& errorLogger)
 	XnStatus rc = xnOSLoadLibrary(library, &m_libHandle);
 	if (rc != XN_STATUS_OK)
 	{
+		errorLogger.Append("LibraryHandler: Couldn't load library %s", library);
 		return;
 	}
 

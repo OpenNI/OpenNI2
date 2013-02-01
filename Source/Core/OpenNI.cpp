@@ -62,6 +62,10 @@ ONI_C_API OniStatus oniRegisterDeviceCallbacks(OniDeviceCallbacks* pCallbacks, v
 	g_Context.clearErrorLogger();
 	DeviceHandles* pDeviceHandles = XN_NEW(DeviceHandles);
 	XN_VALIDATE_PTR(pDeviceHandles, ONI_STATUS_ERROR);
+
+	pDeviceHandles->deviceConnectedHandle = NULL;
+	pDeviceHandles->deviceDisconnectedHandle = NULL;
+	pDeviceHandles->deviceStateChangedHandle = NULL;
 	pDeviceHandles->pCookie = pCookie;
 
 	g_Context.registerDeviceConnectedCallback(pCallbacks->deviceConnected, pCookie, pDeviceHandles->deviceConnectedHandle);
@@ -75,6 +79,10 @@ ONI_C_API void oniUnregisterDeviceCallbacks(OniCallbackHandle handle)
 {
 	g_Context.clearErrorLogger();
 	DeviceHandles* pDevicesHandles = (DeviceHandles*)handle;
+	if (pDevicesHandles == NULL)
+	{
+		return;
+	}
 
 	g_Context.unregisterDeviceConnectedCallback(pDevicesHandles->deviceConnectedHandle);
 	g_Context.unregisterDeviceDisconnectedCallback(pDevicesHandles->deviceDisconnectedHandle);
@@ -267,6 +275,14 @@ void ONI_CALLBACK_TYPE OniNewFrameTranslationHandler(void* pCookie)
 ONI_C_API OniStatus oniStreamRegisterNewFrameCallback(OniStreamHandle stream, OniNewFrameCallback handler, void* pCookie, OniCallbackHandle* pHandle)
 {
 	g_Context.clearErrorLogger();
+
+	if (*pHandle != NULL)
+	{
+		// Already registered to something
+		g_Context.addToLogger("Can't register same listener instance to multiple events");
+		return ONI_STATUS_ERROR;
+	}
+
 	OniNewFrameCookie* pNewFrameCookie = XN_NEW(OniNewFrameCookie);
 	XN_VALIDATE_PTR(pNewFrameCookie, ONI_STATUS_ERROR);
 
@@ -281,6 +297,11 @@ ONI_C_API void oniStreamUnregisterNewFrameCallback(OniStreamHandle stream, OniCa
 {
 	g_Context.clearErrorLogger();
 	OniNewFrameCookie* pNewFrameCookie = (OniNewFrameCookie*)handle;
+
+	if (pNewFrameCookie == NULL)
+	{
+		return;
+	}
 
 	if (oni::implementation::Context::s_valid)
 	{

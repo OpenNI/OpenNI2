@@ -8,6 +8,7 @@
 #include "PS1080.h"
 #include "D2S.h.h"
 #include "S2D.h.h"
+#include "KinectStreamImpl.h"
 
 using namespace oni::driver;
 using namespace kinect_device;
@@ -48,23 +49,54 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	const NUI_DEPTH_IMAGE_PIXEL * pBufferEnd = pBufferRun + (m_videoMode.resolutionY * m_videoMode.resolutionX);
 	// Get the min and max reliable depth for the current frame
 	unsigned short * data = (unsigned short *)pFrame->frame.data;
-	while (pBufferRun < pBufferEnd)
+	if (!m_cropping.enabled)
 	{
-		// discard the portion of the depth that contains only the player index
-		*(data++) = (pBufferRun->depth > 0 && pBufferRun->depth < DEVICE_MAX_DEPTH_VAL)?pBufferRun->depth:0;
-		++pBufferRun;
+		while (pBufferRun < pBufferEnd)
+		{
+			// discard the portion of the depth that contains only the player index
+			*(data++) = (pBufferRun->depth > 0 && pBufferRun->depth < DEVICE_MAX_DEPTH_VAL)?pBufferRun->depth:0;
+			++pBufferRun;
+		}
+		pFrame->frame.stride = m_videoMode.resolutionX * 2;
+		pFrame->frame.height = pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->frame.width  = pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
+		pFrame->frame.croppingEnabled = FALSE;
 	}
-	pFrame->frame.height= pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-	pFrame->frame.width  = pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
+	else
+	{
+		int cropX = m_cropping.originX;
+		int cropY = m_cropping.originY;
+		while (cropY < m_cropping.originY + m_cropping.height)
+		{
+			while (cropX < m_cropping.originX + m_cropping.width)
+			{
+				const NUI_DEPTH_IMAGE_PIXEL *iter = pBufferRun + (m_videoMode.resolutionX * cropY + cropX++);
+				*(data++)= (iter->depth > 0 && iter->depth < DEVICE_MAX_DEPTH_VAL) ? iter->depth:0;
+			}
+			cropY++;
+			cropX = m_cropping.originX;
+		}
+		pFrame->frame.stride = m_cropping.width * 2;
+		pFrame->frame.height = m_cropping.height;
+		pFrame->frame.width  = m_cropping.width;
+		pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->frame.cropOriginX = m_cropping.originX; 
+		pFrame->frame.cropOriginY = m_cropping.originY;
+		pFrame->frame.croppingEnabled = TRUE;
+	}
 	pFrame->frame.videoMode.pixelFormat = m_videoMode.pixelFormat;
 	pFrame->frame.videoMode.fps = m_videoMode.fps;
 	pFrame->frame.sensorType = ONI_SENSOR_DEPTH;
-	pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
-	pFrame->frame.croppingEnabled = FALSE;
-	pFrame->frame.stride = m_videoMode.resolutionX * 2;
 	pFrame->frame.frameIndex = imageFrame.dwFrameNumber;
 	pFrame->frame.timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
+}
+
+OniStatus DepthKinectStream::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)
+{
+	return m_pStreamImpl->convertDepthToColorCoordinates(colorStream, depthX, depthY, depthZ, pColorX, pColorY);
 }
 
 OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataSize)
@@ -82,7 +114,7 @@ OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataS
 	case ONI_STREAM_PROPERTY_MIRRORING:
 		{
 			XnBool * val = (XnBool *)data;
-			*val = FALSE;
+			*val = TRUE;
 			status = ONI_STATUS_OK;
 			break;
 		}

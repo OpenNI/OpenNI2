@@ -31,8 +31,8 @@ import stat
 
 import UpdateVersion
 
-if len(sys.argv) < 2:
-    print "usage: " + sys.argv[0] + " <x86|x64> [UpdateVersion]"
+if len(sys.argv) < 2 or sys.argv[1] in ('-h','--help'):
+    print "usage: " + sys.argv[0] + " <x86|x64|arm|android> [UpdateVersion]"
     sys.exit(1)
     
 plat = sys.argv[1]
@@ -78,10 +78,57 @@ finalDir = "Final"
 if not os.path.isdir(finalDir):
     os.mkdir(finalDir)
     
-if platform.system() == 'Windows':
-    import win32con,pywintypes,win32api
+if plat == 'android':
+    if not 'NDK_ROOT' in os.environ:
+        print 'Please define NDK_ROOT!'
+        sys.exit(2)
 
-    MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0")
+    ndkDir = os.environ['NDK_ROOT']
+
+    buildDir = 'AndroidBuild'
+    if os.path.isdir(buildDir):
+        shutil.rmtree(buildDir)
+
+    outputDir = 'OpenNI-android-' + strVersion
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)
+
+    os.makedirs(buildDir + '/jni')
+    os.symlink('../../../', buildDir + '/jni/OpenNI2')
+    shutil.copy('../Android.mk', buildDir + '/jni')
+    shutil.copy('../Application.mk', buildDir + '/jni')
+    rc = subprocess.call([ ndkDir + '/ndk-build', '-C', buildDir, '-j8' ])
+    if rc != 0:
+        print 'Build failed!'
+        sys.exit(3)
+
+    outFile = 'Final/' + outputDir + '.tar'
+    
+    shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
+    
+    # add config files
+    shutil.copy('../Config/OpenNI.ini', outputDir)
+    shutil.copy('../Config/PS1080.ini', outputDir)
+
+    print('Creating archive ' + outFile)
+
+    rc = subprocess.call(['tar', '-cf', outFile, outputDir])
+    if rc != 0:
+        print 'Tar failed!'
+        sys.exit(3)
+
+elif platform.system() == 'Windows':
+    import win32con,pywintypes,win32api,platform
+    
+    (bits,linkage) = platform.architecture()
+    matchObject = re.search('64',bits)
+    is_64_bit_machine = matchObject is not None
+
+    if is_64_bit_machine:
+        MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0")
+    else:
+        MSVC_KEY = (win32con.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\10.0")
+    
     MSVC_VALUES = [("InstallDir", win32con.REG_SZ)]
     VS_INST_DIR = get_reg_values(MSVC_KEY, MSVC_VALUES)[0]
     PROJECT_SLN = "..\OpenNI.sln"
@@ -95,22 +142,29 @@ if platform.system() == 'Windows':
     else:
         print "Error"
 
-    shutil.copy('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
+    shutil.move('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
         
-elif platform.system() == 'Linux':
+elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     import Redist
     config = Redist.Config()
-    config.Platform = 'Linux'
+
+    if platform.system() == 'Darwin':
+        config.Platform = "MacOS"
+    else:
+        config.Platform = platform.system()
+
     if plat == 'x86':
         config.bits = '32'
     elif plat == 'x64':
         config.bits = '64'
+    elif plat == 'arm':
+        config.bits = 'arm'
     else:
         print 'Unknown platform: ', plat
         sys.exit(1)
 
-    outFile = 'Final/OpenNI-Linux-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
-    dirName = 'OpenNI-' + strVersion
+    outFile = 'Final/OpenNI-' + config.Platform + '-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
+    dirName = 'OpenNI-' + strVersion + '-' + plat
         
     config.path = '..'
     config.output_dir = origDir + '/'+ dirName
