@@ -1772,6 +1772,35 @@ public:
 		return rc == STATUS_OK && enabled == TRUE;
 	}
 
+	Status setGain(int gain)
+	{
+		return setProperty(STREAM_PROPERTY_GAIN, gain);
+	}
+	Status setExposure(int exposure)
+	{
+		return setProperty(STREAM_PROPERTY_EXPOSURE, exposure);
+	}
+	int getGain()
+	{
+		int gain;
+		Status rc = getProperty(STREAM_PROPERTY_GAIN, &gain);
+		if (rc != STATUS_OK)
+		{
+			return 100;
+		}
+		return gain;
+	}
+	int getExposure()
+	{
+		int exposure;
+		Status rc = getProperty(STREAM_PROPERTY_EXPOSURE, &exposure);
+		if (rc != STATUS_OK)
+		{
+			return 0;
+		}
+		return exposure;
+	}
+
 	bool isValid() const {return m_pStream != NULL;}
 private:
 	template <class T>

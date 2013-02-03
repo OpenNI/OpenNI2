@@ -182,7 +182,7 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.bMirrorSupported = FALSE;
 	pDevicePrivateData->FWInfo.bGetPresetsSupported = FALSE;
 	pDevicePrivateData->FWInfo.bDeviceInfoSupported = FALSE;
-	pDevicePrivateData->FWInfo.bAutoImageAdjustmentsSupported = FALSE;
+	pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = FALSE;
 
 	pDevicePrivateData->FWInfo.nOpcodeGetVersion = OPCODE_V017_GET_VERSION;
 	pDevicePrivateData->FWInfo.nOpcodeKeepAlive = OPCODE_V017_KEEP_ALIVE;
@@ -529,15 +529,15 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.bIncreasedFpsCropSupported = TRUE;
 	}
 
-	if (CompareVersion(nMajor, nMinor, nBuild, 5, 7, 10) >= 0)
-	{
-		pDevicePrivateData->FWInfo.bAutoImageAdjustmentsSupported = TRUE;
-	}
-
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 0) >= 0)
 	{
 		pDevicePrivateData->FWInfo.nOpcodeSetLedState = OPCODE_SET_LED_STATE;
 		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 9) >= 0)
+	{
+		pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = TRUE;
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 9, 0) >= 0)

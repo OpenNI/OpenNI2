@@ -44,7 +44,7 @@ public:
 	XnBool bAudioSupported;
 	XnBool bGetPresetsSupported;
 	XnBool bDeviceInfoSupported;
-	XnBool bAutoImageAdjustmentsSupported;
+	XnBool bImageAdjustmentsSupported;
 
 	XnUInt16 nOpcodeGetVersion;
 	XnUInt16 nOpcodeKeepAlive;

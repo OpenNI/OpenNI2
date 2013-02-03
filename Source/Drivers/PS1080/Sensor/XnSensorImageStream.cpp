@@ -56,6 +56,9 @@ XnSensorImageStream::XnSensorImageStream(const XnChar* StreamName, XnSensorObjec
 	m_AutoExposure(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, "AutoExposure", XN_IMAGE_STREAM_DEFAULT_AUTO_EXPOSURE),
 	m_AutoWhiteBalance(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, "AutoWhiteBalance", XN_IMAGE_STREAM_DEFAULT_AWB),
 
+	m_Exposure(ONI_STREAM_PROPERTY_EXPOSURE, "Exposure", XN_IMAGE_STREAM_DEFAULT_EXPOSURE_BAR),
+	m_Gain(ONI_STREAM_PROPERTY_GAIN, "Gain", XN_IMAGE_STREAM_DEFAULT_GAIN),
+
 	m_ActualRead(XN_STREAM_PROPERTY_ACTUAL_READ_DATA, "ActualReadData", FALSE),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
 	m_VerticalFOV(ONI_STREAM_PROPERTY_VERTICAL_FOV, "VerticalFov")
@@ -78,12 +81,14 @@ XnStatus XnSensorImageStream::Init()
 	m_ImageQuality.UpdateSetCallback(SetImageQualityCallback, this);
 	m_CroppingMode.UpdateSetCallback(SetCroppingModeCallback, this);
 	m_AutoExposure.UpdateSetCallback(SetAutoExposureCallback, this);
+	m_Exposure.UpdateSetCallback(SetExposureCallback, this);
+	m_Gain.UpdateSetCallback(SetGainCallback, this);
 	m_AutoWhiteBalance.UpdateSetCallback(SetAutoWhiteBalanceCallback, this);
 	m_ActualRead.UpdateSetCallback(SetActualReadCallback, this); 
 
 	// add properties
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_InputFormat, &m_AntiFlicker, &m_ImageQuality, 
-		&m_CroppingMode, &m_ActualRead, &m_HorizontalFOV, &m_VerticalFOV, &m_AutoExposure, &m_AutoWhiteBalance);
+		&m_CroppingMode, &m_ActualRead, &m_HorizontalFOV, &m_VerticalFOV, &m_AutoExposure, &m_AutoWhiteBalance, &m_Exposure, &m_Gain);
 
 	// set base properties default values
 	nRetVal = ResolutionProperty().UnsafeUpdateValue(XN_IMAGE_STREAM_DEFAULT_RESOLUTION);
@@ -205,6 +210,10 @@ XnStatus XnSensorImageStream::MapPropertiesToFirmware()
 	nRetVal = m_Helper.MapFirmwareProperty(m_AutoExposure, GetFirmwareParams()->m_ImageAutoExposure, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.MapFirmwareProperty(m_AutoWhiteBalance, GetFirmwareParams()->m_ImageAutoWhiteBalance, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_Exposure, GetFirmwareParams()->m_ImageExposureBar, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_Gain, GetFirmwareParams()->m_ImageGain, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
 
 	return (XN_STATUS_OK);
@@ -355,7 +364,7 @@ XnStatus XnSensorImageStream::OpenStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareCropMode);
 	XN_IS_STATUS_OK(nRetVal);
 
-	if (m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = m_Helper.ConfigureFirmware(m_AutoExposure);
 		XN_IS_STATUS_OK(nRetVal);
@@ -644,7 +653,7 @@ XnStatus XnSensorImageStream::SetAutoExposure(XnBool bAutoExposure)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (!m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = SetAutoExposureForOldFirmware(bAutoExposure);
 		XN_IS_STATUS_OK(nRetVal);
@@ -691,7 +700,7 @@ XnStatus XnSensorImageStream::SetAutoWhiteBalance(XnBool bAutoWhiteBalance)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (!m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = SetAutoWhiteBalanceForOldFirmware(bAutoWhiteBalance);
 		XN_IS_STATUS_OK(nRetVal);
@@ -708,6 +717,34 @@ XnStatus XnSensorImageStream::SetAutoWhiteBalance(XnBool bAutoWhiteBalance)
 	return (XN_STATUS_OK);
 }
 
+XnStatus XnSensorImageStream::SetExposure(XnUInt64 nValue)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
+	{
+		return (XN_STATUS_UNSUPPORTED_VERSION);
+	}
+
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_Exposure, (XnUInt16)nValue);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}
+XnStatus XnSensorImageStream::SetGain(XnUInt64 nValue)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
+	{
+		return (XN_STATUS_UNSUPPORTED_VERSION);
+	}
+
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_Gain, (XnUInt16)nValue);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}
 
 XnStatus XnSensorImageStream::ReallocTripleFrameBuffer()
 {
@@ -895,4 +932,16 @@ XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetAutoWhiteBalanceCallback(XnAct
 {
 	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
 	return pStream->SetAutoWhiteBalance((XnBool)nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetExposureCallback(XnActualIntProperty*, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
+	return pStream->SetExposure(nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetGainCallback(XnActualIntProperty*, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
+	return pStream->SetGain(nValue);
 }
