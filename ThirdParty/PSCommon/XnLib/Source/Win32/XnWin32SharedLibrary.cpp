@@ -31,10 +31,13 @@ XN_C_API XnStatus xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibH
 	XN_VALIDATE_INPUT_PTR(cpFileName);
 	XN_VALIDATE_OUTPUT_PTR(pLibHandle);
 
-	// Load the requested shared library via the OS (set error mode before, because otherwise, if a dependency DLL is missing,
-	// Windows will pop a message box)
+	// Load the requested shared library via the OS.
+	// NOTE1: set error mode before, because otherwise, if a dependency DLL is missing, Windows will pop a message box
+	// NOTE2: load DLL using full path name, otherwise behavior with ALTERED_SEARCH_PATH is undefined
 	DWORD prevMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-	*pLibHandle = LoadLibraryEx(cpFileName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	XnChar strFileName[XN_FILE_MAX_PATH];
+	GetFullPathName(cpFileName, XN_FILE_MAX_PATH, strFileName, NULL);
+	*pLibHandle = LoadLibraryEx(strFileName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 	SetErrorMode(prevMode);
 
 	// Make sure it succeeded (return value is not NULL). If not return an error....
