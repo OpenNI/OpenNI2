@@ -1,5 +1,5 @@
-OpenNI 2.1.0 Build 4
-January 15 2013
+OpenNI 2.2.0 Build 1
+February 3 2013
 
 Minimum Requirements:
 ---------------------
@@ -29,6 +29,13 @@ Notes:
 
 Change Log:
 -----------
+
+OpenNI 2.2.0:
+  - Added getDepthColorSyncEnabled API
+  - Merge pull request #7: Driver path resolution based on the shared library location See https://github.com/OpenNI/OpenNI2/pull/7 for details (thanks Tomoto)
+  - Build: Rename Redist dir to Packaging
+  - Build: Remove all warnings during build. Treat all warnings as errors.
+  - Bug Fix: Failed to use after OpenCL was initialized
 
 OpenNI 2.1.0:
   - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.
