@@ -35,62 +35,180 @@ DepthKinectStream::DepthKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
 }
 
-void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT& LockedRect)
+// Discard the depth value equal or greater than the max value.
+inline unsigned short filterReliableDepthValue(unsigned short value)
 {
+	return value < DEVICE_MAX_DEPTH_VAL ? value : 0;
+}
 
-	OniDriverFrame* pFrame = NULL;
-
-	pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-	pFrame->frame.dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * sizeof(unsigned short);
-	pFrame->frame.data =  xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-	pFrame->pDriverCookie = xnOSMalloc(sizeof(KinectStreamFrameCookie));
-	((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
-	const NUI_DEPTH_IMAGE_PIXEL * pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL *>(LockedRect.pBits);
-	const NUI_DEPTH_IMAGE_PIXEL * pBufferEnd = pBufferRun + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-	// Get the min and max reliable depth for the current frame
-	unsigned short * data = (unsigned short *)pFrame->frame.data;
+// Populate the image-related metadata (resolution, cropping, etc.) to OniDriverFrame.
+void DepthKinectStream::populateFrameImageMetadata(OniDriverFrame* pFrame, int dataUnitSize)
+{
 	if (!m_cropping.enabled)
 	{
-		while (pBufferRun < pBufferEnd)
-		{
-			// discard the portion of the depth that contains only the player index
-			*(data++) = (pBufferRun->depth > 0 && pBufferRun->depth < DEVICE_MAX_DEPTH_VAL)?pBufferRun->depth:0;
-			++pBufferRun;
-		}
-		pFrame->frame.stride = m_videoMode.resolutionX * 2;
-		pFrame->frame.height = pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.width  = pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->frame.height = m_videoMode.resolutionY;
+		pFrame->frame.width  = m_videoMode.resolutionX;
 		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
 		pFrame->frame.croppingEnabled = FALSE;
-	}
-	else
-	{
-		int cropX = m_cropping.originX;
-		int cropY = m_cropping.originY;
-		while (cropY < m_cropping.originY + m_cropping.height)
-		{
-			while (cropX < m_cropping.originX + m_cropping.width)
-			{
-				const NUI_DEPTH_IMAGE_PIXEL *iter = pBufferRun + (m_videoMode.resolutionX * cropY + cropX++);
-				*(data++)= (iter->depth > 0 && iter->depth < DEVICE_MAX_DEPTH_VAL) ? iter->depth:0;
-			}
-			cropY++;
-			cropX = m_cropping.originX;
-		}
-		pFrame->frame.stride = m_cropping.width * 2;
+	} else {
 		pFrame->frame.height = m_cropping.height;
 		pFrame->frame.width  = m_cropping.width;
-		pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
-		pFrame->frame.cropOriginX = m_cropping.originX; 
+		pFrame->frame.cropOriginX = m_cropping.originX;
 		pFrame->frame.cropOriginY = m_cropping.originY;
 		pFrame->frame.croppingEnabled = TRUE;
 	}
+	pFrame->frame.stride = pFrame->frame.width * dataUnitSize;
+	pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
+	pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
 	pFrame->frame.videoMode.pixelFormat = m_videoMode.pixelFormat;
 	pFrame->frame.videoMode.fps = m_videoMode.fps;
+}
+
+// FIXME: For preliminary benchmarking purpose. Should not belong here.
+static void recordAverageProcessTime(const char* message, LARGE_INTEGER* pAccTime, LARGE_INTEGER* pAccCount, const LARGE_INTEGER& startTime)
+{
+#if 0 // set to 1 to display the process time
+	LARGE_INTEGER endTime;
+	QueryPerformanceCounter(&endTime);
+	pAccTime->QuadPart += endTime.QuadPart - startTime.QuadPart;
+	pAccCount->QuadPart++;
+	printf("%s: %lld\n", message, pAccTime->QuadPart / pAccCount->QuadPart);
+#endif
+}
+
+// Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
+// with applying cropping but NO depth-to-image registration.
+void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
+{
+	// Note: The local variable assignments and const qualifiers are carefully designed to generate
+	// a high performance code with VC 2010. We recommend check the performance when changing the code
+	// even if it was a trivial change.
+
+	// For benchmarking purpose
+	LARGE_INTEGER startTime;
+	QueryPerformanceCounter(&startTime);
+
+	unsigned short* target = (unsigned short*) pFrame->frame.data;
+
+	const unsigned int width = pFrame->frame.width;
+	const unsigned int height = pFrame->frame.height;
+	const unsigned int skipWidth = m_videoMode.resolutionX - width;
+
+	// Offset the starting position
+	source += pFrame->frame.cropOriginX + pFrame->frame.cropOriginY * m_videoMode.resolutionX;
+
+	for (unsigned int y = 0; y < height; y++)
+	{
+		for (unsigned int x = 0; x < width; x++)
+		{
+			*(target++) = filterReliableDepthValue((source++)->depth);
+		}
+		source += skipWidth;
+	}
+
+	// FIXME: for preliminary benchmarking purpose
+	static LARGE_INTEGER accTime, accCount;
+	recordAverageProcessTime("No Image Reg", &accTime, &accCount, startTime);
+}
+
+// Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
+// with applying cropping and depth-to-image registration.
+void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniDriverFrame* pFrame)
+{
+	// Note: We evaluated another possible implementation using INuiCoordinateMapper*::MapColorFrameToDepthFrame,
+	// but, counterintuitively, it turned out to be slower than this implementation. We reverted it back.
+
+	// Note: The local variable assignments and const qualifiers are carefully designed to generate
+	// a high performance code with VC 2010. We recommend check the performance when changing the code
+	// even if it was a trivial change.
+
+	// For benchmarking purpose
+	LARGE_INTEGER startTime;
+	QueryPerformanceCounter(&startTime);
+
+	NUI_IMAGE_RESOLUTION nuiResolution =
+		m_pStreamImpl->getNuiImagResolution(pFrame->frame.videoMode.resolutionX, pFrame->frame.videoMode.resolutionY);
+
+	unsigned short* const target = (unsigned short*) pFrame->frame.data;
+	xnOSMemSet(target, 0, pFrame->frame.dataSize);
+
+	m_depthValuesBuffer.SetSize(numPoints);
+	m_mappedCoordsBuffer.SetSize(numPoints * 2);
+
+	// Pack depth data for NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
+	USHORT* depthValuesIter = m_depthValuesBuffer.GetData();
+	for (int i = 0; i < numPoints; i++) {
+		*(depthValuesIter++) = (source + i)->depth << 3;
+	}
+
+	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
+	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
+		nuiResolution, // assume the target image with the same resolution as the source.
+		nuiResolution,
+		numPoints,
+		m_depthValuesBuffer.GetData(),
+		numPoints * 2,
+		m_mappedCoordsBuffer.GetData()
+		);
+
+	const unsigned int minX = pFrame->frame.cropOriginX;
+	const unsigned int minY = pFrame->frame.cropOriginY;
+	const unsigned int width = pFrame->frame.width;
+	const unsigned int height = pFrame->frame.height;
+	const LONG* mappedCoordsIter = m_mappedCoordsBuffer.GetData();
+
+	for (int i = 0; i < numPoints; i++)
+	{
+		const unsigned int x = *mappedCoordsIter++ - minX;
+		const unsigned int y = *mappedCoordsIter++ - minY;
+		if (x < width - 1 && y < height) {
+			const unsigned short d = filterReliableDepthValue((source+i)->depth);
+			unsigned short* p = target + x + y * width;
+			if (*p == 0 || *p > d) *p = d;
+			p++;
+			if (*p == 0 || *p > d) *p = d;
+		}
+	}
+
+	// FIXME: for preliminary benchmarking purpose
+	static LARGE_INTEGER accTime, accCount;
+	recordAverageProcessTime("With Image Reg", &accTime, &accCount, startTime);
+}
+
+
+void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT& LockedRect)
+{
+	OniDriverFrame* pFrame = NULL;
+
+	// calculate the data size and allocate the buffer
+	int numPoints = m_videoMode.resolutionY * m_videoMode.resolutionX;
+	int dataSize = numPoints * sizeof(unsigned short);
+	unsigned short * data = (unsigned short *) xnOSMallocAligned(dataSize, XN_DEFAULT_MEM_ALIGN);
+
+	// allocate the frame
+	pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
+	pFrame->pDriverCookie = xnOSMalloc(sizeof(KinectStreamFrameCookie));
+	((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
+
+	// populate the data buffer
+	pFrame->frame.dataSize = dataSize;
+	pFrame->frame.data = data;
+
+	// populate the video-related metadata
+	populateFrameImageMetadata(pFrame, sizeof(unsigned short));
+
+	// populate other frame info
 	pFrame->frame.sensorType = ONI_SENSOR_DEPTH;
 	pFrame->frame.frameIndex = imageFrame.dwFrameNumber;
 	pFrame->frame.timestamp = imageFrame.liTimeStamp.QuadPart*1000;
+
+	// populate the pixel data
+	if (m_pStreamImpl->getImageRegistrationMode() == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR) {
+		copyDepthPixelsWithImageRegistration((NUI_DEPTH_IMAGE_PIXEL*)LockedRect.pBits, numPoints, pFrame);
+	} else {
+		copyDepthPixelsStraight((NUI_DEPTH_IMAGE_PIXEL*)LockedRect.pBits, numPoints, pFrame);
+	}
+
 	raiseNewFrame(pFrame);
 }
 

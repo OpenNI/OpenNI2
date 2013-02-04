@@ -28,6 +28,8 @@ public:
 	virtual OniBool isCommandSupported(int commandId) ;
 	virtual OniStatus tryManualTrigger();
 
+	virtual OniBool isImageRegistrationModeSupported(OniImageRegistrationMode mode);
+
 private:
 	INuiSensor * m_pNuiSensor;
 	KinectStreamImpl* m_pDepthStream;
