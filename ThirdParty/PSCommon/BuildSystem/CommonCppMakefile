@@ -19,6 +19,7 @@
 # LDFLAGS - [Optional] additional flags for the linker
 # SSE_GENERATION - [Optional] The SSE generation to use (default is 3)
 # TARGET_SYS_ROOT - [Optional] The path to the root of the target
+# ALLOW_WARNINGS - [Optional] Allow warnings during compilation
 #############################################################################
 
 # take this file's dir
@@ -70,7 +71,11 @@ endif
 
 CFLAGS += $(INC_DIRS_OPTION) $(DEFINES_OPTION)
 CFLAGS += -fPIC -fvisibility=hidden
-CFLAGS += -Werror
+
+ifneq "$(ALLOW_WARNINGS)" "1"
+	CFLAGS += -Werror
+endif
+
 LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
 
 # some lib / exe specifics
