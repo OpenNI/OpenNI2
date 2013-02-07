@@ -3,6 +3,8 @@
 
 #include "OniCTypes.h"
 
+#pragma pack (push, 1)
+
 typedef struct
 {
 	unsigned short nStartLines;
@@ -72,6 +74,8 @@ typedef struct
 
 	} params1080;
 } DepthUtilsSensorCalibrationInfo;
+
+#pragma pack (pop)
 
 
 struct _DepthUtils;
