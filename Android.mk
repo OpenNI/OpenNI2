@@ -16,25 +16,19 @@
 
 # Check if we're building from OS or NDK
 ifdef TARGET_BUILD_VARIANT
-    $(info OpenNI2: Building from OS.)	
-	
-    OPENNI2_ANDROID_OS_BUILD := true
+	OPENNI2_ANDROID_OS_BUILD := true
 else
-    $(info OpenNI2: Building from NDK.)
-	
-    OPENNI2_ANDROID_NDK_BUILD := true
+	OPENNI2_ANDROID_NDK_BUILD := true
 endif
 
 # Setup OpenNI2 local variables
 OPENNI2_CFLAGS := -O3 -ftree-vectorize -ffast-math -funroll-loops -fPIC -fvisibility=hidden
 
 ifeq ($(ARCH_ARM_HAVE_ARMV7A),true) 
-    $(info OpenNI2: ARMV7A is enabled.)
-	OPENNI2_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfp=vfpv3-d16 -mfpu=vfp
+	OPENNI2_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfpu=vfp
 endif
 
 ifeq ($(ARCH_ARM_HAVE_NEON),true)
-    $(info OpenNI2: NEON is enabled.)
 	OPENNI2_CFLAGS += -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
 endif
 
