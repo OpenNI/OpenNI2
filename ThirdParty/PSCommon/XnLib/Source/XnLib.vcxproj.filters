@@ -78,9 +78,6 @@
     <ClInclude Include="..\Include\XnPlatform.h">
       <Filter>Header Files\API</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Win32\XnLibWin32.h">
-      <Filter>Header Files\API\Win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Win32\XnPlatformWin32.h">
       <Filter>Header Files\API\Win32</Filter>
     </ClInclude>
@@ -164,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="..\Include\XnSIMD-SSE.h">
       <Filter>Header Files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Win32\usb100.h">
+      <Filter>Header Files\API\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Win32\XnOSWin32.h">
+      <Filter>Header Files\API\Win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
