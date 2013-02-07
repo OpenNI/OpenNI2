@@ -232,6 +232,17 @@ XnStatus XnSensorDepthStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 
+	// initialize registration
+	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3)
+	{
+		nRetVal = PopulateSensorCalibrationInfo();
+		XN_IS_STATUS_OK(nRetVal);
+		nRetVal = DepthUtilsInitialize(&m_calibrationInfo, &m_depthUtilsHandle);
+		XN_IS_STATUS_OK(nRetVal);
+		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
+		XN_IS_STATUS_OK(nRetVal);
+	}
+
 	return (XN_STATUS_OK);
 }
 
@@ -362,17 +373,6 @@ XnStatus XnSensorDepthStream::SetActualRead(XnBool bRead)
 XnStatus XnSensorDepthStream::OpenStreamImpl()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
-
-	// initialize registration
-	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3)
-	{
-		nRetVal = PopulateSensorCalibrationInfo();
-		XN_IS_STATUS_OK(nRetVal);
-		nRetVal = DepthUtilsInitialize(&m_calibrationInfo, &m_depthUtilsHandle);
-		XN_IS_STATUS_OK(nRetVal);
-		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
-		XN_IS_STATUS_OK(nRetVal);
-	}
 
 	// Turn stream on
 	nRetVal = GetFirmwareParams()->m_Stream1Mode.SetValue(XN_VIDEO_STREAM_DEPTH);
