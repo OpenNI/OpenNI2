@@ -26,7 +26,9 @@
 //---------------------------------------------------------------------------
 #include "XnFormats.h"
 #include <XnOS.h>
-#include <../../../../ThirdParty/LibJPEG/jpeglib.h>
+extern "C" {
+#include <jpeglib.h>
+}
 #include <setjmp.h>
 
 //---------------------------------------------------------------------------

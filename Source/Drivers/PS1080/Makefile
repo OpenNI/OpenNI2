@@ -7,6 +7,7 @@ INC_DIRS = \
 	Include \
 	../../../Include \
 	../../../ThirdParty/PSCommon/XnLib/Include \
+	../../../ThirdParty/LibJPEG \
 	../../DepthUtils
 
 SRC_FILES = \

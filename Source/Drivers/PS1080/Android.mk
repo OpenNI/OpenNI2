@@ -46,7 +46,7 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include
 
 ifdef OPENNI2_ANDROID_NDK_BUILD
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG
+    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG
 else
     LOCAL_C_INCLUDES += external/jpeg
 endif
