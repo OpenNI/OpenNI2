@@ -405,9 +405,6 @@
     <ClCompile Include="Sensor\LinAlg.cpp">
       <Filter>Sensor\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Sensor\Registration.cpp">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClCompile>
     <ClCompile Include="Sensor\Uncomp.cpp">
       <Filter>Sensor\Algorithms</Filter>
     </ClCompile>
@@ -747,9 +744,6 @@
       <Filter>Sensor\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\LinAlg.h">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Sensor\Registration.h">
       <Filter>Sensor\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\Uncomp.h">

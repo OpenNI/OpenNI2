@@ -26,8 +26,8 @@
 //---------------------------------------------------------------------------
 #include <DDK/XnDepthStream.h>
 #include "XnDeviceSensorProtocol.h"
-#include "Registration.h"
 #include "XnSensorStreamHelper.h"
+#include <DepthUtils.h>
 
 
 //---------------------------------------------------------------------------
@@ -72,6 +72,7 @@ public:
 	inline XnSensorStreamHelper* GetHelper() { return &m_Helper; }
 
 	friend class XnDepthProcessor;
+	friend class XnOniDepthStream;
 
 protected:
 	inline XnSensorFirmwareParams* GetFirmwareParams() const { return m_Helper.GetFirmware()->GetParams(); }
@@ -92,8 +93,9 @@ protected:
 	XnStatus MapPropertiesToFirmware();
 	void GetFirmwareStreamConfig(XnResolutions* pnRes, XnUInt32* pnFPS) { *pnRes = GetResolution(); *pnFPS = GetFPS(); }
 
-	XnRegistration& GetRegistration() { return m_Registration; }
-
+	XnStatus ApplyRegistration(OniDepthPixel* pDetphmap);
+	OniStatus GetSensorCalibrationInfo(void* data, int* dataSize);
+	XnStatus PopulateSensorCalibrationInfo();
 
 protected:
 	//---------------------------------------------------------------------------
@@ -175,7 +177,8 @@ private:
 	XnActualRealProperty m_VerticalFOV;
 
 
-	XnRegistration m_Registration;
+	DepthUtilsHandle m_depthUtilsHandle;
+	DepthUtilsSensorCalibrationInfo m_calibrationInfo;
 	XnCallbackHandle m_hReferenceSizeChangedCallback;
 };
 

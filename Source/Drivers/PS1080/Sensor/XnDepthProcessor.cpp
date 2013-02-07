@@ -142,7 +142,7 @@ void XnDepthProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeade
 	{
 		if (m_applyRegistrationOnEnd)
 		{
-			GetStream()->GetRegistration().Apply((OniDepthPixel*)GetWriteBuffer()->GetData());
+			GetStream()->ApplyRegistration((OniDepthPixel*)GetWriteBuffer()->GetData());
 		}
 	}
 

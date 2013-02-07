@@ -27,7 +27,6 @@
 #include "XnPSCompressedDepthProcessor.h"
 #include "XnPacked11DepthProcessor.h"
 #include "XnPacked12DepthProcessor.h"
-#include "Registration.h"
 #include "XnCmosInfo.h"
 #include <XnOS.h>
 #include <XnProfiling.h>
@@ -57,7 +56,7 @@ XnSensorDepthStream::XnSensorDepthStream(const XnChar* strName, XnSensorObjects*
 	m_HoleFilter(XN_STREAM_PROPERTY_HOLE_FILTER, "HoleFilter", XN_DEPTH_STREAM_DEFAULT_HOLE_FILLER),
 	m_WhiteBalance(XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED, "WhiteBalanceEnabled", XN_DEPTH_STREAM_DEFAULT_WHITE_BALANCE),
 	m_Gain(XN_STREAM_PROPERTY_GAIN, "Gain", XN_DEPTH_STREAM_DEFAULT_GAIN_OLD),
-	m_RegistrationType(XN_STREAM_PROPERTY_REGISTRATION_TYPE, "RegistartionType", XN_DEPTH_STREAM_DEFAULT_REGISTRATION_TYPE),
+	m_RegistrationType(XN_STREAM_PROPERTY_REGISTRATION_TYPE, "RegistrationType", XN_DEPTH_STREAM_DEFAULT_REGISTRATION_TYPE),
 	m_CroppingMode(XN_STREAM_PROPERTY_CROPPING_MODE, "CroppingMode", XN_CROPPING_MODE_NORMAL),
 	m_AGCBin(XN_STREAM_PROPERTY_AGC_BIN, "AGCBin", NULL, ReadAGCBinsFromFile),
 	m_FirmwareMirror(0, "FirmwareMirror", FALSE, strName),
@@ -73,6 +72,7 @@ XnSensorDepthStream::XnSensorDepthStream(const XnChar* strName, XnSensorObjects*
 	m_PixelRegistration(XN_STREAM_PROPERTY_PIXEL_REGISTRATION, "PixelRegistration"),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
 	m_VerticalFOV(ONI_STREAM_PROPERTY_VERTICAL_FOV, "VerticalFov"),
+	m_depthUtilsHandle(NULL),
 	m_hReferenceSizeChangedCallback(NULL)
 {
 	m_ActualRead.UpdateSetCallback(SetActualReadCallback, this);
@@ -238,7 +238,7 @@ XnStatus XnSensorDepthStream::Init()
 XnStatus XnSensorDepthStream::Free()
 {
 
-	m_Registration.Free();
+	DepthUtilsShutdown(&m_depthUtilsHandle);
 
 	// unregister from external properties (internal ones will be destroyed anyway...)
 	if (m_hReferenceSizeChangedCallback != NULL)
@@ -366,7 +366,11 @@ XnStatus XnSensorDepthStream::OpenStreamImpl()
 	// initialize registration
 	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3)
 	{
-		nRetVal = m_Registration.Init(m_Helper.GetPrivateData(), this, GetShiftToDepthTable());
+		nRetVal = PopulateSensorCalibrationInfo();
+		XN_IS_STATUS_OK(nRetVal);
+		nRetVal = DepthUtilsInitialize(&m_calibrationInfo, &m_depthUtilsHandle);
+		XN_IS_STATUS_OK(nRetVal);
+		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
 		XN_IS_STATUS_OK(nRetVal);
 	}
 
@@ -449,6 +453,12 @@ XnStatus XnSensorDepthStream::SetOutputFormat(OniPixelFormat nOutputFormat)
 	nRetVal = m_Helper.AfterSettingDataProcessorProperty();
 	XN_IS_STATUS_OK(nRetVal);
 
+	if (m_depthUtilsHandle != NULL)
+	{	
+		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
+		XN_IS_STATUS_OK(nRetVal);
+	}
+		
 	return (XN_STATUS_OK);
 }
 
@@ -470,8 +480,15 @@ XnStatus XnSensorDepthStream::SetMirror(XnBool bIsMirrored)
 
 	// update prop
 	nRetVal = XnDepthStream::SetMirror(bIsMirrored);
+
 	xnOSLeaveCriticalSection(GetLock());
 	XN_IS_STATUS_OK(nRetVal);
+
+	if (m_depthUtilsHandle != NULL)
+	{
+		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	return (XN_STATUS_OK);
 }
@@ -505,6 +522,12 @@ XnStatus XnSensorDepthStream::SetResolution(XnResolutions nResolution)
 	nRetVal = m_Helper.AfterSettingFirmwareParam(ResolutionProperty());
 	XN_IS_STATUS_OK(nRetVal);
 
+	if (m_depthUtilsHandle != NULL)
+	{
+		nRetVal = DepthUtilsSetDepthConfiguration(m_depthUtilsHandle, GetXRes(), GetYRes(), GetOutputFormat(), IsMirrored());
+		XN_IS_STATUS_OK(nRetVal);
+	}
+		
 	return (XN_STATUS_OK);
 }
 
@@ -988,42 +1011,96 @@ XnStatus XnSensorDepthStream::GetImageCoordinatesOfDepthPixel(XnUInt32 x, XnUInt
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	
-	// first translate to same resolution
-	nRetVal = m_Registration.TranslateSinglePixel(x, y, z, imageX, imageY);
+	nRetVal = DepthUtilsSetColorResolution(m_depthUtilsHandle, imageXRes, imageYRes);
 	XN_IS_STATUS_OK(nRetVal);
 
-	// We assume image resolution is for the entire FOV, unless a wide (16:9) resolution is used. In this case,
-	// we assume the matching 5:4 resolution is the entire FOV, and the wide is a crop from it.
-	XnDouble fullXRes = imageXRes;
-	XnDouble fullYRes;
-	XnBool bCrop = FALSE;
+	// first translate to same resolution
+	nRetVal = DepthUtilsTranslatePixel(m_depthUtilsHandle, x, y, z, &imageX, &imageY);
+	return nRetVal;
+}
 
-	if ((9 * imageXRes / imageYRes) == 16)
+OniStatus XnSensorDepthStream::GetSensorCalibrationInfo(void* data, int* pDataSize)
+{
+	if ((size_t)*pDataSize < sizeof(DepthUtilsSensorCalibrationInfo))
 	{
-		fullYRes = imageXRes * 4 / 5;
-		bCrop = TRUE;
-	}
-	else
-	{
-		fullYRes = imageYRes;
-		bCrop = FALSE;
+		return ONI_STATUS_BAD_PARAMETER;
 	}
 
-	// inflate to full res
-	imageX = (XnUInt32)(fullXRes / GetXRes() * imageX);
-	imageY = (XnUInt32)(fullYRes / GetYRes() * imageY);
+	*pDataSize = sizeof(DepthUtilsSensorCalibrationInfo);
+	xnOSMemCopy(data, &m_calibrationInfo, sizeof(DepthUtilsSensorCalibrationInfo));
+	return ONI_STATUS_OK;
+}
 
-	if (bCrop)
+
+XnStatus XnSensorDepthStream::ApplyRegistration(OniDepthPixel* pDetphmap)
+{
+	DepthUtilsTranslateDepthMap(m_depthUtilsHandle, pDetphmap);
+	return XN_STATUS_OK;
+}
+
+#define RGB_REG_X_RES 640
+#define RGB_REG_Y_RES 512
+#define XN_CMOS_VGAOUTPUT_XRES 1280
+#define XN_SENSOR_WIN_OFFET_X 1
+#define XN_SENSOR_WIN_OFFET_Y 1
+#define RGB_REG_X_VAL_SCALE 16
+#define S2D_PEL_CONST 10
+#define S2D_CONST_OFFSET 0.375
+
+XnStatus XnSensorDepthStream::PopulateSensorCalibrationInfo()
+{
+	XnDouble dPlanePixelSize;
+	GetProperty(XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE, &dPlanePixelSize);
+
+	XnUInt64 nPlaneDsr;
+	GetProperty(XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE, &nPlaneDsr);
+
+	XnDouble dDCRCDist;
+	GetProperty(XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE, &dDCRCDist);
+
+	m_calibrationInfo.magic = 0x023A;
+	m_calibrationInfo.version = 1;
+	m_calibrationInfo.params1080.zpd = (int)nPlaneDsr;
+	m_calibrationInfo.params1080.zpps = dPlanePixelSize;
+	m_calibrationInfo.params1080.dcrcdist = dDCRCDist;
+
+	xnOSStrCopy(m_calibrationInfo.deviceName, "PS1080", 80);
+	xnOSMemSet(m_calibrationInfo.serial, 0, 80);
+
+	m_calibrationInfo.params1080.rgbRegXRes = RGB_REG_X_RES;
+	m_calibrationInfo.params1080.rgbRegYRes = RGB_REG_Y_RES;
+	m_calibrationInfo.params1080.cmosVGAOutputXRes = XN_CMOS_VGAOUTPUT_XRES;
+	m_calibrationInfo.params1080.sensorWinOffsetX = XN_SENSOR_WIN_OFFET_X;
+	m_calibrationInfo.params1080.sensorWinOffsetY = XN_SENSOR_WIN_OFFET_Y;
+	m_calibrationInfo.params1080.rgbRegXValScale = RGB_REG_X_VAL_SCALE;
+	m_calibrationInfo.params1080.s2dPelConst = S2D_PEL_CONST;
+	m_calibrationInfo.params1080.s2dConstOffset = S2D_CONST_OFFSET;
+
+	XnStatus nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &m_calibrationInfo.params1080.registrationInfo_QQVGA, sizeof(m_calibrationInfo.params1080.registrationInfo_QQVGA), XN_RESOLUTION_QQVGA, 30);
+	if (nRetVal != XN_STATUS_OK)
 	{
-		// crop from center
-		imageY -= (XnUInt32)(fullYRes - imageYRes)/2;
-		if (imageY > imageYRes)
-		{
-			return XN_STATUS_BAD_PARAM;
-		}
+		xnOSMemSet(&m_calibrationInfo.params1080.registrationInfo_QQVGA, 0, sizeof(m_calibrationInfo.params1080.registrationInfo_QQVGA));
 	}
+	
+	nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &m_calibrationInfo.params1080.registrationInfo_QVGA, sizeof(m_calibrationInfo.params1080.registrationInfo_QVGA), XN_RESOLUTION_QVGA, 30);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &m_calibrationInfo.params1080.registrationInfo_VGA, sizeof(m_calibrationInfo.params1080.registrationInfo_VGA), XN_RESOLUTION_VGA, 30);
+	XN_IS_STATUS_OK(nRetVal);
 
-	return (XN_STATUS_OK);
+	nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_PADDING, &m_calibrationInfo.params1080.padInfo_QQVGA, sizeof(m_calibrationInfo.params1080.padInfo_QQVGA), XN_RESOLUTION_QQVGA, 30);
+	if (nRetVal != XN_STATUS_OK)
+	{	
+		xnOSMemSet(&m_calibrationInfo.params1080.padInfo_QQVGA, 0, sizeof(m_calibrationInfo.params1080.padInfo_QQVGA));
+	}
+	
+	xnOSMemSet(&m_calibrationInfo.params1080.padInfo_QVGA, 0, sizeof(m_calibrationInfo.params1080.padInfo_QVGA));
+	nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_PADDING, &m_calibrationInfo.params1080.padInfo_QVGA, sizeof(m_calibrationInfo.params1080.padInfo_QVGA), XN_RESOLUTION_QVGA, 30);
+	XN_IS_STATUS_OK(nRetVal);
+	xnOSMemSet(&m_calibrationInfo.params1080.padInfo_VGA, 0, sizeof(m_calibrationInfo.params1080.padInfo_VGA));
+	nRetVal = XnHostProtocolAlgorithmParams(m_Helper.GetPrivateData(), XN_HOST_PROTOCOL_ALGORITHM_PADDING, &m_calibrationInfo.params1080.padInfo_VGA, sizeof(m_calibrationInfo.params1080.padInfo_VGA), XN_RESOLUTION_VGA, 30);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return XN_STATUS_OK;
 }
 
 XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetInputFormatCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)

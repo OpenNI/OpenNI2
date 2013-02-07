@@ -25,7 +25,6 @@
 #include "XnDeviceSensorInit.h"
 #include "XnDeviceSensorProtocol.h"
 #include "Bayer.h"
-#include "Registration.h"
 #include "XnHostProtocol.h"
 #include <XnLog.h>
 #include "XnSensor.h"

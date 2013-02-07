@@ -17,6 +17,7 @@ include ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
 
 OPENNI = Source/Core
 XNLIB  = ThirdParty/PSCommon/XnLib/Source
+DEPTH_UTILS = Source/DepthUtils
 
 # list all drivers
 ALL_DRIVERS = \
@@ -31,6 +32,7 @@ ALL_TOOLS =
 ALL_CORE_PROJS = \
 	$(XNLIB)  \
 	$(OPENNI) \
+	$(DEPTH_UTILS) \
 	$(ALL_DRIVERS) \
 	$(ALL_TOOLS)
 
@@ -96,7 +98,7 @@ $(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
 $(OPENNI):				  $(XNLIB)
 Source/Drivers/DummyDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/RawDevice:	$(OPENNI) $(XNLIB)
-Source/Drivers/PS1080:		$(OPENNI) $(XNLIB)
+Source/Drivers/PS1080:		$(OPENNI) $(XNLIB) $(DEPTH_UTILS)
 Source/Drivers/OniFile:		$(OPENNI) $(XNLIB)
 
 Source/Tools/NiViewer:		$(OPENNI) $(XNLIB)
