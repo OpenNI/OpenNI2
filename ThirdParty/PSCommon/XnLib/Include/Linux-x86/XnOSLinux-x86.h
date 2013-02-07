@@ -100,7 +100,7 @@ typedef void* (*XN_THREAD_PROC_PROTO)(void* arg);
 #define	XN_THREAD_PROC void*
 
 /** The thread return function. */
-#define	XN_THREAD_PROC_RETURN(ret) return((void*)ret)
+#define	XN_THREAD_PROC_RETURN(ret) return(NULL)
 
 /** The thread passable data pointer type. */ 
 typedef	void* XN_THREAD_PARAM;

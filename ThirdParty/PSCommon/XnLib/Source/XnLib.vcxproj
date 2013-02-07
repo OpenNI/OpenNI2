@@ -19,10 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Include\Win32\usb100.h" />
+    <ClInclude Include="..\Include\Win32\XnOSWin32.h" />
     <ClInclude Include="..\Include\XnCallStackLogger.h" />
     <ClInclude Include="..\Include\XnErrorLogger.h" />
     <ClInclude Include="..\Include\XnLib.h" />
-    <ClInclude Include="..\Include\Win32\XnLibWin32.h" />
     <ClInclude Include="..\Include\Win32\XnPlatformWin32.h" />
     <ClInclude Include="..\Include\XnArray.h" />
     <ClInclude Include="..\Include\XnBox3D.h" />
