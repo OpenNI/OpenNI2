@@ -532,7 +532,11 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 0) >= 0)
 	{
 		pDevicePrivateData->FWInfo.nOpcodeSetLedState = OPCODE_SET_LED_STATE;
-		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 2) >= 0)
+	{
+		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;		
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 9) >= 0)
