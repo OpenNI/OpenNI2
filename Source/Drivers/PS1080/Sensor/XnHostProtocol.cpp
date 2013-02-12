@@ -483,7 +483,7 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 3, 31) >= 0 && CompareVersion(nMajor, nMinor, nBuild, 5, 4, 0) < 0)
 	{
-		// filesystem lock was also added in 5.3.31 (a maintenance release), but it's not in newer versions (5.4 and above)
+		// file system lock was also added in 5.3.31 (a maintenance release), but it's not in newer versions (5.4 and above)
 		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
 	}
 
@@ -723,6 +723,12 @@ XnStatus ValidateReplyV26(const XnDevicePrivateData* pDevicePrivateData, XnUChar
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_COMMAND_SIZE;
 		case NACK_NOT_READY:
 			return XN_STATUS_DEVICE_PROTOCOL_NOT_READY;
+		case NACK_OVERFLOW:
+			return XN_STATUS_DEVICE_PROTOCOL_OVERFLOW;
+		case NACK_OVERLAY_NOT_LOADED:
+			return XN_STATUS_DEVICE_PROTOCOL_OVERLAY_NOT_LOADED;
+		case NACK_FILE_SYSTEM_LOCKED:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_SYSTEM_LOCKED;
 		case NACK_UNKNOWN_ERROR:
 		default:
 			return XN_STATUS_DEVICE_PROTOCOL_UNKNOWN_ERROR;
