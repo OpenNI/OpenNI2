@@ -481,6 +481,12 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.bGetPresetsSupported = TRUE;
 	}
 
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 3, 31) >= 0 && CompareVersion(nMajor, nMinor, nBuild, 5, 4, 0) < 0)
+	{
+		// filesystem lock was also added in 5.3.31 (a maintenance release), but it's not in newer versions (5.4 and above)
+		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
+	}
+
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 4, 0) >= 0)
 	{
 		pDevicePrivateData->FWInfo.nOpcodeGetSerialNumber = OPCODE_GET_SERIAL_NUMBER;
