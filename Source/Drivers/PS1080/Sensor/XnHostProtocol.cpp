@@ -1048,7 +1048,7 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	Version.SDK.nMaintenance = XN_PS_MAINTENANCE_VERSION;
 	Version.SDK.nBuild = XN_PS_BUILD_VERSION;
 
-	// find out hardware version (for pre-RD boards)
+	// find out hardware version
 	if (Version.nFPGA == XN_FPGA_VER_FPDB_26)
 	{
 		Version.HWVer = XN_SENSOR_HW_VER_FPDB_10;
@@ -1111,8 +1111,8 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	// find out sensor version
 	Version.SensorVer = XN_SENSOR_VER_UNKNOWN;
 
+	// in some firmwares, the HWVer was incorrect. Override according to firmware number
 	Version.FWVer = GetFWVersion(Version.nMajor, Version.nMinor, Version.nBuild);
-
 	if (Version.FWVer == XN_SENSOR_FW_VER_5_0)
 	{
 		Version.HWVer = XN_SENSOR_HW_VER_RD_5;
@@ -1127,7 +1127,15 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	}
 	else if (Version.FWVer == XN_SENSOR_FW_VER_5_3)
 	{
-		Version.HWVer = XN_SENSOR_HW_VER_RD1081;
+		if (Version.nBuild < 28)
+		{
+			Version.HWVer = XN_SENSOR_HW_VER_RD1081;
+		}
+		else if (Version.nBuild == 28)
+		{
+			Version.HWVer = XN_SENSOR_HW_VER_RD1082;
+		}
+		// 5.3.29 and up returns valid HW versions, so no need to override anything
 	}
 	else if (Version.FWVer == XN_SENSOR_FW_VER_5_4)
 	{
