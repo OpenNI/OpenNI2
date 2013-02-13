@@ -77,6 +77,7 @@ typedef struct
 
 #pragma pack (pop)
 
+static const int ONI_DEPTH_UTILS_CALIBRATION_INFO_MAGIC = 0x023a;
 
 struct _DepthUtils;
 typedef _DepthUtils* DepthUtilsHandle;

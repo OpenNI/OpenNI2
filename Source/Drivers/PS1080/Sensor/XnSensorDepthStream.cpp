@@ -1026,6 +1026,12 @@ OniStatus XnSensorDepthStream::GetSensorCalibrationInfo(void* data, int* pDataSi
 		return ONI_STATUS_BAD_PARAMETER;
 	}
 
+	if (m_depthUtilsHandle == NULL)
+	{
+		// Depth utils not initialized - probably not supported for this device
+		return ONI_STATUS_NOT_SUPPORTED;
+	}
+
 	*pDataSize = sizeof(DepthUtilsSensorCalibrationInfo);
 	xnOSMemCopy(data, &m_calibrationInfo, sizeof(DepthUtilsSensorCalibrationInfo));
 	return ONI_STATUS_OK;
@@ -1058,7 +1064,7 @@ XnStatus XnSensorDepthStream::PopulateSensorCalibrationInfo()
 	XnDouble dDCRCDist;
 	GetProperty(XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE, &dDCRCDist);
 
-	m_calibrationInfo.magic = 0x023A;
+	m_calibrationInfo.magic = ONI_DEPTH_UTILS_CALIBRATION_INFO_MAGIC;
 	m_calibrationInfo.version = 1;
 	m_calibrationInfo.params1080.zpd = (int)nPlaneDsr;
 	m_calibrationInfo.params1080.zpps = dPlanePixelSize;

@@ -10,12 +10,24 @@ XN_C_API XnStatus DepthUtilsInitialize(DepthUtilsSensorCalibrationInfo* pDepthPa
 {
 	*handle = new _DepthUtils;
 	(*handle)->pDepthUtils = new DepthUtilsImpl;
-	return (*handle)->pDepthUtils->Initialize(pDepthParameters);
+	XnStatus rc = (*handle)->pDepthUtils->Initialize(pDepthParameters);
+
+	if (rc != XN_STATUS_OK)
+	{
+		DepthUtilsShutdown(handle);
+	}
+
+	return rc;
 }
 XN_C_API void DepthUtilsShutdown(DepthUtilsHandle* handle)
 {
-	delete (*handle)->pDepthUtils;
-	delete *handle;
+	if ((*handle) != NULL && (*handle)->pDepthUtils != NULL)
+	{
+		delete (*handle)->pDepthUtils;
+		delete *handle;
+
+		*handle = NULL;
+	}
 }
 
 XN_C_API XnStatus DepthUtilsTranslatePixel(DepthUtilsHandle handle, unsigned int x, unsigned int y, unsigned short z, unsigned int* pX, unsigned int* pY)

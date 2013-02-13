@@ -34,6 +34,16 @@ XnStatus DepthUtilsImpl::Initialize(DepthUtilsSensorCalibrationInfo* pBlob)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
+	if (pBlob == NULL)
+	{
+		return XN_STATUS_BAD_PARAM;
+	}
+
+	if (pBlob->magic != ONI_DEPTH_UTILS_CALIBRATION_INFO_MAGIC)
+	{
+		return XN_STATUS_BAD_PARAM;
+	}
+
 	Free();
 
 	xnOSMemCopy(&m_blob, pBlob, sizeof(DepthUtilsSensorCalibrationInfo));
