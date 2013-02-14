@@ -163,38 +163,42 @@ XnStatus XnOniDevice::FillSupportedVideoModes()
 	pSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.irModes.GetData();
 
 	m_sensors[s].sensorType             = ONI_SENSOR_IR;
-	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes);
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes*2);
 	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
 	
+	OniPixelFormat irFormats[] = {ONI_PIXEL_FORMAT_GRAY16, ONI_PIXEL_FORMAT_RGB888};
 	writeIndex = 0;
 	for(XnUInt32 i=0; i < nSupportedModes; ++i)
 	{
-		m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_GRAY16;
-		m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[i].nFPS;
-		XnBool bOK = XnDDKGetXYFromResolution(
-			(XnResolutions)pSupportedModes[i].nResolution,
-			(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
-			(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
-			);
-		XN_ASSERT(bOK);
-		XN_REFERENCE_VARIABLE(bOK);
+		for (int fmt = 0; fmt <= 1; ++fmt)
+		{
+			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = irFormats[fmt];
+			m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[i].nFPS;
+			XnBool bOK = XnDDKGetXYFromResolution(
+				(XnResolutions)pSupportedModes[i].nResolution,
+				(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
+				(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
+				);
+			XN_ASSERT(bOK);
+			XN_REFERENCE_VARIABLE(bOK);
 
-		bool foundMatch = false;
-		for (int j = 0; j < writeIndex; ++j)
-		{
-			if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[j].fps &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
+			bool foundMatch = false;
+			for (int j = 0; j < writeIndex; ++j)
 			{
-				// Already know this configuration
-				foundMatch = true;
-				break;
+				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[j].fps &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
+				{
+					// Already know this configuration
+					foundMatch = true;
+					break;
+				}
 			}
-		}
-		if (!foundMatch)
-		{
-			++writeIndex;
+			if (!foundMatch)
+			{
+				++writeIndex;
+			}
 		}
 	}
 	m_sensors[s].numSupportedVideoModes = writeIndex;
