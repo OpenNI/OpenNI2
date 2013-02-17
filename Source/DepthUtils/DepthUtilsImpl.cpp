@@ -239,7 +239,7 @@ XnStatus DepthUtilsImpl::TranslateSinglePixel(XnUInt32 x, XnUInt32 y, unsigned s
 	XnBool bMirror = m_isMirrored;
 	XnUInt32 nIndex = bMirror ? ((y+1)*nDepthXRes - x - 1) * 2 : (y*nDepthXRes + x) * 2;
 	XnInt16* pRegTable = (XnInt16*)&m_pRegTable[nIndex];
-	XnUInt16* pRGBRegDepthToShiftTable = m_pDepth2ShiftTable; 
+	XnInt16* pRGBRegDepthToShiftTable = (XnInt16*)m_pDepth2ShiftTable; 
 	XnUInt32 nNewX = 0;
 	XnUInt32 nNewY = 0;
 
