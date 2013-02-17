@@ -143,9 +143,14 @@ Pixel type used to store depth images.
 typedef uint16_t OniDepthPixel;
 
 /**
-Pixel type used to store IR images.
+Pixel type used to store 16-bit grayscale images
 */
 typedef uint16_t OniGrayscale16Pixel;
+
+/**
+Pixel type used to store 8-bit grayscale/bayer images
+*/
+typedef uint8_t OniGrayscale8Pixel;
 
 #pragma pack (push, 1)
 
