@@ -1153,9 +1153,18 @@ public:
 	Default constructor. Creates a new empty Device object. This object will be invalid until it is initialized by
 	calling its open() function.
 	*/
-	Device() : m_pPlaybackControl(NULL), m_device(NULL)
+	Device() : m_pPlaybackControl(NULL), m_device(NULL), m_isOwner(true)
 	{
 		clearSensors();
+	}
+
+	/**
+	Handle constructor. Creates a Device object based on the given initialized handle.
+	This object will not destroy the underlying handle when  @ref close() or destructor is closed
+	*/
+	explicit Device(OniDeviceHandle handle) : m_pPlaybackControl(NULL), m_device(NULL), m_isOwner(false)
+	{
+		_setHandle(handle);
 	}
 
 	/**
@@ -1550,6 +1559,8 @@ private:
 	OniDeviceHandle m_device;
 	DeviceInfo m_deviceInfo;
 	SensorInfo m_aSensorInfo[ONI_MAX_SENSORS];
+
+	bool m_isOwner;
 };
 
 /**
@@ -2479,6 +2490,16 @@ void VideoStream::destroy()
 
 Status Device::open(const char* uri)
 {
+	//If we are not the owners, we stick with our own device
+	if(!m_isOwner)
+	{
+		if(isValid()){
+			return STATUS_OK;
+		}else{
+			return STATUS_OUT_OF_FLOW;
+		}
+	}
+
 	OniDeviceHandle deviceHandle;
 	Status rc = (Status)oniDeviceOpen(uri, &deviceHandle);
 	if (rc != STATUS_OK)
@@ -2506,7 +2527,11 @@ void Device::close()
 
 	if (m_device != NULL)
 	{
-		oniDeviceClose(m_device);
+		if(m_isOwner)
+		{
+			oniDeviceClose(m_device);
+		}
+
 		m_device = NULL;
 	}
 }
