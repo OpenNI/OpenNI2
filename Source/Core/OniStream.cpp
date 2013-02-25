@@ -100,7 +100,10 @@ VideoStream::~VideoStream()
 	}
 
 	m_pFrameHolder->setStreamEnabled(this, FALSE);
-	m_driverHandler.deviceDestroyStream(m_device.getHandle(), m_streamHandle);
+	if (m_device.getHandle() != NULL)
+	{
+		m_driverHandler.deviceDestroyStream(m_device.getHandle(), m_streamHandle);
+	}
 
 	xnOSCloseEvent(&m_newFrameInternalEvent);
 	xnOSCloseEvent(&m_newFrameInternalEventForFrameHolder);
