@@ -157,7 +157,7 @@ OniStatus BaseKinectStream::SetVideoMode(OniVideoMode* videoMode)
 		return ONI_STATUS_OK;
 	}
 	
-	return ONI_STATUS_NOT_SUPPORTED;
+	return ONI_STATUS_OUT_OF_FLOW;
 }
 
 OniStatus BaseKinectStream::GetVideoMode(OniVideoMode* pVideoMode)
