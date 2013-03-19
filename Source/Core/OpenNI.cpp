@@ -26,10 +26,10 @@
 
 oni::implementation::Context g_Context;
 
-ONI_C_API OniStatus oniInitialize(int /*apiVersion*/)
+ONI_C_API OniStatus oniInitialize(int /*apiVersion*/, const char* iniFileParentDirectory)
 {
 	g_Context.clearErrorLogger();
-	OniStatus rc = g_Context.initialize();
+	OniStatus rc = g_Context.initialize(iniFileParentDirectory);
 	return rc;
 }
 

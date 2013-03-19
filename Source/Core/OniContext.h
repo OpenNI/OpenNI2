@@ -57,7 +57,7 @@ public:
 	Context();
 	~Context();
 
-	OniStatus initialize();
+	OniStatus initialize(const char* iniFileParentDirectory = NULL);
 	void shutdown();
 
 	OniStatus registerDeviceConnectedCallback(OniDeviceInfoCallback handler, void* pCookie, OniCallbackHandle& handle);

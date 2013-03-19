@@ -22,6 +22,8 @@
 #include "OniStreamFrameHolder.h"
 #include <XnLog.h>
 
+#include <string>
+
 static const char* ONI_CONFIGURATION_FILE = XN_FILE_LOCAL_DIR "OpenNI.ini";
 #if (XN_PLATFORM == XN_PLATFORM_WIN32) && (_M_X64)
 static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH64";
@@ -44,7 +46,7 @@ Context::~Context()
 	s_valid = FALSE;
 }
 
-OniStatus Context::initialize()
+OniStatus Context::initialize(const char* iniFileParentDirectory)
 {
 	XnBool repositoryOverridden = FALSE;
 	XnChar repositoryFromINI[XN_FILE_MAX_PATH] = {0};
@@ -68,35 +70,39 @@ OniStatus Context::initialize()
 	s_valid = TRUE;
 
 	// Read configuration file
+	std::string configurationFilePath(ONI_CONFIGURATION_FILE);
+	if (iniFileParentDirectory) {
+		configurationFilePath = std::string(iniFileParentDirectory) + XN_FILE_DIR_SEP + ONI_CONFIGURATION_FILE;
+	}
 
 	XnBool configurationFileExists = FALSE;
-	rc = xnOSDoesFileExist(ONI_CONFIGURATION_FILE, &configurationFileExists);
+	rc = xnOSDoesFileExist(configurationFilePath.c_str(), &configurationFileExists);
 	if (configurationFileExists)
 	{
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
+		rc = xnOSReadStringFromINI(configurationFilePath.c_str(), "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
 		if (rc != XN_STATUS_OK)
 		{
 			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
 		}
 
 		XnInt32 nValue;
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "Verbosity", &nValue);
+		rc = xnOSReadIntFromINI(configurationFilePath.c_str(), "Log", "Verbosity", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nValue);
 		}
 
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToConsole", &nValue);
+		rc = xnOSReadIntFromINI(configurationFilePath.c_str(), "Log", "LogToConsole", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetConsoleOutput(nValue == 1);
 		}
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToFile", &nValue);
+		rc = xnOSReadIntFromINI(configurationFilePath.c_str(), "Log", "LogToFile", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetFileOutput(nValue == 1);
 		}
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
+		rc = xnOSReadStringFromINI(configurationFilePath.c_str(), "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
 		if (rc == XN_STATUS_OK)
 		{
 			repositoryOverridden = TRUE;
@@ -104,7 +110,7 @@ OniStatus Context::initialize()
 	}
 	else
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", configurationFilePath.c_str());
 	}
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
@@ -112,7 +118,7 @@ OniStatus Context::initialize()
 	// Use path specified in ini file
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", repositoryFromINI, ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", repositoryFromINI, configurationFilePath.c_str());
 		rc = loadLibraries(repositoryFromINI);
 		return OniStatusFromXnStatus(rc);
 	}
