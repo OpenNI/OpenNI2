@@ -1947,10 +1947,11 @@ public:
 	Initialize the library.
 	This will load all available drivers, and see which devices are available
 	It is forbidden to call any other method in OpenNI before calling @ref initialize().
+	@param iniFileParentDirectory The path the the parent directory containing the OpenNI ini configuration files.
 	*/
-	static Status initialize()
+	static Status initialize(const char* iniFileParentDirectory = NULL)
 	{
-		return (Status)oniInitialize(ONI_API_VERSION); // provide version of API, to make sure proper struct sizes are used
+		return (Status)oniInitialize(ONI_API_VERSION, iniFileParentDirectory); // provide version of API, to make sure proper struct sizes are used
 	}
 
 	/**

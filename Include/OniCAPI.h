@@ -29,7 +29,7 @@
 /******************************************** General APIs */
 
 /**  Initialize OpenNI2. Use ONI_API_VERSION as the version. */
-ONI_C_API OniStatus oniInitialize(int apiVersion);
+ONI_C_API OniStatus oniInitialize(int apiVersion, const char* iniFileParentDirectory);
 /**  Shutdown OpenNI2 */
 ONI_C_API void oniShutdown();
 
