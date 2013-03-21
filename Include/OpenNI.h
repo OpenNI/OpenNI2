@@ -651,8 +651,17 @@ public:
 	Default constructor.  Creates a new, non-valid @ref VideoStream object.  The object created will be invalid until its create() function
 	is called with a valid Device.
 	*/
-	VideoStream() : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL)
+	VideoStream() : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL), m_isOwner(true)
 	{}
+
+	/**
+	Handle constructor. Creates a VideoStream object based on the given initialized handle.
+	This object will not destroy the underlying handle when  @ref destroy() or destructor is called
+	*/
+	explicit VideoStream(OniStreamHandle handle) : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL), m_isOwner(false)
+	{
+		_setHandle(handle);
+	}
 
 	/**
 	Destructor.  The destructor calls the destroy() function, but it is considered a best practice for applications to
@@ -1128,6 +1137,7 @@ private:
 	OniStreamHandle m_stream;
 	SensorInfo m_sensorInfo;
 	CameraSettings* m_pCameraSettings;
+	bool m_isOwner;
 };
 
 /**
@@ -1160,7 +1170,7 @@ public:
 
 	/**
 	Handle constructor. Creates a Device object based on the given initialized handle.
-	This object will not destroy the underlying handle when  @ref close() or destructor is closed
+	This object will not destroy the underlying handle when  @ref close() or destructor is called
 	*/
 	explicit Device(OniDeviceHandle handle) : m_pPlaybackControl(NULL), m_device(NULL), m_isOwner(false)
 	{
@@ -2458,6 +2468,7 @@ Status VideoStream::create(const Device& device, SensorType sensorType)
 		return rc;
 	}
 
+	m_isOwner = true;
 	_setHandle(streamHandle);
 
 	if (isPropertySupported(STREAM_PROPERTY_AUTO_WHITE_BALANCE) && isPropertySupported(STREAM_PROPERTY_AUTO_EXPOSURE))
@@ -2483,7 +2494,8 @@ void VideoStream::destroy()
 
 	if (m_stream != NULL)
 	{
-		oniStreamDestroy(m_stream);
+		if(m_isOwner)
+			oniStreamDestroy(m_stream);
 		m_stream = NULL;
 	}
 }
