@@ -18,9 +18,9 @@ else:
     exit(1)
     
 bin_dir = os.path.abspath(sys.argv[2])
-int_dir = os.path.join(bin_dir, "Intermediate", platform_string + "-Release")
 source_dir = os.path.abspath(sys.argv[3])
 proj_name = sys.argv[4]
+int_dir = os.path.join(bin_dir, "Intermediate", platform_string + "-Release", proj_name)
 needed_jar_files = ""
 main_class = ""
 if len(sys.argv) > 5:
@@ -104,7 +104,7 @@ shutil.copy(JAR_FILE, DEBUG_DIR)
 if main_class != "":
     print "Creating batch file..."
     batch = open(BATCH_FILE, 'w')
-    batch.write('java -jar ' + proj_name + '.jar\n')
+    batch.write('java -Xmx768m -jar ' + proj_name + '.jar\n')
     batch.close()
 
     # copy batch to Bin/Debug
