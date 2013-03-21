@@ -34,6 +34,7 @@ XN_C_API XnStatus xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibH
 	XN_VALIDATE_INPUT_PTR(cpFileName);
 	XN_VALIDATE_OUTPUT_PTR(pLibHandle);
 
+#ifndef XN_PLATFORM_ANDROID_OS
 	// Resolve the file name to the absolute path. This is necessary because
 	// we need to get the absolute path of this library by dladdr() later.
 	// Note dladdr() seems to return the path specified to dlopen() "as it is".
@@ -47,8 +48,12 @@ XN_C_API XnStatus xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibH
 
 	// Load the requested shared library via the OS
 	*pLibHandle = dlopen(strAbsoluteFileName, RTLD_NOW);
+
 	free(strAbsoluteFileName); // Don't forget to free the memory allocated by realpath().
-	
+#else
+	*pLibHandle = dlopen(cpFileName, RTLD_NOW);
+#endif
+
 	// Make sure it succeeded (return value is not NULL). If not return an error....
 	if (*pLibHandle == NULL)
 	{

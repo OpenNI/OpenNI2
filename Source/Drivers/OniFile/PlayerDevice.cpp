@@ -418,7 +418,7 @@ OniBool PlayerDevice::isPropertySupported(int propertyId)
 }
 
 /// @copydoc OniDeviceBase::Invoke(int, const void*, int)
-OniStatus PlayerDevice::invoke(int commandId, const void* data, int dataSize)
+OniStatus PlayerDevice::invoke(int commandId, void* data, int dataSize)
 {
 	if (commandId == ONI_DEVICE_COMMAND_SEEK)
 	{

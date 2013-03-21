@@ -34,6 +34,7 @@
 #include "XnSensor.h"
 #include <math.h>
 
+#include "XnGMCDebugProcessor.h"
 
 //---------------------------------------------------------------------------
 // Defines
@@ -72,6 +73,9 @@ XnSensorDepthStream::XnSensorDepthStream(const XnChar* strName, XnSensorObjects*
 	m_PixelRegistration(XN_STREAM_PROPERTY_PIXEL_REGISTRATION, "PixelRegistration"),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
 	m_VerticalFOV(ONI_STREAM_PROPERTY_VERTICAL_FOV, "VerticalFov"),
+	m_GMCDebug(XN_STREAM_PROPERTY_GMC_DEBUG, "GMCDebug", XN_DEPTH_STREAM_DEFAULT_GMC_DEBUG),
+	m_WavelengthCorrection(XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION, "WavelengthCorrection", XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION),
+	m_WavelengthCorrectionDebug(XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION_DEBUG, "WavelengthCorrectionDebug", XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION_DEBUG),
 	m_depthUtilsHandle(NULL),
 	m_hReferenceSizeChangedCallback(NULL)
 {
@@ -102,13 +106,14 @@ XnStatus XnSensorDepthStream::Init()
 	m_CloseRange.UpdateSetCallback(SetCloseRangeCallback, this);
 	m_CroppingMode.UpdateSetCallback(SetCroppingModeCallback, this);
 	m_PixelRegistration.UpdateGetCallback(GetPixelRegistrationCallback, this);
-
+	m_GMCDebug.UpdateSetCallback(SetGMCDebugCallback, this);
+	m_WavelengthCorrection.UpdateSetCallback(SetWavelengthCorrectionCallback, this);
+	m_WavelengthCorrectionDebug.UpdateSetCallback(SetWavelengthCorrectionDebugCallback, this);
 
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_InputFormat, &m_DepthRegistration, &m_HoleFilter, 
 		&m_WhiteBalance, &m_Gain, &m_AGCBin, &m_ActualRead, &m_GMCMode, 
 		&m_CloseRange, &m_CroppingMode, &m_RegistrationType, &m_PixelRegistration,
-		&m_HorizontalFOV, &m_VerticalFOV);
-
+		&m_HorizontalFOV, &m_VerticalFOV, &m_GMCDebug, &m_WavelengthCorrection, &m_WavelengthCorrectionDebug);
 
 	// register supported modes
 	XnCmosPreset* pSupportedModes = m_Helper.GetPrivateData()->FWInfo.depthModes.GetData();
@@ -195,6 +200,11 @@ XnStatus XnSensorDepthStream::Init()
 		XN_IS_STATUS_OK(nRetVal);
 	}
 
+	if (m_Helper.GetFirmwareVersion() < XN_SENSOR_FW_VER_5_2)
+	{
+		nRetVal = m_WavelengthCorrection.UnsafeUpdateValue(FALSE);
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	if (m_Helper.GetFirmwareVersion() < XN_SENSOR_FW_VER_4_0)
 	{
@@ -231,7 +241,6 @@ XnStatus XnSensorDepthStream::Init()
 	nRetVal = DecidePixelSizeFactor();
 	XN_IS_STATUS_OK(nRetVal);
 
-
 	// initialize registration
 	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3)
 	{
@@ -248,7 +257,6 @@ XnStatus XnSensorDepthStream::Init()
 
 XnStatus XnSensorDepthStream::Free()
 {
-
 	DepthUtilsShutdown(&m_depthUtilsHandle);
 
 	// unregister from external properties (internal ones will be destroyed anyway...)
@@ -299,6 +307,12 @@ XnStatus XnSensorDepthStream::MapPropertiesToFirmware()
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.MapFirmwareProperty(m_CloseRange, GetFirmwareParams()->m_DepthCloseRange, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_GMCDebug, GetFirmwareParams()->m_GMCDebug, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_WavelengthCorrection, GetFirmwareParams()->m_WavelengthCorrection, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_WavelengthCorrectionDebug, GetFirmwareParams()->m_WavelengthCorrectionDebug, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
 	
 	return (XN_STATUS_OK);
 }
@@ -334,6 +348,12 @@ XnStatus XnSensorDepthStream::ConfigureStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareMirror);
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.ConfigureFirmware(m_GMCMode);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.ConfigureFirmware(m_GMCDebug);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.ConfigureFirmware(m_WavelengthCorrection);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.ConfigureFirmware(m_WavelengthCorrectionDebug);
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.ConfigureFirmware(m_WhiteBalance);
 	XN_IS_STATUS_OK(nRetVal);;
@@ -628,7 +648,6 @@ XnStatus XnSensorDepthStream::SetGMCMode(XnBool bGMCMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-
 	nRetVal = m_Helper.SimpleSetFirmwareParam(m_GMCMode, (XnUInt16)bGMCMode);
 	XN_IS_STATUS_OK(nRetVal);
 
@@ -670,6 +689,35 @@ XnStatus XnSensorDepthStream::SetCroppingMode(XnCroppingMode mode)
 	return SetCroppingImpl(GetCropping(), mode);
 }
 
+XnStatus XnSensorDepthStream::SetGMCDebug(XnBool bGMCDebug)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_GMCDebug, (XnUInt16)bGMCDebug);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus XnSensorDepthStream::SetWavelengthCorrection(XnBool bWavelengthCorrection)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_WavelengthCorrection, (XnUInt16)bWavelengthCorrection);
+	XN_IS_STATUS_OK(nRetVal);
+	
+	return (XN_STATUS_OK);
+}
+
+XnStatus XnSensorDepthStream::SetWavelengthCorrectionDebug(XnBool bWavelengthCorrectionDebug)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_WavelengthCorrectionDebug, (XnUInt16)bWavelengthCorrectionDebug);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}
 
 XnStatus XnSensorDepthStream::SetAGCBin(const XnDepthAGCBin* pBin)
 {
@@ -1163,6 +1211,23 @@ XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetCroppingModeCallback(XnActualI
 	return pStream->SetCroppingMode((XnCroppingMode)nValue);
 }
 
+XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetGMCDebugCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorDepthStream* pStream = (XnSensorDepthStream*)pCookie;
+	return pStream->SetGMCDebug((XnBool)nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetWavelengthCorrectionCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorDepthStream* pStream = (XnSensorDepthStream*)pCookie;
+	return pStream->SetWavelengthCorrection((XnBool)nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetWavelengthCorrectionDebugCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorDepthStream* pStream = (XnSensorDepthStream*)pCookie;
+	return pStream->SetWavelengthCorrectionDebug((XnBool)nValue);
+}
 
 XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetAGCBinCallback(XnGeneralProperty* /*pSender*/, const OniGeneralBuffer& gbValue, void* pCookie)
 {

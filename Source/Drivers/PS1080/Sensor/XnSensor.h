@@ -86,7 +86,7 @@ public:
 	const XnChar* GetUSBPath() { return m_SensorIO.GetDevicePath(); }
 	XnBool ShouldUseHostTimestamps() { return (m_HostTimestamps.GetValue() == TRUE); }
 	XnBool HasReadingStarted() { return (m_ReadData.GetValue() == TRUE); }
-
+	inline XnBool IsTecDebugPring() const { return (XnBool)m_FirmwareTecDebugPrint.GetValue(); }
 
 	XnStatus SetFrameSyncStreamGroup(XnDeviceStream** ppStreamList, XnUInt32 numStreams);
 
@@ -109,6 +109,9 @@ private:
 
 	static XnStatus XN_CALLBACK_TYPE GetInstanceCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 
+	XnStatus ChangeTaskInterval(XnScheduledTask** ppTask, XnTaskCallbackFuncPtr pCallback, XnUInt32 nInterval);
+	void ReadFirmwareLog();
+	void ReadFirmwareCPU();
 
 	//---------------------------------------------------------------------------
 	// Getters
@@ -122,7 +125,14 @@ private:
 	XnStatus GetDepthCmosRegister(XnControlProcessingData* pRegister);
 	XnStatus GetImageCmosRegister(XnControlProcessingData* pRegister);
 	XnStatus ReadAHB(XnAHBData* pData);
-
+	XnStatus GetI2C(XnI2CReadData* pI2CReadData);
+	XnStatus GetTecStatus(XnTecData* pTecData);
+	XnStatus GetTecFastConvergenceStatus(XnTecFastConvergenceData* pTecData);
+	XnStatus GetEmitterStatus(XnEmitterData* pEmitterData);
+	XnStatus ReadFlashFile(const XnParamFileData* pFile);
+	XnStatus ReadFlashChunk(XnParamFlashData* pFlash);
+	XnStatus GetFirmwareLog(XnChar* csLog, XnUInt32 nSize);
+	XnStatus GetFileList(XnFlashFileList* pFileList);
 
 	//---------------------------------------------------------------------------
 	// Setters
@@ -140,7 +150,20 @@ private:
 	XnStatus SetImageCmosRegister(const XnControlProcessingData* pRegister);
 	XnStatus WriteAHB(const XnAHBData* pData);
 	XnStatus SetLedState(XnUInt16 nLedId, XnUInt16 nState);
-
+	XnStatus SetFirmwareFrameSync(XnBool bOn);
+	XnStatus SetI2C(const XnI2CWriteData* pI2CWriteData);
+	XnStatus SetFirmwareLogFilter(XnUInt32 nFilter);
+	XnStatus SetFirmwareLogInterval(XnUInt32 nMilliSeconds);
+	XnStatus SetFirmwareLogPrint(XnBool bPrint);
+	XnStatus SetFirmwareCPUInterval(XnUInt32 nMilliSeconds);
+	XnStatus SetAPCEnabled(XnBool bEnabled);
+	XnStatus DeleteFile(XnUInt16 nFileID);
+	XnStatus SetTecSetPoint(XnUInt16 nSetPoint);
+	XnStatus SetEmitterSetPoint(XnUInt16 nSetPoint);
+	XnStatus SetFileAttributes(const XnFileAttributes* pAttributes);
+	XnStatus WriteFlashFile(const XnParamFileData* pFile);
+	XnStatus SetProjectorFault(XnProjectorFaultData* pProjectorFaultData);
+	XnStatus RunBIST(XnUInt32 nTestsMask, XnUInt32* pnFailures);
 
 	//---------------------------------------------------------------------------
 	// Callbacks
@@ -170,7 +193,30 @@ private:
 	static XnStatus XN_CALLBACK_TYPE ReadAHBCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE WriteAHBCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetLedStateCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
-
+	static XnStatus XN_CALLBACK_TYPE SetFirmwareFrameSyncCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogFilterCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogIntervalCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogPrintCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFirmwareCPUIntervalCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetAPCEnabledCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetI2CCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE DeleteFileCallback(XnIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetTecSetPointCallback(XnIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetEmitterSetPointCallback(XnIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFileAttributesCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE WriteFlashFileCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetProjectorFaultCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE RunBISTCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetFileListCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static void XN_CALLBACK_TYPE ExecuteFirmwareLogTask(void* pCookie);
+	static void XN_CALLBACK_TYPE ExecuteFirmwareCPUTask(void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetI2CCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetTecStatusCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetTecFastConvergenceStatusCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetEmitterStatusCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE ReadFlashFileCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE GetFirmwareLogCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE ReadFlashChunkCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
@@ -181,6 +227,7 @@ private:
 	XnActualIntProperty m_Interface;
 	XnActualIntProperty m_ReadData;
 	XnActualIntProperty m_FrameSync;
+	XnActualIntProperty m_FirmwareFrameSync;
 	XnActualIntProperty m_CloseStreamsOnShutdown;
 	XnActualIntProperty m_HostTimestamps;
 	XnGeneralProperty m_FirmwareParam;
@@ -200,8 +247,26 @@ private:
 	XnGeneralProperty m_DepthControl;
 	XnGeneralProperty m_AHB;
 	XnGeneralProperty m_LedState;
-
-
+	XnActualIntProperty m_FirmwareLogFilter;
+	XnActualIntProperty m_FirmwareLogInterval;
+	XnActualIntProperty m_FirmwareLogPrint;
+	XnActualIntProperty m_FirmwareCPUInterval;
+	XnActualIntProperty m_APCEnabled;
+	XnActualIntProperty m_FirmwareTecDebugPrint;
+	XnGeneralProperty m_I2C;
+	XnIntProperty m_DeleteFile;
+	XnIntProperty m_TecSetPoint;
+	XnGeneralProperty m_TecStatus;
+	XnGeneralProperty m_TecFastConvergenceStatus;
+	XnIntProperty m_EmitterSetPoint;
+	XnGeneralProperty m_EmitterStatus;
+	XnGeneralProperty m_FileAttributes;
+	XnGeneralProperty m_FlashFile;
+	XnGeneralProperty m_FirmwareLog;
+	XnGeneralProperty m_FlashChunk;
+	XnGeneralProperty m_FileList;
+	XnGeneralProperty m_BIST;
+	XnGeneralProperty m_ProjectorFault;
 	XnSensorFirmware m_Firmware;
 	XnDevicePrivateData m_DevicePrivateData;
 	XnSensorFPS m_FPS;
@@ -210,7 +275,11 @@ private:
 
 	XnSensorObjects m_Objects;
 
-
+	/** A scheduler to be used for performing periodic tasks. */
+	XnScheduler* m_pScheduler;
+	XnScheduledTask* m_pLogTask;
+	XnScheduledTask* m_pCPUTask;
+	XnDumpFile* m_FirmwareLogDump;
 	XnDumpFile* m_FrameSyncDump;
 	XnBool m_nFrameSyncEnabled;
 	typedef struct  

@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PrimeClient">
+      <UniqueIdentifier>{94b9c125-ed70-4c9f-b67e-66fbac650757}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DriverImpl">
+      <UniqueIdentifier>{3450fb6e-076f-4eda-b236-03d7c9f3fc75}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PrimeClient.h">
+      <Filter>PrimeClient</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimeClientDefs.h" />
+    <ClInclude Include="PrimeClientProps.h" />
+    <ClInclude Include="XnPsVersion.h" />
+    <ClInclude Include="PS1200Device.h">
+      <Filter>PrimeClient</Filter>
+    </ClInclude>
+    <ClInclude Include="LenaDevice.h">
+      <Filter>PrimeClient</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniDriver.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniDevice.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniMapStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniIRStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniDepthStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PrimeClient.cpp">
+      <Filter>PrimeClient</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkStatusCodes.cpp" />
+    <ClCompile Include="PS1200Device.cpp">
+      <Filter>PrimeClient</Filter>
+    </ClCompile>
+    <ClCompile Include="LenaDevice.cpp">
+      <Filter>PrimeClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkExportedOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDevice.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniMapStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniIRStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDepthStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

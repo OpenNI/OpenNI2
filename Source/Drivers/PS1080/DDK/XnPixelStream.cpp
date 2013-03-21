@@ -266,6 +266,7 @@ XnStatus XnPixelStream::OnOutputFormatChanged()
 		nBytesPerPixel = sizeof(XnUInt16);
 		break;
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 		// YUV422 is actually 4 bytes for every 2 pixels
 		nBytesPerPixel = sizeof(XnUChar) * 2;
 		break;

@@ -50,10 +50,11 @@ endif
 # Dependencies
 LOCAL_STATIC_LIBRARIES := XnLib
 LOCAL_SHARED_LIBRARIES := liblog
-LOCAL_LDLIBS += -llog
 
 ifdef OPENNI2_ANDROID_OS_BUILD
     LOCAL_SHARED_LIBRARIES += libjpeg
+else
+	LOCAL_LDLIBS += -llog
 endif
 
 # Output

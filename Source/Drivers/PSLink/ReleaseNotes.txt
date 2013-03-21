@@ -1,0 +1,49 @@
+PrimeClient 6.2.2 Build 10
+March 17 2013
+
+Minimum Requirements:
+---------------------
+- Operating System: 
+  - Windows XP (32/64) with SP2 and above, Windows 7 (32/64)
+  - Ubuntu 12.04 (32/64) and above
+- Processor: Pentium 4, 1.4GHz and above or AMD Athlon 64/FX 1GHz and above.
+- Memory: at least 64MB available.
+- 250MB free hard disk space.
+- CD-ROM drive.
+- Available USB 2.0 high-speed port.
+- Development Environment: 
+  - Microsoft Visual Studio 2008 and 2010. The compiler can be MSVC compiler or an Intel Compiler 11 and above.
+  - GCC 4.x
+
+Change Log:
+-----------
+PrimeClient 6.2.2.10:
+  - Bug Fix: BULK not working on Windows
+  - Bug Fix: Can't get current USB interface on Linux
+  - Bug Fix: "Test ALL" failed to start BIST
+
+PrimeClient 6.2.2.9:
+  - Shift-to-Depth: remove the 3/8 offset. Apprently, it only works for PS1080.
+  - Firmware log: now supports creating multiple files
+  - Support for 12-bit packing
+  - Move XnDetailedVersion into the properties include file (was missing from there)
+  - All platforms but Windows change interface by default to BULK
+  - Read serial number from device, and add a property to get it
+  - On ARM, default depth mode is QQVGA with 12-bit packing.
+  - PrimeConsole:
+    - Adding I2CList command to list names of I2C devices
+    - Supporting device names in I2C read/write operations
+    - Add TestAll command to run bist ALL + UsbTest for 5 seconds
+    - Add BeginUpload and EndUpload commands to support new FW boot sequence
+    - Add BootStatus debug command to analyze firmware boot sequence
+    - Add log open/close commands to open/close specific log files
+    - Bug Fix (PRIMECLIENT-60): Set/Get certain properties in depth generator failed.
+
+PrimeClient 6.2.2.4:
+  - Link Protocol (with firmware) was revised
+  - Added support for MaxOSX
+  - A stream now has video mode, which consists of resolution, FPS, pixel format, internal stream format and compression.
+  - All properties are now exposed in a header file given during installation: XnPrimeClientProps.h.
+  - Added commands: PowerReset, FormatZone, DownloadFile, UploadFile (see properties header).
+  - Bug Fix: bist list didn't work well
+  - Supporting new product IDs (0x1250, 0x1260, 0x1290)

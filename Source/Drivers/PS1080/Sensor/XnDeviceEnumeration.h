@@ -44,16 +44,22 @@ public:
 	static XnStatus IsSensorLowBandwidth(const XnChar* connectionString, XnBool* pbIsLowband);
 
 private:
+	typedef struct XnUsbId
+	{
+		XnUInt16 vendorID;
+		XnUInt16 productID;
+	} XnUsbId;
+
 	typedef xnl::StringsHash<OniDeviceInfo> DevicesHash;
 
 	static void XN_CALLBACK_TYPE OnConnectivityEventCallback(XnUSBEventArgs* pArgs, void* pCookie);
-	static void OnConnectivityEvent(const XnChar* uri, XnUSBEventType eventType, XnUInt16 nProductID);
+	static void OnConnectivityEvent(const XnChar* uri, XnUSBEventType eventType, XnUsbId usbId);
 
 	static XnBool ms_initialized;
 	static DeviceConnectivityEvent ms_connectedEvent;
 	static DeviceConnectivityEvent ms_disconnectedEvent;
 
-	static XnUInt16 ms_supportedProducts[];
+	static XnUsbId ms_supportedProducts[];
 	static XnUInt32 ms_supportedProductsCount;
 	static DevicesHash ms_devices;
 	static xnl::Array<XnRegistrationHandle> ms_aRegistrationHandles;

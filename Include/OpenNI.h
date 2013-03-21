@@ -1096,7 +1096,7 @@ public:
 	@returns Status code indicating success or failure of this operation.
 	*/
 	template <class T>
-	Status invoke(int commandId, const T& value)
+	Status invoke(int commandId, T& value)
 	{
 		return invoke(commandId, &value, sizeof(T));
 	}
@@ -1505,7 +1505,7 @@ public:
 	@param [in] dataSize size of the buffer passed in @c data.
 	@returns Status code indicating success or failure of this operation.
 	*/
-	Status invoke(int commandId, const void* data, int dataSize)
+	Status invoke(int commandId, void* data, int dataSize)
 	{
 		return (Status)oniDeviceInvoke(m_device, commandId, data, dataSize);
 	}
@@ -1520,7 +1520,7 @@ public:
 	@returns Status code indicating success or failure of this operation.
 	*/
 	template <class T>
-	Status invoke(int propertyId, const T& value)
+	Status invoke(int propertyId, T& value)
 	{
 		return invoke(propertyId, &value, sizeof(T));
 	}

@@ -195,7 +195,9 @@
     <ClInclude Include="..\..\Include\OniCTypes.h" />
     <ClInclude Include="..\..\Include\OniVersion.h" />
     <ClInclude Include="..\..\Include\OniCAPI.h" />
+    <ClInclude Include="..\..\Include\PrimeSense.h" />
     <ClInclude Include="..\..\Include\PS1080.h" />
+    <ClInclude Include="..\..\Include\PSLink.h" />
     <ClInclude Include="..\..\Include\Win32\OniPlatformWin32.h" />
     <ClInclude Include="OniCommon.h" />
     <ClInclude Include="OniContext.h" />

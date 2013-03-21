@@ -47,7 +47,7 @@ public:
 	virtual OniStatus setProperty(int /*propertyId*/, const void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniStatus getProperty(int /*propertyId*/, void* /*data*/, int* /*pDataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniBool isPropertySupported(int /*propertyId*/) {return FALSE;}
-	virtual OniStatus invoke(int /*commandId*/, const void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
+	virtual OniStatus invoke(int /*commandId*/, void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniBool isCommandSupported(int /*commandId*/) {return FALSE;}
 
 	virtual OniStatus start() = 0;
@@ -88,7 +88,7 @@ public:
 	virtual OniStatus setProperty(int /*propertyId*/, const void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniStatus getProperty(int /*propertyId*/, void* /*data*/, int* /*pDataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniBool isPropertySupported(int /*propertyId*/) {return FALSE;}
-	virtual OniStatus invoke(int /*commandId*/, const void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
+	virtual OniStatus invoke(int /*commandId*/, void* /*data*/, int /*dataSize*/) {return ONI_STATUS_NOT_IMPLEMENTED;}
 	virtual OniBool isCommandSupported(int /*commandId*/) {return FALSE;}
 	virtual OniStatus tryManualTrigger() {return ONI_STATUS_OK;}
 
@@ -254,7 +254,7 @@ ONI_C_API_EXPORT void oniDriverDeviceNotifyAllProperties(oni::driver::DeviceBase
 	pDevice->notifyAllProperties();																							\
 }																															\
 ONI_C_API_EXPORT OniStatus oniDriverDeviceInvoke(oni::driver::DeviceBase* pDevice, int commandId,							\
-												const void* data, int dataSize)												\
+												void* data, int dataSize)													\
 {																															\
 	return pDevice->invoke(commandId, data, dataSize);																		\
 }																															\
@@ -297,7 +297,7 @@ ONI_C_API_EXPORT void oniDriverStreamNotifyAllProperties(oni::driver::StreamBase
 	pStream->notifyAllProperties();																							\
 }																															\
 ONI_C_API_EXPORT OniStatus oniDriverStreamInvoke(oni::driver::StreamBase* pStream, int commandId,							\
-												const void* data, int dataSize)												\
+												void* data, int dataSize)													\
 {																															\
 	return pStream->invoke(commandId, data, dataSize);																		\
 }																															\

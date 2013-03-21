@@ -29,7 +29,6 @@
 #include "XnSensorStreamHelper.h"
 #include <DepthUtils.h>
 
-
 //---------------------------------------------------------------------------
 // Defines
 //---------------------------------------------------------------------------
@@ -52,6 +51,9 @@
 #define XN_DEPTH_STREAM_DEFAULT_CLOSE_RANGE					FALSE
 #define XN_DEPTH_STREAM_DEFAULT_SHIFT_MAP_APPENDED			TRUE
 
+#define XN_DEPTH_STREAM_DEFAULT_GMC_DEBUG					FALSE
+#define XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION		FALSE
+#define XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION_DEBUG	FALSE
 
 //---------------------------------------------------------------------------
 // XnSensorDepthStream class
@@ -119,7 +121,9 @@ protected:
 	virtual XnStatus SetCloseRange(XnBool bCloseRange);
 	virtual XnStatus SetCroppingMode(XnCroppingMode mode);
 	XnStatus GetImageCoordinatesOfDepthPixel(XnUInt32 x, XnUInt32 y, OniDepthPixel z, XnUInt32 imageXRes, XnUInt32 imageYRes, XnUInt32& imageX, XnUInt32& imageY);
-
+	virtual XnStatus SetGMCDebug(XnBool bGMCDebug);
+	virtual XnStatus SetWavelengthCorrection(XnBool bWavelengthCorrection);
+	virtual XnStatus SetWavelengthCorrectionDebug(XnBool bWavelengthCorrectionDebug);
 
 private:
 	XnUInt32 CalculateExpectedSize();
@@ -144,7 +148,9 @@ private:
 	static XnStatus XN_CALLBACK_TYPE SetCloseRangeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetCroppingModeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE GetPixelRegistrationCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
-
+	static XnStatus XN_CALLBACK_TYPE SetGMCDebugCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetWavelengthCorrectionCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetWavelengthCorrectionDebugCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
@@ -176,6 +182,9 @@ private:
 	XnActualRealProperty m_HorizontalFOV;
 	XnActualRealProperty m_VerticalFOV;
 
+	XnActualIntProperty m_GMCDebug;
+	XnActualIntProperty m_WavelengthCorrection;
+	XnActualIntProperty m_WavelengthCorrectionDebug;
 
 	DepthUtilsHandle m_depthUtilsHandle;
 	DepthUtilsSensorCalibrationInfo m_calibrationInfo;

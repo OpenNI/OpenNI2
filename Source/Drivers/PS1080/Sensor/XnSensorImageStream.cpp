@@ -29,8 +29,9 @@
 #include "XnPSCompressedImageProcessor.h"
 #include "XnJpegImageProcessor.h"
 #include "XnJpegToRGBImageProcessor.h"
-#include "XnUncompressedYUVImageProcessor.h"
-#include "XnUncompressedYUVtoRGBImageProcessor.h"
+#include "XnPassThroughImageProcessor.h"
+#include "XnUncompressedYUV422toRGBImageProcessor.h"
+#include "XnUncompressedYUYVtoRGBImageProcessor.h"
 #include "YUV.h"
 #include "Bayer.h"
 #include <XnProfiling.h>
@@ -235,6 +236,7 @@ XnStatus XnSensorImageStream::ValidateMode()
 	case ONI_PIXEL_FORMAT_RGB888:
 		if (nInputFormat != XN_IO_IMAGE_FORMAT_YUV422 &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422 &&
+			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_BAYER &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER)
 		{
@@ -248,6 +250,11 @@ XnStatus XnSensorImageStream::ValidateMode()
 			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to YUV422!", nInputFormat);
 		}
 		break;
+	case ONI_PIXEL_FORMAT_YUYV:
+		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV)
+		{
+			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to YUYV!", nInputFormat);
+		}
 	case ONI_PIXEL_FORMAT_JPEG:
 		if (nInputFormat != XN_IO_IMAGE_FORMAT_JPEG)
 		{
@@ -255,8 +262,7 @@ XnStatus XnSensorImageStream::ValidateMode()
 		}
 		break;
 	case ONI_PIXEL_FORMAT_GRAY8:
-		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_GRAY8 &&
-			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER &&
+		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_BAYER)
 		{
 			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to Gray8!", nInputFormat);
@@ -410,6 +416,7 @@ XnStatus XnSensorImageStream::SetOutputFormat(OniPixelFormat nOutputFormat)
 	{
 	case ONI_PIXEL_FORMAT_GRAY8:
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 	case ONI_PIXEL_FORMAT_RGB888:
 	case ONI_PIXEL_FORMAT_JPEG:
 		break;
@@ -494,6 +501,7 @@ XnStatus XnSensorImageStream::SetInputFormat(XnIOImageFormats nInputFormat)
 	{
 	case XN_IO_IMAGE_FORMAT_YUV422:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
 	case XN_IO_IMAGE_FORMAT_JPEG:
 	case XN_IO_IMAGE_FORMAT_BAYER:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER:
@@ -817,6 +825,7 @@ XnUInt32 XnSensorImageStream::CalculateExpectedSize()
 	{
 	case XN_IO_IMAGE_FORMAT_YUV422:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
 		// in YUV each pixel is represented in 2 bytes (actually 2 pixels are represented by 4 bytes)
 		nExpectedImageBufferSize *= 2;
 		break;
@@ -869,11 +878,25 @@ XnStatus XnSensorImageStream::CreateDataProcessor(XnDataProcessor** ppProcessor)
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
 		if (GetOutputFormat() == ONI_PIXEL_FORMAT_YUV422)
 		{
-			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUVImageProcessor, this, &m_Helper, pBufferManager);
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnPassThroughImageProcessor, this, &m_Helper, pBufferManager);
 		}
 		else if (GetOutputFormat() == ONI_PIXEL_FORMAT_RGB888)
 		{
-			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUVtoRGBImageProcessor, this, &m_Helper, pBufferManager);
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUV422toRGBImageProcessor, this, &m_Helper, pBufferManager);
+		}
+		else
+		{
+			XN_LOG_WARNING_RETURN(XN_STATUS_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "invalid output format %d!", pBufferManager);
+		}
+		break;
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
+		if (GetOutputFormat() == ONI_PIXEL_FORMAT_YUYV)
+		{
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnPassThroughImageProcessor, this, &m_Helper, pBufferManager);
+		}
+		else if (GetOutputFormat() == ONI_PIXEL_FORMAT_RGB888)
+		{
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUYVtoRGBImageProcessor, this, &m_Helper, pBufferManager);
 		}
 		else
 		{

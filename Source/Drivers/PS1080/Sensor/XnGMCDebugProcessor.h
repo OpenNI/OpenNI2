@@ -21,5 +21,34 @@
 #ifndef __XN_GMC_DEBUG_PROCESSOR_H__
 #define __XN_GMC_DEBUG_PROCESSOR_H__
 
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
+#include "XnWholePacketProcessor.h"
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+
+class XnGMCDebugProcessor : public XnWholePacketProcessor
+{
+public:
+	XnGMCDebugProcessor(XnDevicePrivateData* pDevicePrivateData);
+	~XnGMCDebugProcessor();
+
+protected:
+	//---------------------------------------------------------------------------
+	// Overridden Functions
+	//---------------------------------------------------------------------------
+	virtual void ProcessWholePacket(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData);
+
+	//---------------------------------------------------------------------------
+	// Class Members
+	//---------------------------------------------------------------------------
+private:
+	XnDumpFile* m_DumpTxt;
+	XnDumpFile* m_DumpBin;
+	XnUInt32 m_nGMCTime;
+};
 
 #endif //__XN_GMC_DEBUG_PROCESSOR_H__

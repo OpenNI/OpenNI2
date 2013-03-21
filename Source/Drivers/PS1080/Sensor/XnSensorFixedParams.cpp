@@ -54,6 +54,12 @@ XnStatus XnSensorFixedParams::Init()
 	nRetVal = XnHostProtocolGetFixedParams(m_pDevicePrivateData, FixedParams);
 	if (nRetVal != XN_STATUS_OK)
 	{
+		// Ugly patch since get param is not supported in maintenance mode!
+		if (nRetVal != XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND)
+		{
+			return nRetVal;
+		}
+		return nRetVal;
 	}
 
 	if (m_pDevicePrivateData->FWInfo.nFWVer < XN_SENSOR_FW_VER_5_4)

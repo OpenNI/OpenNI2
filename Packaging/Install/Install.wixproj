@@ -138,9 +138,25 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLLOCATION</RefTargetDir>
     </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\PSLink\PrimeClient\PrimeClient.vcxproj">
+      <Name>PrimeClient</Name>
+      <Project>{5b74f010-8b79-46b5-b906-c2b56cdb3386}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\Tools\NiViewer\NiViewer.vcxproj">
       <Name>NiViewer</Name>
       <Project>{bda3bf24-550a-4bf9-83e5-0056134eed40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\PSLink\PrimeConsole\PrimeConsole.vcxproj">
+      <Name>PrimeConsole</Name>
+      <Project>{d39a4248-3985-41de-afd5-aec58d29291f}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>

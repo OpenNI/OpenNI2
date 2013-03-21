@@ -80,7 +80,7 @@
 #define XN_DUMP_BANDWIDTH				"SensorBandwidth"
 #define XN_DUMP_BAD_IMAGE				"BadImage"
 #define XN_DUMP_FRAME_SYNC				"FrameSync"
-
+#define XN_DUMP_SENSOR_LOG				"SensorLog"
 
 //---------------------------------------------------------------------------
 // Forward Declarations
@@ -159,6 +159,14 @@ typedef struct
 	const XnChar* csStreamName;
 } XnTimeStampData;
 
+typedef struct XnDeviceSensorGMCPoint
+{
+	XnUInt16 m_X;
+	XnUInt16 m_Y;
+	XnUInt16 m_DX;
+	XnInt16 m_DY;
+	XnUInt16 m_Score;
+} XnDeviceSensorGMCPoint;
 
 typedef struct XnCmosBlankingCoefficients
 {
@@ -237,6 +245,11 @@ typedef struct XnDevicePrivateData
 
 	XN_MUTEX_HANDLE hExecuteMutex;
 
+	XnDeviceSensorThreadContext		LogThread;
+	/** GMC Mode. */
+	XnUInt32 nGMCMode;
+	XnBool bWavelengthCorrectionEnabled;
+	XnBool bWavelengthCorrectionDebugEnabled;
 
 } XnDevicePrivateData;
 

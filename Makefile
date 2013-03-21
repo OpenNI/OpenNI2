@@ -23,7 +23,13 @@ DEPTH_UTILS = Source/DepthUtils
 ALL_DRIVERS = \
 	Source/Drivers/DummyDevice   \
 	Source/Drivers/PS1080 \
+	Source/Drivers/PSLink \
 	Source/Drivers/OniFile
+
+# list all wrappers
+ALL_WRAPPERS = \
+	Wrappers/java/OpenNI.jni \
+	Wrappers/java/OpenNI.java 
 
 # list all tools
 ALL_TOOLS = 
@@ -34,6 +40,7 @@ ALL_CORE_PROJS = \
 	$(OPENNI) \
 	$(DEPTH_UTILS) \
 	$(ALL_DRIVERS) \
+	$(ALL_WRAPPERS) \
 	$(ALL_TOOLS)
 
 # list all samples
@@ -43,7 +50,11 @@ CORE_SAMPLES = \
 	Samples/MultipleStreamRead \
 	Samples/MWClosestPoint \
 	Samples/MWClosestPointApp 
-	
+
+# list all java samples
+JAVA_SAMPLES = \
+	Samples/SimpleViewer.java	
+
 ifeq "$(GLUT_SUPPORTED)" "1"
 	ALL_TOOLS += \
 		Source/Tools/NiViewer
@@ -59,7 +70,8 @@ else
 endif
 
 ALL_SAMPLES = \
-	$(CORE_SAMPLES)
+	$(CORE_SAMPLES) \
+	$(JAVA_SAMPLES)
 
 # list all projects that are build
 ALL_BUILD_PROJS = \
@@ -96,9 +108,12 @@ $(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
 
 # additional dependencies
 $(OPENNI):				  $(XNLIB)
+Wrappers/java/OpenNI.jni:	$(OPENNI) $(XNLIB)
+
 Source/Drivers/DummyDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/RawDevice:	$(OPENNI) $(XNLIB)
 Source/Drivers/PS1080:		$(OPENNI) $(XNLIB) $(DEPTH_UTILS)
+Source/Drivers/PSLink:		$(OPENNI) $(XNLIB)
 Source/Drivers/OniFile:		$(OPENNI) $(XNLIB)
 
 Source/Tools/NiViewer:		$(OPENNI) $(XNLIB)
@@ -112,6 +127,7 @@ Samples/MWClosestPointApp: 	$(OPENNI) Samples/MWClosestPoint
 Samples/SimpleViewer:		$(OPENNI)
 Samples/MultiDepthViewer:	$(OPENNI)
 Samples/ClosestPointViewer:	$(OPENNI) Samples/MWClosestPoint
+Samples/SimpleViewer.java:	Wrappers/java/OpenNI.java
 
 # clean is cleaning all projects
 clean: $(ALL_PROJS_CLEAN)

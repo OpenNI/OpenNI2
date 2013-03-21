@@ -29,7 +29,7 @@ endif
 LIB_NAME = PS1080
 
 LIB_DIRS += ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-LIB_DIRS += ../../../Bin/$(PLATFORM)-$(CFG)
+LIB_DIRS += $(BIN_DIR)/$(PLATFORM)-$(CFG)
 USED_LIBS = XnLib dl pthread DepthUtils
 ifneq ("$(OSTYPE)","Darwin")
         USED_LIBS += rt usb-1.0

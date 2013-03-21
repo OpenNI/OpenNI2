@@ -152,7 +152,7 @@ void Device::notifyAllProperties()
 {
 	m_driverHandler.deviceNotifyAllProperties(m_deviceHandle);
 }
-OniStatus Device::invoke(int commandId, const void* data, int dataSize)
+OniStatus Device::invoke(int commandId, void* data, int dataSize)
 {
 	if (commandId == ONI_DEVICE_COMMAND_SEEK)
 	{

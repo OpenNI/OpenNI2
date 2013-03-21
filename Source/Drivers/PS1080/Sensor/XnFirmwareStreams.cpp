@@ -25,6 +25,11 @@
 #include <XnProfiling.h>
 #include "XnSensor.h"
 
+#include "XnWavelengthCorrectionDebugProcessor.h"
+#include "XnGMCDebugProcessor.h"
+#include "XnTecDebugProcessor.h"
+#include "XnNesaDebugProcessor.h"
+#include "XnGeneralDebugProcessor.h"
 
 //---------------------------------------------------------------------------
 // Code
@@ -77,6 +82,48 @@ XnStatus XnFirmwareStreams::Init()
 	tempData.strType = XN_STREAM_TYPE_AUDIO;
 	nRetVal = m_FirmwareStreams.Set(XN_STREAM_TYPE_AUDIO, tempData);
 	XN_IS_STATUS_OK(nRetVal);
+
+	// GMC debug processor
+	nRetVal = m_GMCDebugProcessor.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XnDataProcessor* pProcessor;
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnGMCDebugProcessor, m_pDevicePrivateData);
+	m_GMCDebugProcessor.Replace(pProcessor);
+
+	// Wave length debug processor
+	nRetVal = m_WavelengthCorrectionDebugProcessor.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnWavelengthCorrectionDebugProcessor, m_pDevicePrivateData);
+	m_WavelengthCorrectionDebugProcessor.Replace(pProcessor);
+
+	// Tec Debug processor
+	nRetVal = m_TecDebugProcessor.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnTecDebugProcessor, m_pDevicePrivateData);
+	m_TecDebugProcessor.Replace(pProcessor);
+
+	// NESA Debug processor
+	nRetVal = m_NesaDebugProcessor.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnNesaDebugProcessor, m_pDevicePrivateData);
+	m_NesaDebugProcessor.Replace(pProcessor);
+
+	// General Debug processors
+	nRetVal = m_GeneralDebugProcessor1.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnGeneralDebugProcessor, m_pDevicePrivateData);
+	m_GeneralDebugProcessor1.Replace(pProcessor);
+
+	nRetVal = m_GeneralDebugProcessor2.Init();
+	XN_IS_STATUS_OK(nRetVal);
+
+	XN_VALIDATE_NEW_AND_INIT(pProcessor, XnGeneralDebugProcessor, m_pDevicePrivateData);
+	m_GeneralDebugProcessor2.Replace(pProcessor);
 
 	return (XN_STATUS_OK);
 }
@@ -302,6 +349,25 @@ void XnFirmwareStreams::ProcessPacketChunk(XnSensorProtocolResponseHeader* pHead
 		break;
 	case XN_SENSOR_PROTOCOL_RESPONSE_AUDIO_BUFFER:
 		pStreamProcessor = &m_AudioProcessor;
+		break;
+	case XN_SENSOR_PROTOCOL_RESPONSE_GMC_DEBUG:
+	case XN_SENSOR_PROTOCOL_RESPONSE_GMC_DEBUG_END:
+		pStreamProcessor = &m_GMCDebugProcessor;
+		break;
+	case XN_SENSOR_PROTOCOL_RESPONSE_WAVELENGTH_CORRECTION_DEBUG:
+		pStreamProcessor = &m_WavelengthCorrectionDebugProcessor;
+		break;
+	case XN_SENSOR_PROTOCOL_RESPONSE_TEC_DEBUG:
+		pStreamProcessor = &m_TecDebugProcessor;
+		break;
+	case XN_SENSOR_PROTOCOL_RESPONSE_NESA_DEBUG:
+		pStreamProcessor = &m_NesaDebugProcessor;
+		break;
+	case XN_SENSOR_PROTOCOL_DEBUG_DATA_EP1:
+		pStreamProcessor = &m_GeneralDebugProcessor1;
+		break;
+	case XN_SENSOR_PROTOCOL_DEBUG_DATA_EP2:
+		pStreamProcessor = &m_GeneralDebugProcessor2;
 		break;
 	case XN_SENSOR_PROTOCOL_RESPONSE_PROJECTOR_FAULT_EVENT:
 		m_pDevicePrivateData->pSensor->SetErrorState(XN_STATUS_DEVICE_PROJECTOR_FAULT);

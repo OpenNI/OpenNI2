@@ -51,7 +51,7 @@ public:
 	OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	OniBool isPropertySupported(int propertId);
 	void notifyAllProperties();
-	OniStatus invoke(int commandId, const void* data, int dataSize);
+	OniStatus invoke(int commandId, void* data, int dataSize);
 	OniBool isCommandSupported(int commandId);
 
 	void* getHandle() const {return m_deviceHandle;}

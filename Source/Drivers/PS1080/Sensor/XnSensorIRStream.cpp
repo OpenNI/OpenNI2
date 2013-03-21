@@ -202,6 +202,8 @@ XnStatus XnSensorIRStream::OpenStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareCropMode);
 	XN_IS_STATUS_OK(nRetVal);;
 
+	nRetVal = FixFirmwareBug();
+	XN_IS_STATUS_OK(nRetVal);
 
 	nRetVal = XnIRStream::Open();
 	XN_IS_STATUS_OK(nRetVal);
@@ -209,6 +211,22 @@ XnStatus XnSensorIRStream::OpenStreamImpl()
 	return (XN_STATUS_OK);
 }
 
+XnStatus XnSensorIRStream::FixFirmwareBug()
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	
+	// Firmware bug ugly workaround: in v5.1, IR 1.3 would not turn off decimation, so image is
+	// corrupted. we need to turn it off ourselves. The problem is that the firmware does not 
+	// even provide a way to do so, so we need to directly change the register...
+	// the bug only happens when cropping is off
+	if (m_Helper.GetFirmware()->GetInfo()->nFWVer == XN_SENSOR_FW_VER_5_1 && GetResolution() == XN_RESOLUTION_SXGA && !GetCropping()->enabled)
+	{
+		nRetVal = XnHostProtocolWriteAHB(m_Helper.GetPrivateData(), 0x2a003c00, 0x3ff0000, 0xffffffff);
+		XN_IS_STATUS_OK(nRetVal);
+	}
+
+	return (XN_STATUS_OK);
+}
 
 XnStatus XnSensorIRStream::CloseStreamImpl()
 {
@@ -359,7 +377,10 @@ XnStatus XnSensorIRStream::SetCroppingImpl(const OniCropping* pCropping, XnCropp
 	XN_ASSERT(nRetVal == XN_STATUS_OK);
 
 	nRetVal = XnIRStream::SetCropping(pCropping);
-
+	if (nRetVal == XN_STATUS_OK)
+	{
+		nRetVal = FixFirmwareBug();
+	}
 
 	xnOSLeaveCriticalSection(GetLock());
 	XN_IS_STATUS_OK(nRetVal);

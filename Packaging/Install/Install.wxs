@@ -114,6 +114,8 @@
 
         <Shortcut Id="NiViewer" Name="NiViewer" Target="[Tools]NiViewer.exe" WorkingDirectory="Tools" />
 
+        <Shortcut Id="PrimeConsole" Name="PrimeConsole" Target="[Tools]PrimeConsole.exe" WorkingDirectory="Tools" />
+
         <Shortcut Id="UninstallProduct" Name="Uninstall OpenNI" Target="[SystemFolder]msiexec.exe"
               Arguments="/x [ProductCode]" Directory="ApplicationProgramsFolder"/>
 

@@ -58,6 +58,7 @@ typedef enum
 	ONI_PIXEL_FORMAT_GRAY8 = 202,
 	ONI_PIXEL_FORMAT_GRAY16 = 203,
 	ONI_PIXEL_FORMAT_JPEG = 204,
+	ONI_PIXEL_FORMAT_YUYV = 205,
 } OniPixelFormat;
 
 typedef enum

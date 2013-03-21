@@ -84,7 +84,7 @@ ONI_C_API OniStatus oniDeviceGetProperty(OniDeviceHandle device, int propertyId,
 /** Check if the property is supported by the device. Use the properties listed in OniTypes.h: ONI_DEVICE_PROPERTY_..., or specific ones supplied by the device. */
 ONI_C_API OniBool oniDeviceIsPropertySupported(OniDeviceHandle device, int propertyId);
 /** Invoke an internal functionality of the device. */
-ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, const void* data, int dataSize);
+ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, void* data, int dataSize);
 /** Check if a command is supported, for invoke */
 ONI_C_API OniBool oniDeviceIsCommandSupported(OniDeviceHandle device, int commandId);
 
@@ -118,7 +118,7 @@ ONI_C_API OniStatus oniStreamGetProperty(OniStreamHandle stream, int propertyId,
 /** Check if the property is supported the stream. Use the properties listed in OniTypes.h: ONI_STREAM_PROPERTY_..., or specific ones supplied by the device for its streams. */
 ONI_C_API OniBool oniStreamIsPropertySupported(OniStreamHandle stream, int propertyId);
 /** Invoke an internal functionality of the stream. */
-ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, const void* data, int dataSize);
+ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, void* data, int dataSize);
 /** Check if a command is supported, for invoke */
 ONI_C_API OniBool oniStreamIsCommandSupported(OniStreamHandle stream, int commandId);
 // handle registration of pixel

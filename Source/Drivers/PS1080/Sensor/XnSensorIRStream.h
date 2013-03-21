@@ -87,6 +87,7 @@ private:
 	XnStatus OnIsMirroredChanged();
 	XnStatus SetCroppingImpl(const OniCropping* pCropping, XnCroppingMode mode);
 
+	XnStatus FixFirmwareBug();
 
 	static XnStatus XN_CALLBACK_TYPE IsMirroredChangedCallback(const XnProperty* pSender, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetActualReadCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);

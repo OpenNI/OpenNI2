@@ -54,7 +54,7 @@ public:
 	OniStatus setProperty(int propertyId, const void* data, int dataSize);
 	OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	OniBool isPropertySupported(int propertyId);
-	OniStatus invoke(int commandId, const void* data, int dataSize);
+	OniStatus invoke(int commandId, void* data, int dataSize);
 	OniBool isCommandSupported(int commandId);
 	void notifyAllProperties();
 

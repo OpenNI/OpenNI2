@@ -204,7 +204,7 @@ void VideoStream::notifyAllProperties()
 	m_driverHandler.streamNotifyAllProperties(m_streamHandle);
 }
 
-OniStatus VideoStream::invoke(int commandId, const void* data, int dataSize)
+OniStatus VideoStream::invoke(int commandId, void* data, int dataSize)
 {
 	return m_driverHandler.streamInvoke(m_streamHandle, commandId, data, dataSize);
 }

@@ -70,6 +70,29 @@ public:
 	XnUInt16 nOpcodeGetUsbCore;
 	XnUInt16 nOpcodeSetLedState;
 
+	XnUInt16 nOpcodeGetLog;
+	XnUInt16 nOpcodeTakeSnapshot;
+	XnUInt16 nOpcodeInitFileUpload;
+	XnUInt16 nOpcodeWriteFileUpload;
+	XnUInt16 nOpcodeFinishFileUpload;
+	XnUInt16 nOpcodeDownloadFile;
+	XnUInt16 nOpcodeDeleteFile;
+	XnUInt16 nOpcodeGetFlashMap;
+	XnUInt16 nOpcodeGetFileList;
+	XnUInt16 nOpcodeSetFileAttribute;
+	XnUInt16 nOpcodeExecuteFile;
+	XnUInt16 nOpcodeReadFlash;
+	XnUInt16 nOpcodeBIST;
+	XnUInt16 nOpcodeSetGMCParams;
+	XnUInt16 nOpcodeGetCPUStats;
+	XnUInt16 nOpcodeCalibrateTec;
+	XnUInt16 nOpcodeGetTecData;
+	XnUInt16 nOpcodeCalibrateEmitter;
+	XnUInt16 nOpcodeGetEmitterData;
+	XnUInt16 nOpcodeCalibrateProjectorFault;
+
+	XnUInt16 nLogStringType;
+	XnUInt16 nLogOverflowType;
 
 	XnBool bMirrorSupported;
 

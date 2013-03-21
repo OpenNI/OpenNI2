@@ -59,18 +59,20 @@ if platform.system() == 'Windows':
                 pass
         return tuple(values)
 
-
 class OS:
     #def __init__():
     def setConfiguration(self, config):
         self.config = config
     def getExportedDrivers(self):
-        return ['PS1080', 'OniFile']
+        return ['PS1080', 'PSLink', 'OniFile']
     def getExportedTools(self):
-        return ['NiViewer']
+        return ['NiViewer', 'PSLinkConsole']
     def getExportedSamples(self):
-        return ['ClosestPointViewer', 'EventBasedRead', 'MultiDepthViewer', 'MultipleStreamRead', 'MWClosestPoint', 'MWClosestPointApp', 'SimpleRead', 'SimpleViewer']
+        return ['ClosestPointViewer', 'EventBasedRead', 'MultiDepthViewer', 'MultipleStreamRead', 'MWClosestPoint', 'MWClosestPointApp', 'SimpleRead', 'SimpleViewer', 'SimpleViewer.java', 'org.openni.Samples.SimpleViewer']
 
+    def prepare(self):
+        return
+        
     def cleanOutput(self):
         # Delete the redist directory and create it again
         if os.path.isdir(self.config.output_dir):
@@ -187,6 +189,19 @@ class OSWin(OS):
         self.VS_INST_DIR = get_reg_values(MSVC_KEY, MSVC_VALUES)[0]
         self.PROJECT_SLN = "OpenNI.sln"
 
+    def prepare(self):
+        # java wrapper
+        os.chdir(os.path.join('Wrappers', 'java', 'OpenNI.java'))
+        subprocess.call(['Build.bat'])
+        os.chdir(os.path.join('..', '..', '..'))
+        
+        # java samples
+        for sample in self.getExportedSamples():
+            if sample.endswith('.java'):
+                os.chdir(os.path.join('Samples', sample))
+                subprocess.call(['Build.bat'])
+                os.chdir(os.path.join('..', '..'))
+        
     def getExportedDrivers(self):
         drivers = OS.getExportedDrivers(self)
         drivers.append('Kinect')
@@ -199,7 +214,7 @@ class OSWin(OS):
         binDir = self.getBinDir()
         for r, d, f in os.walk(binDir):
             for file in f:
-                if not self.isIllegalBinFile(file) and (file.startswith('OpenNI') and not file.endswith('.lib')):
+                if not self.isIllegalBinFile(file) and ((file.startswith('OpenNI') and not file.endswith('.lib')) or (file == "org.openni.jar")):
                     shutil.copy(r+'/'+file, where)
         
         # Copy the OpenNI driver binaries
@@ -355,21 +370,32 @@ class OSWin(OS):
         print(compilationMode + ', RC: %d'%rc)
         if rc == 0:
             os.remove(outfile)
-        
+            
         return rc
 
     def isBaseDirValid(self, dir):
         if os.path.isdir(dir) and os.path.exists(dir+'/OpenNI.sln'):
             return True
         return False
+    
     def isIllegalSampleFile(self, file):
         return file.endswith('.user') or file == 'Makefile' or file == 'Android.mk'
+
     def isIllegalBinFile(self, file):
-        return not file.endswith('.exe') and not file.endswith('.dll') and not file.endswith('.pdb') and not file.endswith('.lib') or (not self.config.supplyTools and file == 'XnLib.lib')
+        return 	not file.endswith('.exe') and \
+            not file.endswith('.dll') and \
+            not file.endswith('.pdb') and \
+            not file.endswith('.jar') and \
+            not file.endswith('.bat') and \
+            not file.endswith('.lib') \
+            or file == 'DepthUtils.lib' or file == 'LinkProtoLib.lib' or (not self.config.supplyTools and file == 'XnLib.lib')
+
     def isIllegalBinDriverFile(self, file):
         return not any(file.startswith(driver) for driver in self.getExportedDrivers()) or file.endswith('.lib')
+
     def isIllegalToolFile(self, file):
         return not any(file.startswith(tool) for tool in self.getExportedTools()) or file.endswith('.lib')
+
     def isIllegalSampleBinFile(self, file):
         return not any(file.startswith(sample) for sample in self.getExportedSamples())
 
@@ -384,7 +410,7 @@ class OSLinux(OS):
         binDir = self.getBinDir()
         for r, d, f in os.walk(binDir):
             for file in f:
-                if not self.isIllegalBinFile(file) and file.startswith('libOpenNI'):
+                if not self.isIllegalBinFile(file) and (file.startswith('libOpenNI') or file == 'org.openni.jar'):
                     shutil.copy(r+'/'+file, where)
         
         # Copy the OpenNI driver binaries
@@ -550,14 +576,20 @@ class OSLinux(OS):
         if os.path.isdir(dir) and os.path.exists(dir+'/Makefile'):
             return True
         return False
+
     def isIllegalBinFile(self, file):
-        return False
+        #TODO: currently implemented on a Blacklist basis, consider changing this.
+        return file == 'libDepthUtils.a' or file == 'libLinkProtoLib.a' or (not self.config.supplyTools and file == 'libXnLib.a')
+
     def isIllegalBinDriverFile(self, file):
         return not any(file=="lib"+driver+".so" for driver in self.getExportedDrivers())
+
     def isIllegalSampleFile(self, file):
         return any(file.endswith(ext) for ext in ['.vcxproj', '.vcxproj.filters', 'Android.mk'])
+
     def isIllegalToolFile(self, file):
         return not any(file.startswith(tool) for tool in self.getExportedTools())
+
     def isIllegalSampleBinFile(self, file):
         return not any((file.startswith(sample) or file.startswith('lib'+sample)) for sample in self.getExportedSamples())
 
@@ -697,6 +729,7 @@ def Redist(myConfig):
         sys.exit(2)
 
     # Create file structure
+    myOS.prepare()
     myOS.createGeneralFiles()
     myOS.createRedist()
     myOS.createInclude()

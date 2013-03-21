@@ -1,0 +1,1 @@
+@%0\..\..\..\ThirdParty\PSCommon\BuildSystem\BuildJavaWindows.py "%1" "%0\..\..\..\Bin" src\org\openni\Samples\SimpleViewer org.openni.Samples.SimpleViewer org.openni.jar;jogl.jar;gluegen-rt.jar org.openni.Samples.SimpleViewer.SimpleViewerApplication

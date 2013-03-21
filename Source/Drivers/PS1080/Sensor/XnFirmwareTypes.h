@@ -29,5 +29,10 @@
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
+typedef struct
+{
+	XnUInt32 nTimesExecuted;
+	XnUInt32 nTimeInMicroSeconds;
+} XnTaskCPUInfo;
 
 #endif //__XN_FIRMWARE_TYPES_H__

@@ -29,25 +29,15 @@ if [ `whoami` != root ]; then
     exit
 fi
 
-if [ "`uname -s`" != "Darwin" ]; then
-    # Install UDEV rules for USB device
-    echo '# Make primesense device mount with writing permissions (default is read only for unknown devices)
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0200", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0300", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0401", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0500", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0600", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="0601", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="1280", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="2100", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="2200", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
-    SUBSYSTEM=="usb", ATTR{idProduct}=="f9db", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"' > /etc/udev/rules.d/557-primesense-usb.rules 
-fi
-
 ORIG_PATH=`pwd`
 cd `dirname $0`
 SCRIPT_PATH=`pwd`
 cd $ORIG_PATH
+
+if [ "`uname -s`" != "Darwin" ]; then
+    # Install UDEV rules for USB device
+    cp ${SCRIPT_PATH}/primesense-usb.rules /etc/udev/rules.d/557-primesense-usb.rules 
+fi
 
 OUT_FILE="$SCRIPT_PATH/OpenNIDevEnvironment"
 

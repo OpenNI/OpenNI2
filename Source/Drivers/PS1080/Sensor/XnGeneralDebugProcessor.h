@@ -23,5 +23,17 @@
 
 #include "XnDataProcessor.h"
 
+class XnGeneralDebugProcessor : public XnDataProcessor
+{
+public:
+	XnGeneralDebugProcessor(XnDevicePrivateData* pDevicePrivateData);
+	~XnGeneralDebugProcessor();
+
+protected:
+	virtual void ProcessPacketChunk(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData, XnUInt32 nDataOffset, XnUInt32 nDataSize);
+
+private:
+	XnDumpFile* m_pDump;
+};
 
 #endif // __XN_GENERAL_DEBUG_PROCESSOR_H__

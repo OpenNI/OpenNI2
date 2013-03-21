@@ -94,6 +94,8 @@ const char* getFormatName(openni::PixelFormat format)
 		return "RGB 888";
 	case openni::PIXEL_FORMAT_YUV422:
 		return "YUV 422";
+	case openni::PIXEL_FORMAT_YUYV:
+		return "YUYV";
 	case openni::PIXEL_FORMAT_GRAY8:
 		return "Grayscale 8-bit";
 	case openni::PIXEL_FORMAT_GRAY16:

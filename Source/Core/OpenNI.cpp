@@ -131,6 +131,7 @@ ONI_C_API int oniFormatBytesPerPixel(OniPixelFormat format)
 	case ONI_PIXEL_FORMAT_RGB888:
 		return 3;
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 		return 2;
 	case ONI_PIXEL_FORMAT_JPEG:
 	default:
@@ -207,7 +208,7 @@ ONI_C_API OniBool oniDeviceIsPropertySupported(OniDeviceHandle device, int prope
 	g_Context.clearErrorLogger();
 	return device->pDevice->isPropertySupported(propertyId);
 }
-ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, const void* data, int dataSize)
+ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, void* data, int dataSize)
 {
 	g_Context.clearErrorLogger();
 	return device->pDevice->invoke(commandId, data, dataSize);
@@ -332,7 +333,7 @@ ONI_C_API OniBool oniStreamIsPropertySupported(OniStreamHandle stream, int prope
 	return stream->pStream->isPropertySupported(propertyId);
 }
 
-ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, const void* data, int dataSize)
+ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, void* data, int dataSize)
 {
 	g_Context.clearErrorLogger();
 	return stream->pStream->invoke(commandId, data, dataSize);

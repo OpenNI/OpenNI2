@@ -1,0 +1,318 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{8478c1ff-aea5-4863-bd81-116cf7438518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\MessageParsers">
+      <UniqueIdentifier>{fe372670-7845-4514-a7e6-cb92fe3314ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections">
+      <UniqueIdentifier>{cb204f31-492e-4af6-9976-5fc770ff2935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Streams">
+      <UniqueIdentifier>{72998f7b-dc69-48fb-af02-eb6ee0019e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Endpoints">
+      <UniqueIdentifier>{6192cb21-3da0-48f8-9779-59e3ace1c45f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XnLinkProto">
+      <UniqueIdentifier>{3eebd636-20e2-464e-9190-eab5fe3ec371}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\Interfaces">
+      <UniqueIdentifier>{3723c51c-936b-4cca-9102-e396f62a377f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\USB Client">
+      <UniqueIdentifier>{2b74cccd-78e5-4310-bfef-395d5299f438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\Sockets Client">
+      <UniqueIdentifier>{fd86b1a9-1245-448f-a791-11f070803485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\USB Server">
+      <UniqueIdentifier>{1fbe4092-cbb4-493d-ae14-a2b4cb0fc516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\Sockets Server">
+      <UniqueIdentifier>{ea97ad66-3e9a-42c5-9023-d23576615eca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Connections\Sockets Common">
+      <UniqueIdentifier>{f2fc2492-c76e-4258-97dc-8662773be9f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utils">
+      <UniqueIdentifier>{7c70a978-a870-49e9-ade3-54ba8e9bc4d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\MessageEncoders">
+      <UniqueIdentifier>{d8430420-495f-49c4-aebf-ec715e1e9f7b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\XnLinkOutputStream.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkDefs.h">
+      <Filter>XnLinkProto</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkProto.h">
+      <Filter>XnLinkProto</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IAsyncInputConnection.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ISyncIOConnection.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IConnection.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IConnectionFactory.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IOutputConnection.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ISyncInputConnection.h">
+      <Filter>Source\Connections\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnClientUSBControlEndpoint.h">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnClientUSBConnectionFactory.h">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClInclude>
+    <ClInclude Include="XnClientSyncSocketConnection.h">
+      <Filter>Source\Connections\Sockets Client</Filter>
+    </ClInclude>
+    <ClInclude Include="XnClientSocketInConnection.h">
+      <Filter>Source\Connections\Sockets Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnClientUSBInDataEndpoint.h">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnClientUSBOutDataEndpoint.h">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnServerUSBLinuxOutDataEndpoint.h">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnServerUSBLinuxConnectionFactory.h">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnServerUSBLinuxControlEndpoint.h">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnSyncServerSocketConnection.h">
+      <Filter>Source\Connections\Sockets Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnSyncSocketConnection.h">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnSocketInConnection.h">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnSocketConnectionFactory.h">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\XnServerSocketInConnection.h">
+      <Filter>Source\Connections\Sockets Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkControlEndpoint.h">
+      <Filter>Source\Endpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkInputDataEndpoint.h">
+      <Filter>Source\Endpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkOutputDataEndpoint.h">
+      <Filter>Source\Endpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkMsgParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLink16zParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLink11BitS2DParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkPacked10BitParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkResponseMsgParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkUnpackedS2DParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkUnpackedDataReductionParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnShiftToDepth.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkOutputStreamsMgr.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkInputStreamsMgr.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkMsgEncoder.h">
+      <Filter>Source\MessageEncoders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkInputStream.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\LinkProtoLibVersion.h" />
+    <ClInclude Include="Include\XnLinkProtoLibDefs.h" />
+    <ClInclude Include="Include\XnLinkProtoUtils.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkStatusCodes.h" />
+    <ClInclude Include="XnLink24zYuv422Parser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ILinkOutputStream.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="XnLinkYuvToRgb.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="XnLinkYuv422ToRgb888Parser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLink12BitS2DParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\XnLink6BitParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkContInputStream.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkFrameInputStream.h">
+      <Filter>Source\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\XnLinkLogParser.h">
+      <Filter>Source\MessageParsers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XnLinkStatusCodes.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLink11BitS2DParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLink16zParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkMsgParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkPacked10BitParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkResponseMsgParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkUnpackedDataReductionParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkUnpackedS2DParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkContInputStream.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkFrameInputStream.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkInputStreamsMgr.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkOutputStream.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkOutputStreamsMgr.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkControlEndpoint.cpp">
+      <Filter>Source\Endpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkInputDataEndpoint.cpp">
+      <Filter>Source\Endpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkOutputDataEndpoint.cpp">
+      <Filter>Source\Endpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientUSBConnectionFactory.cpp">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientUSBControlEndpoint.cpp">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientUSBInDataEndpoint.cpp">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientSocketInConnection.cpp">
+      <Filter>Source\Connections\Sockets Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientSyncSocketConnection.cpp">
+      <Filter>Source\Connections\Sockets Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnClientUSBOutDataEndpoint.cpp">
+      <Filter>Source\Connections\USB Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XnServerUSBLinuxConnectionFactory.cpp">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClCompile>
+    <ClCompile Include="XnServerUSBLinuxControlEndpoint.cpp">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClCompile>
+    <ClCompile Include="XnServerUSBLinuxOutDataEndpoint.cpp">
+      <Filter>Source\Connections\USB Server</Filter>
+    </ClCompile>
+    <ClCompile Include="XnServerSocketInConnection.cpp">
+      <Filter>Source\Connections\Sockets Server</Filter>
+    </ClCompile>
+    <ClCompile Include="XnSyncServerSocketConnection.cpp">
+      <Filter>Source\Connections\Sockets Server</Filter>
+    </ClCompile>
+    <ClCompile Include="XnSyncSocketConnection.cpp">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClCompile>
+    <ClCompile Include="XnSocketInConnection.cpp">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClCompile>
+    <ClCompile Include="XnSocketConnectionFactory.cpp">
+      <Filter>Source\Connections\Sockets Common</Filter>
+    </ClCompile>
+    <ClCompile Include="XnShiftToDepth.cpp">
+      <Filter>Source\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkMsgEncoder.cpp">
+      <Filter>Source\MessageEncoders</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkProtoUtils.cpp">
+      <Filter>Source\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkInputStream.cpp">
+      <Filter>Source\Streams</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLink24zYuv422Parser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkYuvToRgb.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkYuv422ToRgb888Parser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLink12BitS2DParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLink6BitParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+    <ClCompile Include="XnLinkLogParser.cpp">
+      <Filter>Source\MessageParsers</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

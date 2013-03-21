@@ -46,6 +46,7 @@ OniStatus Context::initialize()
 {
 	XnBool repositoryOverridden = FALSE;
 	XnChar repositoryFromINI[XN_FILE_MAX_PATH] = {0};
+	xnLogSetFileOutput(1 == 1);
 
 	m_initializationCounter++;
 	if (m_initializationCounter > 1)

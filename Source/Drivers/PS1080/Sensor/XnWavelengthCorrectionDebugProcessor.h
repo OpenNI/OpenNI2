@@ -21,5 +21,31 @@
 #ifndef __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__
 #define __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__
 
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
+#include "XnWholePacketProcessor.h"
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+class XnWavelengthCorrectionDebugProcessor : public XnWholePacketProcessor
+{
+public:
+	XnWavelengthCorrectionDebugProcessor(XnDevicePrivateData* pDevicePrivateData);
+	~XnWavelengthCorrectionDebugProcessor();
+
+protected:
+	//---------------------------------------------------------------------------
+	// Overridden Functions
+	//---------------------------------------------------------------------------
+	virtual void ProcessWholePacket(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData);
+
+	//---------------------------------------------------------------------------
+	// Class Members
+	//---------------------------------------------------------------------------
+private:
+	XnDumpFile* m_DumpTxt;
+};
 
 #endif // __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__

@@ -128,6 +128,6 @@ XnStatus XnCalculateExpectedImageSize(XnDevicePrivateData* pDevicePrivateData, X
 void XnProcessUncompressedDepthPacket(XnSensorProtocolResponseHeader* pCurrHeader, XnUChar* pData, XnUInt32 nDataSize, XnBool bEOP, XnSpecificUsbDevice* pSpecificDevice);
 XnStatus XnDeviceSensorProtocolUpdateImageProcessor(XnDevicePrivateData* pDevicePrivateData);
 
-
+XN_THREAD_PROC XnDeviceSensorProtocolScriptThread(XN_THREAD_PARAM pThreadParam);
 
 #endif //_XN_DEVICESENSORPROTOCOL_H_

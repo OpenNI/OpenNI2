@@ -35,6 +35,12 @@
 #define YUV422_Y2 3
 #define YUV422_BPP 4
 
+#define YUYV_Y1 0
+#define YUYV_U  1
+#define YUYV_Y2 2
+#define YUYV_V  3
+#define YUYV_BPP 4
+
 #define YUV420_U   0
 #define YUV420_Y1  1
 #define YUV420_Y2  2
@@ -57,6 +63,7 @@
 // Functions Declaration
 //---------------------------------------------------------------------------
 void YUV422ToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32* pnActualRead, XnUInt32* pnRGBSize);
+void YUYVToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32* pnActualRead, XnUInt32* pnRGBSize);
 void YUV420ToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32 nRGBSize);
 
 #endif //_XN_BAYER_H_

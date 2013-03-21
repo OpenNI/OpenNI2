@@ -177,6 +177,43 @@ XnStatus XnMirrorYUV422Pixels(XnUChar* pBuffer, XnUInt32 nBufferSize, XnUInt32 n
 	return (XN_STATUS_OK);
 }
 
+XnStatus XnMirrorYUYVPixels(XnUChar* pBuffer, XnUInt32 nBufferSize, XnUInt32 nLineSize)
+{
+	// Local function variables
+	XnUInt8* pSrc = pBuffer;
+	XnUInt8 pLineBuffer[XN_MIRROR_MAX_LINE_SIZE];
+	XnUInt8* pSrcEnd = (XnUInt8*)pSrc + nBufferSize;
+	XnUInt8* pDest = NULL;
+	XnUInt8* pDestVal = &pLineBuffer[(nLineSize/2-1)*sizeof(XnUInt32)]; // last element
+	XnUInt8* pDestEnd = &pLineBuffer[0]; // first element
+	XnUInt32 nMemCpyLineSize = nLineSize/2*sizeof(XnUInt32);
+
+	if (nMemCpyLineSize > XN_MIRROR_MAX_LINE_SIZE)
+	{
+		return (XN_STATUS_INTERNAL_BUFFER_TOO_SMALL);
+	}
+
+	while (pSrc < pSrcEnd)
+	{
+		xnOSMemCopy(pLineBuffer, pSrc, nMemCpyLineSize);
+		pDest = pDestVal;
+
+		while (pDest >= pDestEnd)
+		{
+			pSrc[0] = pDest[2]; // y1 <-> y2
+			pSrc[1] = pDest[3]; // u
+			pSrc[2] = pDest[0]; // y2 <-> y1
+			pSrc[3] = pDest[1]; // v
+
+			pSrc += 4;
+			pDest -= 4;
+		}
+	}
+
+	// All is good...
+	return (XN_STATUS_OK);
+}
+
 XnStatus XnFormatsMirrorPixelData(OniPixelFormat nOutputFormat, XnUChar* pBuffer, XnUInt32 nBufferSize, XnUInt32 nXRes)
 {
 	// Validate the input/output pointers (to make sure none of them is NULL)
@@ -193,6 +230,8 @@ XnStatus XnFormatsMirrorPixelData(OniPixelFormat nOutputFormat, XnUChar* pBuffer
 		return XnMirrorOneBytePixels(pBuffer, nBufferSize, nXRes);
 	case ONI_PIXEL_FORMAT_YUV422:
 		return XnMirrorYUV422Pixels(pBuffer, nBufferSize, nXRes);
+	case ONI_PIXEL_FORMAT_YUYV:
+		return XnMirrorYUYVPixels(pBuffer, nBufferSize, nXRes);
 	case ONI_PIXEL_FORMAT_RGB888:
 		return XnMirrorThreeBytePixels(pBuffer, nBufferSize, nXRes);
 	default:

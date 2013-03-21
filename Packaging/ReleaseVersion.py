@@ -102,7 +102,7 @@ if plat == 'android':
         print 'Build failed!'
         sys.exit(3)
 
-    outFile = 'Final/' + outputDir + '.tar'
+    outFile = finalDir + '/' + outputDir + '.tar'
     
     shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
     
@@ -111,11 +111,7 @@ if plat == 'android':
     shutil.copy('../Config/PS1080.ini', outputDir)
 
     print('Creating archive ' + outFile)
-
-    rc = subprocess.call(['tar', '-cf', outFile, outputDir])
-    if rc != 0:
-        print 'Tar failed!'
-        sys.exit(3)
+    subprocess.check_call(['tar', '-cf', outFile, outputDir])
 
 elif platform.system() == 'Windows':
     import win32con,pywintypes,win32api,platform
@@ -133,16 +129,17 @@ elif platform.system() == 'Windows':
     VS_INST_DIR = get_reg_values(MSVC_KEY, MSVC_VALUES)[0]
     PROJECT_SLN = "..\OpenNI.sln"
 
-    outfile = origDir+'/build.Release.'+plat+'.txt'
-    devenv_cmd = '\"'+VS_INST_DIR + 'devenv\" '+PROJECT_SLN + ' /Project Install /Rebuild "Release|'+plat+'\" /out '+outfile
+    bulidLog = origDir+'/build.Release.'+plat+'.txt'
+    devenv_cmd = '\"'+VS_INST_DIR + 'devenv\" '+PROJECT_SLN + ' /Project Install /Rebuild "Release|'+plat+'\" /out '+bulidLog
     print(devenv_cmd)
-    rc = subprocess.call(devenv_cmd, close_fds=True)
-    if rc == 0:
-        os.remove(outfile)
-    else:
-        print "Error"
+    subprocess.check_call(devenv_cmd, close_fds=True)
+    os.remove(bulidLog)
+        
+    outFile = 'OpenNI-Windows-' + plat + '-' + strVersion + '.msi'
+    if os.path.exists(os.path.join(finalDir, outFile)):
+        os.remove(os.path.join(finalDir, outFile))
 
-    shutil.move('Install/bin/' + plat + '/en-us/OpenNI-Windows-' + plat + '-' + strVersion + '.msi', finalDir)
+    shutil.move('Install/bin/' + plat + '/en-us/' + outFile, finalDir)
         
 elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     import Redist
@@ -175,16 +172,13 @@ elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     Redist.Redist(config)
     
     # Copy install script
-    shutil.copy('Linux/install.sh', config.output_dir + '/install.sh')
-
+    shutil.copy('Linux/install.sh', config.output_dir)
+    shutil.copy('Linux/primesense-usb.rules', config.output_dir)
+    
     # Create archive
     print('Creating archive ' + outFile)
-
-    archiveCmd = 'tar -cjf ' + outFile + ' ' + dirName + '/*'
-    rc = os.system(archiveCmd)
-
-    if rc != 0:
-        print('Could not create archive' + outFile)
+    subprocess.check_call(['tar', '-cjf', outFile, dirName])
+    
 else:
     print "Unknown OS"
     sys.exit(2)

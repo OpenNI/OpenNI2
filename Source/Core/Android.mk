@@ -53,11 +53,12 @@ LOCAL_LDFLAGS := -Wl,--export-dynamic
 # Dependencies
 LOCAL_STATIC_LIBRARIES := XnLib
 LOCAL_SHARED_LIBRARIES := liblog libdl
-LOCAL_LDLIBS += -llog
 
 ifdef OPENNI2_ANDROID_OS_BUILD
     LOCAL_SHARED_LIBRARIES += libjpeg
     LOCAL_REQUIRED_MODULES = libPS1080 libOniFile
+else
+	LOCAL_LDLIBS += -llog
 endif
 
 # Output
