@@ -23,6 +23,7 @@ ClientUSBConnectionFactory::ClientUSBConnectionFactory(XnUInt16 nInputConnection
 	m_controlEndpoint(nPreControlReceiveSleep),
 	m_hUSBDevice(NULL),
 	m_bInitialized(FALSE),
+	m_bUsbInitialized(FALSE),
 	m_dataOpen(FALSE)
 {
 }
@@ -35,15 +36,12 @@ ClientUSBConnectionFactory::~ClientUSBConnectionFactory()
 XnStatus ClientUSBConnectionFactory::Init(const XnChar* strConnString)
 {
 	XnStatus nRetVal = xnUSBInit();
-	if (nRetVal == XN_STATUS_USB_ALREADY_INIT)
-	{
-		//Already initialized is ok
-		nRetVal = XN_STATUS_OK;
-	}
 	XN_IS_STATUS_OK_LOG_ERROR("Initialize USB", nRetVal);
+	m_bUsbInitialized = TRUE;
 
 	nRetVal = xnUSBOpenDeviceByPath(strConnString, &m_hUSBDevice);
 	XN_IS_STATUS_OK_LOG_ERROR("Open USB device", nRetVal);
+
 	//TODO: Check speed maybe?
 	nRetVal = m_controlEndpoint.Init(m_hUSBDevice);
 	XN_IS_STATUS_OK_LOG_ERROR("Init usb control endpoint", nRetVal);
@@ -55,11 +53,20 @@ XnStatus ClientUSBConnectionFactory::Init(const XnChar* strConnString)
 void ClientUSBConnectionFactory::Shutdown()
 {
 	m_controlEndpoint.Shutdown();
-	//Close USB device
-	xnUSBCloseDevice(m_hUSBDevice);
-	m_hUSBDevice = NULL;
 
-	xnUSBShutdown();
+	//Close USB device
+	if (m_hUSBDevice != NULL)
+	{
+		xnUSBCloseDevice(m_hUSBDevice);
+		m_hUSBDevice = NULL;
+	}
+
+	if (m_bUsbInitialized)
+	{
+		xnUSBShutdown();
+		m_bUsbInitialized = FALSE;
+	}
+
 	m_bInitialized = FALSE;
 }
 

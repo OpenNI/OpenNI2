@@ -48,6 +48,7 @@ private:
 	static const XnUInt16 NUM_INPUT_CONNECTIONS;
 	XN_USB_DEV_HANDLE m_hUSBDevice;
 	XnBool m_bInitialized;
+	XnBool m_bUsbInitialized;
 	XnBool m_dataOpen;
 };
 
