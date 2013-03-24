@@ -51,7 +51,10 @@ public class SimpleViewer extends Component
         }
         
         mBufferedImage.setRGB(0, 0, width, height, mImagePixels, 0, width);
-        g.drawImage(mBufferedImage, 0, 0, null);
+
+        int framePosX = (getWidth() - width) / 2;
+        int framePosY = (getHeight() - height) / 2;
+        g.drawImage(mBufferedImage, framePosX, framePosY, null);
     }
 
     public void onFrameReady(VideoStream stream) {

@@ -88,7 +88,7 @@ public class SimpleViewerApplication implements ItemListener {
         mPanel.add("East", mComboBoxVideoModes);
         mFrame.add("North", mPanel);
         mFrame.add("Center", mViewer);
-        mFrame.setSize(800, 600 + mPanel.getHeight());
+        mFrame.setSize(mViewer.getWidth() + 20, mViewer.getHeight() + 80);
         mFrame.setVisible(true);
     }
 
@@ -173,7 +173,7 @@ public class SimpleViewerApplication implements ItemListener {
         mVideoStream.setVideoMode(mode);
         mViewer.setStream(mVideoStream);
         mViewer.setSize(mode.getResolutionX(), mode.getResolutionY());
-        mFrame.setSize(mode.getResolutionX(), mode.getResolutionY() + mPanel.getHeight());
+        mFrame.setSize(mViewer.getWidth() + 20, mViewer.getHeight() + 80);
         mVideoStream.start();
     }
     
