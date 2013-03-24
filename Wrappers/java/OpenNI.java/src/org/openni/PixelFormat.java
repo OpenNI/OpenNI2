@@ -11,7 +11,7 @@ public enum PixelFormat {
   DEPTH_1_MM(100), DEPTH_100_UM(101), SHIFT_9_2(102), SHIFT_9_3(103),
 
   // Color
-  RGB888(200), YUV422(201), GRAY8(202), GRAY16(203), JPEG(204);
+  RGB888(200), YUV422(201), GRAY8(202), GRAY16(203), JPEG(204), YUYV(205);
   private final int mValue;
 
   private PixelFormat(int value) {
@@ -27,7 +27,7 @@ public enum PixelFormat {
       if (type.mValue == value) return type;
     }
 
-    throw new NoSuchElementException();
+    throw new NoSuchElementException(String.format("Unknown pixel format: %d", value));
   }
 
 
