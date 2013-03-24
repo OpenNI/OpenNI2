@@ -73,20 +73,20 @@ typedef enum XnUsbInterfaceType
 
 typedef struct XnCommandAHB
 {
-	uint32_t m_nAddress;	// Address of this register
-	uint32_t m_nBitOffset;	// Offset of the field in bits within address
-	uint32_t m_nBitWidth;	// Width of the field in bits
-	uint32_t m_nValue;		// For read requests, this is where the actual value will be filled. For write requests, the value to write.
+	uint32_t address;		// Address of this register
+	uint32_t offsetInBits;	// Offset of the field in bits within address
+	uint32_t widthInBits;	// Width of the field in bits
+	uint32_t value;			// For read requests, this is where the actual value will be filled. For write requests, the value to write.
 } XnCommandAHB;
 
 typedef struct XnCommandI2C
 {
-	uint32_t m_nDeviceID;		// Device to communicate with
-	uint32_t m_nAddressSize;	// Size of the address, in bytes (1-4)
-	uint32_t m_nAddress;		// Address
-	uint32_t m_nValueSize;		// Size of the value, in bytes (1-4)
-	uint32_t m_nMask;			// For write request - a mask to be applied to the value. For read requests - ignored.
-	uint32_t m_nValue;			// For write request - the value to be written. For read requests - the place where the actual value is written to
+	uint32_t deviceID;		// Device to communicate with
+	uint32_t addressSize;	// Size of the address, in bytes (1-4)
+	uint32_t address;		// Address
+	uint32_t valueSize;		// Size of the value, in bytes (1-4)
+	uint32_t mask;			// For write request - a mask to be applied to the value. For read requests - ignored.
+	uint32_t value;			// For write request - the value to be written. For read requests - the place where the actual value is written to
 } XnCommandI2C;
 
 #pragma pack (pop)

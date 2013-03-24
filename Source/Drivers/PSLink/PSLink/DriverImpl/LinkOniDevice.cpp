@@ -712,10 +712,10 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 			}
 
 			XnCommandAHB* pPropReadAHB = reinterpret_cast<XnCommandAHB*>(data);
-			nRetVal = m_pSensor->ReadAHB(pPropReadAHB->m_nAddress, 
-				static_cast<XnUInt8>(pPropReadAHB->m_nBitOffset), 
-				static_cast<XnUInt8>(pPropReadAHB->m_nBitWidth), 
-				pPropReadAHB->m_nValue);
+			nRetVal = m_pSensor->ReadAHB(pPropReadAHB->address, 
+				static_cast<XnUInt8>(pPropReadAHB->offsetInBits), 
+				static_cast<XnUInt8>(pPropReadAHB->widthInBits), 
+				pPropReadAHB->value);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Read AHB", nRetVal, ONI_STATUS_ERROR);
 			break;
 		}
@@ -730,10 +730,10 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 			}
 
 			const XnCommandAHB* pPropWriteAHB = reinterpret_cast<const XnCommandAHB*>(data);
-			nRetVal = m_pSensor->WriteAHB(pPropWriteAHB->m_nAddress, 
-				pPropWriteAHB->m_nValue, 
-				static_cast<XnUInt8>(pPropWriteAHB->m_nBitOffset), 
-				static_cast<XnUInt8>(pPropWriteAHB->m_nBitWidth));
+			nRetVal = m_pSensor->WriteAHB(pPropWriteAHB->address, 
+				pPropWriteAHB->value, 
+				static_cast<XnUInt8>(pPropWriteAHB->offsetInBits), 
+				static_cast<XnUInt8>(pPropWriteAHB->widthInBits));
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Write AHB", nRetVal, ONI_STATUS_ERROR);
 			break;
 		}
@@ -749,11 +749,11 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 
 			XnCommandI2C* pPropReadI2C = reinterpret_cast<XnCommandI2C*>(data);
 			nRetVal = m_pSensor->ReadI2C(
-				static_cast<XnUInt8>(pPropReadI2C->m_nDeviceID),  
-				static_cast<XnUInt8>(pPropReadI2C->m_nAddressSize), 
-				pPropReadI2C->m_nAddress, 
-				static_cast<XnUInt8>(pPropReadI2C->m_nValueSize),
-				pPropReadI2C->m_nValue);
+				static_cast<XnUInt8>(pPropReadI2C->deviceID),  
+				static_cast<XnUInt8>(pPropReadI2C->addressSize), 
+				pPropReadI2C->address, 
+				static_cast<XnUInt8>(pPropReadI2C->valueSize),
+				pPropReadI2C->value);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Read I2C", nRetVal, ONI_STATUS_ERROR);
 			break;
 		}
@@ -768,12 +768,12 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 			}
 
 			const XnCommandI2C* pPropWriteI2C = reinterpret_cast<const XnCommandI2C*>(data);
-			nRetVal = m_pSensor->WriteI2C(static_cast<XnUInt8>(pPropWriteI2C->m_nDeviceID), 
-				static_cast<XnUInt8>(pPropWriteI2C->m_nAddressSize), 
-				pPropWriteI2C->m_nAddress, 
-				static_cast<XnUInt8>(pPropWriteI2C->m_nValueSize),
-				pPropWriteI2C->m_nValue,
-				pPropWriteI2C->m_nMask);
+			nRetVal = m_pSensor->WriteI2C(static_cast<XnUInt8>(pPropWriteI2C->deviceID), 
+				static_cast<XnUInt8>(pPropWriteI2C->addressSize), 
+				pPropWriteI2C->address, 
+				static_cast<XnUInt8>(pPropWriteI2C->valueSize),
+				pPropWriteI2C->value,
+				pPropWriteI2C->mask);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Write I2C", nRetVal, ONI_STATUS_ERROR);
 			break;
 		}
