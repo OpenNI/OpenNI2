@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #/****************************************************************************
 #*                                                                           *
 #*  OpenNI 2.x Alpha                                                         *
@@ -22,95 +24,234 @@ import os
 import re
 import sys
 import shutil
-import subprocess
 import platform
-import argparse
 import stat
-from commands import getoutput as gop
 
-binDir = "../Bin/Win32-Release"
-rootDir = "../"
-
-def copySharedObject(sourceDir, name, targetDir):
-    if platform.system() == 'Windows':
-        shutil.copy(os.path.join(sourceDir, name + '.dll'), targetDir)
-        shutil.copy(os.path.join(sourceDir, name + '.pdb'), targetDir)
-    elif platform.system() == 'Linux':
-        shutil.copy(os.path.join(sourceDir, 'lib' + name + '.so'), targetDir)
-    elif platform.system() == 'Darwin':
-        shutil.copy(os.path.join(sourceDir, 'lib' + name + '.dylib'), targetDir)
-    else:
-        raise 'Unsupported platform!'
+class Harvest:
+    def __init__(self, rootDir, outDir, arch):
+        self.rootDir = rootDir
+        self.outDir = outDir
+        self.arch = arch
+        self.osName = platform.system()
+        self.binDir = os.path.join(rootDir, 'Bin', arch + '-Release')
+        self.platformSuffix = ''
+        self.glutSuffix = '32'
         
-def copyRedistFiles(targetDir):
-    os.makedirs(targetDir)
-    # start with OpenNI itself
-    copySharedObject(binDir, 'OpenNI2', targetDir)
-    copySharedObject(binDir, 'OpenNI2.jni', targetDir)
-    shutil.copy(os.path.join(binDir, 'org.openni.jar'), targetDir)
-    shutil.copy(os.path.join(rootDir, 'Config', 'OpenNI.ini'), targetDir)
-    # and now all drivers
-    binDriversDir = os.path.join(binDir, 'OpenNI2', 'Drivers')
-    targetDriversDir = os.path.join(targetDir, 'OpenNI2', 'Drivers')
-    os.makedirs(targetDriversDir)
-    copySharedObject(binDriversDir, 'OniFile', targetDriversDir)
-    copySharedObject(binDriversDir, 'PS1080', targetDriversDir)
-    copySharedObject(binDriversDir, 'PSLink', targetDriversDir)
-    copySharedObject(binDriversDir, 'Kinect', targetDriversDir)
-    shutil.copy(os.path.join(rootDir, 'Config', 'OpenNI2', 'Drivers', 'PS1080.ini'), targetDriversDir)
-    
-def copySample(samplesDir, name, isLibrary = False):
-    sampleTargetDir = os.path.join(samplesDir, name)
-    sampleSourceDir = os.path.join(rootDir, 'Samples', name)
-    shutil.copytree(sampleSourceDir, sampleTargetDir)
+        if self.osName == 'Windows':
+            if arch == 'x86':
+                self.binDir = os.path.join(rootDir, 'Bin', 'Win32-Release')
+            elif arch == 'x64':
+                self.platformSuffix = '64'
+                self.glutSuffix = '64'
 
-    # copy binaries
-    splitName = os.path.splitext(name)
-    if splitName[1] == '.java':
-        # copy jar
-        shutil.copy(os.path.join(binDir, 'org.openni.Samples.' + splitName[0] + '.jar'), os.path.join(samplesDir, 'Bin'))
-        # and script
-        if not isLibrary:
-            if platform.system() == 'Windows':
-                shutil.copy(os.path.join(binDir, 'org.openni.Samples.' + splitName[0] + '.bat'), os.path.join(samplesDir, 'Bin'))
-            else:
-                shutil.copy(os.path.join(binDir, 'org.openni.Samples.' + splitName[0]), os.path.join(samplesDir, 'Bin'))
-    elif isLibrary:
-        copySharedObject(binDir, name, os.path.join(samplesDir, 'Bin'))
-    else:
-        if platform.system() == 'Windows':
-            shutil.copy(os.path.join(binDir, name + '.exe'), os.path.join(samplesDir, 'Bin'))
+    def copySharedObject(self, sourceDir, name, targetDir):
+        if self.osName == 'Windows':
+            shutil.copy(os.path.join(sourceDir, name + '.dll'), targetDir)
+            shutil.copy(os.path.join(sourceDir, name + '.pdb'), targetDir)
+        elif self.osName == 'Linux':
+            shutil.copy(os.path.join(sourceDir, 'lib' + name + '.so'), targetDir)
+        elif self.osName == 'Darwin':
+            shutil.copy(os.path.join(sourceDir, 'lib' + name + '.dylib'), targetDir)
         else:
-            shutil.copy(os.path.join(binDir, name), os.path.join(samplesDir, 'Bin'))
-    
-def harvest(targetRootDir):
-    if os.path.exists(targetRootDir):
-        shutil.rmtree(targetRootDir)
-    
-    copyRedistFiles(os.path.join(targetRootDir, 'Redist'))
-    
-    copyRedistFiles(os.path.join(targetRootDir, os.path.join('Samples', 'Bin')))
-    copySample(os.path.join(targetRootDir, 'Samples'), 'SimpleRead')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'SimpleViewer')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'SimpleViewer.java')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'EventBasedRead')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'MultiDepthViewer')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'MultipleStreamRead')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'MWClosestPoint', True)
-    copySample(os.path.join(targetRootDir, 'Samples'), 'MWClosestPointApp')
-    copySample(os.path.join(targetRootDir, 'Samples'), 'ClosestPointViewer')
-    
-    copyRedistFiles(os.path.join(targetRootDir, 'Tools'))
+            raise 'Unsupported platform!'
+            
+    def copyExecutable(self, sourceDir, name, targetDir):
+        if self.osName == 'Windows':
+            shutil.copy(os.path.join(sourceDir, name + '.exe'), targetDir)
+            shutil.copy(os.path.join(sourceDir, name + '.pdb'), targetDir)
+        else:
+            shutil.copy(os.path.join(sourceDir, name), targetDir)
+            
+    def regxReplace(self, findStr, repStr, filePath):
+        "replaces all findStr by repStr in file filePath using regualr expression"
+        findStrRegx = re.compile(findStr)
+        tempName = filePath+'~~~'
+        fileMode = os.stat(filePath).st_mode
+        os.chmod(filePath, fileMode | stat.S_IWRITE)
+        input = open(filePath)
+        output = open(tempName, 'w')
+        for s in input:
+            output.write(findStrRegx.sub(repStr, s))
+        output.close()
+        input.close()
+        os.remove(filePath)
+        os.rename(tempName, filePath)
         
-def copyDocumentation(targetDir, sourceDir):
-    if platform.system() == 'Windows':
-        return [ [ os.path.join(targetDir, 'OpenNI.chm'), sourceDir ] ]
-    elif platform.system() == 'Linux' or platform.system() == 'Darwin':
-        result = [ [ os.path.join(targetDir, os.path.basename(file)), sourceDir ] for file in glob.glob(os.path.join(location, '*.html')) ]
-        if len(result) == 0:
-            raise 'no documentation files found!'
-        return result
-    else:
-        raise 'Unsupported platform!'
+    def copyRedistFiles(self, targetDir):
+        os.makedirs(targetDir)
+        # start with OpenNI itself
+        self.copySharedObject(self.binDir, 'OpenNI2', targetDir)
+        self.copySharedObject(self.binDir, 'OpenNI2.jni', targetDir)
+        shutil.copy(os.path.join(self.binDir, 'org.openni.jar'), targetDir)
+        shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI.ini'), targetDir)
+        # and now all drivers
+        binDriversDir = os.path.join(self.binDir, 'OpenNI2', 'Drivers')
+        targetDriversDir = os.path.join(targetDir, 'OpenNI2', 'Drivers')
+        os.makedirs(targetDriversDir)
+        self.copySharedObject(binDriversDir, 'OniFile', targetDriversDir)
+        self.copySharedObject(binDriversDir, 'PS1080', targetDriversDir)
+        self.copySharedObject(binDriversDir, 'PSLink', targetDriversDir)
+        shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'PS1080.ini'), targetDriversDir)
+        if self.osName == 'Windows':
+            self.copySharedObject(binDriversDir, 'Kinect', targetDriversDir)
+        
+    def copySample(self, samplesDir, name, isLibrary = False, isGL = False, isJava = False):
+        if self.arch == 'Arm' and isGL:
+            return
+            
+        sampleTargetDir = os.path.join(samplesDir, name)
+        sampleSourceDir = os.path.join(self.rootDir, 'Samples', name)
 
-harvest('Output_Harvest')
+        # copy sources
+        for root, dirs, files in os.walk(sampleSourceDir):
+            # take dir name without 'root' and append to target
+            dst = os.path.join(samplesDir, name, os.path.relpath(root, sampleSourceDir))
+            #print dst
+            for file in files:
+                if (isJava and file.endswith('.java')) or (not isJava and (file.endswith('.h') or file.endswith('.cpp'))):
+                    if not os.path.exists(dst):
+                        os.makedirs(dst)
+                    shutil.copy(os.path.join(root, file), dst)
+                    
+        # copy common header
+        if not isJava and not isLibrary:
+            shutil.copy(os.path.join(self.rootDir, 'Samples', 'Common', 'OniSampleUtilities.h'), sampleTargetDir)
+            
+        # copy GL headers
+        if self.osName == 'Windows' and isGL:
+            shutil.copytree(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'GL'), os.path.join(sampleTargetDir, 'GL'))
+            shutil.copytree(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glh'), os.path.join(sampleTargetDir, 'glh'))
+            # and lib
+            shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut' + self.glutSuffix + '.lib'), sampleTargetDir)
+                    
+        # and project file / makefile
+        if self.osName == 'Windows':
+            if isJava:
+                shutil.copy(os.path.join(sampleSourceDir, 'Build.bat'), sampleTargetDir)
+                shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'BuildJavaWindows.py'), sampleTargetDir)
+                # fix call
+                self.regxReplace(r'..\\\\..\\\\ThirdParty\\\\PSCommon\\\\BuildSystem\\\\', '', os.path.join(sampleTargetDir, 'Build.bat'))
+            else:
+                shutil.copy(os.path.join(sampleSourceDir, name + '.vcxproj'), sampleTargetDir)
+                # fix output dir
+                self.regxReplace('<OutDir>\$\(SolutionDir\)Bin\\\\\$\(Platform\)-\$\(Configuration\)', '<OutDir>$(ProjectDir)..\\Bin', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                # fix intermediate dir
+                self.regxReplace('<IntDir>\$\(SolutionDir\)Bin', '<IntDir>$(ProjectDir)..\\Bin', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                # fix OpenNI include dir
+                self.regxReplace('..\\\\..\\\\Include', '$(OPENNI2_INCLUDE' + self.platformSuffix + ')', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                # fix GL include dir
+                self.regxReplace('..\\\\..\\\\ThirdParty\\\\GL', '.', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                # fix Common include dir
+                self.regxReplace('..\\\\Common', '.', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                # fix library dir
+                self.regxReplace('<AdditionalLibraryDirectories>\$\(OutDir\)', '<AdditionalLibraryDirectories>$(OutDir);$(OPENNI2_LIB' + self.platformSuffix + ')', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                
+        elif self.osName == 'Linux' or self.osName == 'Darwin':
+            shutil.copy(os.path.join(sampleSourceDir, 'Makefile'), sampleTargetDir)
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonDefs.mak'), sampleTargetDir)
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonTargets.mak'), sampleTargetDir)
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'Platform.x86'), sampleTargetDir)
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'Platform.x64'), sampleTargetDir)
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'Platform.Arm'), sampleTargetDir)
+            if isJava:
+                shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonJavaMakefile'), sampleTargetDir)
+            else:
+                shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonCppMakefile'), sampleTargetDir)
+            # fix includes
+            self.regxReplace('../../ThirdParty/PSCommon/BuildSystem/', '', os.path.join(sampleTargetDir, 'Makefile'))
+
+        # and executable
+        if isJava:
+            splitName = os.path.splitext(name)
+            # copy jar
+            shutil.copy(os.path.join(self.binDir, 'org.openni.Samples.' + splitName[0] + '.jar'), os.path.join(samplesDir, 'Bin'))
+            # and script
+            if not isLibrary:
+                if self.osName == 'Windows':
+                    shutil.copy(os.path.join(self.binDir, 'org.openni.Samples.' + splitName[0] + '.bat'), os.path.join(samplesDir, 'Bin'))
+                else:
+                    shutil.copy(os.path.join(self.binDir, 'org.openni.Samples.' + splitName[0]), os.path.join(samplesDir, 'Bin'))
+        elif isLibrary:
+            self.copySharedObject(self.binDir, name, os.path.join(samplesDir, 'Bin'))
+            if self.osName == 'Windows':
+                shutil.copy(os.path.join(self.binDir, name + '.lib'), os.path.join(samplesDir, 'Bin'))
+        else: # regular executable
+            self.copyExecutable(self.binDir, name, os.path.join(samplesDir, 'Bin'))
+        
+    def copyTool(self, toolsDir, name, isGL = False):
+        if self.arch == 'Arm' and isGL:
+            return
+            
+        self.copyExecutable(self.binDir, name, toolsDir)
+
+    def copyDocumentation(self, docDir):
+        if self.osName == 'Windows':
+            os.makedirs(docDir)
+            shutil.copy(os.path.join(self.rootDir, 'Source', 'Documentation', 'html', 'OpenNI.chm'), docDir)
+        else:
+            shutil.copytree(os.path.join(self.rootDir, 'Source', 'Documentation', 'html'), docDir)
+            
+    def copyGLUT(self, targetDir):
+        if self.osName == 'Windows':
+            shutil.copy(os.path.join(rootDir, 'ThirdParty', 'GL', 'glut' + self.glutSuffix + '.dll'), targetDir)
+        
+    def run(self):
+        if os.path.exists(self.outDir):
+            shutil.rmtree(self.outDir)
+        os.makedirs(self.outDir)
+        
+        # Redist
+        self.copyRedistFiles(os.path.join(self.outDir, 'Redist'))
+        
+        # Samples
+        samplesDir = os.path.join(self.outDir, 'Samples')
+        self.copyRedistFiles(os.path.join(samplesDir, 'Bin'))
+        self.copyGLUT(os.path.join(samplesDir, 'Bin'))
+        self.copySample(samplesDir, 'SimpleRead')
+        self.copySample(samplesDir, 'SimpleViewer', isGL = True)
+        self.copySample(samplesDir, 'SimpleViewer.java', isJava = True)
+        self.copySample(samplesDir, 'EventBasedRead')
+        self.copySample(samplesDir, 'MultiDepthViewer', isGL = True)
+        self.copySample(samplesDir, 'MultipleStreamRead')
+        self.copySample(samplesDir, 'MWClosestPoint', isLibrary = True)
+        self.copySample(samplesDir, 'MWClosestPointApp')
+        self.copySample(samplesDir, 'ClosestPointViewer', isGL = True)
+        
+        # Tools
+        toolsDir = os.path.join(self.outDir, 'Tools')
+        self.copyRedistFiles(toolsDir)
+        self.copyGLUT(toolsDir)
+        self.copyTool(toolsDir, 'NiViewer', isGL = True)
+        self.copyTool(toolsDir, 'PSLinkConsole')
+        
+        # Documentation
+        docDir = os.path.join(self.outDir, 'Documentation')
+        self.copyDocumentation(docDir)
+        
+        # Include
+        shutil.copytree(os.path.join(rootDir, 'Include'), os.path.join(self.outDir, 'Include'))
+        
+        # Licenses
+        shutil.copy(os.path.join(rootDir, 'NOTICE'), self.outDir)
+        shutil.copy(os.path.join(rootDir, 'LICENSE'), self.outDir)
+        
+        if self.osName == 'Windows':
+            # Driver
+            shutil.copytree(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'XnLib', 'Driver', 'Win32', 'Bin'), os.path.join(self.outDir, 'Driver'))
+            
+            # Library
+            libDir = os.path.join(self.outDir, 'Lib')
+            os.makedirs(libDir)
+            shutil.copy(os.path.join(self.binDir, 'OpenNI2.lib'), libDir)
+        else:
+            # install script
+            shutil.copy(os.path.join(self.rootDir, 'Packaging', 'Linux', 'install.sh'), self.outDir)
+            shutil.copy(os.path.join(self.rootDir, 'Packaging', 'Linux', 'primesense-usb.rules'), self.outDir)
+
+if len(sys.argv) < 3:
+    print 'Usage: ' + sys.argv[0] + ' <OutDir> <x86|x64|Arm>'
+    exit(1)
+    
+rootDir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+harvest = Harvest(rootDir, sys.argv[1], sys.argv[2])
+harvest.run()

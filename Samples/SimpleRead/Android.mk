@@ -29,7 +29,8 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 
 # Includes
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../Include
+	$(LOCAL_PATH)/../../Include \
+	$(LOCAL_PATH)/../Common
 
 # Dependencies	
 LOCAL_SHARED_LIBRARIES := libOpenNI2

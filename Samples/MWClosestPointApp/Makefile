@@ -4,7 +4,8 @@ BIN_DIR = ../../Bin
 
 INC_DIRS = \
 	../../Include \
-	../MWClosestPoint
+	../MWClosestPoint \
+	../Common
 
 SRC_FILES = *.cpp
 

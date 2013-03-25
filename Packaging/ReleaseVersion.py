@@ -32,7 +32,7 @@ import stat
 import UpdateVersion
 
 if len(sys.argv) < 2 or sys.argv[1] in ('-h','--help'):
-    print "usage: " + sys.argv[0] + " <x86|x64|arm|android> [UpdateVersion]"
+    print "usage: " + sys.argv[0] + " <x86|x64|Arm|android> [UpdateVersion]"
     sys.exit(1)
     
 plat = sys.argv[1]
@@ -72,8 +72,24 @@ def get_reg_values(reg_key, value_list):
             pass
     return tuple(values)
 
+def calc_jobs_number():
+    cores = 1
+    
+    try:
+        if isinstance(self, OSMac):
+            txt = gop('sysctl -n hw.physicalcpu')
+        else:
+            txt = gop('grep "processor\W:" /proc/cpuinfo | wc -l')
+
+        cores = int(txt)
+    except:
+        pass
+       
+    return str(cores * 2)
+
 # Create installer
 strVersion = str(UpdateVersion.VERSION_MAJOR) + "." + str(UpdateVersion.VERSION_MINOR) + "." + str(UpdateVersion.VERSION_MAINTENANCE)
+print "Creating installer for OpenNI " + strVersion + " " + plat
 finalDir = "Final"
 if not os.path.isdir(finalDir):
     os.mkdir(finalDir)
@@ -102,7 +118,7 @@ if plat == 'android':
         print 'Build failed!'
         sys.exit(3)
 
-    outFile = finalDir + '/' + outputDir + '.tar'
+    finalFile = finalDir + '/' + outputDir + '.tar'
     
     shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
     
@@ -110,8 +126,8 @@ if plat == 'android':
     shutil.copy('../Config/OpenNI.ini', outputDir)
     shutil.copy('../Config/PS1080.ini', outputDir)
 
-    print('Creating archive ' + outFile)
-    subprocess.check_call(['tar', '-cf', outFile, outputDir])
+    print('Creating archive ' + finalFile)
+    subprocess.check_call(['tar', '-cf', finalFile, outputDir])
 
 elif platform.system() == 'Windows':
     import win32con,pywintypes,win32api,platform
@@ -133,52 +149,33 @@ elif platform.system() == 'Windows':
     devenv_cmd = '\"'+VS_INST_DIR + 'devenv\" '+PROJECT_SLN + ' /Project Install /Rebuild "Release|'+plat+'\" /out '+bulidLog
     print(devenv_cmd)
     subprocess.check_call(devenv_cmd, close_fds=True)
+
+    # everything OK, can remove build log
     os.remove(bulidLog)
         
     outFile = 'OpenNI-Windows-' + plat + '-' + strVersion + '.msi'
-    if os.path.exists(os.path.join(finalDir, outFile)):
-        os.remove(os.path.join(finalDir, outFile))
+    finalFile = os.path.join(finalDir, outFile)
+    if os.path.exists(finalFile):
+        os.remove(finalFile)
 
     shutil.move('Install/bin/' + plat + '/en-us/' + outFile, finalDir)
         
 elif platform.system() == 'Linux' or platform.system() == 'Darwin':
-    import Redist
-    config = Redist.Config()
 
-    if platform.system() == 'Darwin':
-        config.Platform = "MacOS"
-    else:
-        config.Platform = platform.system()
-
-    if plat == 'x86':
-        config.bits = '32'
-    elif plat == 'x64':
-        config.bits = '64'
-    elif plat == 'arm':
-        config.bits = 'arm'
-    else:
-        print 'Unknown platform: ', plat
-        sys.exit(1)
-
-    outFile = 'Final/OpenNI-' + config.Platform + '-' + config.getPlatforms()[0].getPlatformString() + '-' + strVersion + '.tar.bz2'
-    dirName = 'OpenNI-' + strVersion + '-' + plat
-        
-    config.path = '..'
-    config.output_dir = origDir + '/'+ dirName
-    config.compile = 'Build'
-    config.createDocs = True
-    config.supplyTools = False
-    config.machine = platform.machine()
-    Redist.Redist(config)
+    devNull = open('/dev/null', 'w')
+    subprocess.check_call(['make', '-C', '../', '-j' + calc_jobs_number(), 'PLATFORM=' + plat, 'clean'], stdout=devNull, stderr=devNull)
+    devNull.close()
     
-    # Copy install script
-    shutil.copy('Linux/install.sh', config.output_dir)
-    shutil.copy('Linux/primesense-usb.rules', config.output_dir)
+    buildLog = open(origDir + '/build.release.' + plat + '.log', 'w')
+    subprocess.check_call(['make', '-C', '../', '-j' + calc_jobs_number(), 'PLATFORM=' + plat, 'release'], stdout=buildLog, stderr=buildLog)
+    buildLog.close()
     
-    # Create archive
-    print('Creating archive ' + outFile)
-    subprocess.check_call(['tar', '-cjf', outFile, dirName])
+    # everything OK, can remove build log
+    os.remove(origDir + '/build.release.' + plat + '.log')
     
 else:
     print "Unknown OS"
     sys.exit(2)
+    
+print "Installer can be found under: " + finalDir
+print "Done"

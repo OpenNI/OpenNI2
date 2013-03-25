@@ -3,7 +3,8 @@ include ../../ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
 BIN_DIR = ../../Bin
 
 INC_DIRS = \
-	../../Include
+	../../Include \
+	../Common
 
 SRC_FILES = *.cpp
 

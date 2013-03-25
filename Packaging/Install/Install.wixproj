@@ -196,11 +196,13 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)\..\Redist.py" -platform $(platformName) -compile None -path $(SolutionDir) -output $(ProjectDir)\..\Output_$(PlatformName)
-"$(WIX)\bin\heat" dir "$(ProjectDir)\..\Output_$(PlatformName)" -ag -scom -sfrag -srd -dr INSTALLLOCATION -cg RedistComponentGroup -var var.RedistDir -out "$(ProjectDir)\Fragments\RedistFragments.wxs" -sw5150</PreBuildEvent>
+    <PostBuildEvent />
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent />
+    <PreBuildEvent>"$(ProjectDir)\..\Harvest.py" $(ProjectDir)\..\Output_$(PlatformName) $(PlatformName)
+if errorlevel 1 exit 1
+"$(WIX)\bin\heat" dir "$(ProjectDir)\..\Output_$(PlatformName)" -ag -scom -sfrag -srd -dr INSTALLLOCATION -cg RedistComponentGroup -var var.RedistDir -out "$(ProjectDir)\Fragments\RedistFragments.wxs" -sw5150
+if errorlevel 1 exit 1</PreBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

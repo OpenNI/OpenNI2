@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "OpenNI.h"
 
-#include "../Common/OniSampleUtilities.h"
+#include "OniSampleUtilities.h"
 
 using namespace openni;
 

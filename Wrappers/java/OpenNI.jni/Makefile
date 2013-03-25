@@ -11,7 +11,7 @@ SRC_FILES = *.cpp
 
 USED_LIBS += OpenNI2 
 
-LIB_NAME = OpenNI.jni
+LIB_NAME = OpenNI2.jni
 
 CFLAGS += -Wall
 
