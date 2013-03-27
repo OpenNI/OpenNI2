@@ -199,18 +199,20 @@
     <PostBuildEvent />
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>REM Build Java
-"$(SolutionDir)\Wrappers\java\OpenNI.java\Build.bat"
+    <PreBuildEvent>echo "Building Java Wrappers..."
+call "$(SolutionDir)\Wrappers\java\OpenNI.java\Build.bat"
+ECHO.%ERRORLEVEL%
 if errorlevel 1 exit 1
-"$(SolutionDir)\Samples\SimpleViewer.java\Build.bat"
+echo "Building SimpleViewer.java..."
+call "$(SolutionDir)\Samples\SimpleViewer.java\Build.bat"
 if errorlevel 1 exit 1
-REM Creating Documentation
+echo "Building Documentation..."
 "$(SolutionDir)\Source\Documentation\Runme.py"
 if errorlevel 1 exit 1
-REM Harvesting...
+echo "Harvesting Files..."
 "$(ProjectDir)\..\Harvest.py" $(ProjectDir)\..\Output_$(PlatformName) $(PlatformName)
 if errorlevel 1 exit 1
-REM Create File List
+echo "Creating File List..."
 "$(WIX)\bin\heat" dir "$(ProjectDir)\..\Output_$(PlatformName)" -ag -scom -sfrag -srd -dr INSTALLLOCATION -cg RedistComponentGroup -var var.RedistDir -out "$(ProjectDir)\Fragments\RedistFragments.wxs" -sw5150
 if errorlevel 1 exit 1</PreBuildEvent>
   </PropertyGroup>
