@@ -45,8 +45,12 @@ CLASS_PATH = os.path.expandvars("$CLASSPATH")
 TEMP_BUILD_DIR = int_dir
 
 # create bin dir if needed
+if not os.path.exists(RELEASE_DIR):
+    os.makedirs(RELEASE_DIR)
+if not os.path.exists(DEBUG_DIR):
+    os.makedirs(DEBUG_DIR)
 if not os.path.exists(TEMP_BUILD_DIR):
-    os.mkdir(TEMP_BUILD_DIR)
+    os.makedirs(TEMP_BUILD_DIR)
  
 # build
 cmd = [os.path.join(JAVA_HOME, 'bin\javac.exe')]

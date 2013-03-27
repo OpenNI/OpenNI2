@@ -143,8 +143,12 @@ Samples/SimpleViewer.java:            Wrappers/java/OpenNI.java
 
 $(FINAL_DIR):
 	mkdir -p $(FINAL_DIR)
+
+doc:
+	Source/Documentation/Runme.py
+	rm -f Source/Documentation/html/*.md5
 	
-release: | all $(FINAL_DIR)
+release: | all doc $(FINAL_DIR)
 	Packaging/Harvest.py Packaging/$(PRODUCT_STRING) $(PLATFORM)
 	cd Packaging; tar -cjf Final/$(PRODUCT_STRING).tar.bz2 $(PRODUCT_STRING)
 
