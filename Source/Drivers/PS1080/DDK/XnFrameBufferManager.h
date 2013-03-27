@@ -68,7 +68,7 @@ public:
 	} NewFrameEventArgs;
 
 	typedef xnl::Event<NewFrameEventArgs> NewFrameEvent;
-	NewFrameEvent::EventInterface& OnNewFrameEvent() { return m_NewFrameEvent; }
+	NewFrameEvent/* ::EventInterface */& OnNewFrameEvent() { return m_NewFrameEvent; }
 
 private:
 	XnOniFramePool* m_pBufferPool;
