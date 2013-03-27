@@ -1,1 +1,1 @@
-@"%0\..\..\..\..\ThirdParty\PSCommon\BuildSystem\BuildJavaWindows.py" "%1" "%0\..\..\..\..\Bin" src\org\openni org.openni
+@"%0\..\..\..\..\ThirdParty\PSCommon\BuildSystem\BuildJavaWindows.py" "%1" "%0\..\..\..\..\Bin" "%0\..\src\org\openni" org.openni
