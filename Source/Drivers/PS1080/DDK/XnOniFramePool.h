@@ -41,8 +41,8 @@ typedef struct
 
 class XnOniFramePool : public xnl::Pool<OniFrame>
 {
-public:
-	XnOniFramePool() : Pool(true), m_frameSize(0)
+   public:
+  XnOniFramePool() : xnl::Pool<OniFrame>::Pool(true), m_frameSize(0)
 	{
 	}
 
@@ -58,7 +58,7 @@ public:
 		Lock();
 
 		// Try to release the frame.
-		XnStatus nRetVal = Pool::Release(pFrame);
+		XnStatus nRetVal = xnl::Pool<OniFrame>::Release(pFrame);
 		if (nRetVal == XN_STATUS_OK)
 		{
 			// Check if frame requires resize.
