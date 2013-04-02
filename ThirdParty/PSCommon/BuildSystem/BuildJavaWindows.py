@@ -5,16 +5,16 @@ import shutil
 
 # parse command line
 if len(sys.argv) < 5:
-    print "usage: " + sys.argv[0] + " <32|64> <BinDir> <SourceDir> <Name> [NeededJarFiles] [MainClass]"
+    print "usage: " + sys.argv[0] + " <x86|x64> <BinDir> <SourceDir> <Name> [NeededJarFiles] [MainClass]"
     exit(1)
 
 platform_string = ""
-if sys.argv[1] == "" or sys.argv[1] == "32":
+if sys.argv[1] == "" or sys.argv[1] == "x86":
     platform_string = "Win32"
-elif sys.argv[1] == "64":
+elif sys.argv[1] == "x64":
     platform_string = "x64"
 else:
-    print 'First argument must be "32", "64" or empty (32)'
+    print 'First argument must be "x86", "x64" or empty (x86)'
     exit(1)
     
 bin_dir = os.path.abspath(sys.argv[2])
