@@ -214,6 +214,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	acsFileList = XN_NEW_ARR(FileName, nFileCount);
 	strcpy(acsFileList[0], "libPS1080.so");
 	strcpy(acsFileList[1], "libOniFile.so");
+	strcpy(acsFileList[1], "libPSLink.so");
 #endif
 
 	// Save directory
