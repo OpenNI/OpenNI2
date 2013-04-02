@@ -217,7 +217,7 @@ template<class FuncPtr>
 class EventBase : public EventInterface<FuncPtr>
 {
 public:
-	using EventInterface::Clear;
+	using EventInterface<FuncPtr>::Clear;
 };
 
 class EventNoArgs : public EventBase<HandlerFuncNoArgs::FuncPtr>
