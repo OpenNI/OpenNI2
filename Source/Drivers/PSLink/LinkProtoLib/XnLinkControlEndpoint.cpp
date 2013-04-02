@@ -316,7 +316,7 @@ XnStatus LinkControlEndpoint::GetComponentsVersions(xnl::Array<XnComponentVersio
 	XnLinkComponentVersionsList* pComponentVersionsList = reinterpret_cast<XnLinkComponentVersionsList*>(m_pIncomingResponse);
 	XnUInt32 nResponseSize = m_nMaxResponseSize;
 
-	nRetVal = GetGeneralProperty(XN_LINK_PROP_ID_NONE, XN_LINK_PROP_ID_FW_VERSION, nResponseSize, pComponentVersionsList);
+	nRetVal = GetGeneralProperty(XN_LINK_PROP_ID_NONE, XN_LINK_PROP_ID_COMPONENT_VERSIONS, nResponseSize, pComponentVersionsList);
 	XN_IS_STATUS_OK_LOG_ERROR("Execute get components versions list", nRetVal);
 
 	nRetVal = xnLinkParseComponentVersionsList(components, pComponentVersionsList, nResponseSize);
@@ -927,7 +927,7 @@ XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, XnBistTestResponse*
 	pResponse->m_nExtraDataSize = nExtraDataSize;
 	xnOSMemCopy(pResponse->m_extraData, pExecuteBistResponse->m_ExtraData, nExtraDataSize);
 
-	xnLogInfo(XN_MASK_LINK, "LINK: BIST %u completed with error code %u", pResponse->m_nErrorCode);
+	xnLogInfo(XN_MASK_LINK, "LINK: BIST %u completed with error code %u", nID, pResponse->m_nErrorCode);
 	
 	return XN_STATUS_OK;
 }
