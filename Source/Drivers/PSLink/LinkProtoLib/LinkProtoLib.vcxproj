@@ -206,9 +206,6 @@
     <ClInclude Include="Include\XnLinkUnpackedDataReductionParser.h" />
     <ClInclude Include="Include\XnLinkUnpackedS2DParser.h" />
     <ClInclude Include="include\XnServerSocketInConnection.h" />
-    <ClInclude Include="include\XnServerUSBLinuxConnectionFactory.h" />
-    <ClInclude Include="include\XnServerUSBLinuxControlEndpoint.h" />
-    <ClInclude Include="include\XnServerUSBLinuxOutDataEndpoint.h" />
     <ClInclude Include="Include\XnShiftToDepth.h" />
     <ClInclude Include="Include\XnSocketConnectionFactory.h" />
     <ClInclude Include="Include\XnSocketInConnection.h" />
@@ -250,9 +247,6 @@
     <ClCompile Include="XnClientUSBInDataEndpoint.cpp" />
     <ClCompile Include="XnClientUSBOutDataEndpoint.cpp" />
     <ClCompile Include="XnServerSocketInConnection.cpp" />
-    <ClCompile Include="XnServerUSBLinuxConnectionFactory.cpp" />
-    <ClCompile Include="XnServerUSBLinuxControlEndpoint.cpp" />
-    <ClCompile Include="XnServerUSBLinuxOutDataEndpoint.cpp" />
     <ClCompile Include="XnSocketConnectionFactory.cpp" />
     <ClCompile Include="XnSocketInConnection.cpp" />
     <ClCompile Include="XnSyncServerSocketConnection.cpp" />

@@ -28,9 +28,6 @@
     <Filter Include="Source\Connections\Sockets Client">
       <UniqueIdentifier>{fd86b1a9-1245-448f-a791-11f070803485}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Connections\USB Server">
-      <UniqueIdentifier>{1fbe4092-cbb4-493d-ae14-a2b4cb0fc516}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Connections\Sockets Server">
       <UniqueIdentifier>{ea97ad66-3e9a-42c5-9023-d23576615eca}</UniqueIdentifier>
     </Filter>
@@ -89,15 +86,6 @@
     </ClInclude>
     <ClInclude Include="Include\XnClientUSBOutDataEndpoint.h">
       <Filter>Source\Connections\USB Client</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\XnServerUSBLinuxOutDataEndpoint.h">
-      <Filter>Source\Connections\USB Server</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\XnServerUSBLinuxConnectionFactory.h">
-      <Filter>Source\Connections\USB Server</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\XnServerUSBLinuxControlEndpoint.h">
-      <Filter>Source\Connections\USB Server</Filter>
     </ClInclude>
     <ClInclude Include="Include\XnSyncServerSocketConnection.h">
       <Filter>Source\Connections\Sockets Server</Filter>
@@ -259,15 +247,6 @@
     </ClCompile>
     <ClCompile Include="XnClientUSBOutDataEndpoint.cpp">
       <Filter>Source\Connections\USB Client</Filter>
-    </ClCompile>
-    <ClCompile Include="XnServerUSBLinuxConnectionFactory.cpp">
-      <Filter>Source\Connections\USB Server</Filter>
-    </ClCompile>
-    <ClCompile Include="XnServerUSBLinuxControlEndpoint.cpp">
-      <Filter>Source\Connections\USB Server</Filter>
-    </ClCompile>
-    <ClCompile Include="XnServerUSBLinuxOutDataEndpoint.cpp">
-      <Filter>Source\Connections\USB Server</Filter>
     </ClCompile>
     <ClCompile Include="XnServerSocketInConnection.cpp">
       <Filter>Source\Connections\Sockets Server</Filter>
