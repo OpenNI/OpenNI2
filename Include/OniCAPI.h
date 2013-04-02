@@ -95,7 +95,7 @@ ONI_C_API OniBool oniDeviceIsImageRegistrationModeSupported(OniDeviceHandle devi
 /** Destroy an existing stream */
 ONI_C_API void oniStreamDestroy(OniStreamHandle stream);
 
-/** Get the OniSourceInfo of the certain stream. */
+/** Get the OniSensorInfo of the certain stream. */
 ONI_C_API const OniSensorInfo* oniStreamGetSensorInfo(OniStreamHandle stream);
 
 /** Start generating data from the stream. */
