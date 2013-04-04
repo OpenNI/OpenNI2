@@ -1070,10 +1070,17 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 				if (rc != 0)
 				{
 					xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
+
+                    if (pThreadData->bKillReadThread)
+                    {
+                        XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+                    }
 				}
-			
-				// wait for it to cancel	
-				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_WAIT_INFINITE);
+                else
+                {
+                    // wait for it to cancel
+                    nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_WAIT_INFINITE);
+                }
 			}
 			
 			if (nRetVal != XN_STATUS_OK)
@@ -1315,20 +1322,6 @@ XN_C_API XnStatus xnUSBShutdownReadThread(XN_USB_EP_HANDLE pEPHandle)
 	{
 		// mark thread should be killed
 		pThreadData->bKillReadThread = TRUE;
-
-		// PATCH: we don't cancel the requests, because there is a bug causing segmentation fault.
-#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
-		// cancel all pending requests
-		for (XnUInt32 i = 0; i < pThreadData->nNumBuffers; ++i)
-		{
-			if (pThreadData->pBuffersInfo[i].bIsQueued)
-			{
-				libusb_cancel_transfer(pThreadData->pBuffersInfo[i].transfer);
-				// NOTE: we don't check error code. In any case we still need to wait for all transfers to complete. If cancelling was succeeded, they will
-				// return immediately. If not, they will reach timeout and return
-			}
-		}
-#endif
 
 		// now wait for thread to exit (we wait the timeout of all buffers + an extra second)
 		XnStatus nRetVal = xnOSWaitForThreadExit(pThreadData->hReadThread, pThreadData->nTimeOut * pThreadData->nNumBuffers + 1000);
