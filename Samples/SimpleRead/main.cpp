@@ -65,6 +65,14 @@ int main()
 
 	while (!wasKeyboardHit())
 	{
+		int changedStreamDummy;
+		VideoStream* pStream = &depth;
+		rc = OpenNI::waitForAnyStream(&pStream, 1, &changedStreamDummy, 1000); //1 second timeout
+		if (rc != STATUS_OK)
+		{
+			break;
+		}
+
 		rc = depth.readFrame(&frame);
 		if (rc != STATUS_OK)
 		{
