@@ -36,6 +36,7 @@ XnDeviceEnumeration::XnUsbId XnDeviceEnumeration::ms_supportedProducts[] =
 	{ 0x1D27, 0x0500 },
 	{ 0x1D27, 0x0600 },
 	{ 0x1D27, 0x0601 },
+	{ 0x1D27, 0x0609 },
 };
 
 XnUInt32 XnDeviceEnumeration::ms_supportedProductsCount = sizeof(XnDeviceEnumeration::ms_supportedProducts) / sizeof(XnDeviceEnumeration::ms_supportedProducts[0]);

@@ -5,6 +5,7 @@ SUBSYSTEM=="usb", ATTR{idProduct}=="0401", ATTR{idVendor}=="1d27", MODE:="0666",
 SUBSYSTEM=="usb", ATTR{idProduct}=="0500", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
 SUBSYSTEM=="usb", ATTR{idProduct}=="0600", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
 SUBSYSTEM=="usb", ATTR{idProduct}=="0601", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
+SUBSYSTEM=="usb", ATTR{idProduct}=="0609", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
 SUBSYSTEM=="usb", ATTR{idProduct}=="1250", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
 SUBSYSTEM=="usb", ATTR{idProduct}=="1260", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
 SUBSYSTEM=="usb", ATTR{idProduct}=="1270", ATTR{idVendor}=="1d27", MODE:="0666", OWNER:="root", GROUP:="video"
