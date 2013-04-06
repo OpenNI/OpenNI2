@@ -685,7 +685,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			}
 		}
 	}
-
+    bool wasEventForMe = true;
 	do
 	{
 		for (int i = 0; i < streamCount; ++i)
@@ -709,13 +709,15 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			*pStreamIndex = oldestIndex;
 			return ONI_STATUS_OK;
 		}
-
+        if (!wasEventForMe) {
+            m_newFrameAvailableEvent.Set();
+        }
 		// 'Poke' the driver to attempt to receive more frames.
 		for (int j = 0; j < numDevices; ++j)
 		{
 			deviceList[j]->tryManualTrigger();
 		}
-
+        wasEventForMe = false;
 	} while (m_newFrameAvailableEvent.Wait(timeout) == XN_STATUS_OK);
 
 	m_errorLogger.Append("waitForStreams: timeout reached");
