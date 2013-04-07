@@ -23,6 +23,8 @@
 
 #include "OniSampleUtilities.h"
 
+#define WAIT_TIMEOUT 2000 //2000ms
+
 using namespace openni;
 
 void analyzeFrame(const VideoFrameRef& frame)
@@ -113,11 +115,11 @@ int main()
 	while (!wasKeyboardHit())
 	{
 		int readyStream = -1;
-		rc = OpenNI::waitForAnyStream(streams, 2, &readyStream);
+		rc = OpenNI::waitForAnyStream(streams, 2, &readyStream, WAIT_TIMEOUT);
 		if (rc != STATUS_OK)
 		{
-			printf("Wait failed\n");
-			continue;
+			printf("Wait failed! (timeout is %d ms)\n%s\n", WAIT_TIMEOUT, OpenNI::getExtendedError());
+			break;
 		}
 
 		switch (readyStream)
