@@ -201,7 +201,6 @@
   <PropertyGroup>
     <PreBuildEvent>echo "Building Java Wrappers..."
 call "$(SolutionDir)\Wrappers\java\OpenNI.java\Build.bat" $(PlatformName)
-ECHO.%ERRORLEVEL%
 if errorlevel 1 exit 1
 echo "Building SimpleViewer.java..."
 call "$(SolutionDir)\Samples\SimpleViewer.java\Build.bat" $(PlatformName)
