@@ -48,15 +48,13 @@ enum
 	XN_MODULE_PROPERTY_USB_INTERFACE = 0x1080F001, // "UsbInterface"
 	/** Boolean */ 
 	XN_MODULE_PROPERTY_MIRROR = 0x1080F002, // "Mirror"
-	/** unsigned long long */
-	XN_STREAM_PROPERTY_CLOSE_RANGE = 0x1080F003, // "CloseRange"
-	/** unsigned long long */
+	/** unsigned long long, get only */
 	XN_MODULE_PROPERTY_RESET_SENSOR_ON_STARTUP = 0x1080F004, // "ResetSensorOnStartup"
-	/** unsigned long long */
+	/** unsigned long long, get only */
 	XN_MODULE_PROPERTY_LEAN_INIT = 0x1080F005, // "LeanInit"
-	/** char[XN_DEVICE_MAX_STRING_LENGTH] */
+	/** char[XN_DEVICE_MAX_STRING_LENGTH], get only */
 	XN_MODULE_PROPERTY_SERIAL_NUMBER = 0x1080F006, // "ID"
-	/** XnVersions */
+	/** XnVersions, get only */
 	XN_MODULE_PROPERTY_VERSION = 0x1080F007, // "Version"
 	/** Boolean */
 	XN_MODULE_PROPERTY_FIRMWARE_FRAME_SYNC = 0x1080F008,
@@ -70,15 +68,15 @@ enum
 	XN_MODULE_PROPERTY_PRINT_FIRMWARE_LOG = 0x1080FF80, // "FirmwareLogPrint"
 	/** Integer */
 	XN_MODULE_PROPERTY_FIRMWARE_LOG_FILTER = 0x1080FF81, // "FirmwareLogFilter"
-	/** Integer */
+	/** String, get only */
 	XN_MODULE_PROPERTY_FIRMWARE_LOG = 0x1080FF82, // "FirmwareLog"
 	/** Integer */
 	XN_MODULE_PROPERTY_FIRMWARE_CPU_INTERVAL = 0x1080FF83, // "FirmwareCPUInterval"
-	/** String */
+	/** String, get only */
 	XN_MODULE_PROPERTY_PHYSICAL_DEVICE_NAME = 0x1080FF7A, // "PhysicalDeviceName"
-	/** String */
+	/** String, get only */
 	XN_MODULE_PROPERTY_VENDOR_SPECIFIC_DATA = 0x1080FF7B, // "VendorSpecificData"
-	/** String */
+	/** String, get only */
 	XN_MODULE_PROPERTY_SENSOR_PLATFORM_STRING = 0x1080FF7C, // "SensorPlatformString"
 
 	/*******************************************************************/
@@ -137,6 +135,8 @@ enum
 	/* Depth stream properties                                         */
 	/*******************************************************************/
 
+	/** unsigned long long */
+	XN_STREAM_PROPERTY_CLOSE_RANGE = 0x1080F003, // "CloseRange"
 	/** XnPixelRegistration - get only */
 	XN_STREAM_PROPERTY_PIXEL_REGISTRATION = 0x10801001, // "PixelRegistration"
 	/** unsigned long long */
@@ -149,29 +149,29 @@ enum
 	XN_STREAM_PROPERTY_REGISTRATION_TYPE = 0x10801005, // "RegistrationType"
 	/** XnDepthAGCBin* */
 	XN_STREAM_PROPERTY_AGC_BIN = 0x10801006, // "AGCBin"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_CONST_SHIFT = 0x10801007, // "ConstShift"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR = 0x10801008, // "PixelSizeFactor"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_MAX_SHIFT = 0x10801009, // "MaxShift"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_PARAM_COEFF = 0x1080100A, // "ParamCoeff"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_SHIFT_SCALE = 0x1080100B, // "ShiftScale"
-	/** unsigned long long */ 
+	/** unsigned long long, get only */ 
 	XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE = 0x1080100C, // "ZPD"
-	/** double */ 
+	/** double, get only */ 
 	XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE = 0x1080100D, // "ZPPS"
-	/** double */ 
+	/** double, get only */ 
 	XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE = 0x1080100E, // "LDDIS"
-	/** double */ 
+	/** double, get only */ 
 	XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE = 0x1080100F, // "DCRCDIS"
-	/** OniDepthPixel[] */ 
+	/** OniDepthPixel[], get only */ 
 	XN_STREAM_PROPERTY_S2D_TABLE = 0x10801010, // "S2D"
-	/** unsigned short[] */ 
+	/** unsigned short[], get only */ 
 	XN_STREAM_PROPERTY_D2S_TABLE = 0x10801011, // "D2S"
-
+	/** get only */
 	XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO = 0x10801012,
 	/** Boolean */
 	XN_STREAM_PROPERTY_GMC_MODE	= 0x1080FF44, // "GmcMode"
