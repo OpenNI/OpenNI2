@@ -684,6 +684,10 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			}
 		}
 	}
+    
+    uint64_t beforeLoop, now;
+    xnOSGetHighResTimeStamp(&beforeLoop);
+
     bool wasEventForMe = true;
 	do
 	{
@@ -717,7 +721,12 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			deviceList[j]->tryManualTrigger();
 		}
         wasEventForMe = false;
-	} while (m_newFrameAvailableEvent.Wait(timeout) == XN_STATUS_OK);
+        
+        xnOSGetHighResTimeStamp(&now);
+        if (timeout >= 0 && int((now-beforeLoop)/1000) > timeout) {
+            break;
+        }
+	} while (m_newFrameAvailableEvent.Wait(timeout - (now-beforeLoop)/1000) == XN_STATUS_OK);
 
 	m_errorLogger.Append("waitForStreams: timeout reached");
 	return ONI_STATUS_TIME_OUT;
