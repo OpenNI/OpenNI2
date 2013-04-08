@@ -71,8 +71,6 @@ XnUSBEventCallbackList g_connectivityEvent;
 	if (x == NULL)									\
 		return (XN_STATUS_USB_ENDPOINT_NOT_VALID);
 
-#define XN_ANDROID_CANCEL_MIN_TIMEOUT 10 //10ms
-
 struct xnUSBInitData
 {
 	libusb_context* pContext;
@@ -1071,17 +1069,15 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 				int rc = libusb_cancel_transfer(pBufferInfo->transfer);
 				if (rc != 0)
 				{
-					xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
-
-					pBufferInfo->bIsQueued = FALSE;
+					// No need to print anything if it was already cancaled/completed...
+					if (rc != LIBUSB_ERROR_NOT_FOUND)
+					{
+						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
+					}
 				}
 
 				// wait for it to cancel
-#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
-				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_ANDROID_CANCEL_MIN_TIMEOUT);
-#else
 				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_WAIT_INFINITE);
-#endif
 			}
 			
 			if (nRetVal != XN_STATUS_OK)
@@ -1098,6 +1094,12 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 			}
 			else // transfer done
 			{
+				// check for unexpected disconnects
+				if (pTransfer->status == LIBUSB_TRANSFER_NO_DEVICE)
+				{
+					goto disconnect;
+				}
+
 				if (pBufferInfo->nLastStatus == LIBUSB_TRANSFER_COMPLETED || // read succeeded
 					pBufferInfo->nLastStatus == LIBUSB_TRANSFER_CANCELLED)   // cancelled, but maybe some data arrived
 				{
@@ -1154,25 +1156,34 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 					int rc = libusb_submit_transfer(pTransfer);
 					if (rc != 0)
 					{
-						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to re-submit asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
 						if (rc == LIBUSB_ERROR_NO_DEVICE)
 						{
-							for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
-							{
-								XnUSBEventCallback* pCallback = *it;
-								XnUSBEventArgs args;
-								args.strDevicePath = NULL;
-								args.eventType = XN_USB_EVENT_DEVICE_DISCONNECT;
-								pCallback->pFunc(&args, pCallback->pCookie);
-							}
+							goto disconnect;
 						}
 
+						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to re-submit asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
 					}
 				}
 			}
 		}
 	}
 	
+	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+
+disconnect:
+	xnLogError(XN_MASK_USB, "Endpoint 0x%x: Unexpected device disconnect, aborting the read thread!");
+
+	// notify the user callbacks about the device disconnect event
+	for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
+	{
+		XnUSBEventCallback* pCallback = *it;
+		XnUSBEventArgs args;
+		args.strDevicePath = NULL;
+		args.eventType = XN_USB_EVENT_DEVICE_DISCONNECT;
+		pCallback->pFunc(&args, pCallback->pCookie);
+	}
+
+	// close the thread, there's device is gone...
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
 }
 
