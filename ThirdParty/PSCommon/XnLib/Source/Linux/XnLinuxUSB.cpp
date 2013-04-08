@@ -1069,7 +1069,7 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 				int rc = libusb_cancel_transfer(pBufferInfo->transfer);
 				if (rc != 0)
 				{
-					// No need to print anything if it was already cancaled/completed...
+					// If we get LIBUSB_ERROR_NOT_FOUND it means that the transfer was already cancaled/completed which is a very common thing during normal shutdown so there's no need to print it.
 					if (rc != LIBUSB_ERROR_NOT_FOUND)
 					{
 						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
@@ -1077,7 +1077,7 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 				}
 
 				// wait for it to cancel
-				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_WAIT_INFINITE);
+				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, pThreadData->nTimeOut);
 			}
 			
 			if (nRetVal != XN_STATUS_OK)
@@ -1183,7 +1183,7 @@ disconnect:
 		pCallback->pFunc(&args, pCallback->pCookie);
 	}
 
-	// close the thread, there's device is gone...
+	// close the thread, the device is gone...
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
 }
 
