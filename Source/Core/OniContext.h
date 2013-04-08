@@ -132,6 +132,9 @@ private:
 	char m_overrideDevice[XN_FILE_MAX_PATH];
 
 	int m_initializationCounter;
+
+	int m_waiting;
+	XN_CRITICAL_SECTION_HANDLE m_waitingCS;
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

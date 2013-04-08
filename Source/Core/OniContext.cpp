@@ -21,6 +21,7 @@
 #include "OniContext.h"
 #include "OniStreamFrameHolder.h"
 #include <XnLog.h>
+#include <XnOSCpp.h>
 
 static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
 static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
@@ -32,10 +33,13 @@ OniBool Context::s_valid = FALSE;
 Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_initializationCounter(0)
 {
 	xnOSMemSet(m_overrideDevice, 0, XN_FILE_MAX_PATH);
+	xnOSCreateCriticalSection(&m_waitingCS);
+	m_waiting = 0;
 }
 
 Context::~Context()
 {
+	xnOSCloseCriticalSection(&m_waitingCS);
 	s_valid = FALSE;
 }
 
@@ -684,12 +688,13 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			}
 		}
 	}
-    
-    uint64_t beforeLoop, now;
-    xnOSGetHighResTimeStamp(&beforeLoop);
 
-    bool wasEventForMe = true;
-	do
+	{
+		xnl::AutoCSLocker guard(m_waitingCS);
+		++m_waiting;
+	}
+
+	for (;;)
 	{
 		for (int i = 0; i < streamCount; ++i)
 		{
@@ -710,23 +715,34 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		if (oldestIndex != -1)
 		{
 			*pStreamIndex = oldestIndex;
-			return ONI_STATUS_OK;
+			break;
 		}
-        if (!wasEventForMe) {
-            m_newFrameAvailableEvent.Set();
-        }
 		// 'Poke' the driver to attempt to receive more frames.
 		for (int j = 0; j < numDevices; ++j)
 		{
 			deviceList[j]->tryManualTrigger();
 		}
-        wasEventForMe = false;
-        
-        xnOSGetHighResTimeStamp(&now);
-        if (timeout >= 0 && int((now-beforeLoop)/1000) > timeout) {
-            break;
-        }
-	} while (m_newFrameAvailableEvent.Wait(timeout - int(now-beforeLoop)/1000) == XN_STATUS_OK);
+
+		if (m_newFrameAvailableEvent.Wait(timeout) != XN_STATUS_OK)
+		{
+			break;
+		}
+
+		if (m_waiting > 1)
+		{
+			m_newFrameAvailableEvent.Set();
+		}
+	}
+
+	{
+		xnl::AutoCSLocker guard(m_waitingCS);
+		--m_waiting;
+	}
+
+	if (oldestIndex != -1)
+	{
+		return ONI_STATUS_OK;
+	}
 
 	m_errorLogger.Append("waitForStreams: timeout reached");
 	return ONI_STATUS_TIME_OUT;
