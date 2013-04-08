@@ -23,7 +23,7 @@
 
 #include "OniSampleUtilities.h"
 
-#define WAIT_TIMEOUT 2000 //2000ms
+#define SIMPLE_READ_WAIT_TIMEOUT 2000 //2000ms
 
 using namespace openni;
 
@@ -69,10 +69,10 @@ int main()
 	{
 		int changedStreamDummy;
 		VideoStream* pStream = &depth;
-		rc = OpenNI::waitForAnyStream(&pStream, 1, &changedStreamDummy, WAIT_TIMEOUT);
+		rc = OpenNI::waitForAnyStream(&pStream, 1, &changedStreamDummy, SIMPLE_READ_WAIT_TIMEOUT);
 		if (rc != STATUS_OK)
 		{
-			printf("Wait failed! (timeout is %d ms)\n%s\n", WAIT_TIMEOUT, OpenNI::getExtendedError());
+			printf("Wait failed! (timeout is %d ms)\n%s\n", SIMPLE_READ_WAIT_TIMEOUT, OpenNI::getExtendedError());
 			break;
 		}
 
