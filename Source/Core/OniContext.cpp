@@ -726,7 +726,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
         if (timeout >= 0 && int((now-beforeLoop)/1000) > timeout) {
             break;
         }
-	} while (m_newFrameAvailableEvent.Wait(timeout - (now-beforeLoop)/1000) == XN_STATUS_OK);
+	} while (m_newFrameAvailableEvent.Wait(timeout - int(now-beforeLoop)/1000) == XN_STATUS_OK);
 
 	m_errorLogger.Append("waitForStreams: timeout reached");
 	return ONI_STATUS_TIME_OUT;
