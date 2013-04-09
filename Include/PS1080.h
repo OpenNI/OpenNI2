@@ -85,7 +85,7 @@ enum
 
 	/** XnInnerParam */
 	XN_MODULE_PROPERTY_FIRMWARE_PARAM = 0x1080E001, // "FirmwareParam"
-	/** unsigned long long */
+	/** unsigned long long, set only */
 	XN_MODULE_PROPERTY_RESET = 0x1080E002, // "Reset"
 	/** XnControlProcessingData */
 	XN_MODULE_PROPERTY_IMAGE_CONTROL = 0x1080E003, // "ImageControl"
@@ -99,25 +99,28 @@ enum
 	XN_MODULE_PROPERTY_CMOS_BLANKING_UNITS = 0x1080FF74, // "CmosBlankingUnits"
 	/** XnCmosBlankingTime */
 	XN_MODULE_PROPERTY_CMOS_BLANKING_TIME = 0x1080FF75, // "CmosBlankingTime"
-	/** XnFlashFileList */
+	/** XnFlashFileList, get only */
 	XN_MODULE_PROPERTY_FILE_LIST = 0x1080FF84, // "FileList"
-	/** XnParamFlashData */
+	/** XnParamFlashData, get only */
 	XN_MODULE_PROPERTY_FLASH_CHUNK = 0x1080FF85, // "FlashChunk"
 	XN_MODULE_PROPERTY_FILE = 0x1080FF86, // "FlashFile"
 	/** Integer */
 	XN_MODULE_PROPERTY_DELETE_FILE = 0x1080FF87, // "DeleteFile"
 	XN_MODULE_PROPERTY_FILE_ATTRIBUTES = 0x1080FF88, // "FileAttributes"
 	XN_MODULE_PROPERTY_TEC_SET_POINT = 0x1080FF89, // "TecSetPoint"
+	/** get only */
 	XN_MODULE_PROPERTY_TEC_STATUS = 0x1080FF8A, // "TecStatus"
+	/** get only */
 	XN_MODULE_PROPERTY_TEC_FAST_CONVERGENCE_STATUS = 0x1080FF8B, // "TecFastConvergenceStatus"
 	XN_MODULE_PROPERTY_EMITTER_SET_POINT = 0x1080FF8C, // "EmitterSetPoint"
+	/** get only */
 	XN_MODULE_PROPERTY_EMITTER_STATUS = 0x1080FF8D, // "EmitterStatus"
 	XN_MODULE_PROPERTY_I2C = 0x1080FF8E, // "I2C"
-	/** Integer */
+	/** Integer, set only */
 	XN_MODULE_PROPERTY_BIST = 0x1080FF8F, // "BIST"
-	/** XnProjectorFaultData */
+	/** XnProjectorFaultData, set only */
 	XN_MODULE_PROPERTY_PROJECTOR_FAULT = 0x1080FF90, // "ProjectorFault"
-	/** Boolean */
+	/** Boolean, set only */
 	XN_MODULE_PROPERTY_APC_ENABLED = 0x1080FF91, // "APCEnabled"
 	/** Boolean */
 	XN_MODULE_PROPERTY_FIRMWARE_TEC_DEBUG_PRINT = 0x1080FF92, // "TecDebugPrint"
