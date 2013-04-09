@@ -23,8 +23,6 @@ enum
 	LINK_PROP_FW_LOG = 0x12000009, // "FWLog"
 	/* String. Set only */
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
-	/* Real. Set only */
-	LINK_PROP_DEPTH_SCALE = 0x1200000b, // "DepthScale"
 	/* Int. Set only */
 	LINK_PROP_FORMAT_ZONE = 0x1200000f, // "FormatZone"
 	/* String, get only */
@@ -37,6 +35,8 @@ enum
 	LINK_PROP_COMPRESSION = 0x12001002, // "Compression"
 
 	/**** Depth Stream properties ****/
+	/* Real, get only */
+	LINK_PROP_DEPTH_SCALE = 0x1200000b, // "DepthScale"
 	/* Int, get only */
 	LINK_PROP_MAX_SHIFT = 0x12002001, // "MaxShift"
 	/* Int, get only */
