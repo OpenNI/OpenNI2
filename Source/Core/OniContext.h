@@ -127,8 +127,6 @@ private:
 
 	xnl::CriticalSection m_cs;
 
-	xnl::OSEvent m_newFrameAvailableEvent;
-
 	char m_overrideDevice[XN_FILE_MAX_PATH];
 
 	int m_initializationCounter;

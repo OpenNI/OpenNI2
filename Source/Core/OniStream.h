@@ -79,8 +79,6 @@ public:
 	void raiseNewFrameEvent();
 	XnStatus waitForNewFrameEvent();
 
-	void setContextNewFrameEvent(xnl::OSEvent* pContextNewFrameEvent);
-
 	static VideoStream* getFrameStream(OniFrame* pFrame);
     OniStatus addRecorder(Recorder& aRecorder);
     OniStatus removeRecorder(Recorder& aRecorder);
@@ -88,6 +86,8 @@ public:
 	OniStatus convertDepthToWorldCoordinates(float depthX, float depthY, float depthZ, float* pWorldX, float* pWorldY, float* pWorldZ);
 	OniStatus convertWorldToDepthCoordinates(float worldX, float worldY, float worldZ, float* pDepthX, float* pDepthY, float* pDepthZ);
 	OniStatus convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
+
+	XN_EVENT_HANDLE getNewFrameEvent() { return (XN_EVENT_HANDLE)m_newFrameOSEvent; }
 
 protected:
 	XN_EVENT_HANDLE m_newFrameInternalEvent;
@@ -119,7 +119,7 @@ private:
 	const DriverHandler& m_driverHandler;
 	void* m_streamHandle;
 
-	xnl::OSEvent* m_pContextNewFrameEvent;
+	xnl::OSEvent m_newFrameOSEvent;
 
 	xnl::CriticalSection m_cs;
 

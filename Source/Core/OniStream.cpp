@@ -50,11 +50,11 @@ VideoStream::VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, D
 	m_device(device),
 	m_driverHandler(libraryHandler),
 	m_streamHandle(streamHandle),
-	m_pContextNewFrameEvent(NULL),
 	m_started(FALSE)
 {
 	xnOSCreateEvent(&m_newFrameInternalEvent, false);
 	xnOSCreateEvent(&m_newFrameInternalEventForFrameHolder, false);
+	m_newFrameOSEvent.Create(FALSE);
 	xnOSCreateThread(newFrameThread, this, &m_newFrameThread);
 	
 	m_pSensorInfo = XN_NEW(OniSensorInfo);
@@ -107,6 +107,7 @@ VideoStream::~VideoStream()
 
 	xnOSCloseEvent(&m_newFrameInternalEvent);
 	xnOSCloseEvent(&m_newFrameInternalEventForFrameHolder);
+	m_newFrameOSEvent.Close();
 
 	XN_DELETE_ARR(m_pSensorInfo->pSupportedVideoModes);
 	XN_DELETE(m_pSensorInfo);
@@ -249,11 +250,6 @@ void VideoStream::newFrameThreadMainloop()
 	}
 }
 
-void VideoStream::setContextNewFrameEvent(xnl::OSEvent* pContextNewFrameEvent)
-{
-	m_pContextNewFrameEvent = pContextNewFrameEvent;
-}
-
 OniStatus VideoStream::addRecorder(Recorder& aRecorder)
 {
     xnl::LockGuard<Recorders> guard(m_recorders);
@@ -308,10 +304,7 @@ void VideoStream::raiseNewFrameEvent()
 {
 	xnOSSetEvent(m_newFrameInternalEvent);
 	xnOSSetEvent(m_newFrameInternalEventForFrameHolder);
-	if (m_pContextNewFrameEvent != NULL)
-	{
-		m_pContextNewFrameEvent->Set();
-	}
+	m_newFrameOSEvent.Set();
 }
 
 XnStatus VideoStream::waitForNewFrameEvent()

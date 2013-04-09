@@ -77,13 +77,6 @@ OniStatus Context::initialize()
 		return OniStatusFromXnStatus(rc);
 	}
 
-	rc = m_newFrameAvailableEvent.Create(FALSE);
-	if (rc != XN_STATUS_OK)
-	{
-		m_errorLogger.Append("Couldn't create event for new frames: %s", xnGetStatusString(rc));
-		return ONI_STATUS_ERROR;
-	}
-
 	s_valid = TRUE;
 
 	// Read configuration file
@@ -313,8 +306,6 @@ void Context::shutdown()
 	}
 	m_deviceDrivers.Clear();
 
-	m_newFrameAvailableEvent.Close();
-
 	m_cs.Unlock();
 
 	xnLogClose();
@@ -504,7 +495,6 @@ OniStatus Context::createStream(OniDeviceHandle device, OniSensorType sensorType
 		return ONI_STATUS_ERROR;
 	}
 
-	pMyStream->setContextNewFrameEvent(&m_newFrameAvailableEvent);
 	// Create stream frame holder and connect it to the stream.
 	StreamFrameHolder* pFrameHolder = XN_NEW(StreamFrameHolder, pMyStream);
 	if (pFrameHolder == NULL)
@@ -649,49 +639,58 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 {
 	static const int MAX_WAITED_DEVICES = 20;
 	Device* deviceList[MAX_WAITED_DEVICES];
+	static const int MAX_WAITED_STREAMS = 50;
+	VideoStream* streamsList[MAX_WAITED_STREAMS];
+	XN_EVENT_HANDLE eventsList[MAX_WAITED_STREAMS];
 
 	unsigned long long oldestTimestamp = XN_MAX_UINT64;
 	int oldestIndex = -1;
 
+	if (streamCount > MAX_WAITED_STREAMS)
+	{
+		m_errorLogger.Append("Cannot wait on more than %d streams", MAX_WAITED_STREAMS);
+		return ONI_STATUS_NOT_SUPPORTED;
+	}
+
 	int numDevices = 0;
 	for (int i = 0; i < streamCount; ++i)
 	{
-		if (pStreams[i] != NULL)
+		if (pStreams[i] == NULL)
 		{
-			VideoStream* pStream = ((_OniStream*)pStreams[i])->pStream;
-			Device* pDevice = &pStream->getDevice();
+			m_errorLogger.Append("Stream handle in index %d is NULL", i);
+			return ONI_STATUS_BAD_PARAMETER;
+		}
 
-			// Check if device already exists.
-			bool found = false;
-			for (int j = 0; j < numDevices; ++j)
-			{
-				if (deviceList[j] == pDevice)
-				{
-					found = true;
-					break;
-				}
-			}
+		streamsList[i] =  ((_OniStream*)pStreams[i])->pStream;
+		eventsList[i] = streamsList[i]->getNewFrameEvent();
 
-			// Add new device to list.
-			if (!found)
+		Device* pDevice = &streamsList[i]->getDevice();
+
+		// Check if device already exists.
+		bool found = false;
+		for (int j = 0; j < numDevices; ++j)
+		{
+			if (deviceList[j] == pDevice)
 			{
-				if (numDevices < MAX_WAITED_DEVICES)
-				{
-					deviceList[numDevices] = pDevice;
-					++numDevices;
-				}
-				else
-				{
-					// Cannot wait on streams from more than MAX_WAITED_DEVICES devices.
-					return ONI_STATUS_NOT_SUPPORTED;
-				}
+				found = true;
+				break;
 			}
 		}
-	}
 
-	{
-		xnl::AutoCSLocker guard(m_waitingCS);
-		++m_waiting;
+		// Add new device to list.
+		if (!found)
+		{
+			if (numDevices < MAX_WAITED_DEVICES)
+			{
+				deviceList[numDevices] = pDevice;
+				++numDevices;
+			}
+			else
+			{
+				m_errorLogger.Append("Cannot wait on more than %d devices", MAX_WAITED_DEVICES);
+				return ONI_STATUS_NOT_SUPPORTED;
+			}
+		}
 	}
 
 	for (;;)
@@ -717,26 +716,18 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			*pStreamIndex = oldestIndex;
 			break;
 		}
+
 		// 'Poke' the driver to attempt to receive more frames.
 		for (int j = 0; j < numDevices; ++j)
 		{
 			deviceList[j]->tryManualTrigger();
 		}
 
-		if (m_newFrameAvailableEvent.Wait(timeout) != XN_STATUS_OK)
+		XnUInt32 nIndex;
+		if (xnOSWaitMultipleEvents(streamCount, eventsList, timeout, &nIndex) != XN_STATUS_OK)
 		{
 			break;
 		}
-
-		if (m_waiting > 1)
-		{
-			m_newFrameAvailableEvent.Set();
-		}
-	}
-
-	{
-		xnl::AutoCSLocker guard(m_waitingCS);
-		--m_waiting;
 	}
 
 	if (oldestIndex != -1)

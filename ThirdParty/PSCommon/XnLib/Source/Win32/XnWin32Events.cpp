@@ -204,6 +204,37 @@ XN_C_API XnStatus xnOSWaitEvent(const XN_EVENT_HANDLE EventHandle, XnUInt32 nMil
 	return (XN_STATUS_OK);
 }
 
+XN_C_API XnStatus xnOSWaitMultipleEvents(XnUInt32 nCount, const XN_EVENT_HANDLE EventHandles[], XnUInt32 nMilliseconds, XnUInt32* pnIndex)
+{
+	// Local function variables
+	DWORD nRetVal = 0;
+
+	*pnIndex = 0;
+
+	// Make sure the actual event handles aren't NULL
+	for (XnUInt32 i = 0; i < nCount; ++i)
+		XN_RET_IF_NULL(EventHandles[i], XN_STATUS_OS_INVALID_EVENT);
+
+	// Wait for the event for a period if time (can be infinite)
+	nRetVal = WaitForMultipleObjects(nCount, EventHandles, FALSE, nMilliseconds);
+
+	// Check the return value
+	if (nRetVal == WAIT_TIMEOUT)
+	{
+		return XN_STATUS_OS_EVENT_TIMEOUT;
+	}
+	else if (nRetVal >= WAIT_OBJECT_0 && nRetVal <= (WAIT_OBJECT_0 + nCount - 1))
+	{
+		*pnIndex = nRetVal - WAIT_OBJECT_0;
+		return XN_STATUS_OK;
+	}
+	else
+	{
+		xnLogVerbose(XN_MASK_OS, "WaitForMultipleObjects() failed with error %u", GetLastError());
+		return (XN_STATUS_OS_EVENT_WAIT_FAILED);
+	}
+}
+
 XN_C_API XnBool xnOSIsEventSet(const XN_EVENT_HANDLE EventHandle)
 {
 	return (xnOSWaitEvent(EventHandle, 0) == XN_STATUS_OK);
