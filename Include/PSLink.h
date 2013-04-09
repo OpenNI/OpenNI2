@@ -6,11 +6,12 @@
 enum
 {
 	/**** Device properties ****/
-	/* (XnDetailedVersion) */
+
+	/* XnDetailedVersion, get only */
 	LINK_PROP_FW_VERSION = 0x12000001, // "FWVersion"
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_VERSIONS_INFO_COUNT = 0x12000002, // "VersionsInfoCount"
-	/* General - array - XnComponentVersion * count elements */
+	/* General - array - XnComponentVersion * count elements, get only */
 	LINK_PROP_VERSIONS_INFO = 0x12000003, // "VersionsInfo"
 	/* General. XnPropUploadFile. Set only. */
 	LINK_PROP_UPLOAD_FILE	= 0x12000006, // "UploadFile"
@@ -20,13 +21,13 @@ enum
 	LINK_PROP_EMITTER_ACTIVE = 0x12000008, // "EmitterActive"
 	/* Int - 0 means off, 1 means on. */
 	LINK_PROP_FW_LOG = 0x12000009, // "FWLog"
-	/* String */
+	/* String. Set only */
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
-	/* Real */
+	/* Real. Set only */
 	LINK_PROP_DEPTH_SCALE = 0x1200000b, // "DepthScale"
-	/* Int */
+	/* Int. Set only */
 	LINK_PROP_FORMAT_ZONE = 0x1200000f, // "FormatZone"
-	/* String */
+	/* String, get only */
 	LINK_PROP_SERIAL_NUMBER = 0x12000010, // "ID"
 
 	/**** Stream properties ****/
@@ -36,25 +37,25 @@ enum
 	LINK_PROP_COMPRESSION = 0x12001002, // "Compression"
 
 	/**** Depth Stream properties ****/
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_MAX_SHIFT = 0x12002001, // "MaxShift"
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_ZERO_PLANE_DISTANCE = 0x12002002, // "ZPD"
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_CONST_SHIFT = 0x12002003, // "ConstShift"
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_PARAM_COEFF = 0x12002004, // "ParamCoeff"
-	/* Int */
+	/* Int, get only */
 	LINK_PROP_SHIFT_SCALE = 0x12002005, // "ShiftScale"
-	/* Real */
+	/* Real, get only */
 	LINK_PROP_ZERO_PLANE_PIXEL_SIZE = 0x12002006, // "ZPPS"
-	/* Real */
+	/* Real, get only */
 	LINK_PROP_ZERO_PLANE_OUTPUT_PIXEL_SIZE = 0x12002007, // "ZPOPS"
-	/* Real */
+	/* Real, get only */
 	LINK_PROP_EMITTER_DEPTH_CMOS_DISTANCE = 0x12002008, // "LDDIS"
-	/*  General - array - MaxShift * XnDepthPixel elements */
+	/*  General - array - MaxShift * XnDepthPixel elements, get only */
 	LINK_PROP_SHIFT_TO_DEPTH_TABLE = 0x12002009, // "S2D"
-	/* General - array - MaxDepth * uint16_t elements */
+	/* General - array - MaxDepth * uint16_t elements, get only */
 	LINK_PROP_DEPTH_TO_SHIFT_TABLE = 0x1200200a, // "D2S"
 };
 

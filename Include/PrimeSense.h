@@ -53,7 +53,7 @@ enum
 */
 enum
 {
-	// Device Commands
+	// Device Commands - use via invoke()
 	PS_COMMAND_AHB_READ = 0x1d27E001, // XnCommandAHB
 	PS_COMMAND_AHB_WRITE = 0x1d27E002, // XnCommandAHB
 	PS_COMMAND_I2C_READ = 0x1d27E003, // XnCommandI2C
