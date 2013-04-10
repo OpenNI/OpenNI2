@@ -33,13 +33,10 @@ OniBool Context::s_valid = FALSE;
 Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_initializationCounter(0)
 {
 	xnOSMemSet(m_overrideDevice, 0, XN_FILE_MAX_PATH);
-	xnOSCreateCriticalSection(&m_waitingCS);
-	m_waiting = 0;
 }
 
 Context::~Context()
 {
-	xnOSCloseCriticalSection(&m_waitingCS);
 	s_valid = FALSE;
 }
 
