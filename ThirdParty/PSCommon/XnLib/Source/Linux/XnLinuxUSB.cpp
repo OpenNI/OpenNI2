@@ -1122,7 +1122,7 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 								}
 								nTotalBytes += pPacket->actual_length;
 							}
-							else if (pPacket->status != LIBUSB_TRANSFER_COMPLETED)
+							else if (pPacket->status != LIBUSB_TRANSFER_COMPLETED && pPacket->status != LIBUSB_TRANSFER_ERROR) //Skip printing uninformative common errors
 							{
 								xnLogWarning(XN_MASK_USB, "Endpoint 0x%x, Buffer %d, packet %d Asynch transfer failed (status: %d)", pTransfer->endpoint, pBufferInfo->nBufferID, i, pPacket->status);
 							}

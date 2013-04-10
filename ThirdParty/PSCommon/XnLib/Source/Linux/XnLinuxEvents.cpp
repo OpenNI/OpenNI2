@@ -44,7 +44,7 @@ XN_C_API XnStatus xnOSCreateEvent(XN_EVENT_HANDLE* pEventHandle, XnBool manualRe
 	*pEventHandle = NULL;
 	
 	_XnEvent* pEvent = XN_NEW(_XnEvent);
-	pEvent->fd = eventfd(0, EFD_NONBLOCK);
+	pEvent->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
 
 	if (pEvent->fd == -1)
 	{
@@ -102,10 +102,9 @@ XN_C_API XnStatus xnOSResetEvent(const XN_EVENT_HANDLE EventHandle)
 
 	_XnEvent* pEvent = EventHandle;
 	
-	// read from the event until it is clear (reading fails with EAGAIN)
-	while (-1 != read(pEvent->fd, &nValue, sizeof(nValue)));
-
-	if (errno != EAGAIN)
+	// read from it will cause it to reset
+	int ret = read(pEvent->fd, &nValue, sizeof(nValue));
+	if (ret == -1 && errno != EAGAIN) // EAGAIN means it was already reset
 	{
 		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_RESET_FAILED, XN_MASK_OS, "Failed to reset event: read errno is %d", errno);
 	}
@@ -174,7 +173,6 @@ XN_C_API XnStatus xnOSWaitMultipleEvents(XnUInt32 nCount, const XN_EVENT_HANDLE 
 	int ret = select(max_fd + 1, &rfds, NULL, NULL, &tv);
 	if (ret == 0)
 	{
-//		printf("timeout on %d\n", max_fd-1);
 		return XN_STATUS_OS_EVENT_TIMEOUT;
 	}
 	else if (ret == -1)
@@ -191,7 +189,6 @@ XN_C_API XnStatus xnOSWaitMultipleEvents(XnUInt32 nCount, const XN_EVENT_HANDLE 
 
 				if (!EventHandles[i]->manualReset)
 				{
-//					printf("auto resetting %d\n", EventHandles[i]->fd);
 					xnOSResetEvent(EventHandles[i]);
 				}
 
