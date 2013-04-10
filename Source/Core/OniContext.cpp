@@ -634,9 +634,8 @@ void Context::frameAddRef(OniFrame* pFrame)
 
 OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, int* pStreamIndex, int timeout)
 {
-	static const int MAX_WAITED_DEVICES = 20;
-	Device* deviceList[MAX_WAITED_DEVICES];
 	static const int MAX_WAITED_STREAMS = 50;
+	Device* deviceList[MAX_WAITED_STREAMS];
 	VideoStream* streamsList[MAX_WAITED_STREAMS];
 	XN_EVENT_HANDLE eventsList[MAX_WAITED_STREAMS];
 
@@ -650,16 +649,18 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 	}
 
 	int numDevices = 0;
+	int numEvents = 0;
+
 	for (int i = 0; i < streamCount; ++i)
 	{
 		if (pStreams[i] == NULL)
 		{
-			m_errorLogger.Append("Stream handle in index %d is NULL", i);
-			return ONI_STATUS_BAD_PARAMETER;
+			continue;
 		}
 
 		streamsList[i] =  ((_OniStream*)pStreams[i])->pStream;
-		eventsList[i] = streamsList[i]->getNewFrameEvent();
+
+		eventsList[numEvents++] = streamsList[i]->getNewFrameEvent();
 
 		Device* pDevice = &streamsList[i]->getDevice();
 
@@ -677,14 +678,14 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		// Add new device to list.
 		if (!found)
 		{
-			if (numDevices < MAX_WAITED_DEVICES)
+			if (numDevices < MAX_WAITED_STREAMS)
 			{
 				deviceList[numDevices] = pDevice;
 				++numDevices;
 			}
 			else
 			{
-				m_errorLogger.Append("Cannot wait on more than %d devices", MAX_WAITED_DEVICES);
+				m_errorLogger.Append("Cannot wait on more than %d devices", MAX_WAITED_STREAMS);
 				return ONI_STATUS_NOT_SUPPORTED;
 			}
 		}
@@ -721,7 +722,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		}
 
 		XnUInt32 nIndex;
-		if (xnOSWaitMultipleEvents(streamCount, eventsList, timeout, &nIndex) != XN_STATUS_OK)
+		if (xnOSWaitMultipleEvents(numEvents, eventsList, timeout, &nIndex) != XN_STATUS_OK)
 		{
 			break;
 		}
