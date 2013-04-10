@@ -190,6 +190,7 @@
     <ClInclude Include="DriverImpl\LinkOniIRStream.h" />
     <ClInclude Include="DriverImpl\LinkOniMapStream.h" />
     <ClInclude Include="DriverImpl\LinkOniStream.h" />
+    <ClInclude Include="LinkDeviceEnumeration.h" />
     <ClInclude Include="PrimeClient.h" />
     <ClInclude Include="LenaDevice.h" />
     <ClInclude Include="PS1200Device.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="DriverImpl\LinkOniIRStream.cpp" />
     <ClCompile Include="DriverImpl\LinkOniMapStream.cpp" />
     <ClCompile Include="DriverImpl\LinkOniStream.cpp" />
+    <ClCompile Include="LinkDeviceEnumeration.cpp" />
     <ClCompile Include="PrimeClient.cpp" />
     <ClCompile Include="LenaDevice.cpp" />
     <ClCompile Include="PS1200Device.cpp" />

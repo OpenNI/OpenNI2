@@ -39,6 +39,7 @@
     <ClInclude Include="DriverImpl\LinkOniDepthStream.h">
       <Filter>DriverImpl</Filter>
     </ClInclude>
+    <ClInclude Include="LinkDeviceEnumeration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PrimeClient.cpp">
@@ -72,5 +73,6 @@
     <ClCompile Include="DriverImpl\LinkOniDepthStream.cpp">
       <Filter>DriverImpl</Filter>
     </ClCompile>
+    <ClCompile Include="LinkDeviceEnumeration.cpp" />
   </ItemGroup>
 </Project>
