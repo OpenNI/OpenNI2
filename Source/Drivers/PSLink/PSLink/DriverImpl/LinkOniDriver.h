@@ -81,9 +81,6 @@ private:
 	LinkOpenNILogWriter m_writer;
 	XnCallbackHandle m_connectedEventHandle;
 	XnCallbackHandle m_disconnectedEventHandle;
-
-	//TODO: temporary additions, remove when normal usb event mechanism is implemented
-	int EnumerateConnectedDevices();
 };
 
 #endif // __LINK_ONI_DRIVER_H__

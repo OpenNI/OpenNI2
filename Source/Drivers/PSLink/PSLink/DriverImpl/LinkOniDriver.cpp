@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 #include "LinkOniDriver.h"
 #include "LinkOniDevice.h"
+#include "LinkDeviceEnumeration.h"
 #include <XnOS.h>
 #include <XnLogWriterBase.h>
 
@@ -54,46 +55,38 @@ OniStatus LinkOniDriver::initialize(oni::driver::DeviceConnectedCallback deviceC
 	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, XN_LOG_VERBOSE);
 	m_writer.Register();
 
-	// TODO: impl internal usb events registration! (as in XnDeviceEnumeration in 1080)
-	/*
-	XnStatus rc = XnDeviceEnumeration::ConnectedEvent().Register(OnDeviceConnected, this, m_connectedEventHandle);
+	XnStatus rc = LinkDeviceEnumeration::ConnectedEvent().Register(OnDeviceConnected, this, m_connectedEventHandle);
 	if (rc != XN_STATUS_OK)
 	{
 		return ONI_STATUS_ERROR;
 	}
 
-	rc = XnDeviceEnumeration::DisconnectedEvent().Register(OnDeviceDisconnected, this, m_disconnectedEventHandle);
+	rc = LinkDeviceEnumeration::DisconnectedEvent().Register(OnDeviceDisconnected, this, m_disconnectedEventHandle);
 	if (rc != XN_STATUS_OK)
 	{
 		return ONI_STATUS_ERROR;
 	}
 
-	rc = XnDeviceEnumeration::Initialize();
+	rc = LinkDeviceEnumeration::Initialize();
 	if (rc != XN_STATUS_OK)
 	{
 		return ONI_STATUS_ERROR;
 	}
-	*/
-
-	// TODO: delete this:
-	EnumerateConnectedDevices();
 
 	return ONI_STATUS_OK;
 }
 
 void LinkOniDriver::shutdown() 
 {
-	// TODO: impl internal usb events registration! (as in XnDeviceEnumeration in 1080)
-	/*
 	if (m_connectedEventHandle != NULL)
 	{
-		XnDeviceEnumeration::ConnectedEvent().Unregister(m_connectedEventHandle);
+		LinkDeviceEnumeration::ConnectedEvent().Unregister(m_connectedEventHandle);
 		m_connectedEventHandle = NULL;
 	}
 
 	if (m_disconnectedEventHandle != NULL)
 	{
-		XnDeviceEnumeration::DisconnectedEvent().Unregister(m_disconnectedEventHandle);
+		LinkDeviceEnumeration::DisconnectedEvent().Unregister(m_disconnectedEventHandle);
 		m_disconnectedEventHandle = NULL;
 	}
 
@@ -105,9 +98,7 @@ void LinkOniDriver::shutdown()
 
 	m_devices.Clear();
 
-	// TODO: impl internal usb events registration! (as in XnDeviceEnumeration in 1080)
-	//XnDeviceEnumeration::Shutdown();
-	*/
+	LinkDeviceEnumeration::Shutdown();
 }
 
 oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri)
@@ -295,32 +286,3 @@ void XN_CALLBACK_TYPE LinkOniDriver::OnDeviceDisconnected(const OniDeviceInfo& d
 	pThis->deviceDisconnected(&deviceInfo);
 }
 
-
-//TODO: temporary additions, remove when normal usb event mechanism is implemented
-#include "XnLinkProtoLibDefs.h"
-#include "PS1200Device.h"
-#include "XnClientUSBConnectionFactory.h"
-int LinkOniDriver::EnumerateConnectedDevices()
-{
-	OniDeviceInfo tmpInfos[100] = {{{0},{0},{0},0,0}};
-	int nDevs = 0;
-	XnConnectionString* astrConnStrings;
-	xn::ClientUSBConnectionFactory::EnumerateConnStrings(XN_PRODUCT_ID_PS1250, astrConnStrings, (XnUInt32 &)nDevs);
-	for (int i = 0; i < nDevs ;++i)
-	{
-		OniDeviceInfo &deviceInfo = tmpInfos[i];
-		deviceInfo.usbVendorId  = XN_VENDOR_ID;
-		deviceInfo.usbProductId = XN_PRODUCT_ID_PS1250;
-		xnOSStrCopy(deviceInfo.uri,    astrConnStrings[i],   sizeof(deviceInfo.uri));
-		xnOSStrCopy(deviceInfo.vendor, XN_VENDOR_PRIMESENSE, sizeof(deviceInfo.vendor));
-		xnOSStrCopy(deviceInfo.name,   "PS1250",             sizeof(deviceInfo.name));
-	}
-	xn::ClientUSBConnectionFactory::FreeConnStringsList(astrConnStrings);
-
-	// notify
-	for (int i = 0; i < nDevs ;++i)
-	{
-		OnDeviceConnected(tmpInfos[i], this);
-	}
-	return (int)nDevs;
-}

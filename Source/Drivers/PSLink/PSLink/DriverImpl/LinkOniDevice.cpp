@@ -23,8 +23,8 @@
 //---------------------------------------------------------------------------
 #include "LinkOniDevice.h"
 #include "LinkOniDriver.h"
-#include "XnLinkProtoLibDefs.h"
 
+#include "LinkDeviceEnumeration.h"
 #include <PS1200Device.h>
 #include <XnPsVersion.h>
 
@@ -36,12 +36,7 @@
 LinkOniDevice::LinkOniDevice(const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
 	m_pSensor(NULL), m_didReset(false), m_driverServices(driverServices), m_pDriver(pDriver)
 {
-	//TODO: redundancy with driver's code
-	m_info.usbVendorId  = XN_VENDOR_ID;
-	m_info.usbProductId = XN_PRODUCT_ID_PS1250;
-	xnOSStrCopy(m_info.uri,    uri,                  sizeof(m_info.uri));
-	xnOSStrCopy(m_info.vendor, XN_VENDOR_PRIMESENSE, sizeof(m_info.vendor));
-	xnOSStrCopy(m_info.name,   "PS1250",             sizeof(m_info.name));
+	xnOSMemCopy(&m_info, LinkDeviceEnumeration::GetDeviceInfo(uri), sizeof(m_info));
 }
 
 LinkOniDevice::~LinkOniDevice()
