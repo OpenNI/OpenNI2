@@ -255,6 +255,7 @@ XnStatus XnSensorImageStream::ValidateMode()
 		{
 			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to YUYV!", nInputFormat);
 		}
+		break;
 	case ONI_PIXEL_FORMAT_JPEG:
 		if (nInputFormat != XN_IO_IMAGE_FORMAT_JPEG)
 		{
