@@ -26,6 +26,13 @@
 namespace xnl
 {
 
+class NoLock
+{
+public:
+	void Lock() {}
+	void Unlock() {}
+};
+
 class CriticalSection
 {
 public:
@@ -53,6 +60,15 @@ private:
 
 	XN_CRITICAL_SECTION_HANDLE m_cs;
 };
+
+template<bool TThreadSafe>
+class VirtualLock {};
+
+template<>
+class VirtualLock<true> : public CriticalSection {};
+
+template<>
+class VirtualLock<false> : public NoLock {};
 
 class AutoMutexLocker
 {

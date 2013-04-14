@@ -33,7 +33,7 @@ class SyncedStreamsFrameHolder : public FrameHolder
 public:
 
 	// Constructor.
-	SyncedStreamsFrameHolder(VideoStream** ppStreams, int numStreams);
+	SyncedStreamsFrameHolder(FrameManager& frameManager, VideoStream** ppStreams, int numStreams);
 
 	// Destructor.
 	virtual ~SyncedStreamsFrameHolder();

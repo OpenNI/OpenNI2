@@ -574,7 +574,6 @@ XN_C_API XnStatus XN_C_DECL xnOSCloseEvent(XN_EVENT_HANDLE* pEventHandle);
 XN_C_API XnStatus XN_C_DECL xnOSSetEvent(const XN_EVENT_HANDLE EventHandle);
 XN_C_API XnStatus XN_C_DECL xnOSResetEvent(const XN_EVENT_HANDLE EventHandle);
 XN_C_API XnStatus XN_C_DECL xnOSWaitEvent(const XN_EVENT_HANDLE EventHandle, XnUInt32 nMilliseconds);
-XN_C_API XnStatus XN_C_DECL xnOSWaitMultipleEvents(XnUInt32 nCount, const XN_EVENT_HANDLE EventHandles[], XnUInt32 nMilliseconds, XnUInt32* pnIndex);
 XN_C_API XnBool XN_C_DECL xnOSIsEventSet(const XN_EVENT_HANDLE EventHandle);
 
 // Semaphores

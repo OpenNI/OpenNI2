@@ -134,7 +134,9 @@ ONI_C_API int oniFormatBytesPerPixel(OniPixelFormat format)
 	case ONI_PIXEL_FORMAT_YUYV:
 		return 2;
 	case ONI_PIXEL_FORMAT_JPEG:
+		return 1;
 	default:
+		XN_ASSERT(FALSE);
 		return 0;
 	}
 }
@@ -342,6 +344,12 @@ ONI_C_API OniBool oniStreamIsCommandSupported(OniStreamHandle stream, int comman
 {
 	g_Context.clearErrorLogger();
 	return stream->pStream->isCommandSupported(commandId);
+}
+
+ONI_C_API OniStatus oniStreamSetFrameBuffersAllocator(OniStreamHandle stream, OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie)
+{
+	g_Context.clearErrorLogger();
+	return stream->pStream->setFrameBufferAllocator(alloc, free, pCookie);	
 }
 
 ////

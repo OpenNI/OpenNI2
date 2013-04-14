@@ -7,7 +7,7 @@
 #include <XnStatus.h>
 #include <OpenNI.h>
 
-#include <Driver/OniDriverTypes.h>
+#include <Driver/OniDriverAPI.h>
 
 struct XnDumpFile;
 
@@ -18,57 +18,10 @@ class LinkControlEndpoint;
 
 typedef struct NewFrameEventArgs
 {
-	OniDriverFrame* pFrame;
+	OniFrame* pFrame;
 } NewFrameEventArgs;
 
 typedef xnl::Event<NewFrameEventArgs> NewFrameEvent;
-
-class MyFrameDealer
-{
-public:
-	typedef struct  
-	{
-		int refCount;
-	} MyFrameDealerCookie;
-
-	OniDriverFrame* AcquireFrame(int dataSize)
-	{
-		OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-		if (pFrame == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		pFrame->frame.data = xnOSMallocAligned(dataSize, XN_DEFAULT_MEM_ALIGN);
-		if (pFrame->frame.data == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		pFrame->pDriverCookie = xnOSMalloc(sizeof(MyFrameDealerCookie));
-		((MyFrameDealerCookie*)pFrame->pDriverCookie)->refCount = 0;
-
-		pFrame->frame.dataSize = dataSize;
-		return pFrame;
-	}
-
-	void addRefToFrame(OniDriverFrame* pFrame)
-	{
-		++((MyFrameDealerCookie*)pFrame->pDriverCookie)->refCount;
-	}
-
-	void releaseFrame(OniDriverFrame* pFrame)
-	{
-		if (0 == --((MyFrameDealerCookie*)pFrame->pDriverCookie)->refCount)
-		{
-			xnOSFree(pFrame->pDriverCookie);
-			xnOSFreeAligned(pFrame->frame.data);
-			xnOSFree(pFrame);
-		}
-	}
-};
 
 class LinkFrameInputStream : public LinkInputStream
 {
@@ -79,6 +32,10 @@ public:
                           XnStreamType streamType,
                           XnUInt16 nStreamID, 
                           IConnection* pConnection);
+
+	virtual void SetStreamServices(oni::driver::StreamServices* pServices) { m_pServices = pServices; }
+
+	XnUInt32 GetRequiredFrameSize() const { return CalcBufferSize(); }
 
 	virtual void Reset();
 
@@ -94,9 +51,6 @@ public:
 	typedef void (XN_CALLBACK_TYPE* NewFrameEventHandler)(const NewFrameEventArgs& args, void* pCookie);
 	NewFrameEvent::EventInterface& GetNewFrameEvent() { return m_newFrameEvent; }
 
-	void AddRefToFrame(OniDriverFrame* pFrame);
-	void ReleaseFrame(OniDriverFrame* pFrame);
-	
 	virtual XnBool IsOutputFormatSupported(OniPixelFormat format) const;
 
 	virtual const xnl::Array<XnStreamVideoMode>& GetSupportedVideoModes() const;
@@ -121,10 +75,21 @@ protected:
 	virtual LinkMsgParser* CreateLinkMsgParser();
 
 private:
-    void DeallocateBuffers(XnUInt32 nBuffers);
-	const void* GetDataImpl(XnUInt32 nBufferIndex) const;
-	XnUInt32 GetDataSizeImpl(XnUInt32 nBufferIndex) const;
-	XnUInt64 GetTimestampImpl(XnUInt32 nBufferIndex) const;
+	class DefaultStreamServices : public oni::driver::StreamServices
+	{
+	public:
+		DefaultStreamServices();
+		void setStream(LinkFrameInputStream* pStream);
+		static int ONI_CALLBACK_TYPE getDefaultRequiredFrameSizeCallback(void* streamServices);
+		static OniFrame* ONI_CALLBACK_TYPE acquireFrameCallback(void* streamServices);
+		static void ONI_CALLBACK_TYPE releaseFrameCallback(void* streamServices, OniFrame* pFrame);
+		static void ONI_CALLBACK_TYPE addFrameRefCallback(void* streamServices, OniFrame* pFrame);
+	};
+
+	struct LinkOniFrame : public OniFrame
+	{
+		int refCount;
+	};
 
 	static void Swap(XnUInt32& nVal1, XnUInt32& nVal2);
 	XnUInt32 GetOutputBytesPerPixel() const;
@@ -132,24 +97,15 @@ private:
 	XnUInt32 CalcExpectedSize() const;
 	XnStatus UpdateCameraIntrinsics();
 
-    enum {NUM_BUFFERS = 2};
+	DefaultStreamServices m_defaultServices;
+
+	oni::driver::StreamServices* m_pServices;
+
 	volatile XnBool m_bInitialized;
 
-	struct BufferInfo
-	{
-		XnUInt64 m_nTimestamp;
-		void* m_pData;
-		XnUInt32 m_nSize;
-	} m_buffersInfo[NUM_BUFFERS];
-
-
 	NewFrameEvent m_newFrameEvent;
+	OniFrame* m_pCurrFrame;
 
-	MyFrameDealer* m_pBufferManager;
-
-	XnUInt32 m_nStableBufferIdx;
-	XnUInt32 m_nWorkingBufferIdx;
-	
 	XnBool m_currentFrameCorrupt;
 	mutable XN_CRITICAL_SECTION_HANDLE m_hCriticalSection; //Protects buffers info
 
@@ -172,7 +128,8 @@ private:
 	XnLinkCameraIntrinsics m_cameraIntrinsics;
 
 	// Field of View
-	XnFloat m_fHFOV, m_fVFOV;
+	XnFloat m_fHFOV; 
+	XnFloat m_fVFOV;
 };
 
 }

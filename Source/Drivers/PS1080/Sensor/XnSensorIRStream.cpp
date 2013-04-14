@@ -421,34 +421,6 @@ XnStatus XnSensorIRStream::CalcRequiredSize(XnUInt32* pnRequiredSize) const
 	return XN_STATUS_OK;
 }
 
-XnStatus XnSensorIRStream::ReallocTripleFrameBuffer()
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	if (IsOpen())
-	{
-		// before actually replacing buffer, lock the processor (so it will not continue to 
-		// use old buffer)
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->LockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	nRetVal = XnIRStream::ReallocTripleFrameBuffer();
-	if (nRetVal != XN_STATUS_OK)
-	{
-		m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		return (nRetVal);
-	}
-
-	if (IsOpen())
-	{
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	return (XN_STATUS_OK);
-}
-
 XnStatus XnSensorIRStream::CropImpl(OniFrame* pFrame, const OniCropping* pCropping)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
@@ -468,7 +440,7 @@ XnStatus XnSensorIRStream::CreateDataProcessor(XnDataProcessor** ppProcessor)
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	XnFrameBufferManager* pBufferManager;
-	nRetVal = GetTripleBuffer(&pBufferManager);
+	nRetVal = StartBufferManager(&pBufferManager);
 	XN_IS_STATUS_OK(nRetVal);
 
 	XnDataProcessor* pNew;

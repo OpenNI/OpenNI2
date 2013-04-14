@@ -123,7 +123,6 @@ void KinectStreamImpl::mainLoop()
 		{
 			HRESULT hr;
 			NUI_IMAGE_FRAME imageFrame;
-			OniDriverFrame* pFrame = NULL;
 			hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_hStreamHandle, 0, &imageFrame);
 			if (FAILED(hr))
 			{

@@ -26,8 +26,8 @@
 //---------------------------------------------------------------------------
 #include <XnPlatform.h>
 #include <XnEvent.h>
-#include "XnOniFramePool.h"
 #include <Core/XnBuffer.h>
+#include <Driver/OniDriverAPI.h>
 
 //---------------------------------------------------------------------------
 // Types
@@ -39,9 +39,11 @@ public:
 	XnFrameBufferManager();
 	~XnFrameBufferManager();
 
-	XnStatus Init(XnUInt32 nBufferSize);
-	XnStatus Reallocate(XnUInt32 nBufferSize);
+	XnStatus Init();
 	void Free();
+
+	XnStatus Start(oni::driver::StreamServices& services);
+	void Stop();
 
 	inline XnBuffer* GetWriteBuffer() 
 	{ 
@@ -54,9 +56,6 @@ public:
 	{
 		return m_pWorkingBuffer;
 	}
-
-	void AddRefToFrame(OniFrame* pFrame);
-	void ReleaseFrame(OniFrame* pFrame);
 
 	void MarkWriteBufferAsStable(XnUInt32* pnFrameID);
 
@@ -71,7 +70,9 @@ public:
 	NewFrameEvent::EventInterface& OnNewFrameEvent() { return m_NewFrameEvent; }
 
 private:
-	XnOniFramePool* m_pBufferPool;
+	XN_DISABLE_COPY_AND_ASSIGN(XnFrameBufferManager);
+
+	oni::driver::StreamServices* m_pServices;
 	OniFrame* m_pWorkingBuffer;
 	XnUInt32 m_nStableFrameID;
 	NewFrameEvent m_NewFrameEvent;

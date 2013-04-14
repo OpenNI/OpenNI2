@@ -70,6 +70,12 @@ XnStatus LinkOniStream::Init()
 	return (XN_STATUS_OK);
 }
 
+void LinkOniStream::setServices(oni::driver::StreamServices* pStreamServices)
+{
+	oni::driver::StreamBase::setServices(pStreamServices);
+	m_pInputStream->SetStreamServices(pStreamServices);
+}
+
 void LinkOniStream::destroy()
 {
 	stop();
@@ -133,18 +139,7 @@ void XN_CALLBACK_TYPE LinkOniStream::OnNewStreamDataEventHandler(const xn::NewFr
 	LinkOniStream* pThis = (LinkOniStream*)pCookie;
 	if (pThis->m_started)
 	{
-		OniDriverFrame* pDriverFrame = (OniDriverFrame*)args.pFrame;
-		pThis->addRefToFrame(pDriverFrame);
-		pThis->raiseNewFrame(pDriverFrame);
+		pThis->getServices().addFrameRef(args.pFrame);
+		pThis->raiseNewFrame(args.pFrame);
 	}
-}
-
-void LinkOniStream::addRefToFrame(OniDriverFrame* pFrame)
-{
-	m_pInputStream->AddRefToFrame(pFrame);
-}
-
-void LinkOniStream::releaseFrame(OniDriverFrame* pFrame)
-{
-	m_pInputStream->ReleaseFrame(pFrame);
 }

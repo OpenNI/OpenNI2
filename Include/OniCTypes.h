@@ -120,6 +120,9 @@ typedef void (ONI_CALLBACK_TYPE* OniGeneralCallback)(void* pCookie);
 typedef void (ONI_CALLBACK_TYPE* OniDeviceInfoCallback)(const OniDeviceInfo* pInfo, void* pCookie);
 typedef void (ONI_CALLBACK_TYPE* OniDeviceStateCallback)(const OniDeviceInfo* pInfo, OniDeviceState deviceState, void* pCookie);
 
+typedef void* (ONI_CALLBACK_TYPE* OniFrameAllocBufferCallback)(int size, void* pCookie);
+typedef void (ONI_CALLBACK_TYPE* OniFrameFreeBufferCallback)(void* data, void* pCookie);
+
 typedef struct
 {
 	OniDeviceInfoCallback		deviceConnected;

@@ -22,56 +22,103 @@
 // Includes
 //---------------------------------------------------------------------------
 #include <XnOS.h>
-#include <XnLog.h>
-#include <sys/eventfd.h>
-#include <sys/select.h>
-#include <errno.h>
-
-struct _XnEvent
-{
-	XnInt fd;
-	XnBool manualReset;
-};
+#include "XnLinuxPosixEvents.h"
+#include "XnLinuxPosixNamedEvents.h"
+#include "XnLinuxSysVNamedEvents.h"
 
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-XN_C_API XnStatus xnOSCreateEvent(XN_EVENT_HANDLE* pEventHandle, XnBool manualReset)
+XN_C_API XnStatus xnOSCreateEvent(XN_EVENT_HANDLE* pEventHandle, XnBool bManualReset)
 {
+	// Local function variables
+	XnStatus nRetVal = XN_STATUS_OK;
+
 	// Validate the input/output pointers (to make sure none of them is NULL)
 	XN_VALIDATE_INPUT_PTR(pEventHandle);
-	
-	*pEventHandle = NULL;
-	
-	_XnEvent* pEvent = XN_NEW(_XnEvent);
-	pEvent->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
 
-	if (pEvent->fd == -1)
+	*pEventHandle = NULL;
+
+	XnLinuxEvent* pEvent = NULL;
+	XN_VALIDATE_NEW(pEvent, XnLinuxPosixEvent, bManualReset);
+
+	nRetVal = pEvent->Init();
+	if (nRetVal != XN_STATUS_OK)
 	{
 		XN_DELETE(pEvent);
-		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_CREATION_FAILED, XN_MASK_OS, "Failed to create event: eventfd errno is %d", errno);
+		return (nRetVal);
 	}
-	
-	pEvent->manualReset = manualReset;
-	
+
 	*pEventHandle = pEvent;
 	
 	// All is good...
 	return (XN_STATUS_OK);
 }
 
+XnStatus CreateNamedEventObject(XN_EVENT_HANDLE* pEventHandle, const XnChar* cpEventName, XnBool bCreate, XnBool bManualReset)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	// Validate the input/output pointers (to make sure none of them is NULL)
+	XN_VALIDATE_INPUT_PTR(cpEventName);
+	XN_VALIDATE_OUTPUT_PTR(pEventHandle);
+
+	*pEventHandle = NULL;
+
+	XnLinuxNamedEvent* pEvent = NULL;
+
+#ifdef XN_PLATFORM_LINUX_NO_SYSV
+	XN_VALIDATE_NEW(pEvent, XnLinuxPosixNamedEvent, bManualReset, cpEventName, bCreate);
+#else
+	XN_VALIDATE_NEW(pEvent, XnLinuxSysVNamedEvent, bManualReset, cpEventName, bCreate);
+#endif
+
+	nRetVal = pEvent->Init();
+	if (nRetVal != XN_STATUS_OK)
+	{
+		XN_DELETE(pEvent);
+		return (nRetVal);
+	}
+
+	*pEventHandle = pEvent;
+
+	return XN_STATUS_OK;
+}
+
+XN_C_API XnStatus XN_C_DECL xnOSCreateNamedEvent(XN_EVENT_HANDLE* pEventHandle, const XnChar* cpEventName, XnBool bManualReset)
+{
+	return xnOSCreateNamedEventEx(pEventHandle, cpEventName, bManualReset, FALSE);
+}
+
+XN_C_API XnStatus XN_C_DECL xnOSCreateNamedEventEx(XN_EVENT_HANDLE* pEventHandle, const XnChar* cpEventName, XnBool bManualReset, XnBool bAllowOtherUsers)
+{
+	return CreateNamedEventObject(pEventHandle, cpEventName, TRUE, bManualReset);
+}
+
+XN_C_API XnStatus XN_C_DECL xnOSOpenNamedEvent(XN_EVENT_HANDLE* pEventHandle, const XnChar* cpEventName)
+{
+	return xnOSOpenNamedEventEx(pEventHandle, cpEventName, FALSE);
+}
+
+XN_C_API XnStatus XN_C_DECL xnOSOpenNamedEventEx(XN_EVENT_HANDLE* pEventHandle, const XnChar* cpEventName, XnBool bAllowOtherUsers)
+{
+	return CreateNamedEventObject(pEventHandle, cpEventName, FALSE, FALSE);
+}
+
 XN_C_API XnStatus xnOSCloseEvent(XN_EVENT_HANDLE* pEventHandle)
 {
+	XnStatus nRetVal = XN_STATUS_OK;
+	
 	// Validate the input/output pointers (to make sure none of them is NULL)
 	XN_VALIDATE_INPUT_PTR(pEventHandle);
 
 	// Make sure the actual event handle isn't NULL
 	XN_RET_IF_NULL(*pEventHandle, XN_STATUS_OS_INVALID_EVENT);
-	
-	_XnEvent* pEvent = *pEventHandle;
-	
-	close(pEvent->fd);
-	
+
+	XnLinuxEvent* pEvent = (XnLinuxEvent*)*pEventHandle;
+	nRetVal = pEvent->Destroy();
+	XN_IS_STATUS_OK(nRetVal);
+
 	XN_DELETE(pEvent);
 
 	*pEventHandle = NULL;
@@ -83,33 +130,17 @@ XN_C_API XnStatus xnOSSetEvent(const XN_EVENT_HANDLE EventHandle)
 	// Make sure the actual event handle isn't NULL
 	XN_RET_IF_NULL(EventHandle, XN_STATUS_OS_INVALID_EVENT);
 
-	_XnEvent* pEvent = EventHandle;
-	XnUInt64 nValue = 1;
-	if (-1 == write(pEvent->fd, &nValue, sizeof(nValue)))
-	{
-		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_SET_FAILED, XN_MASK_OS, "Failed to set event: read errno is %d", errno);
-	}
-	
-	return XN_STATUS_OK;
+	XnLinuxEvent* pEvent = (XnLinuxEvent*)EventHandle;
+	return pEvent->Set();
 }
 
 XN_C_API XnStatus xnOSResetEvent(const XN_EVENT_HANDLE EventHandle)
 {
-	XnUInt64 nValue;
-
 	// Make sure the actual event handle isn't NULL
 	XN_RET_IF_NULL(EventHandle, XN_STATUS_OS_INVALID_EVENT);
 
-	_XnEvent* pEvent = EventHandle;
-	
-	// read from it will cause it to reset
-	int ret = read(pEvent->fd, &nValue, sizeof(nValue));
-	if (ret == -1 && errno != EAGAIN) // EAGAIN means it was already reset
-	{
-		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_RESET_FAILED, XN_MASK_OS, "Failed to reset event: read errno is %d", errno);
-	}
-
-	return XN_STATUS_OK;
+	XnLinuxEvent* pEvent = (XnLinuxEvent*)EventHandle;
+	return pEvent->Reset();
 }
 
 XN_C_API XnBool xnOSIsEventSet(const XN_EVENT_HANDLE EventHandle)
@@ -119,84 +150,9 @@ XN_C_API XnBool xnOSIsEventSet(const XN_EVENT_HANDLE EventHandle)
 
 XN_C_API XnStatus xnOSWaitEvent(const XN_EVENT_HANDLE EventHandle, XnUInt32 nMilliseconds)
 {
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	FD_SET(EventHandle->fd, &rfds);
+	// Make sure the actual event handle isn't NULL
+	XN_RET_IF_NULL(EventHandle, XN_STATUS_OS_INVALID_EVENT);
 
-	struct timeval tv;
-	tv.tv_sec = nMilliseconds / 1000;
-	tv.tv_usec = (nMilliseconds % 1000) * 1000;
-
-	int ret = select(EventHandle->fd + 1, &rfds, NULL, NULL, &tv);
-	if (ret == 0)
-	{
-		return XN_STATUS_OS_EVENT_TIMEOUT;
-	}
-	else if (ret == -1)
-	{
-		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_WAIT_FAILED, XN_MASK_OS, "Failed to wait event: eventfd errno is %d", errno);
-	}
-	else
-	{
-		if (!EventHandle->manualReset)
-		{
-			xnOSResetEvent(EventHandle);
-		}
-
-		return XN_STATUS_OK;
-	}
-}
-
-XN_C_API XnStatus xnOSWaitMultipleEvents(XnUInt32 nCount, const XN_EVENT_HANDLE EventHandles[], XnUInt32 nMilliseconds, XnUInt32* pnIndex)
-{
-	*pnIndex = 0;
-
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	
-	int max_fd = -1;
-	
-	for (XnUInt32 i = 0; i < nCount; ++i)
-	{
-		XN_RET_IF_NULL(EventHandles[i], XN_STATUS_OS_INVALID_EVENT);
-		FD_SET(EventHandles[i]->fd, &rfds);
-		if (EventHandles[i]->fd > max_fd)
-		{
-			max_fd = EventHandles[i]->fd;
-		}
-	}
-	
-	struct timeval tv;
-	tv.tv_sec = nMilliseconds / 1000;
-	tv.tv_usec = (nMilliseconds % 1000) * 1000;
-	
-	int ret = select(max_fd + 1, &rfds, NULL, NULL, &tv);
-	if (ret == 0)
-	{
-		return XN_STATUS_OS_EVENT_TIMEOUT;
-	}
-	else if (ret == -1)
-	{
-		XN_LOG_WARNING_RETURN(XN_STATUS_OS_EVENT_CREATION_FAILED, XN_MASK_OS, "Failed to create event: eventfd errno is %d", errno);
-	}
-	else
-	{
-		for (XnUInt32 i = 0; i < nCount; ++i)
-		{
-			if (FD_ISSET(EventHandles[i]->fd, &rfds))
-			{
-				*pnIndex = i;
-
-				if (!EventHandles[i]->manualReset)
-				{
-					xnOSResetEvent(EventHandles[i]);
-				}
-
-				return XN_STATUS_OK;
-			}
-		}
-		
-		// shouldn't get here
-		XN_LOG_ERROR_RETURN(XN_STATUS_ERROR, XN_MASK_OS, "Internal error - no fd in set!");
-	}
+	XnLinuxEvent* pEvent = (XnLinuxEvent*)EventHandle;
+	return pEvent->Wait(nMilliseconds);
 }

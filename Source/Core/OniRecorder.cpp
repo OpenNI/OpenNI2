@@ -178,8 +178,9 @@ private:
     XnBool    m_needRollback;
 };
 
-Recorder::Recorder(xnl::ErrorLogger& errorLogger, OniRecorderHandle handle)
-        : m_errorLogger(errorLogger), 
+Recorder::Recorder(FrameManager& frameManager, xnl::ErrorLogger& errorLogger, OniRecorderHandle handle)
+        : m_frameManager(frameManager),
+          m_errorLogger(errorLogger), 
           m_handle(handle),
           m_maxId(0),
           m_configurationId(0),
@@ -311,7 +312,7 @@ OniStatus Recorder::record(VideoStream& stream, OniFrame& aFrame)
         return ONI_STATUS_BAD_PARAMETER;
     }
     OniFrame* pFrame = &aFrame;
-    pStream->frameAddRef(pFrame);
+    m_frameManager.addRef(pFrame);
     send(Message::MESSAGE_RECORD, pStream, pFrame);
     return ONI_STATUS_OK;
 }
@@ -426,7 +427,7 @@ void Recorder::messagePump()
                         m_streams[msg.pStream].lastInputTimestamp = msg.pFrame->timestamp;
                         m_streams[msg.pStream].lastOutputTimestamp = timestamp;
                         onRecord(i->Value().nodeId, pCodec, msg.pFrame, frameId, timestamp);
-                        msg.pStream->frameRelease(msg.pFrame);
+                        m_frameManager.release(msg.pFrame);
                     }
                 }
                 break;

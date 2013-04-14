@@ -177,18 +177,3 @@ OniStatus BaseKinectStream::GetCropping(OniCropping* cropping)
 	*cropping = m_cropping;
 	return ONI_STATUS_OK;
 }
-
-void BaseKinectStream::addRefToFrame(OniDriverFrame* pFrame)
-{
-	++((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-}
-
-void BaseKinectStream::releaseFrame(OniDriverFrame* pFrame)
-{
-	if (0 == --((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-	{
-		xnOSFree(pFrame->pDriverCookie);
-		xnOSFreeAligned(pFrame->frame.data);
-		xnOSFree(pFrame);
-	}
-}

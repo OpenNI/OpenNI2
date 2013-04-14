@@ -85,6 +85,9 @@
     <ClInclude Include="..\..\Include\PSLink.h">
       <Filter>Header files\API</Filter>
     </ClInclude>
+    <ClInclude Include="OniFrameManager.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header files">
@@ -286,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\LibJPEG\jutils.c">
       <Filter>Header files\Formats\LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="OniFrameManager.cpp">
+      <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

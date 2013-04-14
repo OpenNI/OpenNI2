@@ -662,9 +662,6 @@
     <ClInclude Include="Include\XnStreamParams.h">
       <Filter>DDK</Filter>
     </ClInclude>
-    <ClInclude Include="DDK\XnOniFramePool.h">
-      <Filter>DDK</Filter>
-    </ClInclude>
     <ClInclude Include="Sensor\XnAudioProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>

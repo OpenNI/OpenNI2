@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 2.x Alpha                                                          *
+*  PrimeSense PSCommon Library                                               *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of OpenNI.                                              *
+*  This file is part of PSCommon.                                            *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -18,60 +18,39 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_STREAM_H__
-#define __XN_ONI_STREAM_H__
+#ifndef __LINUX_SYS_V_NAMED_EVENTS_H__
+#define __LINUX_SYS_V_NAMED_EVENTS_H__
 
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
-#include <Driver/OniDriverAPI.h>
-#include <XnLib.h>
-#include "../Sensor/XnSensor.h"
+#include <XnPlatform.h>
+#include "XnLinuxEvents.h"
 
-//using namespace oni::driver;
+#ifndef XN_PLATFORM_LINUX_NO_SYSV
+#include <sys/sem.h>
+
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
-class XnDeviceStream;
-class XnOniDevice;
-
-class XnOniStream :
-	public oni::driver::StreamBase
+class XnLinuxSysVNamedEvent : public XnLinuxNamedEvent
 {
 public:
-	XnOniStream(XnSensor* pSensor, const XnChar* strName, OniSensorType sensorType, XnOniDevice* pDevice);
-	~XnOniStream();
+	XnLinuxSysVNamedEvent(XnBool bManualReset, const XnChar* strName, XnBool bCreate);
 
-	virtual XnStatus Init();
-
-	virtual void setServices(oni::driver::StreamServices* pStreamServices);
-
-	OniStatus start();
-	void stop();
-
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-
-	virtual int getRequiredFrameSize();
-
-	XnOniDevice* GetDevice() { return m_pDevice; }
-	XnDeviceStream* GetDeviceStream() { return m_pDeviceStream; }
-
-protected:
-	virtual XnStatus SetPropertyImpl(int propertyId, const void* data, int dataSize);
-
-	OniSensorType m_sensorType;
-	XnSensor* m_pSensor;
-	const XnChar* m_strType;
-	XnDeviceStream* m_pDeviceStream;
-	XnOniDevice* m_pDevice;
-	XnCallbackHandle m_hNewDataCallback;
+	virtual XnStatus CreateNamed(const XnChar* strName);
+	virtual XnStatus OpenNamed(const XnChar* strName);
+	virtual XnStatus Destroy();
+	virtual XnStatus Set();
+	virtual XnStatus Reset();
+	virtual XnStatus Wait(XnUInt32 nTimeout);
 
 private:
-	void destroy();
-	XnBool m_started;
-	static void XN_CALLBACK_TYPE OnNewStreamDataEventHandler(const XnNewStreamDataEventArgs& args, void* pCookie);
+	int m_hSem;
+	XnChar m_csSemFileName[XN_FILE_MAX_PATH];
+	int m_hSemFile;
 };
 
-#endif // __XN_ONI_STREAM_H__
+#endif // if we have SysV
+
+#endif // __LINUX_SYS_V_NAMED_EVENTS_H__

@@ -29,6 +29,7 @@
 //---------------------------------------------------------------------------
 XnDeviceStream::XnDeviceStream(const XnChar* csType, const XnChar* csName) :
 	XnDeviceModule(csName),
+	m_pServices(NULL),
 	m_IsStream(XN_STREAM_PROPERTY_IS_STREAM, "IsStream", TRUE),
 	m_Type(XN_STREAM_PROPERTY_TYPE, "Type", csType),
 	m_IsOpen(XN_STREAM_PROPERTY_STATE, "State", FALSE),

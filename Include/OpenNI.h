@@ -647,6 +647,28 @@ public:
 		OniCallbackHandle m_callbackHandle;
 	};
 
+	class FrameAllocator
+	{
+	public:
+		virtual void* allocateFrameBuffer(int size) = 0;
+		virtual void freeFrameBuffer(void* data) = 0;
+
+	private:
+		friend class VideoStream;
+
+		static void* ONI_CALLBACK_TYPE allocateFrameBufferCallback(int size, void* pCookie)
+		{
+			FrameAllocator* pThis = (FrameAllocator*)pCookie;
+			return pThis->allocateFrameBuffer(size);
+		}
+
+		static void ONI_CALLBACK_TYPE freeFrameBufferCallback(void* data, void* pCookie)
+		{
+			FrameAllocator* pThis = (FrameAllocator*)pCookie;
+			pThis->freeFrameBuffer(data);
+		}
+	};
+
 	/**
 	Default constructor.  Creates a new, non-valid @ref VideoStream object.  The object created will be invalid until its create() function
 	is called with a valid Device.
@@ -792,6 +814,28 @@ public:
 
 		oniStreamUnregisterNewFrameCallback(m_stream, pListener->m_callbackHandle);
 		pListener->m_callbackHandle = NULL;
+	}
+
+	/**
+	Sets the frame buffers allocator for this video stream.
+	@param [in] pAllocator Pointer to the frame buffers allocator object. Pass NULL to return to default frame allocator.
+	@returns ONI_STATUS_OUT_OF_FLOW The frame buffers allocator cannot be set while stream is streaming.
+	*/
+	Status setFrameBuffersAllocator(FrameAllocator* pAllocator)
+	{
+		if (!isValid())
+		{
+			return STATUS_ERROR;
+		}
+
+		if (pAllocator == NULL)
+		{
+			return (Status)oniStreamSetFrameBuffersAllocator(m_stream, NULL, NULL, NULL);
+		}
+		else
+		{
+			return (Status)oniStreamSetFrameBuffersAllocator(m_stream, pAllocator->allocateFrameBufferCallback, pAllocator->freeFrameBufferCallback, pAllocator);
+		}
 	}
 
 	/**

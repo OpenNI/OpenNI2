@@ -218,7 +218,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 
 	for (int i = 0; i < nFileCount; ++i)
 	{
-		DeviceDriver* pDeviceDriver = XN_NEW(DeviceDriver, acsFileList[i], m_errorLogger);
+		DeviceDriver* pDeviceDriver = XN_NEW(DeviceDriver, acsFileList[i], m_frameManager, m_errorLogger);
 		if (pDeviceDriver == NULL || !pDeviceDriver->isValid())
 		{
 			xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't use file '%s' as a device driver", acsFileList[i]);
@@ -492,8 +492,10 @@ OniStatus Context::createStream(OniDeviceHandle device, OniSensorType sensorType
 		return ONI_STATUS_ERROR;
 	}
 
+	pMyStream->setNewFrameCallback(newFrameCallback, this);
+
 	// Create stream frame holder and connect it to the stream.
-	StreamFrameHolder* pFrameHolder = XN_NEW(StreamFrameHolder, pMyStream);
+	StreamFrameHolder* pFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pMyStream);
 	if (pFrameHolder == NULL)
 	{
 		m_errorLogger.Append("Context: Couldn't create stream frame holder from device:%08x, source: %d", device, sensorType);
@@ -578,7 +580,7 @@ OniStatus Context::streamDestroy(VideoStream* pStream)
 		if (pStreamList[i] != pStream)
 		{
 			// Allocate new frame holder.
-			StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, pStreamList[i]);
+			StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pStreamList[i]);
 			if (pStreamFrameHolder == NULL)
 			{
 				rc = ONI_STATUS_ERROR;
@@ -618,18 +620,12 @@ OniStatus Context::readFrame(OniStreamHandle stream, OniFrame** pFrame)
 
 void Context::frameRelease(OniFrame* pFrame)
 {
-	oni::implementation::VideoStream* pStream = oni::implementation::VideoStream::getFrameStream(pFrame);
-
-	if (m_streams.Find(pStream) != m_streams.End())
-	{
-		pStream->frameRelease(pFrame);
-	}
+	m_frameManager.release(pFrame);
 }
 
 void Context::frameAddRef(OniFrame* pFrame)
 {
-	oni::implementation::VideoStream* pStream = oni::implementation::VideoStream::getFrameStream(pFrame);
-	pStream->frameAddRef(pFrame);
+	m_frameManager.addRef(pFrame);
 }
 
 OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, int* pStreamIndex, int timeout)
@@ -637,7 +633,6 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 	static const int MAX_WAITED_STREAMS = 50;
 	Device* deviceList[MAX_WAITED_STREAMS];
 	VideoStream* streamsList[MAX_WAITED_STREAMS];
-	XN_EVENT_HANDLE eventsList[MAX_WAITED_STREAMS];
 
 	unsigned long long oldestTimestamp = XN_MAX_UINT64;
 	int oldestIndex = -1;
@@ -649,7 +644,6 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 	}
 
 	int numDevices = 0;
-	int numEvents = 0;
 
 	for (int i = 0; i < streamCount; ++i)
 	{
@@ -659,8 +653,6 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		}
 
 		streamsList[i] =  ((_OniStream*)pStreams[i])->pStream;
-
-		eventsList[numEvents++] = streamsList[i]->getNewFrameEvent();
 
 		Device* pDevice = &streamsList[i]->getDevice();
 
@@ -678,20 +670,14 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		// Add new device to list.
 		if (!found)
 		{
-			if (numDevices < MAX_WAITED_STREAMS)
-			{
-				deviceList[numDevices] = pDevice;
-				++numDevices;
-			}
-			else
-			{
-				m_errorLogger.Append("Cannot wait on more than %d devices", MAX_WAITED_STREAMS);
-				return ONI_STATUS_NOT_SUPPORTED;
-			}
+			deviceList[numDevices] = pDevice;
+			++numDevices;
 		}
 	}
 
-	for (;;)
+	XN_EVENT_HANDLE hEvent = getThreadEvent();
+
+	do
 	{
 		for (int i = 0; i < streamCount; ++i)
 		{
@@ -721,12 +707,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			deviceList[j]->tryManualTrigger();
 		}
 
-		XnUInt32 nIndex;
-		if (xnOSWaitMultipleEvents(numEvents, eventsList, timeout, &nIndex) != XN_STATUS_OK)
-		{
-			break;
-		}
-	}
+	} while (XN_STATUS_OK == xnOSWaitEvent(hEvent, timeout));
 
 	if (oldestIndex != -1)
 	{
@@ -794,7 +775,7 @@ OniStatus Context::enableFrameSyncEx(VideoStream** pStreams, int numStreams, Dev
 
 	// Create the new frame sync group (it will link all the streams).
 	SyncedStreamsFrameHolder* pSyncedStreamsFrameHolder = XN_NEW(SyncedStreamsFrameHolder, 
-																	pStreams, numStreams);
+																	m_frameManager, pStreams, numStreams);
 	XN_VALIDATE_PTR(pSyncedStreamsFrameHolder, ONI_STATUS_ERROR);
 
 	// Configure frame-sync group in driver.
@@ -855,7 +836,7 @@ void Context::disableFrameSync(OniFrameSyncHandle frameSyncHandle)
 	for (int i = 0; i < numStreams; ++i)
 	{
 		// Allocate new frame holder.
-		StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, pStreamList[i]);
+		StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pStreamList[i]);
 		if (pStreamFrameHolder == NULL)
 		{
 			// TODO: error!!!
@@ -917,7 +898,7 @@ OniStatus Context::recorderOpen(const char* fileName, OniRecorderHandle* pRecord
         return ONI_STATUS_ERROR;
     }
     // Create the recorder itself.
-    if (NULL == ((*pRecorder)->pRecorder = XN_NEW(Recorder, m_errorLogger, *pRecorder)))
+    if (NULL == ((*pRecorder)->pRecorder = XN_NEW(Recorder, m_frameManager, m_errorLogger, *pRecorder)))
     {
         XN_DELETE(*pRecorder);
         return ONI_STATUS_ERROR;
@@ -1006,6 +987,41 @@ void Context::addToLogger(const XnChar* cpFormat, ...)
 	va_start(args, cpFormat);
 	m_errorLogger.AppendV(cpFormat, args);
 	va_end(args);
+}
+
+void Context::onNewFrame()
+{
+	m_cs.Lock();
+	for (xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE>::Iterator it = m_waitingThreads.Begin(); it != m_waitingThreads.End(); ++it)
+	{
+		xnOSSetEvent(it->Value());
+	}
+	m_cs.Unlock();
+}
+
+void XN_CALLBACK_TYPE Context::newFrameCallback(void* pCookie)
+{
+	Context* pThis = (Context*)pCookie;
+	pThis->onNewFrame();
+}
+
+XN_EVENT_HANDLE Context::getThreadEvent()
+{
+	XN_THREAD_ID tid;
+	XN_EVENT_HANDLE hEvent = NULL;
+	xnOSGetCurrentThreadID(&tid);
+
+	m_cs.Lock();
+	
+	if (XN_STATUS_OK != m_waitingThreads.Get(tid, hEvent))
+	{
+		xnOSCreateEvent(&hEvent, FALSE);
+		m_waitingThreads.Set(tid, hEvent);
+	}
+
+	m_cs.Unlock();
+
+	return hEvent;
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

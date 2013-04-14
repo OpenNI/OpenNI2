@@ -29,6 +29,4 @@
 struct _OniFrameSync;
 typedef _OniFrameSync* OniFrameSyncHandle;
 
-
-
 #endif // _ONI_COMMON_H_

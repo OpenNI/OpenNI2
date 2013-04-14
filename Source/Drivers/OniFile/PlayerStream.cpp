@@ -30,11 +30,6 @@
 
 namespace oni_file {
 
-typedef struct  
-{
-	int refCount;
-} PlayerStreamFrameCookie;
-
 PlayerStream::PlayerStream(PlayerSource* pSource) :
 	m_pSource(pSource), m_pLastFrame(NULL), m_newDataHandle(NULL), m_isStarted(false)
 {
@@ -53,7 +48,7 @@ PlayerStream::~PlayerStream()
 	m_cs.Lock();
 	if (m_pLastFrame != NULL)
 	{
-		releaseFrame(m_pLastFrame);
+		getServices().releaseFrame(m_pLastFrame);
 		m_pLastFrame = NULL;
 	}
 	m_cs.Unlock();
@@ -174,17 +169,17 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 	// Release last frame (if exists).
 	if (pStream->m_pLastFrame != NULL)
 	{
-		pStream->releaseFrame(pStream->m_pLastFrame);
+		pStream->getServices().releaseFrame(pStream->m_pLastFrame);
 	}
 
 	// Allocate new frame and fill it.
-	pStream->m_pLastFrame = pStream->AllocateFrame();
+	pStream->m_pLastFrame = pStream->getServices().acquireFrame();
 	if (pStream->m_pLastFrame == NULL)
 	{
 		return;
 	}
 
-	OniFrame* pFrame = &pStream->m_pLastFrame->frame;
+	OniFrame* pFrame = pStream->m_pLastFrame;
 
 	// Set the cropping property.
 	OniCropping cropping;
@@ -229,63 +224,6 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 	// Process the new frame.
 	pStream->raiseNewFrame(pStream->m_pLastFrame);
 	pStream->m_pLastFrame = NULL;
-}
-
-OniDriverFrame* PlayerStream::AllocateFrame()
-{
-	// Get the video mode.
-	int valueSize = sizeof(m_videoMode);
-	OniStatus rc = m_pSource->GetProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &m_videoMode, &valueSize);
-	if (rc != ONI_STATUS_OK)
-	{
-		XN_ASSERT(FALSE);
-		return NULL;
-	}
-
-	// Get stride.
-	valueSize = sizeof(m_stride);
-	rc = m_pSource->GetProperty(ONI_STREAM_PROPERTY_STRIDE, &m_stride, &valueSize);
-	if (rc != ONI_STATUS_OK)
-	{
-		XN_ASSERT(FALSE);
-		return NULL;
-	}
-
-	int dataSize = m_videoMode.resolutionY * m_stride;
-	OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-	if (pFrame == NULL)
-	{
-		XN_ASSERT(FALSE);
-		return NULL;
-	}
-
-	pFrame->frame.data = xnOSMallocAligned(dataSize, XN_DEFAULT_MEM_ALIGN);
-	if (pFrame->frame.data == NULL)
-	{
-		XN_ASSERT(FALSE);
-		return NULL;
-	}
-
-	pFrame->pDriverCookie = xnOSMalloc(sizeof(PlayerStreamFrameCookie));
-	((PlayerStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
-
-	pFrame->frame.dataSize = dataSize;
-	return pFrame;
-}
-
-void PlayerStream::addRefToFrame(OniDriverFrame* pFrame)
-{
-	++((PlayerStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-}
-
-void PlayerStream::releaseFrame(OniDriverFrame* pFrame)
-{
-	if (0 == --((PlayerStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-	{
-		xnOSFree(pFrame->pDriverCookie);
-		xnOSFreeAligned(pFrame->frame.data);
-		xnOSFree(pFrame);
-	}
 }
 
 } // namespace oni_files_player

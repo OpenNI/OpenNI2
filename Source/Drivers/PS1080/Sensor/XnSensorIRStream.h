@@ -64,7 +64,6 @@ protected:
 	XnStatus Open() { return m_Helper.Open(); }
 	XnStatus Close() { return m_Helper.Close(); }
 	XnStatus CalcRequiredSize(XnUInt32* pnRequiredSize) const;
-	XnStatus ReallocTripleFrameBuffer();
 	XnStatus CropImpl(OniFrame* pFrame, const OniCropping* pCropping);
 	XnStatus ConfigureStreamImpl();
 	XnStatus OpenStreamImpl();

@@ -121,7 +121,8 @@ ONI_C_API OniBool oniStreamIsPropertySupported(OniStreamHandle stream, int prope
 ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, void* data, int dataSize);
 /** Check if a command is supported, for invoke */
 ONI_C_API OniBool oniStreamIsCommandSupported(OniStreamHandle stream, int commandId);
-// handle registration of pixel
+/** Sets the stream buffer allocation functions. Note that this function may only be called while stream is not started. */
+ONI_C_API OniStatus oniStreamSetFrameBuffersAllocator(OniStreamHandle stream, OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie);
 
 ////
 /** Mark another user of the frame. */

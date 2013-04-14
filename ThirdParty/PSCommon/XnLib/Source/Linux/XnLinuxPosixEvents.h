@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 2.x Alpha                                                          *
+*  PrimeSense PSCommon Library                                               *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of OpenNI.                                              *
+*  This file is part of PSCommon.                                            *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -18,54 +18,21 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_IMPL_STREAM_FRAME_HOLDER_H_
-#define _ONI_IMPL_STREAM_FRAME_HOLDER_H_
+#include "XnLinuxEvents.h"
 
-#include "OniCommon.h"
-#include "OniFrameHolder.h"
-
-ONI_NAMESPACE_IMPLEMENTATION_BEGIN
-
-class VideoStream;
-
-class StreamFrameHolder : public FrameHolder
+class XnLinuxPosixEvent : public XnLinuxEvent
 {
 public:
+	XnLinuxPosixEvent(XnBool bManualReset);
 
-	// Constructor.
-	StreamFrameHolder(FrameManager& frameManager, VideoStream* pStream);
-
-	// Destructor.
-	virtual ~StreamFrameHolder();
-
-	// Get the next frame belonging to a stream.
-	virtual OniStatus readFrame(VideoStream* pStream, OniFrame** pFrame);
-
-	// Process a newly received frame.
-	virtual OniStatus processNewFrame(VideoStream* pStream, OniFrame* pFrame);
-	
-	// Peek at next frame.
-	virtual OniFrame* peekFrame(VideoStream* pStream);
-
-	// Clear all the frame in the holder.
-	virtual void clear();
-
-	// Return list of streams which are members of the stream group.
-	virtual void getStreams(VideoStream** ppStreams, int* pNumStreams);
-
-	// Return number of streams which are members of the stream group.
-	virtual int getNumStreams();
-
-	//
-	virtual void setStreamEnabled(VideoStream* /*pStream*/, OniBool /*enabled*/);
+	virtual XnStatus Init();
+	virtual XnStatus Destroy();
+	virtual XnStatus Set();
+	virtual XnStatus Reset();
+	virtual XnStatus Wait(XnUInt32 nMilliseconds);
 
 private:
-
-	VideoStream* m_pStream;
-
-	OniFrame* m_pLastFrame;
+	pthread_cond_t m_cond;
+	pthread_mutex_t m_mutex;
 };
 
-ONI_NAMESPACE_IMPLEMENTATION_END
-
-#endif // _ONI_IMPL_STREAM_FRAME_HOLDER_H_

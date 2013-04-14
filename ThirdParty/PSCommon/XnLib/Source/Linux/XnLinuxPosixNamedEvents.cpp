@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 2.x Alpha                                                          *
+*  PrimeSense PSCommon Library                                               *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of OpenNI.                                              *
+*  This file is part of PSCommon.                                            *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -18,60 +18,72 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_STREAM_H__
-#define __XN_ONI_STREAM_H__
-
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
-#include <Driver/OniDriverAPI.h>
-#include <XnLib.h>
-#include "../Sensor/XnSensor.h"
+#include "XnLinuxPosixNamedEvents.h"
 
-//using namespace oni::driver;
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class XnDeviceStream;
-class XnOniDevice;
+#ifdef XN_PLATFORM_LINUX_NO_SYSV
 
-class XnOniStream :
-	public oni::driver::StreamBase
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+XnLinuxPosixNamedEvent::XnLinuxPosixNamedEvent(XnBool bManualReset, const XnChar* strName, XnBool bCreate) : 
+	XnLinuxNamedEvent(bManualReset, strName, bCreate), m_pSem(NULL)
 {
-public:
-	XnOniStream(XnSensor* pSensor, const XnChar* strName, OniSensorType sensorType, XnOniDevice* pDevice);
-	~XnOniStream();
+}
 
-	virtual XnStatus Init();
+XnStatus XnLinuxPosixNamedEvent::CreateNamed(const XnChar* strName)
+{
+	// Create a new semaphore or open existing
+	m_pSem = sem_open(strName, O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO , 0);
+	if (SEM_FAILED == m_pSem)
+	{
+		return XN_STATUS_OS_EVENT_CREATION_FAILED;
+	}
 
-	virtual void setServices(oni::driver::StreamServices* pStreamServices);
+	return (XN_STATUS_OK);
+}
 
-	OniStatus start();
-	void stop();
+XnStatus XnLinuxPosixNamedEvent::OpenNamed(const XnChar* strName)
+{
+	return XN_STATUS_OS_EVENT_OPEN_FAILED;
 
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
-	virtual OniBool isPropertySupported(int propertyId);
+	// Open the existing samaphore
+	m_pSem = sem_open(strName,  0);
+	if (SEM_FAILED == m_pSem)
+	{
+		return XN_STATUS_OS_EVENT_OPEN_FAILED;
+	}
 
-	virtual int getRequiredFrameSize();
+	// TODO: find a way to get manual reset
+	//pEvent->bManualReset
+}
 
-	XnOniDevice* GetDevice() { return m_pDevice; }
-	XnDeviceStream* GetDeviceStream() { return m_pDeviceStream; }
+XnStatus XnLinuxPosixNamedEvent::Destroy()
+{
+	// Destroy the named semaphore
+	if (0 != sem_close(m_pSem))
+	{
+		return (XN_STATUS_OS_EVENT_CLOSE_FAILED);
+	}
 
-protected:
-	virtual XnStatus SetPropertyImpl(int propertyId, const void* data, int dataSize);
+	return (XN_STATUS_OK);
+}
 
-	OniSensorType m_sensorType;
-	XnSensor* m_pSensor;
-	const XnChar* m_strType;
-	XnDeviceStream* m_pDeviceStream;
-	XnOniDevice* m_pDevice;
-	XnCallbackHandle m_hNewDataCallback;
+XnStatus XnLinuxPosixNamedEvent::Set()
+{
+	return (XN_STATUS_OS_EVENT_SET_FAILED);
+}
 
-private:
-	void destroy();
-	XnBool m_started;
-	static void XN_CALLBACK_TYPE OnNewStreamDataEventHandler(const XnNewStreamDataEventArgs& args, void* pCookie);
-};
+XnStatus XnLinuxPosixNamedEvent::Reset()
+{
+	return (XN_STATUS_OS_EVENT_RESET_FAILED);
+}
 
-#endif // __XN_ONI_STREAM_H__
+XnStatus XnLinuxPosixNamedEvent::Wait(XnUInt32 nTimeout)
+{
+	return (XN_STATUS_OS_EVENT_WAIT_FAILED);
+}
+
+#endif // if no SysV

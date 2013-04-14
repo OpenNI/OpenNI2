@@ -37,18 +37,11 @@ DepthKinectStream::DepthKinectStream(KinectStreamImpl* pStreamImpl):
 
 void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT& LockedRect)
 {
-
-	OniDriverFrame* pFrame = NULL;
-
-	pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-	pFrame->frame.dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * sizeof(unsigned short);
-	pFrame->frame.data =  xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-	pFrame->pDriverCookie = xnOSMalloc(sizeof(KinectStreamFrameCookie));
-	((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
+	OniFrame* pFrame = getServices().acquireFrame();
 	const NUI_DEPTH_IMAGE_PIXEL * pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL *>(LockedRect.pBits);
 	const NUI_DEPTH_IMAGE_PIXEL * pBufferEnd = pBufferRun + (m_videoMode.resolutionY * m_videoMode.resolutionX);
 	// Get the min and max reliable depth for the current frame
-	unsigned short * data = (unsigned short *)pFrame->frame.data;
+	unsigned short * data = (unsigned short *)pFrame->data;
 	if (!m_cropping.enabled)
 	{
 		while (pBufferRun < pBufferEnd)
@@ -57,11 +50,11 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 			*(data++) = (pBufferRun->depth > 0 && pBufferRun->depth < DEVICE_MAX_DEPTH_VAL)?pBufferRun->depth:0;
 			++pBufferRun;
 		}
-		pFrame->frame.stride = m_videoMode.resolutionX * 2;
-		pFrame->frame.height = pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.width  = pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
-		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
-		pFrame->frame.croppingEnabled = FALSE;
+		pFrame->stride = m_videoMode.resolutionX * 2;
+		pFrame->height = pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->width  = pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->cropOriginX = pFrame->cropOriginY = 0;
+		pFrame->croppingEnabled = FALSE;
 	}
 	else
 	{
@@ -77,20 +70,20 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 			cropY++;
 			cropX = m_cropping.originX;
 		}
-		pFrame->frame.stride = m_cropping.width * 2;
-		pFrame->frame.height = m_cropping.height;
-		pFrame->frame.width  = m_cropping.width;
-		pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
-		pFrame->frame.cropOriginX = m_cropping.originX; 
-		pFrame->frame.cropOriginY = m_cropping.originY;
-		pFrame->frame.croppingEnabled = TRUE;
+		pFrame->stride = m_cropping.width * 2;
+		pFrame->height = m_cropping.height;
+		pFrame->width  = m_cropping.width;
+		pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->cropOriginX = m_cropping.originX; 
+		pFrame->cropOriginY = m_cropping.originY;
+		pFrame->croppingEnabled = TRUE;
 	}
-	pFrame->frame.videoMode.pixelFormat = m_videoMode.pixelFormat;
-	pFrame->frame.videoMode.fps = m_videoMode.fps;
-	pFrame->frame.sensorType = ONI_SENSOR_DEPTH;
-	pFrame->frame.frameIndex = imageFrame.dwFrameNumber;
-	pFrame->frame.timestamp = imageFrame.liTimeStamp.QuadPart*1000;
+	pFrame->videoMode.pixelFormat = m_videoMode.pixelFormat;
+	pFrame->videoMode.fps = m_videoMode.fps;
+	pFrame->sensorType = ONI_SENSOR_DEPTH;
+	pFrame->frameIndex = imageFrame.dwFrameNumber;
+	pFrame->timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
 }
 

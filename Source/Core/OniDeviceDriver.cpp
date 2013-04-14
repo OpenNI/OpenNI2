@@ -57,11 +57,12 @@ OniDriverServices* CreateDriverServicesForDriver(oni::implementation::DriverServ
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
-DeviceDriver::DeviceDriver(const char* strDriverFilename, xnl::ErrorLogger& errorLogger) :
+DeviceDriver::DeviceDriver(const char* strDriverFilename, FrameManager& frameManager, xnl::ErrorLogger& errorLogger) :
 	m_driverServices(errorLogger),
 	m_pDriverServicesForDriver(NULL),
 	m_errorLogger(errorLogger),
 	m_driverHandler(strDriverFilename, errorLogger),
+	m_frameManager(frameManager),
 	m_valid(false)
 {
 	if (!m_driverHandler.isValid())
@@ -136,7 +137,7 @@ void ONI_CALLBACK_TYPE DeviceDriver::driver_DeviceConnected(const OniDeviceInfo*
 {
 	DeviceDriver* pDriver = (DeviceDriver*)pCookie;
 	xnLogInfo(XN_MASK_ONI_DEVICE_DRIVER, "Device connected: %s %s (%s)", pInfo->vendor, pInfo->name, pInfo->uri);
-	Device* pDevice = XN_NEW(Device, pDriver, pDriver->m_driverHandler, pInfo, pDriver->m_errorLogger);
+	Device* pDevice = XN_NEW(Device, pDriver, pDriver->m_driverHandler, pDriver->m_frameManager, pInfo, pDriver->m_errorLogger);
 	if (pDriver != NULL)
 	{
 		pDriver->m_devices[pInfo->uri] = pDevice;

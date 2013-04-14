@@ -23,6 +23,7 @@
 #include "OniSyncedStreamsFrameHolder.h"
 #include "OniDeviceDriver.h"
 #include "OniRecorder.h"
+#include "OniFrameManager.h"
 
 #include "XnList.h"
 #include "XnHash.h"
@@ -106,11 +107,17 @@ protected:
 	static void ONI_CALLBACK_TYPE deviceDriver_DeviceConnected(Device* pDevice, void* pCookie);
 	static void ONI_CALLBACK_TYPE deviceDriver_DeviceDisconnected(Device* pDevice, void* pCookie);
 	static void ONI_CALLBACK_TYPE deviceDriver_DeviceStateChanged(Device* pDevice, OniDeviceState deviceState, void* pCookie);
+
 private:
 	Context(const Context& other);
 	Context& operator=(const Context&other);
 
 	XnStatus loadLibraries(const char* directoryName);
+	void onNewFrame();
+	XN_EVENT_HANDLE getThreadEvent();
+	static void XN_CALLBACK_TYPE newFrameCallback(void* pCookie);
+
+	FrameManager m_frameManager;
 
 	xnl::ErrorLogger& m_errorLogger;
 
@@ -124,6 +131,7 @@ private:
     xnl::List<oni::implementation::Recorder*> m_recorders;
 
 	xnl::Hash<oni::implementation::Device*, OniDeviceHandle> m_deviceToHandle;
+	xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE> m_waitingThreads;
 
 	xnl::CriticalSection m_cs;
 

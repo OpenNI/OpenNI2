@@ -25,8 +25,9 @@
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
-Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger) : 
+Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, FrameManager& frameManager, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger) : 
 	m_driverHandler(driverHandler),
+	m_frameManager(frameManager),
 	m_errorLogger(errorLogger),
 	m_active(false),
 	m_openCount(0),
@@ -115,7 +116,7 @@ VideoStream* Device::createStream(OniSensorType sensorType)
 		return NULL;
 	}
 
-	VideoStream* pStream = XN_NEW(VideoStream, streamHandle, pSensor, *this, m_driverHandler, m_errorLogger);
+	VideoStream* pStream = XN_NEW(VideoStream, streamHandle, pSensor, *this, m_driverHandler, m_frameManager, m_errorLogger);
 	m_streams.AddLast(pStream);
 
 	if ((sensorType == ONI_SENSOR_DEPTH || sensorType == ONI_SENSOR_COLOR) &&

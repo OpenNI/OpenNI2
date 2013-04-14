@@ -427,7 +427,6 @@
     <ClInclude Include="DDK\XnIntProperty.h" />
     <ClInclude Include="DDK\XnIntPropertySynchronizer.h" />
     <ClInclude Include="DDK\XnIRStream.h" />
-    <ClInclude Include="DDK\XnOniFramePool.h" />
     <ClInclude Include="DDK\XnPixelStream.h" />
     <ClInclude Include="DDK\XnProperty.h" />
     <ClInclude Include="DDK\XnPropertySetInternal.h" />

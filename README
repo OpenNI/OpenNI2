@@ -41,6 +41,8 @@ Linux
     From: http://sourceforge.net/projects/libusb/files/libusb-1.0/
     Or via apt:
     sudo apt-get install libusb-1.0-0-dev
+- LibUDEV
+    sudo apt-get install libudev-dev
 - JDK 6.0
     From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
     Or via apt:

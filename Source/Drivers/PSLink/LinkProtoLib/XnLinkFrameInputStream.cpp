@@ -24,11 +24,10 @@ namespace xn
 LinkFrameInputStream::LinkFrameInputStream()
 {
 	m_bInitialized = FALSE;
+	m_defaultServices.setStream(this);
+	m_pServices = &m_defaultServices;
     m_bStreaming = FALSE;
-	xnOSMemSet(&m_buffersInfo, 0, sizeof(m_buffersInfo));
-
-	m_nWorkingBufferIdx = 0;
-	m_nStableBufferIdx = 1;
+	m_pCurrFrame = NULL;
 	m_nDumpFrameID = 0;
 
 	m_frameIndex = 0;
@@ -140,8 +139,11 @@ void LinkFrameInputStream::Shutdown()
 	xnOSEnterCriticalSection(&m_hCriticalSection);
     Stop();
 
-    XN_ALIGNED_FREE_AND_NULL(m_buffersInfo[m_nWorkingBufferIdx].m_pData);
-    XN_ALIGNED_FREE_AND_NULL(m_buffersInfo[m_nStableBufferIdx].m_pData);
+	if (m_pCurrFrame != NULL)
+	{
+		m_pServices->releaseFrame(m_pCurrFrame);
+		m_pCurrFrame = NULL;
+	}
 
 	XnShiftToDepthFree(&m_shiftToDepthTables);
 
@@ -170,6 +172,17 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
         m_pDumpFile = xnDumpFileOpen(m_strDumpName, "%s.%05u.raw", m_strDumpName, m_nDumpFrameID++);
 		m_currentFrameCorrupt = FALSE;
 
+		// acquire a frame
+		if (m_pCurrFrame == NULL)
+		{
+			m_pCurrFrame = m_pServices->acquireFrame();
+			if (m_pCurrFrame == NULL)
+			{
+				xnLogError(XN_MASK_LINK, "Failed to acquire frame. Stream can't function!");
+				return XN_STATUS_ALLOC_FAILED;
+			}
+		}
+
 		// take timestamp
 		if (header.GetDataSize() < sizeof(XnUInt64))
 		{
@@ -178,21 +191,20 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 			XN_ASSERT(FALSE);
 			return XN_STATUS_LINK_MISSING_TIMESTAMP;
 		}
+		m_pCurrFrame->timestamp = *(XnUInt64*)pData;
+		pData += sizeof(XnUInt64);
+		header.SetSize(header.GetSize() - sizeof(XnUInt64));
 
         // TEMP: inject the host's timestamp. Firmware can't produce timestamps yet
-		// m_buffersInfo[m_nWorkingBufferIdx].m_nTimestamp = *(XnUInt64*)pData;
-        nRetVal = xnOSGetHighResTimeStamp(&m_buffersInfo[m_nWorkingBufferIdx].m_nTimestamp);
+        nRetVal = xnOSGetHighResTimeStamp(&m_pCurrFrame->timestamp);
         if (nRetVal != XN_STATUS_OK)
         {
             xnLogWarning(XN_MASK_LINK, "Failed to get timestamp from os: %s", xnGetStatusString(nRetVal));
             XN_ASSERT(FALSE);
         }
 
-		pData += sizeof(XnUInt64);
-		header.SetSize(header.GetSize() - sizeof(XnUInt64));
-
 		// begin parsing frame
-		nRetVal = m_pLinkMsgParser->BeginParsing(m_buffersInfo[m_nWorkingBufferIdx].m_pData, m_nBufferSize);
+		nRetVal = m_pLinkMsgParser->BeginParsing(m_pCurrFrame->data, m_nBufferSize);
 		XN_IS_STATUS_OK_LOG_ERROR("Begin parsing link frame msg", nRetVal);
 	}
 	else if (bPacketLoss)
@@ -207,7 +219,6 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 		if (nRetVal != XN_STATUS_OK)
 		{
 			m_currentFrameCorrupt = TRUE;
-//			XN_IS_STATUS_OK_LOG_ERROR("Parse data from stream", nRetVal);
 			if (nRetVal != XN_STATUS_OK)
 			{
 				return nRetVal;
@@ -234,48 +245,41 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 		if (!m_currentFrameCorrupt)
 		{
 			//Save actual size of data in working buffer info
-			m_buffersInfo[m_nWorkingBufferIdx].m_nSize = m_pLinkMsgParser->GetParsedSize();
+			m_pCurrFrame->dataSize = m_pLinkMsgParser->GetParsedSize();
+			m_pCurrFrame->frameIndex = m_frameIndex++;
 
-			//Swap working buffer and stable buffer
-			Swap(m_nWorkingBufferIdx, m_nStableBufferIdx);
-
-			//Create a frame that can be passed on and notified of
-			NewFrameEventArgs args;
-			args.pFrame = m_pBufferManager->AcquireFrame(m_buffersInfo[m_nStableBufferIdx].m_nSize);
-			OniFrame & oFrame = args.pFrame->frame;
-
-			oFrame.dataSize  =       m_buffersInfo[m_nStableBufferIdx].m_nSize;
-			xnOSMemCopy(oFrame.data, m_buffersInfo[m_nStableBufferIdx].m_pData, oFrame.dataSize);
-			oFrame.timestamp =       m_buffersInfo[m_nStableBufferIdx].m_nTimestamp;
-
-			oFrame.frameIndex            = m_frameIndex++;
-			oFrame.croppingEnabled       = m_cropping.enabled;
+			m_pCurrFrame->frameIndex            = m_frameIndex++;
+			m_pCurrFrame->croppingEnabled       = m_cropping.enabled;
 			if (m_cropping.enabled)
 			{
-				oFrame.width             = m_cropping.width;
-				oFrame.height            = m_cropping.height;
-				oFrame.cropOriginX       = m_cropping.originX;
-				oFrame.cropOriginY       = m_cropping.originY;
+				m_pCurrFrame->width             = m_cropping.width;
+				m_pCurrFrame->height            = m_cropping.height;
+				m_pCurrFrame->cropOriginX       = m_cropping.originX;
+				m_pCurrFrame->cropOriginY       = m_cropping.originY;
 			} else {
-				oFrame.width             = m_videoMode.m_nXRes;
-				oFrame.height            = m_videoMode.m_nYRes;
-				oFrame.cropOriginX       = 0;
-				oFrame.cropOriginY       = 0;
+				m_pCurrFrame->width             = m_videoMode.m_nXRes;
+				m_pCurrFrame->height            = m_videoMode.m_nYRes;
+				m_pCurrFrame->cropOriginX       = 0;
+				m_pCurrFrame->cropOriginY       = 0;
 			}
-			oFrame.stride                = oFrame.width * GetOutputBytesPerPixel();
-			oFrame.videoMode.fps         = m_videoMode.m_nFPS;
-			oFrame.videoMode.pixelFormat = m_outputFormat;
-			oFrame.videoMode.resolutionX = m_videoMode.m_nXRes;
-			oFrame.videoMode.resolutionY = m_videoMode.m_nYRes;
+			m_pCurrFrame->stride                = m_pCurrFrame->width * GetOutputBytesPerPixel();
+			m_pCurrFrame->videoMode.fps         = m_videoMode.m_nFPS;
+			m_pCurrFrame->videoMode.pixelFormat = m_outputFormat;
+			m_pCurrFrame->videoMode.resolutionX = m_videoMode.m_nXRes;
+			m_pCurrFrame->videoMode.resolutionY = m_videoMode.m_nYRes;
 
 			switch (m_streamType)
 			{
-			case XN_LINK_STREAM_TYPE_SHIFTS:	oFrame.sensorType = ONI_SENSOR_DEPTH; break;
-			case XN_LINK_STREAM_TYPE_COLOR:		oFrame.sensorType = ONI_SENSOR_COLOR; break;
-			case XN_LINK_STREAM_TYPE_IR:		oFrame.sensorType = ONI_SENSOR_IR;    break;
+			case XN_LINK_STREAM_TYPE_SHIFTS:	m_pCurrFrame->sensorType = ONI_SENSOR_DEPTH; break;
+			case XN_LINK_STREAM_TYPE_COLOR:		m_pCurrFrame->sensorType = ONI_SENSOR_COLOR; break;
+			case XN_LINK_STREAM_TYPE_IR:		m_pCurrFrame->sensorType = ONI_SENSOR_IR;    break;
 			}
 
+			NewFrameEventArgs args;
+			args.pFrame = m_pCurrFrame;
 			nRetVal = m_newFrameEvent.Raise(args);
+			m_pServices->releaseFrame(m_pCurrFrame);
+			m_pCurrFrame = NULL;
 			XN_IS_STATUS_OK_LOG_ERROR("Raise new frame event", nRetVal);
 		}
 	}
@@ -302,22 +306,6 @@ XnStatus LinkFrameInputStream::StartImpl()
         return XN_STATUS_ERROR;
     }
     xnLogVerbose(XN_MASK_LINK, "Stream %u calculated buffer size: %u", m_nStreamID, m_nBufferSize);
-
-    for (XnUInt32 i = 0; i < NUM_BUFFERS; i++)
-    {
-        xnOSFreeAligned(m_buffersInfo[i].m_pData);
-        m_buffersInfo[i].m_pData = xnOSCallocAligned(1, m_nBufferSize, XN_DEFAULT_MEM_ALIGN);
-        if (m_buffersInfo[i].m_pData == NULL)
-        {
-            //Deallocate all buffers that were allocated in previous iterations of this loop
-            DeallocateBuffers(i);
-
-            Shutdown();
-            xnLogError(XN_MASK_INPUT_STREAM, "Failed to allocate buffer of size %u", m_nBufferSize);
-            XN_ASSERT(FALSE);
-            return XN_STATUS_ALLOC_FAILED;
-        }
-    }
 
     //Prepare parser
 	m_pLinkMsgParser = CreateLinkMsgParser();
@@ -371,9 +359,12 @@ XnStatus LinkFrameInputStream::StopImpl()
         m_pLinkMsgParser = NULL;
     }
 
-    //Free all buffers but user buffer
-    XN_ALIGNED_FREE_AND_NULL(m_buffersInfo[m_nWorkingBufferIdx].m_pData);
-    XN_ALIGNED_FREE_AND_NULL(m_buffersInfo[m_nStableBufferIdx].m_pData);
+    //Free curr buffer if we still hold it
+	if (m_pCurrFrame != NULL)
+	{
+		m_pServices->releaseFrame(m_pCurrFrame);
+		m_pCurrFrame = NULL;
+	}
         
     m_bStreaming = FALSE;
 
@@ -397,16 +388,6 @@ void LinkFrameInputStream::SetDumpOn(XnBool bDumpOn)
         xnLogWarning(XN_MASK_INPUT_STREAM, "Failed to set dump state: %s", xnGetStatusString(nRetVal));
         XN_ASSERT(FALSE);
     }
-}
-
-void LinkFrameInputStream::AddRefToFrame(OniDriverFrame* pFrame)
-{
-	m_pBufferManager->addRefToFrame(pFrame);
-}
-
-void LinkFrameInputStream::ReleaseFrame(OniDriverFrame* pFrame)
-{
-	m_pBufferManager->releaseFrame(pFrame);
 }
 
 void LinkFrameInputStream::Swap(XnUInt32& nVal1, XnUInt32& nVal2)
@@ -491,14 +472,6 @@ XnUInt32 LinkFrameInputStream::CalcExpectedSize() const
 	{
 		return (0);
 	}
-}
-
-void LinkFrameInputStream::DeallocateBuffers(XnUInt32 nBuffers)
-{
-    for (XnUInt32 j = 0; j < nBuffers; j++)
-    {
-        XN_ALIGNED_FREE_AND_NULL(m_buffersInfo[j].m_pData);
-    }
 }
 
 XnBool LinkFrameInputStream::IsOutputFormatSupported(OniPixelFormat format) const
@@ -791,6 +764,63 @@ XnStatus LinkFrameInputStream::UpdateCameraIntrinsics()
 		m_fVFOV*180/M_PI);
 
 	return (XN_STATUS_OK);
+}
+
+
+LinkFrameInputStream::DefaultStreamServices::DefaultStreamServices()
+{
+	OniStreamServices::getDefaultRequiredFrameSize = getDefaultRequiredFrameSizeCallback;
+	OniStreamServices::acquireFrame = acquireFrameCallback;
+	OniStreamServices::addFrameRef = addFrameRefCallback;
+	OniStreamServices::releaseFrame = releaseFrameCallback;
+}
+
+void LinkFrameInputStream::DefaultStreamServices::setStream(LinkFrameInputStream* pStream)
+{
+	OniStreamServices::streamServices = pStream;
+}
+
+int ONI_CALLBACK_TYPE LinkFrameInputStream::DefaultStreamServices::getDefaultRequiredFrameSizeCallback(void* streamServices)
+{
+	LinkFrameInputStream* pThis = (LinkFrameInputStream*)streamServices;
+	return pThis->GetRequiredFrameSize();
+}
+
+OniFrame* ONI_CALLBACK_TYPE LinkFrameInputStream::DefaultStreamServices::acquireFrameCallback(void* streamServices)
+{
+	LinkFrameInputStream* pThis = (LinkFrameInputStream*)streamServices;
+	LinkOniFrame* pFrame = XN_NEW(LinkOniFrame);
+	if (pFrame == NULL)
+	{
+		return NULL;
+	}
+
+	pFrame->refCount = 1;
+	pFrame->dataSize = pThis->GetRequiredFrameSize();
+	pFrame->data = xnOSMallocAligned(pFrame->dataSize, XN_DEFAULT_MEM_ALIGN);
+	if (pFrame->data == NULL)
+	{
+		XN_DELETE(pFrame);
+		return NULL;
+	}
+
+	return pFrame;
+}
+
+void ONI_CALLBACK_TYPE LinkFrameInputStream::DefaultStreamServices::addFrameRefCallback(void* /*streamServices*/, OniFrame* pFrame)
+{
+	LinkOniFrame* pLinkFrame = (LinkOniFrame*)pFrame;
+	++pLinkFrame->refCount;
+}
+
+void ONI_CALLBACK_TYPE LinkFrameInputStream::DefaultStreamServices::releaseFrameCallback(void* /*streamServices*/, OniFrame* pFrame)
+{
+	LinkOniFrame* pLinkFrame = (LinkOniFrame*)pFrame;
+	if (--pLinkFrame->refCount == 0)
+	{
+		xnOSFreeAligned(pLinkFrame->data);
+		XN_DELETE(pLinkFrame);
+	}
 }
 
 }

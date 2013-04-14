@@ -76,12 +76,6 @@ public:
     /// @copydoc OniStreamBase::stop()
     virtual void stop();
 
-	/// @copydoc OniStreamBase::addRefToFrame()
-	virtual void addRefToFrame(OniDriverFrame* pFrame);
-
-	/// @copydoc OniStreamBase::releaseFrame()
-	virtual void releaseFrame(OniDriverFrame* pFrame);
-
 	// Return whether the stream is ready to receive data.
 	OniBool IsReadyForData();
 
@@ -115,8 +109,6 @@ private:
 	// Callback to be called when new data is available.
 	static void ONI_CALLBACK_TYPE OnNewDataCallback(const PlayerSource::NewDataEventArgs& newDataEventArgs, void* pCookie);
 
-	OniDriverFrame* AllocateFrame();
-
 // Data members
 private:
 
@@ -127,7 +119,7 @@ private:
     PlayerProperties m_properties;
 
 	// Pointer to last received frame.
-	OniDriverFrame* m_pLastFrame;
+	OniFrame* m_pLastFrame;
 
 	// Current video mode.
 	OniVideoMode m_videoMode;

@@ -19,11 +19,6 @@ static const int KINECT_RESOLUTION_Y_480 = 480;
 static const int KINECT_RESOLUTION_X_1280 = 1280;
 static const int KINECT_RESOLUTION_Y_960 = 960;
 
-typedef struct  
-{
-	int refCount;
-} KinectStreamFrameCookie;
-
 class BaseKinectStream : public oni::driver::StreamBase
 {
 public:
@@ -49,10 +44,6 @@ public:
 	
 	virtual OniStatus GetCropping(OniCropping* cropping);
 	
-	void addRefToFrame(OniDriverFrame* pFrame);
-	
-	void releaseFrame(OniDriverFrame* pFrame);
-
 	bool isRunning() { return m_running; }
 
 	virtual void frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect) = 0;

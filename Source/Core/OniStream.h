@@ -24,6 +24,7 @@
 #include "OniDriverHandler.h"
 #include "OniCommon.h"
 #include "OniFrameHolder.h"
+#include "OniFrameManager.h"
 #include "XnEvent.h"
 #include "XnErrorLogger.h"
 #include "XnHash.h"
@@ -35,11 +36,15 @@ class Device;
 class FrameHolder;
 class Recorder;
 
-class VideoStream
+class VideoStream : OniStreamServices
 {
 public:
-	VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& driverHandler, xnl::ErrorLogger& errorLogger);
+	VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& driverHandler, FrameManager& frameManager, xnl::ErrorLogger& errorLogger);
 	virtual ~VideoStream();
+
+	typedef void (XN_CALLBACK_TYPE* NewFrameFuncPtr)(void* pCookie);
+
+	void setNewFrameCallback(NewFrameFuncPtr callback, void* pCookie) { m_newFrameCallback = callback; m_newFrameCookie = pCookie; }
 
 	OniStatus start();
 	void stop();
@@ -58,12 +63,6 @@ public:
 	OniBool isCommandSupported(int commandId);
 	void notifyAllProperties();
 
-	void frameRelease(OniFrame* pFrame);
-	void frameAddRef(OniFrame* pFrame);
-
-	void initializeFramePool(int dataSize, int poolSize);
-	void initializeFramePool(OniGeneralBuffer* buffers, int numBuffers, int dataSize);
-
 	OniStatus registerNewFrameCallback(OniGeneralCallback handler, void* pCookie, XnCallbackHandle* pHandle);
 	void unregisterNewFrameCallback(XnCallbackHandle handle);
 
@@ -79,15 +78,14 @@ public:
 	void raiseNewFrameEvent();
 	XnStatus waitForNewFrameEvent();
 
-	static VideoStream* getFrameStream(OniFrame* pFrame);
     OniStatus addRecorder(Recorder& aRecorder);
     OniStatus removeRecorder(Recorder& aRecorder);
+
+	OniStatus setFrameBufferAllocator(OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie);
 
 	OniStatus convertDepthToWorldCoordinates(float depthX, float depthY, float depthZ, float* pWorldX, float* pWorldY, float* pWorldZ);
 	OniStatus convertWorldToDepthCoordinates(float worldX, float worldY, float worldZ, float* pDepthX, float* pDepthY, float* pDepthZ);
 	OniStatus convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
-
-	XN_EVENT_HANDLE getNewFrameEvent() { return (XN_EVENT_HANDLE)m_newFrameOSEvent; }
 
 protected:
 	XN_EVENT_HANDLE m_newFrameInternalEvent;
@@ -96,10 +94,32 @@ protected:
 	xnl::ErrorLogger& m_errorLogger;
 
 private:
-	FrameHolder* m_pFrameHolder;
+	XN_DISABLE_COPY_AND_ASSIGN(VideoStream)
 
-	VideoStream(const VideoStream& other);
-	VideoStream& operator=(const VideoStream& other);
+	void resetFrameAllocator();
+
+	// stream services implementation
+	int getDefaultRequiredFrameSize();
+	OniFrame* acquireFrame();
+	void addFrameRef(OniFrame* pFrame);
+	void releaseFrame(OniFrame* pFrame);
+
+	static int ONI_CALLBACK_TYPE getDefaultRequiredFrameSizeCallback(void* streamServices);
+	static OniFrame* ONI_CALLBACK_TYPE acquireFrameCallback(void* streamServices);
+	static void ONI_CALLBACK_TYPE releaseFrameCallback(void* streamServices, OniFrame* pFrame);
+	static void ONI_CALLBACK_TYPE addFrameRefCallback(void* streamServices, OniFrame* pFrame);
+
+	// frame buffer management
+	void* allocFrameBufferFromPool(int size);
+	void releaseFrameBufferToPool(void* pBuffer);
+	void releaseAllFrames();
+
+	static void* ONI_CALLBACK_TYPE allocFrameBufferFromPoolCallback(int size, void* pCookie);
+	static void ONI_CALLBACK_TYPE releaseFrameBufferToPoolCallback(void* pBuffer, void* pCookie);
+	static void ONI_CALLBACK_TYPE freeFrameBufferMemoryCallback(void* pBuffer, void* pCookie);
+	static void ONI_CALLBACK_TYPE frameBackToPoolCallback(OniFrameInternal* pFrame, void* pCookie);
+
+	FrameHolder* m_pFrameHolder;
 
 	xnl::EventNoArgs m_newFrameEvent;
 	XN_THREAD_HANDLE m_newFrameThread;
@@ -110,18 +130,18 @@ private:
 	void newFrameThreadMainloop();
 	bool m_running;
 
-	static void ONI_CALLBACK_TYPE stream_NewFrame(void* streamHandle, OniDriverFrame* pFrame, void* pCookie);
+	static void ONI_CALLBACK_TYPE stream_NewFrame(void* streamHandle, OniFrame* pFrame, void* pCookie);
 	static void ONI_CALLBACK_TYPE stream_PropertyChanged(void* streamHandle, int propertyId, const void* data, int dataSize, void* pCookie);
 
 	void refreshWorldConversionCache();
 
+	NewFrameFuncPtr m_newFrameCallback;
+	void* m_newFrameCookie;
+
 	Device& m_device;
 	const DriverHandler& m_driverHandler;
+	FrameManager& m_frameManager;
 	void* m_streamHandle;
-
-	xnl::OSEvent m_newFrameOSEvent;
-
-	xnl::CriticalSection m_cs;
 
 	OniBool m_started;
 
@@ -141,6 +161,19 @@ private:
 		int halfResX;
 		int halfResY;
 	} m_worldConvertCache;
+
+	int m_requiredFrameSize;
+
+	// following members are for the frame buffer pool that is used by default
+	xnl::CriticalSection m_availableFramesLock;
+	xnl::List<void*> m_allFrameBuffers;
+	xnl::List<void*> m_availableFrameBuffers;
+	xnl::List<OniFrameInternal*> m_currentStreamFrames;
+
+	// following members point to current allocation functions
+	OniFrameAllocBufferCallback m_allocFrameBufferCallback;
+	OniFrameFreeBufferCallback m_freeFrameBufferCallback;
+	void* m_frameBufferAllocatorCookie;
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

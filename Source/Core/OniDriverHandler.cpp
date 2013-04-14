@@ -69,6 +69,7 @@ DriverHandler::DriverHandler(const char* library, xnl::ErrorLogger& errorLogger)
 	OniGetProcAddress(oniDriverDeviceIsImageRegistrationModeSupported);
 	OniGetProcAddress(oniDriverDeviceTryManualTrigger);
 
+	OniGetProcAddress(oniDriverStreamSetServices);
 	OniGetProcAddress(oniDriverStreamSetProperty);
 	OniGetProcAddress(oniDriverStreamGetProperty);
 	OniGetProcAddress(oniDriverStreamIsPropertySupported);
@@ -78,9 +79,8 @@ DriverHandler::DriverHandler(const char* library, xnl::ErrorLogger& errorLogger)
 	OniGetProcAddress(oniDriverStreamIsCommandSupported);
 	OniGetProcAddress(oniDriverStreamStart);
 	OniGetProcAddress(oniDriverStreamStop);
+	OniGetProcAddress(oniDriverStreamGetRequiredFrameSize);
 	OniGetProcAddress(oniDriverStreamSetNewFrameCallback);
-	OniGetProcAddress(oniDriverStreamAddRefToFrame);
-	OniGetProcAddress(oniDriverStreamReleaseFrame);
 	OniGetProcAddress(oniDriverStreamConvertDepthToColorCoordinates);
 
 	OniGetProcAddress(oniDriverEnableFrameSync);

@@ -27,7 +27,6 @@
 #include <libusb.h>
 #else
 #include <libusb-1.0/libusb.h>
-#include <libudev.h>
 #endif
 
 #include "XnLinuxUSB.h"
@@ -37,6 +36,10 @@
 #include <XnOSCpp.h>
 #include <XnList.h>
 
+#if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
+#include <libudev.h>
+#define XN_USE_UDEV
+#endif
 
 //---------------------------------------------------------------------------
 // Types
@@ -55,7 +58,7 @@ typedef xnl::List<XnUSBEventCallback*> XnUSBEventCallbackList;
 
 XnUSBEventCallbackList g_connectivityEvent;
 
-#if XN_PLATFORM != XN_PLATFORM_ANDROID_ARM
+#ifdef XN_USE_UDEV
 typedef struct XnUSBConnectedDevice
 {
 	XnUInt16 nVendorID;
@@ -113,7 +116,7 @@ XnStatus xnUSBPlatformSpecificShutdown();
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-#if XN_PLATFORM != XN_PLATFORM_ANDROID_ARM
+#ifdef XN_USE_UDEV
 void xnUSBDeviceConnected(struct udev_device *dev)
 {
 	XnUSBConnectedDevice *pConnected;
@@ -385,7 +388,7 @@ XnStatus xnUSBPlatformSpecificInit()
 	XnStatus nRetVal = xnOSCreateCriticalSection(&g_InitData.hLock);
 	XN_IS_STATUS_OK(nRetVal);
 	
-#if XN_PLATFORM != XN_PLATFORM_ANDROID_ARM
+#ifdef XN_USE_UDEV
 	// initialize the UDEV Events thread
 	g_bShouldRunUDEVThread = true;
 	nRetVal = xnOSCreateThread(xnUSBUDEVEventsThread, NULL, &g_hUDEVThread);
@@ -480,7 +483,7 @@ void xnUSBAsynchThreadRelease()
 XnStatus xnUSBPlatformSpecificShutdown()
 {
 	xnUSBAsynchThreadStop();
-#if XN_PLATFORM != XN_PLATFORM_ANDROID_ARM
+#ifdef XN_USE_UDEV
 	g_bShouldRunUDEVThread = false;
 	xnOSWaitAndTerminateThread(&g_hUDEVThread, 2 * 1000);
 	g_hUDEVThread = NULL;

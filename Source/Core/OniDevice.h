@@ -22,6 +22,7 @@
 #define _ONI_IMPL_DEVICE_H_
 
 #include "OniDriverHandler.h"
+#include "OniFrameManager.h"
 #include "OniCommon.h"
 #include "XnList.h"
 
@@ -35,7 +36,7 @@ class DeviceDriver;
 class Device
 {
 public:
-	Device(DeviceDriver* pDeviceDriver, const DriverHandler& libraryHandler, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger);
+	Device(DeviceDriver* pDeviceDriver, const DriverHandler& libraryHandler, FrameManager& frameManager, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger);
 	~Device();
 
 	OniStatus open();
@@ -81,6 +82,7 @@ private:
 	static void ONI_CALLBACK_TYPE stream_PropertyChanged(void* deviceHandle, int propertyId, const void* data, int dataSize, void* pCookie);
 
 	const DriverHandler& m_driverHandler;
+	FrameManager& m_frameManager;
 	xnl::ErrorLogger& m_errorLogger;
 	OniDeviceInfo* m_pInfo;
 	bool m_active;

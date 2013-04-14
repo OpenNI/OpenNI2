@@ -86,7 +86,6 @@ protected:
 	//---------------------------------------------------------------------------
 	XnStatus Open() { return m_Helper.Open(); }
 	XnStatus Close() { return m_Helper.Close(); }
-	XnStatus ReallocTripleFrameBuffer();
 	XnStatus CropImpl(OniFrame* pFrame, const OniCropping* pCropping);
 	XnStatus Mirror(OniFrame* pFrame) const;
 	XnStatus ConfigureStreamImpl();
