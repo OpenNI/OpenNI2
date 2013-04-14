@@ -151,6 +151,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 	m_DepthControl.UpdateGetCallback(GetDepthCmosRegisterCallback, this);
 	m_AHB.UpdateSetCallback(WriteAHBCallback, this);
 	m_AHB.UpdateGetCallback(ReadAHBCallback, this);
+	m_LedState.UpdateSetCallback(SetLedStateCallback, this);
 	m_FirmwareLogInterval.UpdateSetCallback(SetFirmwareLogIntervalCallback, this);
 	m_FirmwareLogPrint.UpdateSetCallback(SetFirmwareLogPrintCallback, this);
 	m_FirmwareCPUInterval.UpdateSetCallback(SetFirmwareCPUIntervalCallback, this);
@@ -358,7 +359,7 @@ XnStatus XnSensor::CreateDeviceModule(XnDeviceModuleHolder** ppModuleHolder)
 		&m_CmosBlankingUnits, &m_CmosBlankingTime, &m_Reset, &m_Version, 
 		&m_FixedParam, &m_FrameSync, &m_FirmwareFrameSync, &m_CloseStreamsOnShutdown, &m_ID,
 		&m_VendorSpecificData, &m_AudioSupported, &m_ImageSupported,
-		&m_ImageControl, &m_DepthControl, &m_AHB, &m_HostTimestamps, &m_PlatformString,
+		&m_ImageControl, &m_DepthControl, &m_AHB, &m_LedState, &m_HostTimestamps, &m_PlatformString,
 		&m_FirmwareLogInterval, &m_FirmwareLogPrint, &m_FirmwareCPUInterval, &m_DeleteFile, 
 		&m_APCEnabled, &m_TecSetPoint, &m_TecStatus, &m_TecFastConvergenceStatus, &m_EmitterSetPoint, &m_EmitterStatus, &m_I2C,
 		&m_FileAttributes, &m_FlashFile, &m_FirmwareLogFilter, &m_FirmwareLog, &m_FlashChunk, &m_FileList, 
