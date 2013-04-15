@@ -196,12 +196,14 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 		header.SetSize(header.GetSize() - sizeof(XnUInt64));
 
         // TEMP: inject the host's timestamp. Firmware can't produce timestamps yet
-        nRetVal = xnOSGetHighResTimeStamp(&m_pCurrFrame->timestamp);
+	XnUInt64 nTimestamp;
+        nRetVal = xnOSGetHighResTimeStamp(&nTimestamp);
         if (nRetVal != XN_STATUS_OK)
         {
             xnLogWarning(XN_MASK_LINK, "Failed to get timestamp from os: %s", xnGetStatusString(nRetVal));
             XN_ASSERT(FALSE);
         }
+	m_pCurrFrame->timestamp = nTimestamp;
 
 		// begin parsing frame
 		nRetVal = m_pLinkMsgParser->BeginParsing(m_pCurrFrame->data, m_nBufferSize);
