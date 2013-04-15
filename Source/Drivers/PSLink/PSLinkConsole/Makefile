@@ -24,7 +24,7 @@ ifeq ("$(OSTYPE)","Darwin")
 endif
 
 ifneq ("$(OSTYPE)","Darwin")
-	USED_LIBS += rt usb-1.0 udev
+	USED_LIBS += rt usb-1.0
 else
 	USED_LIBS += usb-1.0.0
 endif
