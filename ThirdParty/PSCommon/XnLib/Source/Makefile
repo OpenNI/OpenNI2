@@ -16,7 +16,7 @@ ifeq ("$(OSTYPE)","Darwin")
 endif
 
 SLIB_NAME = XnLib
-USED_LIBS = usb-1.0 dl pthread udev
+USED_LIBS = usb-1.0 dl pthread
 ifneq ("$(OSTYPE)","Darwin")
 	USED_LIBS += rt 
 endif
