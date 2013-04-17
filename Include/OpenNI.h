@@ -650,6 +650,7 @@ public:
 	class FrameAllocator
 	{
 	public:
+		virtual ~FrameAllocator() {}
 		virtual void* allocateFrameBuffer(int size) = 0;
 		virtual void freeFrameBuffer(void* data) = 0;
 
