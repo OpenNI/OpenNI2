@@ -389,6 +389,9 @@ JNIEXPORT jobject JNICALL Java_org_openni_NativeMethods_oniDeviceGetSensorInfo
 	  jclass videoModeCls = (*env).FindClass("org/openni/VideoMode");
 	  jmethodID videoModeCtor = env->GetMethodID(videoModeCls, "<init>", "(IIII)V");
 	  const OniSensorInfo* sensorInfo = oniDeviceGetSensorInfo((OniDeviceHandle)deviceHandle, (OniSensorType)sensorType);
+	  if (sensorInfo == NULL)
+		  return NULL;
+
 	  int i = 0;
 	  while (i < sensorInfo->numSupportedVideoModes)
 	  {
