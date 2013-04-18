@@ -49,10 +49,9 @@ XnSensorIO::~XnSensorIO()
 {
 }
 
-XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, XnBool bLeanInit)
+XnStatus XnSensorIO::OpenDevice(const XnChar* strPath)
 {
 	XnStatus nRetVal;
-	XnUSBDeviceSpeed DevSpeed;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Connecting to USB device...");
 

@@ -239,7 +239,7 @@ XnStatus XnSensor::InitSensor(const XnDeviceConfig* pDeviceConfig)
 	pDevicePrivateData->pSensor = this;
 
 	// open IO
-	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString, (XnBool)m_LeanInit.GetValue());
+	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// initialize
