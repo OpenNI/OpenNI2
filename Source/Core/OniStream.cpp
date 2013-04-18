@@ -597,12 +597,12 @@ void VideoStream::releaseAllFrames()
 	// change release method of current frames
 	for (xnl::List<OniFrameInternal*>::Iterator it = m_currentStreamFrames.Begin(); it != m_currentStreamFrames.End(); ++it)
 	{
-		(*it)->backToPoolFunc = NULL;
 		// don't return frame buffer to pool, instead just free it
 		if ((*it)->freeBufferFunc == releaseFrameBufferToPoolCallback)
 		{
 			(*it)->freeBufferFunc = freeFrameBufferMemoryCallback;
 		}
+
 		// mark that this frame does not belong to this stream anymore
 		(*it)->backToPoolFuncCookie = NULL;
 	}
