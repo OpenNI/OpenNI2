@@ -121,12 +121,6 @@ private:
 	// Pointer to last received frame.
 	OniFrame* m_pLastFrame;
 
-	// Current video mode.
-	OniVideoMode m_videoMode;
-
-	// Current map stride.
-	int m_stride;
-
 	// Handle to new data callback.
 	OniCallbackHandle m_newDataHandle;
 

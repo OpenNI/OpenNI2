@@ -33,9 +33,6 @@ namespace oni_file {
 PlayerStream::PlayerStream(PlayerSource* pSource) :
 	m_pSource(pSource), m_pLastFrame(NULL), m_newDataHandle(NULL), m_isStarted(false)
 {
-	m_videoMode.resolutionX = 0;
-	m_videoMode.resolutionY = 0;
-	m_stride = 0;
 }
 
 /// Destructor.
@@ -164,6 +161,37 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 		return;
 	}
 
+	// Get the video mode.
+	OniVideoMode videoMode;
+	int valueSize = sizeof(videoMode);
+	OniStatus rc = pStream->m_pSource->GetProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &valueSize);
+	if (rc != ONI_STATUS_OK)
+	{
+		XN_ASSERT(FALSE);
+		return;
+	}
+
+	// Get stride.
+	int stride;
+	valueSize = sizeof(stride);
+	rc = pStream->m_pSource->GetProperty(ONI_STREAM_PROPERTY_STRIDE, &stride, &valueSize);
+	if (rc != ONI_STATUS_OK)
+	{
+		XN_ASSERT(FALSE);
+		return;
+	}
+
+	// Set the cropping property.
+	OniCropping cropping;
+	cropping.enabled = FALSE;
+	int dataSize = sizeof(cropping);
+	rc = pStream->m_pSource->GetProperty(ONI_STREAM_PROPERTY_CROPPING, &cropping, &dataSize);
+	if (rc != ONI_STATUS_OK)
+	{
+		XN_ASSERT(FALSE);
+		return;
+	}
+
 	pStream->m_cs.Lock();
 
 	// Release last frame (if exists).
@@ -181,25 +209,19 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 
 	OniFrame* pFrame = pStream->m_pLastFrame;
 
-	// Set the cropping property.
-	OniCropping cropping;
-	cropping.enabled = FALSE;
-	int dataSize = sizeof(cropping);
-	pStream->m_pSource->GetProperty(ONI_STREAM_PROPERTY_CROPPING, &cropping, &dataSize);
-
 	// Fill the frame.
 	pFrame->frameIndex = newDataEventArgs.nFrameId;
 
-	pFrame->videoMode.pixelFormat = pStream->m_videoMode.pixelFormat;
-	pFrame->videoMode.resolutionX = pStream->m_videoMode.resolutionX;
-	pFrame->videoMode.resolutionY = pStream->m_videoMode.resolutionY;
-	pFrame->videoMode.fps = pStream->m_videoMode.fps;
+	pFrame->videoMode.pixelFormat = videoMode.pixelFormat;
+	pFrame->videoMode.resolutionX = videoMode.resolutionX;
+	pFrame->videoMode.resolutionY = videoMode.resolutionY;
+	pFrame->videoMode.fps = videoMode.fps;
 	if (!cropping.enabled)
 	{
 		// Set the full resolution, stride and origin.
-		pFrame->width = pStream->m_videoMode.resolutionX;
-		pFrame->height = pStream->m_videoMode.resolutionY;
-		pFrame->stride = pStream->m_stride;
+		pFrame->width = videoMode.resolutionX;
+		pFrame->height = videoMode.resolutionY;
+		pFrame->stride = stride;
 		pFrame->cropOriginX = 0;
 		pFrame->cropOriginY = 0;
 		pFrame->croppingEnabled = FALSE;
@@ -209,7 +231,7 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 		// Take resolution, and origin from cropping and calculate new stride.
 		pFrame->width = cropping.width;
 		pFrame->height = cropping.height;
-		pFrame->stride = (pStream->m_stride / pFrame->videoMode.resolutionX) * cropping.width;
+		pFrame->stride = (stride / pFrame->videoMode.resolutionX) * cropping.width;
 		pFrame->cropOriginX = cropping.originX;
 		pFrame->cropOriginY = cropping.originY;
 		pFrame->croppingEnabled = TRUE;
