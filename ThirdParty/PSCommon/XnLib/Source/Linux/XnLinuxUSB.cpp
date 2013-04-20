@@ -1399,17 +1399,13 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 					{
 						XnUChar* pBuffer = NULL;
 						XnUInt32 nTotalBytes = 0;
+						XnBool bCompletePacket;
 
 						// some packets may return empty or partial, aggregate as many consequent packets as possible, and then send them to processing
 						for (XnInt32 i = 0; i < pTransfer->num_iso_packets; ++i)
 						{
 							struct libusb_iso_packet_descriptor* pPacket = &pTransfer->iso_packet_desc[i];
-							
-							if (pPacket->status != LIBUSB_TRANSFER_COMPLETED && pPacket->status != LIBUSB_TRANSFER_ERROR) //Skip printing uninformative common errors
-							{
-								xnLogWarning(XN_MASK_USB, "Endpoint 0x%x, Buffer %d, packet %d Asynch transfer failed (status: %d)", pTransfer->endpoint, pBufferInfo->nBufferID, i, pPacket->status);
-							}
-							
+
 							// continue aggregating
 							if (pPacket->status == LIBUSB_TRANSFER_COMPLETED)
 							{
@@ -1417,11 +1413,23 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 								{
 									pBuffer = libusb_get_iso_packet_buffer_simple(pTransfer, i);
 								}
+
 								nTotalBytes += pPacket->actual_length;
+
+								bCompletePacket = TRUE;
 							}
-							
+							else
+							{
+								if (pPacket->status != LIBUSB_TRANSFER_ERROR) //Skip printing uninformative common errors
+								{
+									xnLogWarning(XN_MASK_USB, "Endpoint 0x%x, Buffer %d, packet %d Asynch transfer failed (status: %d)", pTransfer->endpoint, pBufferInfo->nBufferID, i, pPacket->status);
+								}
+
+								bCompletePacket = FALSE;
+							}
+
 							// stop condition for aggregating
-							if (pPacket->status != LIBUSB_TRANSFER_COMPLETED || // failed packet
+							if (!bCompletePacket || // failed packet
 								pPacket->actual_length != pPacket->length || // partial packet
 								i == pTransfer->num_iso_packets - 1) // last packet
 							{
