@@ -77,27 +77,6 @@ protected:
 		return m_nExpectedFrameSize;
 	}
 
-	inline OniDepthPixel* GetDepthOutputBuffer()
-	{
-		return (OniDepthPixel*)GetWriteBuffer()->GetUnsafeWritePointer();
-	}
-
-	inline XnUInt16* GetShiftsOutputBuffer()
-	{
-		return (XnUInt16*)(GetWriteBuffer()->GetUnsafeWritePointer() + GetExpectedSize());
-	}
-
-	inline XnBool CheckDepthBufferForOverflow(XnUInt32 nWriteSize)
-	{
-		// Check there is enough room for current depth pixels + the entire shift map
-		return CheckWriteBufferForOverflow(nWriteSize + GetExpectedSize());
-	}
-
-	inline XnUInt32 GetFreeSpaceInDepthBuffer()
-	{
-		return GetWriteBuffer()->GetFreeSpaceInBuffer() - GetExpectedSize();
-	}
-
 private:
 	void PadPixels(XnUInt32 nPixels);
 	XnUInt32 CalculateExpectedSize();

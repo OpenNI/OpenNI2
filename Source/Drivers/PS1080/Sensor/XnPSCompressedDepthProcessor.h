@@ -50,7 +50,7 @@ protected:
 	// Internal Functions
 	//---------------------------------------------------------------------------
 	XnStatus UncompressDepthPS(const XnUInt8* pInput, const XnUInt32 nInputSize,
-		XnUInt16* pDepthOutput, XnUInt16* pShiftOutput, XnUInt32* pnOutputSize,
+		XnUInt16* pDepthOutput, XnUInt32* pnOutputSize,
 		XnUInt32* pnActualRead, XnBool bLastPart);
 
 private:

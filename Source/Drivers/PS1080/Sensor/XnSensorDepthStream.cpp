@@ -877,19 +877,6 @@ XnStatus XnSensorDepthStream::SetCropping(const OniCropping* pCropping)
 	return SetCroppingImpl(pCropping, (XnCroppingMode)m_CroppingMode.GetValue());
 }
 
-XnStatus XnSensorDepthStream::CalcRequiredSize(XnUInt32* pnRequiredSize) const
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-	
-	nRetVal = XnDepthStream::CalcRequiredSize(pnRequiredSize);
-	XN_IS_STATUS_OK(nRetVal);
-
-	// we also store shifts
-	*pnRequiredSize *= 2;
-
-	return XN_STATUS_OK;
-}
-
 XnStatus XnSensorDepthStream::CropImpl(OniFrame* pFrame, const OniCropping* pCropping)
 {
 	XnStatus nRetVal = XN_STATUS_OK;

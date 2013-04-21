@@ -89,13 +89,12 @@ XnStatus XnPacked11DepthProcessor::Unpack11to16(const XnUInt8* pcInput, const Xn
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
 
 	// Check there is enough room for the depth pixels
-	if (!CheckDepthBufferForOverflow(nNeededOutput))
+	if (!CheckWriteBufferForOverflow(nNeededOutput))
 	{
 		return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
 	}
 
-	XnUInt16* pShiftOut = GetShiftsOutputBuffer();
-	XnUInt16* pnOutput = GetDepthOutputBuffer();
+	XnUInt16* pnOutput = (XnUInt16*)pWriteBuffer->GetUnsafeWritePointer();
 
 	XnUInt16 a0,a1,a2,a3,a4,a5,a6,a7;
 #ifdef XN_NEON
@@ -152,15 +151,6 @@ XnStatus XnPacked11DepthProcessor::Unpack11to16(const XnUInt8* pcInput, const Xn
 		// Store
 		vst1q_u16(pShiftOut, Q0);
 #else
-		pShiftOut[0] = (((a0) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a0) : 0);
-		pShiftOut[1] = (((a1) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a1) : 0);
-		pShiftOut[2] = (((a2) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a2) : 0);
-		pShiftOut[3] = (((a3) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a3) : 0);
-		pShiftOut[4] = (((a4) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a4) : 0);
-		pShiftOut[5] = (((a5) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a5) : 0);
-		pShiftOut[6] = (((a6) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a6) : 0);
-		pShiftOut[7] = (((a7) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (a7) : 0);
-
 		pnOutput[0] = GetOutput(a0);
 		pnOutput[1] = GetOutput(a1);
 		pnOutput[2] = GetOutput(a2);
@@ -174,7 +164,6 @@ XnStatus XnPacked11DepthProcessor::Unpack11to16(const XnUInt8* pcInput, const Xn
 
 		pcInput += XN_INPUT_ELEMENT_SIZE;
 		pnOutput += 8;
-		pShiftOut += 8;
 	}
 
 	*pnActualRead = (XnUInt32)(pcInput - pOrigInput);
