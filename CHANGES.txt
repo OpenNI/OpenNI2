@@ -3,7 +3,7 @@ Change Log:
 
 OpenNI 2.2.0:
   - Added getDepthColorSyncEnabled API
-  - Merge pull request #7: Driver path resolution based on the shared library location See https://github.com/OpenNI/OpenNI2/pull/7 for details (thanks Tomoto)
+  - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
   - Build: Rename Redist dir to Packaging
   - Build: Remove all warnings during build. Treat all warnings as errors.
   - Bug Fix: Failed to use after OpenCL was initialized
