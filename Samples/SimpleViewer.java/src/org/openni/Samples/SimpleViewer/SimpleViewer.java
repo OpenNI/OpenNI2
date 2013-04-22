@@ -81,7 +81,7 @@ public class SimpleViewer extends Component
                 frameData.rewind();
                 int pos = 0;
                 while(frameData.remaining() > 0) {
-                    short depth = frameData.getShort();
+                    int depth = (int)frameData.getShort() & 0xFFFF;
                     short pixel = (short)mHistogram[depth];
                     mImagePixels[pos] = 0xFF000000 | (pixel << 16) | (pixel << 8);
                     pos++;
