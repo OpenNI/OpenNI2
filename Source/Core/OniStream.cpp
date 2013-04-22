@@ -496,6 +496,12 @@ OniFrame* VideoStream::acquireFrame()
 	}
 
 	pResult->data = m_allocFrameBufferCallback(m_requiredFrameSize, m_frameBufferAllocatorCookie);
+	if (pResult->data == NULL)
+	{
+		m_frameManager.release(pResult);
+		return NULL;
+	}
+
 	pResult->dataSize = m_requiredFrameSize;
 	pResult->backToPoolFunc = frameBackToPoolCallback;
 	pResult->backToPoolFuncCookie = this;
@@ -622,8 +628,12 @@ void VideoStream::releaseAllFrames()
 void ONI_CALLBACK_TYPE VideoStream::frameBackToPoolCallback(OniFrameInternal* pFrame, void* pCookie)
 {
 	// release the data
-	pFrame->freeBufferFunc(pFrame->data, pFrame->freeBufferFuncCookie);
-	pFrame->data = NULL;
+	if (pFrame->data != NULL)
+	{
+		// this can happen if allocation of data failed
+		pFrame->freeBufferFunc(pFrame->data, pFrame->freeBufferFuncCookie);
+		pFrame->data = NULL;
+	}
 
 	if (pCookie != NULL)
 	{
