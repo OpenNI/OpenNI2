@@ -39,7 +39,9 @@ XnTecDebugProcessor::XnTecDebugProcessor(XnDevicePrivateData* pDevicePrivateData
 }
 
 XnTecDebugProcessor::~XnTecDebugProcessor()
-{}
+{
+	xnDumpFileClose(m_Dump);
+}
 
 void XnTecDebugProcessor::ProcessWholePacket(const XnSensorProtocolResponseHeader* /*pHeader*/, const XnUChar* pData)
 {

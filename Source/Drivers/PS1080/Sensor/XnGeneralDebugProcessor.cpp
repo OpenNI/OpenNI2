@@ -8,7 +8,7 @@ XnGeneralDebugProcessor::XnGeneralDebugProcessor(XnDevicePrivateData* pDevicePri
 
 XnGeneralDebugProcessor::~XnGeneralDebugProcessor()
 {
-
+	xnDumpFileClose(m_pDump);
 }
 
 void XnGeneralDebugProcessor::ProcessPacketChunk(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData, XnUInt32 nDataOffset, XnUInt32 nDataSize)

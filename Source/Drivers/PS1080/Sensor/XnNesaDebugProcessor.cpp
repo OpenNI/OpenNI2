@@ -39,7 +39,9 @@ XnNesaDebugProcessor::XnNesaDebugProcessor(XnDevicePrivateData* pDevicePrivateDa
 }
 
 XnNesaDebugProcessor::~XnNesaDebugProcessor()
-{}
+{
+	xnDumpFileClose(m_Dump);
+}
 
 void XnNesaDebugProcessor::ProcessWholePacket(const XnSensorProtocolResponseHeader* /*pHeader*/, const XnUChar* pData)
 {
