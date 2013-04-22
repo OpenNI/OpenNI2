@@ -118,8 +118,8 @@ XnStatus XnDeviceSensorOpenInputThreads(XnDevicePrivateData* pDevicePrivateData)
 	}
 
 	// number of buffers
-	pDevicePrivateData->pSpecificDepthUsb->nNumberOfBuffers = XN_SENSOR_USB_IMAGE_BUFFERS;
-	pDevicePrivateData->pSpecificDepthUsb->nNumberOfBuffers = XN_SENSOR_USB_MISC_BUFFERS;
+	pDevicePrivateData->pSpecificImageUsb->nNumberOfBuffers = XN_SENSOR_USB_IMAGE_BUFFERS;
+	pDevicePrivateData->pSpecificMiscUsb->nNumberOfBuffers = XN_SENSOR_USB_MISC_BUFFERS;
 	if (usbInterface == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH)
 	{
 		pDevicePrivateData->pSpecificDepthUsb->nNumberOfBuffers = XN_SENSOR_USB_DEPTH_BUFFERS_LOW_ISO;
