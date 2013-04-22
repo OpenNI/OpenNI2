@@ -400,10 +400,10 @@ XnStatus XnSensorImageStream::CloseStreamImpl()
 	nRetVal = GetFirmwareParams()->m_Stream0Mode.SetValue(XN_VIDEO_STREAM_OFF);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = XnImageStream::Close();
+	nRetVal = SetActualRead(FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = SetActualRead(FALSE);
+	nRetVal = XnImageStream::Close();
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
