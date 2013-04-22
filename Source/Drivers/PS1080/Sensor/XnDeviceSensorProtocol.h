@@ -114,6 +114,7 @@ typedef struct XnSpecificUsbDevice
 	XnUsbConnection* pUsbConnection;
 	XnUInt32 nIgnoreBytes;
 	XnUInt32 nChunkReadBytes;
+	XnUInt32 nNumberOfBuffers;
 	XnSpecificUsbDeviceState CurrState;
 	XnUInt32 nTimeout;
 } XnSpecificUsbDevice;

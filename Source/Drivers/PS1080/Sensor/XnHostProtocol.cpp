@@ -168,27 +168,15 @@ XnStatus XnHostProtocolUpdateSupportedImageModes(XnDevicePrivateData* pDevicePri
 	}
 	else
 	{
-		if (pDevicePrivateData->pSensor->GetCurrentUsbInterface() == XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS)
-		{
-			nRetVal = pDevicePrivateData->FWInfo.imageModes.SetData(pDevicePrivateData->FWInfo._imageBulkModes.GetData(), pDevicePrivateData->FWInfo._imageBulkModes.GetSize());
-			XN_IS_STATUS_OK(nRetVal);
-		}
-		else if (pDevicePrivateData->pSensor->GetCurrentUsbInterface() == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS)
-		{
-			nRetVal = pDevicePrivateData->FWInfo.imageModes.SetData(pDevicePrivateData->FWInfo._imageIsoModes.GetData(), pDevicePrivateData->FWInfo._imageIsoModes.GetSize());
-			XN_IS_STATUS_OK(nRetVal);
-		}
-		else
-		{
-			XN_ASSERT(FALSE);
-			return XN_STATUS_ERROR;
-		}
+		xnLogError(XN_MASK_DEVICE_SENSOR, "Device does not support getting presets!");
+		XN_ASSERT(FALSE);
+		return XN_STATUS_ERROR;
 	}
 
 	return (XN_STATUS_OK);
 }
 
-XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb)
+XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb, XnBool bGuessed)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -263,6 +251,8 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.bImageSupported = TRUE;
 	pDevicePrivateData->FWInfo.bIncreasedFpsCropSupported = FALSE;
 	pDevicePrivateData->FWInfo.bHasFilesystemLock = FALSE;
+
+	pDevicePrivateData->FWInfo.nISOLowDepthAlternativeInterface = (XnUInt8)(-1);
 
 	// depth cmos modes
 	pDevicePrivateData->FWInfo.depthModes.Clear();
@@ -653,13 +643,22 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = TRUE;
 	}
 
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 16) >= 0)
+	{
+		pDevicePrivateData->FWInfo.nISOLowDepthAlternativeInterface = 2;
+	}
+
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 9, 0) >= 0)
 	{
 		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Sensor version %d.%d.%x is newer than latest known. Trying to use 5.8 protocol...", nMajor, nMinor, nBuild);
 	}
 
-	nRetVal = XnHostProtocolUpdateSupportedImageModes(pDevicePrivateData);
-	XN_IS_STATUS_OK(nRetVal);
+	// If FW is already known, update image modes
+	if (!bGuessed)
+	{
+		nRetVal = XnHostProtocolUpdateSupportedImageModes(pDevicePrivateData);
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	pDevicePrivateData->FWInfo.nCurrMode = XN_MODE_PS;
 	pDevicePrivateData->FWInfo.nFWVer = GetFWVersion(nMajor, nMinor, nBuild);

@@ -107,6 +107,7 @@ public:
 
 	XnUInt8 nISOAlternativeInterface;
 	XnUInt8 nBulkAlternativeInterface;
+	XnUInt8 nISOLowDepthAlternativeInterface;
 
 	XnBool bGetImageCmosTypeSupported;
 	XnBool bImageSupported;

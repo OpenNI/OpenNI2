@@ -333,7 +333,7 @@ XnStatus XnSensorImageStream::SetActualRead(XnBool bRead)
 		{
 			xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB image read thread...");
 			XnSpecificUsbDevice* pUSB = GetHelper()->GetPrivateData()->pSpecificImageUsb;
-			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, XN_SENSOR_USB_IMAGE_BUFFERS, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
 			XN_IS_STATUS_OK(nRetVal);
 		}
 		else

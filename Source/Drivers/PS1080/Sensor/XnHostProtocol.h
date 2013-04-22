@@ -308,7 +308,7 @@ typedef struct XnWavelengthCorrectionDebugPacket
 
 // All implemented protocol commands
 // Init
-XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb);
+XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb, XnBool bGuessed);
 
 XnStatus XnHostProtocolKeepAlive		(XnDevicePrivateData* pDevicePrivateData);
 XnStatus XnHostProtocolGetVersion		(const XnDevicePrivateData* pDevicePrivateData, XnVersions& Version);

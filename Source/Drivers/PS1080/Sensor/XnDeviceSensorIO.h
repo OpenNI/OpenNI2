@@ -44,8 +44,6 @@ typedef struct XnUsbConnection
 	XnUInt8* pUSBBuffer;
 	XnUInt32 nUSBBufferReadOffset;
 	XnUInt32 nUSBBufferWriteOffset;
-
-	XnUInt32 bIsISO;
 	XnUInt32 nMaxPacketSize;
 } XnUsbConnection;
 
@@ -91,6 +89,8 @@ public:
 	const XnChar* GetDevicePath();
 
 private:
+	XnStatus UpdateCurrentInterface(const XnFirmwareInfo& fwInfo);
+
 	XN_SENSOR_HANDLE* m_pSensorHandle;
 	XnBool m_bMiscSupported;
 	XnSensorUsbInterface m_interface;

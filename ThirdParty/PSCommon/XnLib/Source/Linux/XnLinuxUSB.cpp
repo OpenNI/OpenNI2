@@ -35,6 +35,7 @@
 #include <XnLog.h>
 #include <XnOSCpp.h>
 #include <XnList.h>
+#include <linux/usb/ch9.h>
 
 #if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
 #include <libudev.h>
@@ -859,7 +860,19 @@ XN_C_API XnStatus xnUSBSetInterface(XN_USB_DEV_HANDLE pDevHandle, XnUInt8 nInter
 
 XN_C_API XnStatus xnUSBGetInterface(XN_USB_DEV_HANDLE pDevHandle, XnUInt8* pnInterface, XnUInt8* pnAltInterface)
 {
-	return XN_STATUS_OS_UNSUPPORTED_FUNCTION;
+	XnUInt8 nAltInterface;
+	int rc = libusb_control_transfer(pDevHandle->hDevice, 
+		LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_STANDARD | LIBUSB_RECIPIENT_INTERFACE,
+		USB_REQ_GET_INTERFACE, 0, 0, &nAltInterface, 1, 1000);
+	if (rc != 1)
+	{
+		return (XN_STATUS_USB_GET_INTERFACE_FAILED);
+	}
+
+	*pnInterface = 0;
+	*pnAltInterface = nAltInterface;
+
+	return (XN_STATUS_OK);
 }
 
 XN_C_API XnStatus xnUSBOpenEndPoint(XN_USB_DEV_HANDLE pDevHandle, XnUInt16 nEndPointID, XnUSBEndPointType nEPType, XnUSBDirectionType nDirType, XN_USB_EP_HANDLE* pEPHandlePtr)

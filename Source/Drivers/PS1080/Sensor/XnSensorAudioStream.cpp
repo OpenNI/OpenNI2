@@ -171,7 +171,7 @@ XnStatus XnSensorAudioStream::SetActualRead(XnBool bRead)
 		{
 			xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB audio read thread...");
 			XnSpecificUsbDevice* pUSB = GetHelper()->GetPrivateData()->pSpecificMiscUsb;
-			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, XN_SENSOR_USB_MISC_BUFFERS, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
 			XN_IS_STATUS_OK(nRetVal);
 		}
 		else
