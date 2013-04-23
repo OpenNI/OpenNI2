@@ -23,9 +23,6 @@
 
 #include <OniCTypes.h>
 
-#define PS_USB_VENDOR_ID        0x1D27
-#define PS_NAME					"PrimeSense"
-
 /**
 * Additional properties for PrimeSense devices
 *
