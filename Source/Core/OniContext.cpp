@@ -203,11 +203,11 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	nRetVal = xnOSGetFileList(cpSearchString, NULL, acsFileList, nFileCount, &nFileCount);
 #else
 	// Android
-	nFileCount = 2;
+	nFileCount = 3;
 	acsFileList = XN_NEW_ARR(FileName, nFileCount);
 	strcpy(acsFileList[0], "libPS1080.so");
 	strcpy(acsFileList[1], "libOniFile.so");
-	strcpy(acsFileList[1], "libPSLink.so");
+	strcpy(acsFileList[2], "libPSLink.so");
 #endif
 
 	// Save directory
