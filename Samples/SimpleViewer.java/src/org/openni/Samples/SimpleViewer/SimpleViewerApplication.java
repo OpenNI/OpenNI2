@@ -64,7 +64,7 @@ public class SimpleViewerApplication implements ItemListener {
         mComboBoxVideoModes = new JComboBox();
         
         mComboBoxStreams.addItem("<Stream Type>");
-        mDeviceSensors = new ArrayList<>();
+        mDeviceSensors = new ArrayList<SensorType>();
         
         if (device.getSensorInfo(SensorType.COLOR) != null) {
             mDeviceSensors.add(SensorType.COLOR);
@@ -118,7 +118,7 @@ public class SimpleViewerApplication implements ItemListener {
 
         mVideoStream = VideoStream.create(mDevice, type);
         List<VideoMode> supportedModes = mVideoStream.getSensorInfo().getSupportedVideoModes();
-        mSupportedModes = new ArrayList<>();
+        mSupportedModes = new ArrayList<VideoMode>();
 
         // now only keeo the ones that our application supports
         for (VideoMode mode : supportedModes) {
