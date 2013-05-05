@@ -2,32 +2,43 @@ Change Log:
 -----------
 
 OpenNI 2.2.0:
-  - Added getDepthColorSyncEnabled API
-  - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
-  - Build: Rename Redist dir to Packaging
-  - Build: Remove all warnings during build. Treat all warnings as errors.
-  - Bug Fix: Failed to use after OpenCL was initialized
-  - Rewrote the android make files to proper standards
-  - Fix Linux identification (apparently -std=c1x defines only __linux and not linux)
-  - PS1080 Bug Fix: handle file system lock when uploading only in supporting firmwares
-  - PS1080: Add NESA unlimited to BIST
-  - PS1080: improved hardware name detection
-  - PS1080: IR stream now also supports RGB888
-  - Bug Fix: Visual Sutdio 2008 wasn't supported
+  - Added getDepthColorSyncEnabled() API
   - Add a typedef: OniGrayscale8Pixel
-  - Make sure device is still open when closing a stream that uses it.
-  - Add support for Capri devices
+  - invoke() method signature was updated - data is no longer const
   - New Java Wrappers
   - New Java sample: SimpleViewer.java
-  - Support WIX 3.6 and up
-  - Kinect: wrong error code returned when trying to change video mode while streaming
-  - invoke() method signature was updated - data is no longer const
+  - Add support for Capri devkits
+  - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
+  - Completely re-wrote frame buffers management. 
+  - Added API for replacing frame buffer allocator.
+  - Linux: implement connect/disconnect events
+  - PS1080: IR stream now also supports RGB888
+  - PS1080: improved hardware name detection
+  - PS1080: Add NESA unlimited to BIST
   - PrimeSense: move common properties (PS1080 and Capri) to PrimeSense.h
   - PS1080: add new property for turning on hardware frame sync, with no OpenNI checks
-  - New pixel format: YUYV. PS1080 now supports it (on newer firmwares)
+  - New pixel format: YUYV. PS1080 now supports it (on newer firmwares), and so does NiViewer.
   - PS1080: add lots of debug commands
-  - ReleaseVersion script: don't fail if output file exists (overwrite it)
   - PS1080: add new file type (vendor data)
+  - PS1080: added support for the second alternative interface (low-bandwidth)
+  - Bug Fixes:
+    - Bug Fix: reading frames / waiting on streams did not work well from multiple threads
+    - Bug Fix: Failed to use after OpenCL was initialized
+    - Bug Fix: Visual Sutdio 2008 wasn't supported
+	- PS1080 Linux did not support the RD1.09 device
+	- PS1080 Bug Fix: Physical device name property could not be read
+    - Make sure device is still open when closing a stream that uses it.
+    - PS1080 Bug Fix: handle file system lock when uploading only in supporting firmwares
+	- PS1080 Bug Fix: LED API wasn't working
+	- PS1080 Bug Fix: debug dumps were not closed properly
+    - Kinect Bug Fix: wrong error code returned when trying to change video mode while streaming
+  - Build:
+    - Rename Redist dir to Packaging
+    - Remove all warnings during build. Treat all warnings as errors.
+    - Rewrote the android make files to proper standards
+    - Fix Linux identification (apparently -std=c1x defines only __linux and not linux)
+    - Support WIX 3.6 and up
+    - ReleaseVersion script won't fail if output file exists (overwrite it)
 
 OpenNI 2.1.0:
   - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.

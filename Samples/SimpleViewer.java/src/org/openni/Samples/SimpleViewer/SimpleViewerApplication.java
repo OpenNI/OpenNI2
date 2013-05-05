@@ -1,10 +1,6 @@
 package org.openni.Samples.SimpleViewer;
 
 import org.openni.*;
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -16,7 +12,6 @@ import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JOptionPane;
 
@@ -59,6 +54,7 @@ public class SimpleViewerApplication implements ItemListener {
         
         // register to closing event
         mFrame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 mShouldRun = false;
             }
@@ -68,7 +64,7 @@ public class SimpleViewerApplication implements ItemListener {
         mComboBoxVideoModes = new JComboBox();
         
         mComboBoxStreams.addItem("<Stream Type>");
-        mDeviceSensors = new ArrayList<SensorType>();
+        mDeviceSensors = new ArrayList<>();
         
         if (device.getSensorInfo(SensorType.COLOR) != null) {
             mDeviceSensors.add(SensorType.COLOR);
@@ -92,6 +88,7 @@ public class SimpleViewerApplication implements ItemListener {
         mFrame.setVisible(true);
     }
 
+    @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.DESELECTED)
             return;
@@ -121,7 +118,7 @@ public class SimpleViewerApplication implements ItemListener {
 
         mVideoStream = VideoStream.create(mDevice, type);
         List<VideoMode> supportedModes = mVideoStream.getSensorInfo().getSupportedVideoModes();
-        mSupportedModes = new ArrayList<VideoMode>();
+        mSupportedModes = new ArrayList<>();
 
         // now only keeo the ones that our application supports
         for (VideoMode mode : supportedModes) {
@@ -193,7 +190,7 @@ public class SimpleViewerApplication implements ItemListener {
         OpenNI.initialize();
         
         List<DeviceInfo> devicesInfo = OpenNI.enumerateDevices();
-        if (devicesInfo.size() == 0) {
+        if (devicesInfo.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No device is connected", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }

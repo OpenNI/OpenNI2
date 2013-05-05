@@ -431,6 +431,67 @@ ONI_C_API void oniWriteLogEntry(const char* mask, int severity, const char* mess
 	xnLogWrite(mask, (XnLogSeverity)severity, "External", 0, message);
 }
 
+ONI_C_API OniStatus oniSetLogOutputFolder(const char* strOutputFolder)
+{
+	XnStatus rc = xnLogSetOutputFolder((XnChar*)strOutputFolder);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+	
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniGetLogFileName(char* strFileName, int nBufferSize)
+{
+	XnStatus rc = xnLogGetFileName((XnChar*)strFileName, (XnUInt32)nBufferSize);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogMinSeverity(int nMinSeverity)
+{
+	XnStatus rc = xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nMinSeverity);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogConsoleOutput(OniBool bConsoleOutput)
+{
+	XnStatus rc = xnLogSetConsoleOutput(bConsoleOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogFileOutput(OniBool bFileOutput)
+{
+	XnStatus rc = xnLogSetFileOutput(bFileOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+ONI_C_API OniStatus oniSetLogAndroidOutput(OniBool bAndroidOutput)
+{
+	XnStatus rc = xnLogSetAndroidOutput((XnBool)bAndroidOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+#endif
 ONI_C_API OniStatus oniCoordinateConverterDepthToWorld(OniStreamHandle depthStream, float depthX, float depthY, float depthZ, float* pWorldX, float* pWorldY, float* pWorldZ)
 {
 	g_Context.clearErrorLogger();

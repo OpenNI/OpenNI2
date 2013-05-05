@@ -2238,6 +2238,90 @@ public:
 		oniUnregisterDeviceCallbacks(pListener->m_deviceStateChangedCallbacksHandle);
 		pListener->m_deviceStateChangedCallbacksHandle = NULL;
 	}
+
+	/** 
+	 * Change the log output folder
+	
+	 * @param	const char * strLogOutputFolder	[in]	log required folder
+	 *
+	 * @retval ONI_STATUS_OK Upon successful completion.
+	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	static OniStatus setLogOutputFolder(const char *strLogOutputFolder)
+	{
+		return oniSetLogOutputFolder(strLogOutputFolder);
+	}
+
+	/** 
+	 * Get current log file name
+	
+	 * @param	char * strFileName	[out]	returned file name buffer
+	 * @param	int	nBufferSize	[in]	Buffer size
+	 *
+	 * @retval ONI_STATUS_OK Upon successful completion.
+	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	static OniStatus getLogFileName(char *strFileName, int nBufferSize)
+	{
+		return oniGetLogFileName(strFileName, nBufferSize);
+	}
+
+	/** 
+	 * Set minimum severity for log produce
+	
+	 * @param	const char * strMask	[in]	Logger name
+	 * @param	int nMinSeverity	[in]	Logger severity
+	 *
+	 * @retval ONI_STATUS_OK Upon successful completion.
+	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	static OniStatus  setLogMinSeverity(int nMinSeverity)
+	{
+		return oniSetLogMinSeverity(nMinSeverity);
+	}
+	
+	/** 
+	* Configures if log entries will be printed to console.
+
+	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to console, FALSE otherwise.
+	*
+	* @retval ONI_STATUS_OK Upon successful completion.
+	* @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	static OniStatus setLogConsoleOutput(OniBool bConsoleOutput)
+	{
+		return oniSetLogConsoleOutput(bConsoleOutput);
+	}
+
+	/** 
+	* Configures if log entries will be printed to file.
+
+	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to file, FALSE otherwise.
+	*
+	* @retval ONI_STATUS_OK Upon successful completion.
+	* @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	static OniStatus setLogFileOutput(OniBool bFileOutput)
+	{
+		return oniSetLogFileOutput(bFileOutput);
+	}
+
+	#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+	/** 
+	 * Configures if log entries will be printed to the Android log.
+
+	 * @param	OniBool bAndroidOutput bAndroidOutput	[in]	TRUE to print log entries to the Android log, FALSE otherwise.
+	 *
+	 * @retval ONI_STATUS_OK Upon successful completion.
+	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 */
+	
+	static OniStatus setLogAndroidOutput(OniBool bAndroidOutput)
+	{
+		return oniSetLogAndroidOutput(bAndroidOutput);
+	}
+	#endif
+	
 private:
 	OpenNI()
 	{

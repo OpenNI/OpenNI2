@@ -99,6 +99,24 @@ OniStatus Context::initialize()
 		// First, we should process the log related configuration as early as possible.
 
 		XnInt32 nValue;
+		XnChar strLogPath[XN_FILE_MAX_PATH] = {0};
+
+		//Test if log redirection is needed 
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Log", "LogPath", strLogPath, XN_FILE_MAX_PATH);
+		if (rc == XN_STATUS_OK)
+		{
+			rc = xnLogSetOutputFolder(strLogPath);
+
+			if (rc != XN_STATUS_OK)
+			{
+				xnLogWarning(XN_LOG_MASK_ALL, xnGetStatusString(rc));
+			}
+			else
+			{
+				xnLogVerbose(XN_LOG_MASK_ALL, "Log directory redirected to: %s", strLogPath);
+			}
+		}
+
 		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "Verbosity", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
@@ -110,6 +128,7 @@ OniStatus Context::initialize()
 		{
 			xnLogSetConsoleOutput(nValue == 1);
 		}
+		
 		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "LogToFile", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
@@ -129,6 +148,8 @@ OniStatus Context::initialize()
 		{
 			repositoryOverridden = TRUE;
 		}
+
+
 
 		xnLogVerbose(XN_LOG_MASK_ALL, "Configuration has been read from '%s'", strOniConfigurationFile);
 	}

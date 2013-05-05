@@ -174,6 +174,7 @@ public class OpenNI {
     int i = 0;
     while (itr.hasNext()) {
       handles[i] = ((VideoStream) itr.next()).getHandle();
+      i++;
     }
     boolean result = NativeMethods.oniWaitForAnyStream(handles, readyId, timeout);
     if (result)

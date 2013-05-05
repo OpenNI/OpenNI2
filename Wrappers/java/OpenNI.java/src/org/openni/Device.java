@@ -48,6 +48,11 @@ public class Device {
   public static Device open(String uri) {
     Device device = new Device();
     NativeMethods.checkReturnStatus(NativeMethods.oniDeviceOpen(uri, device));
+   	if (device.isFile())
+	{
+		device.mPlaybackControl = new PlaybackControl(device);
+	}
+
     return device;
   }
 
@@ -60,6 +65,11 @@ public class Device {
   public static Device open() {
     Device device = new Device();
     NativeMethods.checkReturnStatus(NativeMethods.oniDeviceOpen(device));
+   	if (device.isFile())
+	{
+		device.mPlaybackControl = new PlaybackControl(device);
+	}
+
     return device;
   }
 
@@ -70,6 +80,8 @@ public class Device {
    */
   public void close() {
     NativeMethods.checkReturnStatus(NativeMethods.oniDeviceClose(getHandle()));
+    mDeviceHandle = 0;
+    mPlaybackControl = null;
   }
 
   /**
@@ -125,7 +137,7 @@ public class Device {
    * @return null if this device is not a file device.
    */
   public PlaybackControl getPlaybackControl() {
-    return new PlaybackControl(this);
+    return mPlaybackControl;
   }
 
   /**
@@ -202,4 +214,5 @@ public class Device {
   }
 
   private long mDeviceHandle;
+  private PlaybackControl mPlaybackControl;
 }

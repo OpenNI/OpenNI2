@@ -347,19 +347,15 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 	{
 	case ONI_DEVICE_PROPERTY_FIRMWARE_VERSION:
 		{
-			EXACT_PROP_SIZE_DO(*pDataSize, OniVersion)
+			XnDetailedVersion versions = m_pSensor->GetFWVersion();
+			XnUInt32 nCharsWritten = 0;
+			XnStatus rc = xnOSStrFormat((XnChar*)data, *pDataSize, &nCharsWritten, "%d.%d.%d.%d-%s", versions.m_nMajor, versions.m_nMinor, versions.m_nMaintenance, versions.m_nBuild, versions.m_strModifier);
+			if (rc != XN_STATUS_OK)
 			{
-				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniVersion));
-				XN_ASSERT(FALSE);
+				m_driverServices.errorLoggerAppend("Couldn't get firmware version: %s\n", xnGetStatusString(rc));
 				return ONI_STATUS_BAD_PARAMETER;
 			}
-			OniVersion* version = (OniVersion*)data;
-			XnDetailedVersion xnVersion = m_pSensor->GetFWVersion();
-			
-			version->major =       xnVersion.m_nMajor;
-			version->minor =       xnVersion.m_nMinor;
-			version->maintenance = xnVersion.m_nMaintenance;
-			version->build =       xnVersion.m_nBuild;
+			*pDataSize = nCharsWritten+1;
 			break;
 		}
 

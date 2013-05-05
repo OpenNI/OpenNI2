@@ -177,5 +177,9 @@ else:
     print "Unknown OS"
     sys.exit(2)
     
+# also copy Release Notes and CHANGES documents
+shutil.copy('../ReleaseNotes.txt', finalDir)
+shutil.copy('../CHANGES.txt', finalDir)
+    
 print "Installer can be found under: " + finalDir
 print "Done"

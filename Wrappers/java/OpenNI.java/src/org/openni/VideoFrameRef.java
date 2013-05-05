@@ -8,12 +8,18 @@ import java.nio.ByteBuffer;
  * or depth video, along with associated meta data.
  * 
  * An object of type {@link VideoFrameRef} does not actually hold the data of the frame, but only a
- * reference to it. The reference can be released by destroying the {@link VideoFrameRef} object, or
- * by calling the {@link #release()} method. The actual data of the frame is freed when the last
- * reference to it is released.
+ * reference to it. OpenNI uses a ref-count to decide when the data buffer can be freed.
+ * Once the frame is no longer needed, it can be released by calling the {@link #release()} method.
+ * Although the finalization process of the garbage collector also releases the reference, 
+ * it is preferable to manually release it by calling this method rather than to 
+ * rely on a finalization process which may not run to completion for a long period of time.
  * 
  * The usual way to obtain {@link VideoFrameRef} objects is by a call to
- * {@link org.openni.VideoStream#readFrame()}.
+ * {@link org.openni.VideoStream#readFrame()}. Please note that the returned frame
+ * holds native memory. Although the finalization process of the garbage collector 
+ * also disposes of the same system resources, it is preferable to manually free 
+ * the associated resources by calling this method rather than to rely on a finalization 
+ * process which may not run to completion for a long period of time.
  * 
  * All data references by a {@link VideoFrameRef} is stored as a primitive array of pixels. Each
  * pixel will be of a type according to the configured pixel format (see {@link VideoMode}).
@@ -142,11 +148,24 @@ public class VideoFrameRef {
    * Release the reference to the frame. Once this method is called, the object becomes invalid, and
    * no method should be called other than the assignment operator, or passing this object to a
    * {@link VideoStream}::readFrame() call.
+   * 
+   * Although the finalization process of the garbage collector also releases the reference, 
+   * it is preferable to manually release it by calling this method rather than to 
+   * rely on a finalization process which may not run to completion for a long period of time.
    */
   public void release() {
-    NativeMethods.oniFrameRelease(mFrameHandle);
+    if (mFrameHandle != 0) {
+      NativeMethods.oniFrameRelease(mFrameHandle);
+      mFrameHandle = 0;
+    }
   }
   
+  @Override
+  protected void finalize() throws Throwable {
+    release();
+    super.finalize();
+  }
+    
   private VideoFrameRef(long handle) { 
     mFrameHandle = handle;
   }

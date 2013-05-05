@@ -189,4 +189,68 @@ ONI_C_API OniStatus oniCoordinateConverterWorldToDepth(OniStreamHandle depthStre
 
 ONI_C_API OniStatus oniCoordinateConverterDepthToColor(OniStreamHandle depthStream, OniStreamHandle colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
+/******************************************** Log APIs */
+
+/** 
+ * Change the log output folder
+
+ * @param const char * strOutputFolder	[in]	path to the desirebale folder
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogOutputFolder(const char* strOutputFolder);
+
+/** 
+ * Get the current log file name
+
+ * @param	char * strFileName	[out]	hold the returned file name
+ * @param	int nBufferSize	[in]	size of strFileName
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniGetLogFileName(char* strFileName, int nBufferSize);
+
+/** 
+ * Set the Minimum severity for log produce 
+
+ * @param	const char * strMask	[in]	Name of the logger
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogMinSeverity(int nMinSeverity);
+
+/** 
+ * Configures if log entries will be printed to console.
+
+ * @param	OniBool bConsoleOutput	[in]	TRUE to print log entries to console, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogConsoleOutput(OniBool bConsoleOutput);
+
+/** 
+ * Configures if log entries will be printed to a log file.
+
+ * @param	OniBool bFileOutput	[in]	TRUE to print log entries to the file, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogFileOutput(OniBool bFileOutput);
+
+#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+/** 
+ * Configures if log entries will be printed to the Android log.
+
+ * @param	OniBool bAndroidOutput	[in]	TRUE to print log entries to the Android log, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogAndroidOutput(OniBool bAndroidOutput);
+#endif
 #endif // _ONI_C_API_H_
