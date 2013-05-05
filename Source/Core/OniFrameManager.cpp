@@ -14,7 +14,7 @@ FrameManager::~FrameManager()
 OniFrameInternal* FrameManager::acquireFrame()
 {
 	OniFrameInternal* pFrame = m_frames.Acquire();
-    xnOSMemSet(pFrame, 0, sizeof(OniFrameInternal);
+    xnOSMemSet(pFrame, 0, sizeof(OniFrameInternal));
 	pFrame->refCount = 1;
 	return pFrame;
 }
