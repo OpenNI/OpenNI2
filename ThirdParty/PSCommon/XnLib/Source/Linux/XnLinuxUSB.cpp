@@ -1376,14 +1376,14 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 					// If we get LIBUSB_ERROR_NOT_FOUND it means that the transfer was already cancaled/completed which is a very common thing during normal shutdown so there's no need to print it.
 					if (rc != LIBUSB_ERROR_NOT_FOUND)
 					{
-                        if (rc == LIBUSB_ERROR_NO_DEVICE)
-                        {
-                            goto disconnect;
-                        }
-                        else
-                        {
-                            xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
-                        }
+						if (rc == LIBUSB_ERROR_NO_DEVICE)
+						{
+							goto disconnect;
+						}
+						else
+						{
+							xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
+						}
 					}
 				}
 
