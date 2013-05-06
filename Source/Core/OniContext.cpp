@@ -26,6 +26,8 @@
 static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
 static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
 
+#define XN_MASK_ONI_CONTEXT "OniContext"
+
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 OniBool Context::s_valid = FALSE;
@@ -51,7 +53,7 @@ OniStatus Context::initialize()
 	m_initializationCounter++;
 	if (m_initializationCounter > 1)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Initialize: Already initialized");
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Initialize: Already initialized");
 		return ONI_STATUS_OK;
 	}
 
@@ -106,14 +108,13 @@ OniStatus Context::initialize()
 		if (rc == XN_STATUS_OK)
 		{
 			rc = xnLogSetOutputFolder(strLogPath);
-
 			if (rc != XN_STATUS_OK)
 			{
-				xnLogWarning(XN_LOG_MASK_ALL, xnGetStatusString(rc));
+				xnLogWarning(XN_MASK_ONI_CONTEXT, "Failed to set log output folder: %s", xnGetStatusString(rc));
 			}
 			else
 			{
-				xnLogVerbose(XN_LOG_MASK_ALL, "Log directory redirected to: %s", strLogPath);
+				xnLogVerbose(XN_MASK_ONI_CONTEXT, "Log directory redirected to: %s", strLogPath);
 			}
 		}
 
@@ -140,7 +141,7 @@ OniStatus Context::initialize()
 		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
 		if (rc != XN_STATUS_OK)
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "No override device in configuration file");
 		}
 
 		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
@@ -151,14 +152,14 @@ OniStatus Context::initialize()
 
 
 
-		xnLogVerbose(XN_LOG_MASK_ALL, "Configuration has been read from '%s'", strOniConfigurationFile);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Configuration has been read from '%s'", strOniConfigurationFile);
 	}
 	else
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", strOniConfigurationFile);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't find configuration file '%s'", strOniConfigurationFile);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "OpenNI %s", ONI_VERSION_STRING);
 
 	// Resolve the drive path based on the module's directory.
 	XnChar strDriverPath[XN_FILE_MAX_PATH];
@@ -166,7 +167,7 @@ OniStatus Context::initialize()
 
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, strOniConfigurationFile);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, strOniConfigurationFile);
 		rc = xnOSAppendFilePath(strDriverPath, repositoryFromINI, XN_FILE_MAX_PATH);
 	}
 	else
@@ -180,7 +181,7 @@ OniStatus Context::initialize()
 		return OniStatusFromXnStatus(rc);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", strDriverPath);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Using '%s' as driver path", strDriverPath);
 	rc = loadLibraries(strDriverPath);
 
 	if (rc == XN_STATUS_OK)
@@ -203,7 +204,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 #if (ONI_PLATFORM != ONI_PLATFORM_ANDROID_ARM)
 	XnChar cpSearchString[XN_FILE_MAX_PATH] = "";
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Looking for drivers in drivers repository '%s'", directoryName);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Looking for drivers in drivers repository '%s'", directoryName);
 
 	// Build the search pattern string
 	XN_VALIDATE_STR_APPEND(cpSearchString, directoryName, XN_FILE_MAX_PATH, nRetVal);
@@ -215,7 +216,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	nRetVal = xnOSCountFiles(cpSearchString, &nFileCount);
 	if (nRetVal != XN_STATUS_OK || nFileCount == 0)
 	{
-		xnLogError(XN_LOG_MASK_ALL, "Found no drivers matching '%s'", cpSearchString);
+		xnLogError(XN_MASK_ONI_CONTEXT, "Found no drivers matching '%s'", cpSearchString);
 		m_errorLogger.Append("Found no files matching '%s'", cpSearchString);
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
@@ -242,7 +243,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 		DeviceDriver* pDeviceDriver = XN_NEW(DeviceDriver, acsFileList[i], m_frameManager, m_errorLogger);
 		if (pDeviceDriver == NULL || !pDeviceDriver->isValid())
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't use file '%s' as a device driver", acsFileList[i]);
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't use file '%s' as a device driver", acsFileList[i]);
 			m_errorLogger.Append("Couldn't understand file '%s' as a device driver", acsFileList[i]);
 			XN_DELETE(pDeviceDriver);
 			continue;
@@ -253,7 +254,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 		pDeviceDriver->registerDeviceStateChangedCallback(deviceDriver_DeviceStateChanged, this, dummy);
 		if (!pDeviceDriver->initialize())
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't use file '%s' as a device driver", acsFileList[i]);
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't use file '%s' as a device driver", acsFileList[i]);
 			m_errorLogger.Append("Couldn't initialize device driver from file '%s'", acsFileList[i]);
 			XN_DELETE(pDeviceDriver);
 			continue;
@@ -268,7 +269,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 
 	if (m_deviceDrivers.Size() == 0)
 	{
-		xnLogError(XN_LOG_MASK_ALL, "Found no valid drivers");
+		xnLogError(XN_MASK_ONI_CONTEXT, "Found no valid drivers");
 		m_errorLogger.Append("Found no valid drivers in '%s'", directoryName);
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
@@ -282,7 +283,7 @@ void Context::shutdown()
 	--m_initializationCounter;
 	if (m_initializationCounter > 0)
 	{
-		xnLogInfo(XN_LOG_MASK_ALL, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
+		xnLogInfo(XN_MASK_ONI_CONTEXT, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
 		return;
 	}
 	if (!s_valid)
@@ -385,7 +386,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 	if (xnOSStrLen(m_overrideDevice) > 0)
 		deviceURI = m_overrideDevice;
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Trying to open device by URI '%s'", deviceURI == NULL ? "(NULL)" : deviceURI);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Trying to open device by URI '%s'", deviceURI == NULL ? "(NULL)" : deviceURI);
 
 	m_cs.Lock();
 
@@ -395,7 +396,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 		if (m_devices.Size() == 0)
 		{
 			m_errorLogger.Append("DeviceOpen using default: no devices found");
-			xnLogError(XN_LOG_MASK_ALL, "Can't open default device - none found");
+			xnLogError(XN_MASK_ONI_CONTEXT, "Can't open default device - none found");
 			m_cs.Unlock();
 			return ONI_STATUS_ERROR;
 		}
@@ -439,7 +440,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 
 	if (pMyDevice == NULL)
 	{
-		xnLogError("Couldn't open device '%s'", uri);
+		xnLogError(XN_MASK_ONI_CONTEXT, "Couldn't open device '%s'", uri);
 		m_errorLogger.Append("DeviceOpen: Couldn't open device '%s'", uri);
 		return ONI_STATUS_ERROR;
 	}
