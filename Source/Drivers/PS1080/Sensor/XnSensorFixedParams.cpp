@@ -37,7 +37,8 @@ XnSensorFixedParams::XnSensorFixedParams(XnDevicePrivateData* pDevicePrivateData
 	m_dZeroPlanePixelSize(0),
 	m_dEmitterDCmosDistance(0),
 	m_dDCmosRCmosDistance(0),
-	m_nImageCmosType(0)
+	m_nImageCmosType(0),
+	m_nDepthCmosType(0)
 {
 	m_strSensorSerial[0] = '\0';
 	m_deviceInfo.strDeviceName[0] = '\0';
@@ -90,6 +91,7 @@ XnStatus XnSensorFixedParams::Init()
 	m_nSensorImageCMOSI2CSlaveAddress = (XnUInt16)FixedParams.nImageCmosI2CAddress;
 	
 	m_nImageCmosType = (XnUInt32)FixedParams.nImageCmosType;
+	m_nDepthCmosType = (XnUInt32)FixedParams.nDepthCmosType;
 
 	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, XN_HOST_PROTOCOL_ALGORITHM_DEVICE_INFO, 
 		&m_deviceInfo, sizeof(m_deviceInfo), (XnResolutions)0, 0);

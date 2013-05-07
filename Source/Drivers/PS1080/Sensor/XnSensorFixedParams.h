@@ -57,6 +57,7 @@ public:
 	inline const XnChar* GetSensorSerial() const { return m_strSensorSerial; }
 
 	inline XnUInt32 GetImageCmosType() const { return m_nImageCmosType; }
+	inline XnUInt32 GetDepthCmosType() const { return m_nDepthCmosType; }
 
 	inline const XnChar* GetDeviceName() const { return m_deviceInfo.strDeviceName; }
 	inline const XnChar* GetVendorData() const { return m_deviceInfo.strVendorData; }
@@ -76,6 +77,7 @@ private:
 	XnDouble m_dDCmosRCmosDistance;
 
 	XnUInt32 m_nImageCmosType;
+	XnUInt32 m_nDepthCmosType;
 
 	XnChar m_strSensorSerial[XN_DEVICE_MAX_STRING_LENGTH];
 	XnDeviceInformation m_deviceInfo;
