@@ -21,7 +21,11 @@
 #include "OniDevice.h"
 #include "OniStream.h"
 #include "OniContext.h"
+#include "OniSensor.h"
 #include <OniProperties.h>
+#include <XnLog.h>
+
+#define XN_MASK_ONI_DEVICE "OniDevice"
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
@@ -39,6 +43,7 @@ Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, 
 {
 	m_pInfo = XN_NEW(OniDeviceInfo);
 	xnOSMemCopy(m_pInfo, pDeviceInfo, sizeof(OniDeviceInfo));
+	xnOSMemSet(&m_sensors, 0, sizeof(m_sensors));
 }
 Device::~Device()
 {
@@ -91,32 +96,64 @@ OniStatus Device::getSensorInfoList(OniSensorInfo** pSensorInfos, int& numSensor
 VideoStream* Device::createStream(OniSensorType sensorType)
 {
 	OniSensorInfo* pSensorInfos;
-	OniSensorInfo* pSensor = NULL;
+	OniSensorInfo* pSensorInfo = NULL;
+
 	int numSensors = 0;
 	getSensorInfoList(&pSensorInfos, numSensors);
 	for (int i = 0; i < numSensors; ++i)
 	{
 		if (pSensorInfos[i].sensorType == sensorType)
 		{
-			pSensor = &pSensorInfos[i];
+			pSensorInfo = &pSensorInfos[i];
 			break;
 		}
 	}
 
-	if (pSensor == NULL)
+	if (pSensorInfo == NULL)
 	{
 		m_errorLogger.Append("Device: Can't find this source %d", sensorType);
 		return NULL;
 	}
 
-	void* streamHandle = m_driverHandler.deviceCreateStream(m_deviceHandle, sensorType);
-	if (streamHandle == NULL)
+	// make sure our sensor array is big enough
+	if (sensorType >= sizeof(m_sensors))
 	{
-		m_errorLogger.Append("Stream: couldn't create using source %d", sensorType);
+		xnLogError(XN_MASK_ONI_DEVICE, "Internal error!");
+		m_errorLogger.Append("Device: Can't find this source %d", sensorType);
+		XN_ASSERT(FALSE);
 		return NULL;
 	}
 
-	VideoStream* pStream = XN_NEW(VideoStream, streamHandle, pSensor, *this, m_driverHandler, m_frameManager, m_errorLogger);
+	xnl::AutoCSLocker lock(m_cs);
+	if (m_sensors[sensorType] == NULL)
+	{
+		m_sensors[sensorType] = XN_NEW(Sensor, m_errorLogger, m_frameManager, m_driverHandler);
+		if (m_sensors[sensorType] == NULL)
+		{
+			XN_ASSERT(FALSE);
+			return NULL;
+		}
+	}
+
+	{
+		// check if stream already exists. Do this in a lock to make it thread-safe
+		xnl::AutoCSLocker lock(m_sensors[sensorType]->m_refCountCS);
+		if (m_sensors[sensorType]->m_streamCount == 0)
+		{
+			void* streamHandle = m_driverHandler.deviceCreateStream(m_deviceHandle, sensorType);
+			if (streamHandle == NULL)
+			{
+				m_errorLogger.Append("Stream: couldn't create using source %d", sensorType);
+				return NULL;
+			}
+
+			m_sensors[sensorType]->setDriverStream(streamHandle);
+		}
+
+		++m_sensors[sensorType]->m_streamCount;
+	}
+
+	VideoStream* pStream = XN_NEW(VideoStream, m_sensors[sensorType], pSensorInfo, *this, m_driverHandler, m_frameManager, m_errorLogger);
 	m_streams.AddLast(pStream);
 
 	if ((sensorType == ONI_SENSOR_DEPTH || sensorType == ONI_SENSOR_COLOR) &&
@@ -195,6 +232,7 @@ void Device::refreshDepthColorSyncState()
 
 void Device::clearStream(VideoStream* pStream)
 {
+	xnl::AutoCSLocker lock(m_cs);
 	m_streams.Remove(pStream);
 
 	if ((pStream->getSensorInfo()->sensorType == ONI_SENSOR_DEPTH ||

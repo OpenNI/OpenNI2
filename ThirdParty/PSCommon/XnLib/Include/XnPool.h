@@ -21,7 +21,6 @@
 #ifndef _XN_POOL_H_
 #define _XN_POOL_H_
 
-#include "XnArray.h"
 #include "XnList.h"
 #include <XnOSCpp.h>
 

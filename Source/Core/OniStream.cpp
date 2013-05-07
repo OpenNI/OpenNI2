@@ -31,14 +31,15 @@
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
-VideoStream::VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& libraryHandler, FrameManager& frameManager, xnl::ErrorLogger& errorLogger) :
+VideoStream::VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& libraryHandler, FrameManager& frameManager, xnl::ErrorLogger& errorLogger) :
 	m_errorLogger(errorLogger),
 	m_pSensorInfo(NULL),
 	m_running(true),
 	m_device(device),
 	m_driverHandler(libraryHandler),
 	m_frameManager(frameManager),
-	m_streamHandle(streamHandle),
+	m_pSensor(pSensor),
+	m_hNewFrameEvent(NULL),
 	m_started(FALSE)
 {
 	xnOSCreateEvent(&m_newFrameInternalEvent, false);
@@ -51,17 +52,16 @@ VideoStream::VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, D
 	m_pSensorInfo->pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, m_pSensorInfo->numSupportedVideoModes);
 	xnOSMemCopy(m_pSensorInfo->pSupportedVideoModes, pSensorInfo->pSupportedVideoModes, sizeof(OniVideoMode)*m_pSensorInfo->numSupportedVideoModes);
 
-	resetFrameAllocator();
-
 	OniStreamServices::streamServices = this;
 	OniStreamServices::getDefaultRequiredFrameSize = getDefaultRequiredFrameSizeCallback;
 	OniStreamServices::acquireFrame = acquireFrameCallback;
 	OniStreamServices::addFrameRef = addFrameRefCallback;
 	OniStreamServices::releaseFrame = releaseFrameCallback;
 
-	m_driverHandler.streamSetNewFrameCallback(m_streamHandle, stream_NewFrame, this);
-    m_driverHandler.streamSetPropertyChangedCallback(m_streamHandle, stream_PropertyChanged, this);
-	m_driverHandler.streamSetServices(m_streamHandle, this);
+	m_pSensor->newFrameEvent().Register(stream_NewFrame, this, m_hNewFrameEvent);
+
+    m_driverHandler.streamSetPropertyChangedCallback(m_pSensor->streamHandle(), stream_PropertyChanged, this);
+	m_driverHandler.streamSetServices(m_pSensor->streamHandle(), this);
 
 	refreshWorldConversionCache();
 }
@@ -71,6 +71,12 @@ VideoStream::~VideoStream()
 {
 	// Make sure stream is stopped.
 	stop();
+
+	if (m_hNewFrameEvent != NULL)
+	{
+		m_pSensor->newFrameEvent().Unregister(m_hNewFrameEvent);
+		m_hNewFrameEvent = NULL;
+	}
 
 	m_device.clearStream(this);
 
@@ -97,15 +103,19 @@ VideoStream::~VideoStream()
 	}
 
 	m_pFrameHolder->setStreamEnabled(this, FALSE);
+
 	if (m_device.getHandle() != NULL)
 	{
-		m_driverHandler.deviceDestroyStream(m_device.getHandle(), m_streamHandle);
+		xnl::AutoCSLocker lock(m_pSensor->m_refCountCS);
+		XN_ASSERT(m_pSensor->m_streamCount >= 1);
+		if (--m_pSensor->m_streamCount == 0)
+		{
+			m_driverHandler.deviceDestroyStream(m_device.getHandle(), m_pSensor->streamHandle());
+		}
 	}
 
 	xnOSCloseEvent(&m_newFrameInternalEvent);
 	xnOSCloseEvent(&m_newFrameInternalEventForFrameHolder);
-
-	releaseAllFrames();
 
 	XN_DELETE_ARR(m_pSensorInfo->pSupportedVideoModes);
 	XN_DELETE(m_pSensorInfo);
@@ -115,25 +125,27 @@ OniStatus VideoStream::start()
 {
 	if (!m_started)
 	{
-		int requiredFrameSize = m_driverHandler.streamGetRequiredFrameSize(m_streamHandle);
-
-		if (m_requiredFrameSize != requiredFrameSize)
-		{
-			// release all previous frames. They can't be used anymore
-			releaseAllFrames();
-		}
-
-		m_requiredFrameSize = requiredFrameSize;
-
 		m_pFrameHolder->clear();
-		OniStatus rc = m_driverHandler.streamStart(m_streamHandle);
-		if (rc == ONI_STATUS_OK)
+
+		xnl::AutoCSLocker lock(m_pSensor->m_refCountCS);
+		if (m_pSensor->m_startedStreamCount == 0)
 		{
-			m_started = TRUE;
+			int requiredFrameSize = m_driverHandler.streamGetRequiredFrameSize(m_pSensor->streamHandle());
+			m_pSensor->setRequiredFrameSize(requiredFrameSize);
+
+			OniStatus rc = m_driverHandler.streamStart(m_pSensor->streamHandle());
+			if (rc != ONI_STATUS_OK)
+			{
+				return rc;
+			}
+
 			m_device.refreshDepthColorSyncState();
-			m_pFrameHolder->setStreamEnabled(this, m_started);
 		}
-		return rc;
+
+		++m_pSensor->m_startedStreamCount;
+
+		m_pFrameHolder->setStreamEnabled(this, m_started);
+		m_started = TRUE;
 	}
 
 	return ONI_STATUS_OK;
@@ -151,7 +163,16 @@ void VideoStream::stop()
 	m_device.refreshDepthColorSyncState();
 
 	m_pFrameHolder->setStreamEnabled(this, m_started);
-	m_driverHandler.streamStop(m_streamHandle);
+
+	{
+		xnl::AutoCSLocker lock(m_pSensor->m_refCountCS);
+		XN_ASSERT(m_pSensor->m_startedStreamCount != 0);
+		if (--m_pSensor->m_startedStreamCount == 0)
+		{
+			m_driverHandler.streamStop(m_pSensor->streamHandle());
+		}
+	}
+
 	m_pFrameHolder->clear();
 }
 	
@@ -177,7 +198,16 @@ void VideoStream::unlockFrame()
 
 OniStatus VideoStream::setProperty(int propertyId, const void* data, int dataSize)
 {
-	OniStatus rc = m_driverHandler.streamSetProperty(m_streamHandle, propertyId, data, dataSize);
+	xnl::AutoCSLocker lock(m_pSensor->m_refCountCS);
+	// if this stream is open, and not just by me (multiple depth streams for example), don't allow any changes
+	int myOpenRefCount = m_started ? 1 : 0;
+	if (m_pSensor->m_startedStreamCount > myOpenRefCount)
+	{
+		m_errorLogger.Append("This stream is open by other components. Configuration cannot be changed.");
+		return ONI_STATUS_OUT_OF_FLOW;
+	}
+
+	OniStatus rc = m_driverHandler.streamSetProperty(m_pSensor->streamHandle(), propertyId, data, dataSize);
 	if (rc != ONI_STATUS_OK)
 	{
 		m_errorLogger.Append("Stream setProperty(%d) failed\n", propertyId);
@@ -193,7 +223,7 @@ OniStatus VideoStream::setProperty(int propertyId, const void* data, int dataSiz
 }
 OniStatus VideoStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
-	OniStatus rc = m_driverHandler.streamGetProperty(m_streamHandle, propertyId, data, pDataSize);
+	OniStatus rc = m_driverHandler.streamGetProperty(m_pSensor->streamHandle(), propertyId, data, pDataSize);
 	if (rc != ONI_STATUS_OK)
 	{
 		m_errorLogger.Append("Stream getProperty(%d) failed\n", propertyId);
@@ -202,20 +232,20 @@ OniStatus VideoStream::getProperty(int propertyId, void* data, int* pDataSize)
 }
 OniBool VideoStream::isPropertySupported(int propertyId)
 {
-	return m_driverHandler.streamIsPropertySupported(m_streamHandle, propertyId);
+	return m_driverHandler.streamIsPropertySupported(m_pSensor->streamHandle(), propertyId);
 }
 void VideoStream::notifyAllProperties()
 {
-	m_driverHandler.streamNotifyAllProperties(m_streamHandle);
+	m_driverHandler.streamNotifyAllProperties(m_pSensor->streamHandle());
 }
 
 OniStatus VideoStream::invoke(int commandId, void* data, int dataSize)
 {
-	return m_driverHandler.streamInvoke(m_streamHandle, commandId, data, dataSize);
+	return m_driverHandler.streamInvoke(m_pSensor->streamHandle(), commandId, data, dataSize);
 }
 OniBool VideoStream::isCommandSupported(int commandId)
 {
-	return m_driverHandler.streamIsCommandSupported(m_streamHandle, commandId);
+	return m_driverHandler.streamIsCommandSupported(m_pSensor->streamHandle(), commandId);
 }
 
 OniStatus VideoStream::readFrame(OniFrame** pFrame)
@@ -235,29 +265,7 @@ void VideoStream::unregisterNewFrameCallback(XnCallbackHandle handle)
 
 OniStatus VideoStream::setFrameBufferAllocator(OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie)
 {
-	if (m_started)
-	{
-		m_errorLogger.Append("Cannot set frame buffer allocator while stream is running");
-		return ONI_STATUS_OUT_OF_FLOW;
-	}
-
-	if (alloc == NULL && free == NULL)
-	{
-		resetFrameAllocator();
-	}
-	else if (alloc == NULL || free == NULL)
-	{
-		m_errorLogger.Append("Cannot set only alloc or only free function. Both must be supplied.");
-		return ONI_STATUS_BAD_PARAMETER;
-	}
-	else
-	{
-		m_allocFrameBufferCallback = alloc;
-		m_freeFrameBufferCallback = free;
-		m_frameBufferAllocatorCookie = pCookie;
-	}
-
-	return ONI_STATUS_OK;
+	return m_pSensor->setFrameBufferAllocator(alloc, free, pCookie);
 }
 
 const OniSensorInfo* VideoStream::getSensorInfo() const
@@ -303,19 +311,24 @@ XN_THREAD_PROC VideoStream::newFrameThread(XN_THREAD_PARAM pThreadParam)
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
 }
 
-void ONI_CALLBACK_TYPE VideoStream::stream_NewFrame(void* /*streamHandle*/, OniFrame* pFrame, void* pCookie)
+void ONI_CALLBACK_TYPE VideoStream::stream_NewFrame(OniFrame* pFrame, void* pCookie)
 {
     // Validate parameters.
     if (NULL == pCookie || NULL == pFrame)
     {
         return;
     }
-    // Record the frame.
-    // NOTE: record operation must go before ProcessNewFrame, because
-    // m_pFrameHolder might block. We're recording every single frame, no
-    // matter what. Or else we might loose frames or have other odd side
-    // effects.
+
     VideoStream* pStream = (VideoStream*)pCookie;
+	// ignore frames if not started (this can happen if multiple streams exist for the same sensor).
+	if (!pStream->m_started)
+		return;
+
+	// Record the frame.
+	// NOTE: record operation must go before ProcessNewFrame, because
+	// m_pFrameHolder might block. We're recording every single frame, no
+	// matter what. Or else we might loose frames or have other odd side
+	// effects.
 
     {   
 		// NOTE: scoped for the guard.
@@ -352,7 +365,7 @@ Device& VideoStream::getDevice()
 
 void* VideoStream::getHandle() const 
 {
-	return m_streamHandle;
+	return m_pSensor->streamHandle();
 }
 
 void VideoStream::setFrameHolder(FrameHolder* pFrameHolder)
@@ -453,15 +466,7 @@ OniStatus VideoStream::convertDepthToColorCoordinates(VideoStream* colorStream, 
 		m_errorLogger.Append("convertDepthToColorCoordinates: Streams are not from the same device\n");
 		return ONI_STATUS_NOT_SUPPORTED;
 	}
-
-	return m_driverHandler.convertDepthPointToColor(m_streamHandle, colorStream->m_streamHandle, depthX, depthY, depthZ, pColorX, pColorY);
-}
-
-void VideoStream::resetFrameAllocator()
-{
-	m_allocFrameBufferCallback = allocFrameBufferFromPoolCallback;
-	m_freeFrameBufferCallback = releaseFrameBufferToPoolCallback;
-	m_frameBufferAllocatorCookie = this;
+	return m_driverHandler.convertDepthPointToColor(m_pSensor->streamHandle(), colorStream->m_pSensor->streamHandle(), depthX, depthY, depthZ, pColorX, pColorY);
 }
 
 /****************
@@ -489,30 +494,7 @@ int VideoStream::getDefaultRequiredFrameSize()
 
 OniFrame* VideoStream::acquireFrame()
 {
-	OniFrameInternal* pResult = m_frameManager.acquireFrame();
-	if (pResult == NULL)
-	{
-		return NULL;
-	}
-
-	pResult->data = m_allocFrameBufferCallback(m_requiredFrameSize, m_frameBufferAllocatorCookie);
-	if (pResult->data == NULL)
-	{
-		m_frameManager.release(pResult);
-		return NULL;
-	}
-
-	pResult->dataSize = m_requiredFrameSize;
-	pResult->backToPoolFunc = frameBackToPoolCallback;
-	pResult->backToPoolFuncCookie = this;
-	pResult->freeBufferFunc = m_freeFrameBufferCallback;
-	pResult->freeBufferFuncCookie = m_frameBufferAllocatorCookie;
-
-	m_availableFramesLock.Lock();
-	m_currentStreamFrames.AddLast(pResult);
-	m_availableFramesLock.Unlock();
-
-	return pResult;
+	return m_pSensor->acquireFrame();
 }
 
 void VideoStream::addFrameRef(OniFrame* pFrame)
@@ -547,101 +529,6 @@ void ONI_CALLBACK_TYPE VideoStream::releaseFrameCallback(void* streamServices, O
 {
 	VideoStream* pThis = (VideoStream*)streamServices;
 	return pThis->releaseFrame(pFrame);
-}
-
-/************************
-Frame Buffer Management
-************************/
-void* VideoStream::allocFrameBufferFromPool(int size)
-{
-	XN_ASSERT(size == m_requiredFrameSize);
-	void* pResult = NULL;
-	m_availableFramesLock.Lock();
-	if (m_availableFrameBuffers.IsEmpty())
-	{
-		// create a new one
-		pResult = xnOSMallocAligned(size, XN_DEFAULT_MEM_ALIGN);
-		m_allFrameBuffers.AddLast(pResult);
-	}
-	else
-	{
-		xnl::List<void*>::Iterator it = m_availableFrameBuffers.Begin();
-		pResult = *it;
-		m_availableFrameBuffers.Remove(it);
-	}
-	m_availableFramesLock.Unlock();
-	return pResult;
-}
-
-void VideoStream::releaseFrameBufferToPool(void* pBuffer)
-{
-	m_availableFramesLock.Lock();
-	m_availableFrameBuffers.AddLast(pBuffer);
-	m_availableFramesLock.Unlock();
-}
-
-void* ONI_CALLBACK_TYPE VideoStream::allocFrameBufferFromPoolCallback(int size, void* pCookie)
-{
-	VideoStream* pThis = (VideoStream*)pCookie;
-	return pThis->allocFrameBufferFromPool(size);
-}
-
-void ONI_CALLBACK_TYPE VideoStream::releaseFrameBufferToPoolCallback(void* pBuffer, void* pCookie)
-{
-	VideoStream* pThis = (VideoStream*)pCookie;
-	pThis->releaseFrameBufferToPool(pBuffer);
-}
-
-void ONI_CALLBACK_TYPE VideoStream::freeFrameBufferMemoryCallback(void* pBuffer, void* /*pCookie*/)
-{
-	xnOSFreeAligned(pBuffer);
-}
-
-void VideoStream::releaseAllFrames()
-{
-	m_availableFramesLock.Lock();
-	// change release method of current frames
-	for (xnl::List<OniFrameInternal*>::Iterator it = m_currentStreamFrames.Begin(); it != m_currentStreamFrames.End(); ++it)
-	{
-		// don't return frame buffer to pool, instead just free it
-		if ((*it)->freeBufferFunc == releaseFrameBufferToPoolCallback)
-		{
-			(*it)->freeBufferFunc = freeFrameBufferMemoryCallback;
-		}
-
-		// mark that this frame does not belong to this stream anymore
-		(*it)->backToPoolFuncCookie = NULL;
-	}
-
-	m_currentStreamFrames.Clear();
-
-	// delete all available frames
-	for (xnl::List<void*>::Iterator it = m_availableFrameBuffers.Begin(); it != m_availableFrameBuffers.End(); ++it)
-	{
-		xnOSFreeAligned(*it);
-	}
-	m_availableFrameBuffers.Clear();
-	
-	m_availableFramesLock.Unlock();
-}
-
-void ONI_CALLBACK_TYPE VideoStream::frameBackToPoolCallback(OniFrameInternal* pFrame, void* pCookie)
-{
-	// release the data
-	if (pFrame->data != NULL)
-	{
-		// this can happen if allocation of data failed
-		pFrame->freeBufferFunc(pFrame->data, pFrame->freeBufferFuncCookie);
-		pFrame->data = NULL;
-	}
-
-	if (pCookie != NULL)
-	{
-		VideoStream* pThis = (VideoStream*)pCookie;
-		pThis->m_availableFramesLock.Lock();
-		pThis->m_currentStreamFrames.Remove(pFrame);
-		pThis->m_availableFramesLock.Unlock();
-	}
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

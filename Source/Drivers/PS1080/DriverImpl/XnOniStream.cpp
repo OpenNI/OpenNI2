@@ -167,7 +167,6 @@ void XN_CALLBACK_TYPE XnOniStream::OnNewStreamDataEventHandler(const XnNewStream
 	XnOniStream* pThis = (XnOniStream*)pCookie;
 	if (pThis->m_started && strcmp(args.strStreamName, pThis->m_strType) == 0)
 	{
-		pThis->getServices().addFrameRef(args.pFrame);
 		pThis->raiseNewFrame(args.pFrame);
 	}
 }

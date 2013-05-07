@@ -1445,9 +1445,6 @@ void XnSensor::OnNewStreamData(XnDeviceStream* pStream, OniFrame* pFrame)
 	// Lock critical section.
 	m_frameSyncCs.Lock();
 
-	// Add a ref to the frame.
-	pStream->AddRefToFrame(pFrame);
-
 	// Find the relevant stream in the frame-synced streams.
 	FrameSyncedStream* pFrameSyncedStream = NULL;
 	XnUInt32 nValidFrameCount = 0; // received frame
@@ -1468,6 +1465,7 @@ void XnSensor::OnNewStreamData(XnDeviceStream* pStream, OniFrame* pFrame)
 
 				// Store the frame, timestamp and frame ID.
 				m_FrameSyncedStreams[i].pFrame = pFrame;
+				pStream->AddRefToFrame(pFrame);
 				pFrameSyncedStream = &m_FrameSyncedStreams[i];
 				nValidFrameCount++;
 			}
@@ -1501,7 +1499,6 @@ void XnSensor::OnNewStreamData(XnDeviceStream* pStream, OniFrame* pFrame)
 					else
 					{
 						// Release the new frame.
-						pStream->ReleaseFrame(pFrame);
 						pFrame = NULL;
 					}
 				}
@@ -1547,7 +1544,6 @@ void XnSensor::OnNewStreamData(XnDeviceStream* pStream, OniFrame* pFrame)
 		{
 			// Send the frame (it is not frame-synced).
 			XnDeviceBase::OnNewStreamData(pStream, pFrame);
-			pStream->ReleaseFrame(pFrame);
 		}
 	}
 }

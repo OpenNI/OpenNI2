@@ -47,9 +47,7 @@ XnStatus XnFrameStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 	// register for new data events
-	XnCallbackHandle hDummy;
-	nRetVal = m_bufferManager.OnNewFrameEvent().Register(OnTripleBufferNewData, this, hDummy);
-	XN_IS_STATUS_OK(nRetVal);
+	m_bufferManager.SetNewFrameCallback(OnTripleBufferNewData, this);
 
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_IsFrameStream, &m_FPS );
 
@@ -91,10 +89,10 @@ XnStatus XN_CALLBACK_TYPE XnFrameStream::SetFPSCallback(XnActualIntProperty* /*p
 	return pThis->SetFPS((XnUInt32)nValue);
 }
 
-void XN_CALLBACK_TYPE XnFrameStream::OnTripleBufferNewData(const XnFrameBufferManager::NewFrameEventArgs& args, void* pCookie)
+void XN_CALLBACK_TYPE XnFrameStream::OnTripleBufferNewData(OniFrame* pFrame, void* pCookie)
 {
 	XnFrameStream* pThis = (XnFrameStream*)pCookie;
-	pThis->NewDataAvailable(args.pFrame);
+	pThis->NewDataAvailable(pFrame);
 }
 
 XnStatus XnFrameStream::Close()

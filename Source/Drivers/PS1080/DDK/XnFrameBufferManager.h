@@ -36,8 +36,12 @@
 class XnFrameBufferManager
 {
 public:
+	typedef void (XN_CALLBACK_TYPE* NewFrameCallback)(OniFrame* pFrame, void* pCookie);
+
 	XnFrameBufferManager();
 	~XnFrameBufferManager();
+
+	void SetNewFrameCallback(NewFrameCallback func, void* pCookie);
 
 	XnStatus Init();
 	void Free();
@@ -61,21 +65,14 @@ public:
 
 	inline XnUInt32 GetLastFrameID() const { return m_nStableFrameID; }
 
-	typedef struct NewFrameEventArgs
-	{
-		OniFrame* pFrame;
-	} NewFrameEventArgs;
-
-	typedef xnl::Event<NewFrameEventArgs> NewFrameEvent;
-	NewFrameEvent::EventInterface& OnNewFrameEvent() { return m_NewFrameEvent; }
-
 private:
 	XN_DISABLE_COPY_AND_ASSIGN(XnFrameBufferManager);
 
 	oni::driver::StreamServices* m_pServices;
 	OniFrame* m_pWorkingBuffer;
 	XnUInt32 m_nStableFrameID;
-	NewFrameEvent m_NewFrameEvent;
+	NewFrameCallback m_newFrameCallback;
+	void* m_newFrameCallbackCookie;
 	XN_CRITICAL_SECTION_HANDLE m_hLock;
 	XnBuffer m_writeBuffer;
 };

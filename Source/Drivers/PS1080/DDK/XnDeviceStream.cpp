@@ -134,8 +134,6 @@ void XnDeviceStream::NewDataAvailable(OniFrame* pFrame)
 	// make sure someone is listening (otherwise, no one will ever free this frame!)
 	XN_ASSERT(m_pNewDataCallback != NULL);
 	m_pNewDataCallback(this, pFrame, m_pNewDataCallbackCookie);
-
-	ReleaseFrame(pFrame);
 }
 
 void XnDeviceStream::SetNewDataCallback(NewDataCallbackPtr pFunc, void* pCookie)

@@ -71,7 +71,6 @@ OniStatus StreamFrameHolder::processNewFrame(VideoStream* pStream, OniFrame* pFr
 	// Make sure frame holder is enabled.
 	if (!m_enabled)
 	{
-		m_frameManager.release(pFrame);
 		return ONI_STATUS_OK;
 	}
 
@@ -82,6 +81,7 @@ OniStatus StreamFrameHolder::processNewFrame(VideoStream* pStream, OniFrame* pFr
 		m_frameManager.release(m_pLastFrame);
 	}
 	m_pLastFrame = pFrame;
+	m_frameManager.addRef(m_pLastFrame);
 	unlock();
 
 	// Raise the new frame event.

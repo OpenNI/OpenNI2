@@ -77,7 +77,7 @@ private:
 	XN_DISABLE_COPY_AND_ASSIGN(XnFrameStream);
 
 	static XnStatus XN_CALLBACK_TYPE SetFPSCallback(XnActualIntProperty* pSenser, XnUInt64 nValue, void* pCookie);
-	static void XN_CALLBACK_TYPE OnTripleBufferNewData(const XnFrameBufferManager::NewFrameEventArgs& args, void* pCookie);
+	static void XN_CALLBACK_TYPE OnTripleBufferNewData(OniFrame* pFrame, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members

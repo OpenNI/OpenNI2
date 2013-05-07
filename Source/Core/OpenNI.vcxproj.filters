@@ -88,6 +88,9 @@
     <ClInclude Include="OniFrameManager.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="OniSensor.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header files">
@@ -291,6 +294,9 @@
       <Filter>Header files\Formats\LibJPEG</Filter>
     </ClCompile>
     <ClCompile Include="OniFrameManager.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniSensor.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

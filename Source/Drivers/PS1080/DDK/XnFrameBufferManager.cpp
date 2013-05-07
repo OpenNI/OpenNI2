@@ -32,6 +32,8 @@ XnFrameBufferManager::XnFrameBufferManager() :
 	m_pServices(NULL),
 	m_pWorkingBuffer(NULL),
 	m_nStableFrameID(0),
+	m_newFrameCallback(NULL),
+	m_newFrameCallbackCookie(NULL),
 	m_hLock(NULL)
 {
 }
@@ -39,6 +41,12 @@ XnFrameBufferManager::XnFrameBufferManager() :
 XnFrameBufferManager::~XnFrameBufferManager()
 {
 	Free();
+}
+
+void XnFrameBufferManager::SetNewFrameCallback(NewFrameCallback func, void* pCookie)
+{
+	m_newFrameCallback = func;
+	m_newFrameCallbackCookie = pCookie;
 }
 
 XnStatus XnFrameBufferManager::Init()
@@ -124,8 +132,12 @@ void XnFrameBufferManager::MarkWriteBufferAsStable(XnUInt32* pnFrameID)
 	m_pWorkingBuffer->dataSize = 0;
 
 	// notify stream that new data is available
-	NewFrameEventArgs args;
-	args.pFrame = pStableBuffer;
-	m_NewFrameEvent.Raise(args);
+	if (m_newFrameCallback != NULL)
+	{
+		m_newFrameCallback(pStableBuffer, m_newFrameCallbackCookie);
+	}
+
+	// and release our reference
+	m_pServices->releaseFrame(pStableBuffer);
 }
 

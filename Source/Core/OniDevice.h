@@ -23,6 +23,7 @@
 
 #include "OniDriverHandler.h"
 #include "OniFrameManager.h"
+#include "OniSensor.h"
 #include "OniCommon.h"
 #include "XnList.h"
 
@@ -30,7 +31,7 @@ ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 class Context;
 class VideoStream;
-
+class Sensor;
 class DeviceDriver;
 
 class Device
@@ -93,9 +94,11 @@ private:
 	DeviceDriver* m_pDeviceDriver;
 
 	xnl::List<VideoStream*> m_streams;
+	xnl::CriticalSection m_cs;
 	OniFrameSyncHandle m_depthColorSyncHandle;
 	Context* m_pContext;
 	OniBool m_syncEnabled;
+	Sensor* m_sensors[10];
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

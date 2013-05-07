@@ -165,7 +165,6 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 	// Make sure frame holder is enabled.
 	if (!m_enabled)
 	{
-		m_frameManager.release(pFrame);
 		return ONI_STATUS_OK;
 	}
 
@@ -192,10 +191,10 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 			if (m_FrameSyncedStreams[i].enabled)
 			{
 				m_FrameSyncedStreams[i].pLastFrame = pFrame;
+				m_frameManager.addRef(pFrame);
 			}
 			else
 			{
-				m_frameManager.release(pFrame);
 				--validFrameCount;
 			}
 		}
