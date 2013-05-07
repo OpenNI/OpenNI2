@@ -88,6 +88,7 @@ enum EPsProtocolOpCodes
 	OPCODE_GET_PLATFORM_STRING = 39,
 	OPCODE_GET_USB_CORE_TYPE = 40,
 	OPCODE_SET_LED_STATE = 41,
+	OPCODE_ENABLE_EMITTER = 42,
 	OPCODE_KILL = 999,
 };
 
@@ -350,6 +351,7 @@ XnStatus XnHostProtocolReadAHB			(XnDevicePrivateData* pDevicePrivateData, XnUIn
 XnStatus XnHostProtocolWriteAHB			(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nAddress, XnUInt32 nValue, XnUInt32 nMask);
 XnStatus XnHostProtocolGetUsbCoreType	(XnDevicePrivateData* pDevicePrivateData, XnHostProtocolUsbCore& nValue);
 XnStatus XnHostProtocolSetLedState	(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nLedId, XnUInt16 nState);
+XnStatus XnHostProtocolSetEmitterState	(XnDevicePrivateData* pDevicePrivateData, XnBool bActive);
 XnStatus XnHostProtocolUpdateSupportedImageModes(XnDevicePrivateData* pDevicePrivateData);
 
 // Commands.txt

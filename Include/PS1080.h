@@ -95,6 +95,9 @@ enum
 	XN_MODULE_PROPERTY_AHB = 0x1080E005, // "AHB"
 	/** XnLedState */
 	XN_MODULE_PROPERTY_LED_STATE = 0x1080E006, // "LedState"
+	/** Boolean */
+	XN_MODULE_PROPERTY_EMITTER_STATE = 0x1080E007, // "EmitterState"
+
 	/** XnCmosBlankingUnits */
 	XN_MODULE_PROPERTY_CMOS_BLANKING_UNITS = 0x1080FF74, // "CmosBlankingUnits"
 	/** XnCmosBlankingTime */

@@ -91,6 +91,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 	m_DepthControl(XN_MODULE_PROPERTY_DEPTH_CONTROL, "DepthControl", NULL),
 	m_AHB(XN_MODULE_PROPERTY_AHB, "AHB", NULL),
 	m_LedState(XN_MODULE_PROPERTY_LED_STATE, "LedState", NULL),
+	m_EmitterEnabled(XN_MODULE_PROPERTY_EMITTER_STATE, "EmitterState", NULL),
 	m_FirmwareLogFilter(XN_MODULE_PROPERTY_FIRMWARE_LOG_FILTER, "FirmwareLogFilter", 0),
 	m_FirmwareLogInterval(XN_MODULE_PROPERTY_FIRMWARE_LOG_INTERVAL, "FirmwareLogInterval", 0),
 	m_FirmwareLogPrint(XN_MODULE_PROPERTY_PRINT_FIRMWARE_LOG, "PrintFirmwareLog", FALSE),
@@ -152,6 +153,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 	m_AHB.UpdateSetCallback(WriteAHBCallback, this);
 	m_AHB.UpdateGetCallback(ReadAHBCallback, this);
 	m_LedState.UpdateSetCallback(SetLedStateCallback, this);
+	m_EmitterEnabled.UpdateSetCallback(SetEmitterStateCallback, this);
 	m_FirmwareLogInterval.UpdateSetCallback(SetFirmwareLogIntervalCallback, this);
 	m_FirmwareLogPrint.UpdateSetCallback(SetFirmwareLogPrintCallback, this);
 	m_FirmwareCPUInterval.UpdateSetCallback(SetFirmwareCPUIntervalCallback, this);
@@ -359,7 +361,7 @@ XnStatus XnSensor::CreateDeviceModule(XnDeviceModuleHolder** ppModuleHolder)
 		&m_CmosBlankingUnits, &m_CmosBlankingTime, &m_Reset, &m_Version, 
 		&m_FixedParam, &m_FrameSync, &m_FirmwareFrameSync, &m_CloseStreamsOnShutdown, &m_ID,
 		&m_VendorSpecificData, &m_AudioSupported, &m_ImageSupported,
-		&m_ImageControl, &m_DepthControl, &m_AHB, &m_LedState, &m_HostTimestamps, &m_PlatformString,
+		&m_ImageControl, &m_DepthControl, &m_AHB, &m_LedState, &m_EmitterEnabled, &m_HostTimestamps, &m_PlatformString,
 		&m_FirmwareLogInterval, &m_FirmwareLogPrint, &m_FirmwareCPUInterval, &m_DeleteFile, 
 		&m_APCEnabled, &m_TecSetPoint, &m_TecStatus, &m_TecFastConvergenceStatus, &m_EmitterSetPoint, &m_EmitterStatus, &m_I2C,
 		&m_FileAttributes, &m_FlashFile, &m_FirmwareLogFilter, &m_FirmwareLog, &m_FlashChunk, &m_FileList, 
@@ -766,6 +768,11 @@ XnStatus XnSensor::WriteAHB(const XnAHBData* pAHB)
 XnStatus XnSensor::SetLedState(XnUInt16 nLedId, XnUInt16 nState)
 {
 	return XnHostProtocolSetLedState(&m_DevicePrivateData, nLedId, nState);
+}
+
+XnStatus XnSensor::SetEmitterState(XnBool bActive)
+{
+	return XnHostProtocolSetEmitterState(&m_DevicePrivateData, bActive);
 }
 
 XnStatus XnSensor::SetFirmwareFrameSync(XnBool bOn)
@@ -1770,6 +1777,12 @@ XnStatus XN_CALLBACK_TYPE XnSensor::SetLedStateCallback(XnGeneralProperty* /*pSe
 	XnSensor* pThis = (XnSensor*)pCookie;
 	const XnLedState* pLedState = (const XnLedState*)gbValue.data;
 	return pThis->SetLedState(pLedState->nLedID, pLedState->nState);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensor::SetEmitterStateCallback(XnIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
+{
+	XnSensor* pThis = (XnSensor*)pCookie;
+	return pThis->SetEmitterState(nValue == TRUE);
 }
 
 XnStatus XN_CALLBACK_TYPE XnSensor::SetFirmwareFrameSyncCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)

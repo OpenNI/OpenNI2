@@ -214,6 +214,7 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.nOpcodeGetPlatformString = OPCODE_INVALID;
 	pDevicePrivateData->FWInfo.nOpcodeGetUsbCore = OPCODE_GET_USB_CORE_TYPE;
 	pDevicePrivateData->FWInfo.nOpcodeSetLedState = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeEnableEmitter = OPCODE_INVALID;
 	pDevicePrivateData->FWInfo.nOpcodeGetLog = OPCODE_V017_GET_LOG;
 	pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot = OPCODE_V017_TAKE_SNAPSHOT;
 	pDevicePrivateData->FWInfo.nOpcodeInitFileUpload = OPCODE_V017_INIT_FILE_UPLOAD;
@@ -641,6 +642,11 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 9) >= 0)
 	{
 		pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = TRUE;
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 15) >= 0)
+	{
+		pDevicePrivateData->FWInfo.nOpcodeEnableEmitter = OPCODE_ENABLE_EMITTER;	
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 16) >= 0)
@@ -3382,6 +3388,36 @@ XnStatus XnHostProtocolSetLedState(XnDevicePrivateData* pDevicePrivateData, XnUI
 	XnUInt16 nDataSize;
 	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
 		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + (XnUInt16)nRequestSize, pDevicePrivateData->FWInfo.nOpcodeSetLedState,
+		NULL, nDataSize);
+	XN_IS_STATUS_OK(rc);
+
+	return (XN_STATUS_OK);
+}
+
+#pragma pack (push, 1)
+
+typedef struct XnVSetEmitterStateRequest
+{
+	XnUInt16 nActive;
+} XnVSetEmitterStateRequest;
+
+#pragma pack (pop)
+
+XnStatus XnHostProtocolSetEmitterState(XnDevicePrivateData* pDevicePrivateData, XnBool bActive)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUInt32 nRequestSize;
+
+	XnVSetEmitterStateRequest* pRequest = (XnVSetEmitterStateRequest*)pDataBuf;
+	pRequest->nActive = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)bActive);
+	nRequestSize = sizeof(XnVSetEmitterStateRequest);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, nRequestSize, pDevicePrivateData->FWInfo.nOpcodeEnableEmitter);
+
+	XnUInt16 nDataSize;
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + (XnUInt16)nRequestSize, pDevicePrivateData->FWInfo.nOpcodeEnableEmitter,
 		NULL, nDataSize);
 	XN_IS_STATUS_OK(rc);
 

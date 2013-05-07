@@ -150,6 +150,7 @@ private:
 	XnStatus SetImageCmosRegister(const XnControlProcessingData* pRegister);
 	XnStatus WriteAHB(const XnAHBData* pData);
 	XnStatus SetLedState(XnUInt16 nLedId, XnUInt16 nState);
+	XnStatus SetEmitterState(XnBool bActive);
 	XnStatus SetFirmwareFrameSync(XnBool bOn);
 	XnStatus SetI2C(const XnI2CWriteData* pI2CWriteData);
 	XnStatus SetFirmwareLogFilter(XnUInt32 nFilter);
@@ -193,6 +194,7 @@ private:
 	static XnStatus XN_CALLBACK_TYPE ReadAHBCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE WriteAHBCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetLedStateCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetEmitterStateCallback(XnIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareFrameSyncCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogFilterCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogIntervalCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
@@ -247,6 +249,7 @@ private:
 	XnGeneralProperty m_DepthControl;
 	XnGeneralProperty m_AHB;
 	XnGeneralProperty m_LedState;
+	XnIntProperty m_EmitterEnabled;
 	XnActualIntProperty m_FirmwareLogFilter;
 	XnActualIntProperty m_FirmwareLogInterval;
 	XnActualIntProperty m_FirmwareLogPrint;

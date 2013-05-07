@@ -69,6 +69,7 @@ public:
 	XnUInt16 nOpcodeGetPlatformString;
 	XnUInt16 nOpcodeGetUsbCore;
 	XnUInt16 nOpcodeSetLedState;
+	XnUInt16 nOpcodeEnableEmitter;
 
 	XnUInt16 nOpcodeGetLog;
 	XnUInt16 nOpcodeTakeSnapshot;
