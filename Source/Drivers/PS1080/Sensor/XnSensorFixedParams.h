@@ -56,8 +56,8 @@ public:
 
 	inline const XnChar* GetSensorSerial() const { return m_strSensorSerial; }
 
-	inline XnUInt32 GetImageCmosType() const { return m_nImageCmosType; }
-	inline XnUInt32 GetDepthCmosType() const { return m_nDepthCmosType; }
+	inline XnImageCMOSType GetImageCmosType() const { return (XnImageCMOSType)m_nImageCmosType; }
+	inline XnDepthCMOSType GetDepthCmosType() const { return (XnDepthCMOSType)m_nDepthCmosType; }
 
 	inline const XnChar* GetDeviceName() const { return m_deviceInfo.strDeviceName; }
 	inline const XnChar* GetVendorData() const { return m_deviceInfo.strVendorData; }

@@ -66,6 +66,7 @@ private:
 	XnBuffer m_ContinuousBuffer;
 	XnBuffer m_UnpackedBuffer;
 	XnUInt64 m_nRefTimestamp; // needed for firmware bug workaround 
+	XnDepthCMOSType m_DepthCMOSType;
 };
 
 #endif //__XN_IR_PROCESSOR_H__

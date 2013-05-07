@@ -40,7 +40,8 @@
 
 XnIRProcessor::XnIRProcessor(XnSensorIRStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager) :
 	XnFrameStreamProcessor(pStream, pHelper, pBufferManager, XN_SENSOR_PROTOCOL_RESPONSE_IMAGE_START, XN_SENSOR_PROTOCOL_RESPONSE_IMAGE_END),
-	m_nRefTimestamp(0)
+	m_nRefTimestamp(0),
+	m_DepthCMOSType(pHelper->GetFixedParams()->GetDepthCmosType())
 {
 }
 
@@ -250,15 +251,25 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 		nXRes = (XnUInt32)GetStream()->m_FirmwareCropSizeX.GetValue();
 		nYRes = (XnUInt32)GetStream()->m_FirmwareCropSizeY.GetValue();
 	}
+	else if (GetStream()->GetResolution() != XN_RESOLUTION_SXGA)
+	{
+		if (m_DepthCMOSType == XN_DEPTH_CMOS_MT9M001)
+		{
+			// there are additional 8 rows (this is how the CMOS is configured)
+			nYRes += 8;
+		}	
+	}
+	else
+	{
+		if (m_DepthCMOSType == XN_DEPTH_CMOS_AR130)
+		{
+			// there missing 64 rows (this is how the CMOS is configured)
+			nYRes -= 64;
+		}
+	}
 
 	XnUInt32 nFrameSize = nXRes * nYRes * GetStream()->GetBytesPerPixel();
 	XnUInt32 nExpectedBufferSize = nFrameSize;
-
-	if (GetStream()->m_FirmwareCropMode.GetValue() == XN_FIRMWARE_CROPPING_MODE_DISABLED && GetStream()->GetResolution() != XN_RESOLUTION_SXGA)
-	{
-		// there are additional 8 rows (this is how the CMOS is configured)
-		nExpectedBufferSize += (8 * nXRes * GetStream()->GetBytesPerPixel());
-	}
 
 	if (GetWriteBuffer()->GetSize() != nExpectedBufferSize)
 	{
