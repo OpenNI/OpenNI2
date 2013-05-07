@@ -58,6 +58,8 @@ private:
 	CriticalSection(const CriticalSection& other);
 	CriticalSection& operator=(const CriticalSection& other);
 
+	friend class AutoCSLocker;
+
 	XN_CRITICAL_SECTION_HANDLE m_cs;
 };
 
@@ -112,6 +114,10 @@ public:
 		return *this;
 	}
 	inline AutoCSLocker(XN_CRITICAL_SECTION_HANDLE handle) : m_cs(handle), m_locked(FALSE)
+	{
+		Lock();
+	}
+	inline AutoCSLocker(const CriticalSection& cs) : m_cs(cs.m_cs), m_locked(FALSE)
 	{
 		Lock();
 	}
