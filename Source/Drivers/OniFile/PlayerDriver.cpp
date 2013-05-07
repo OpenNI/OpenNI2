@@ -45,7 +45,7 @@ PlayerDriver::PlayerDriver(OniDriverServices* pDriverServices)
 {
 }
 
-driver::DeviceBase* PlayerDriver::deviceOpen(const char* strUri)
+driver::DeviceBase* PlayerDriver::deviceOpen(const char* strUri, const char* /*mode*/)
 {
 	PlayerDevice* pDevice = XN_NEW(PlayerDevice, strUri);
 	if (pDevice == NULL)

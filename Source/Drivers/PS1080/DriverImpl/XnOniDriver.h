@@ -43,7 +43,7 @@ public:
 	virtual OniStatus initialize(oni::driver::DeviceConnectedCallback deviceConnectedCallback, oni::driver::DeviceDisconnectedCallback deviceDisconnectedCallback, oni::driver::DeviceStateChangedCallback deviceStateChangedCallback, void* pCookie);
 	virtual void shutdown();
 
-	virtual oni::driver::DeviceBase* deviceOpen(const char* uri);
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* mode);
 	virtual void deviceClose(oni::driver::DeviceBase* pDevice);
 
 	virtual void* enableFrameSync(oni::driver::StreamBase** pStreams, int streamCount);

@@ -378,7 +378,7 @@ OniStatus Context::releaseDeviceList(OniDeviceInfo* pDevices)
 	return ONI_STATUS_OK;
 }
 
-OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
+OniStatus Context::deviceOpen(const char* uri, const char* mode, OniDeviceHandle* pDevice)
 {
 	oni::implementation::Device* pMyDevice = NULL;
 
@@ -442,7 +442,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 	{
 		xnLogError(XN_MASK_ONI_CONTEXT, "Couldn't open device '%s'", uri);
 		m_errorLogger.Append("DeviceOpen: Couldn't open device '%s'", uri);
-		return ONI_STATUS_ERROR;
+		return ONI_STATUS_NO_DEVICE;
 	}
 
 	_OniDevice* pDeviceHandle = XN_NEW(_OniDevice);
@@ -455,7 +455,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 	pDeviceHandle->pDevice = pMyDevice;
 	m_deviceToHandle[pMyDevice] = pDeviceHandle;
 
-	return pMyDevice->open();
+	return pMyDevice->open(mode);
 }
 
 OniStatus Context::deviceClose(OniDeviceHandle device)

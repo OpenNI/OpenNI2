@@ -363,7 +363,7 @@ public:
 	OzDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
 	{}
 
-	virtual oni::driver::DeviceBase* deviceOpen(const char* uri)
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* /*mode*/)
 	{
 		for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
 		{

@@ -71,7 +71,7 @@ public:
 	OniStatus getDeviceList(OniDeviceInfo** pDevices, int* pDeviceCount);
 	OniStatus releaseDeviceList(OniDeviceInfo* pDevices);
 
-	OniStatus deviceOpen(const char* uri, OniDeviceHandle* pDevice);
+	OniStatus deviceOpen(const char* uri, const char* mode, OniDeviceHandle* pDevice);
 	OniStatus deviceClose(OniDeviceHandle device);
 
 	const OniSensorInfo* getSensorInfo(OniDeviceHandle device, OniSensorType sensorType);

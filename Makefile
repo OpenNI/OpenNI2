@@ -44,8 +44,9 @@ ALL_WRAPPERS = \
 	Wrappers/java/OpenNI.java 
 
 # list all tools
-ALL_TOOLS = 
-
+ALL_TOOLS = \
+	Source/Drivers/PS1080/PS1080Console \
+	
 # list all core projects
 ALL_CORE_PROJS = \
 	$(XNLIB)  \
@@ -125,6 +126,7 @@ Wrappers/java/OpenNI.jni:   $(OPENNI) $(XNLIB)
 Source/Drivers/DummyDevice: $(OPENNI) $(XNLIB)
 Source/Drivers/RawDevice:   $(OPENNI) $(XNLIB)
 Source/Drivers/PS1080:      $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
+Source/Drivers/PS1080/PS1080Console: $(OPENNI) $(XNLIB)
 Source/Drivers/PSLink:      $(OPENNI) $(XNLIB)
 Source/Drivers/OniFile:     $(OPENNI) $(XNLIB)
 

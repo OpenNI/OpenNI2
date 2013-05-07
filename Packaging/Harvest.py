@@ -222,6 +222,7 @@ class Harvest:
         self.copyRedistFiles(toolsDir)
         self.copyGLUT(toolsDir)
         self.copyTool(toolsDir, 'NiViewer', isGL = True)
+        self.copyTool(toolsDir, 'PS1080Console')
         self.copyTool(toolsDir, 'PSLinkConsole')
         
         # Documentation

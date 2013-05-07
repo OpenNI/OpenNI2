@@ -25,6 +25,7 @@
 #include "XnOniStream.h"
 #include "XnOniDriver.h"
 #include "../Sensor/XnDeviceEnumeration.h"
+#include "../DDK/XnPropertySetInternal.h"
 
 //---------------------------------------------------------------------------
 // XnOniDevice class
@@ -207,15 +208,43 @@ XnStatus XnOniDevice::FillSupportedVideoModes()
 	return XN_STATUS_OK;
 }
 
-XnStatus XnOniDevice::Init()
+XnStatus XnOniDevice::Init(const char* mode)
 {
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	XN_PROPERTY_SET_CREATE_ON_STACK(initialValues);
+
+	if (mode != NULL)
+	{
+		nRetVal = XnPropertySetAddModule(&initialValues, XN_MODULE_NAME_DEVICE);
+		XN_IS_STATUS_OK(nRetVal);
+
+		for (int i = 0; mode[i] != '\0'; ++i)
+		{
+			switch (mode[i])
+			{
+			case 'L':
+				nRetVal = XnPropertySetAddIntProperty(&initialValues, XN_MODULE_NAME_DEVICE, XN_MODULE_PROPERTY_LEAN_INIT, TRUE);
+				XN_IS_STATUS_OK(nRetVal);
+				break;
+			case 'R':
+				nRetVal = XnPropertySetAddIntProperty(&initialValues, XN_MODULE_NAME_DEVICE, XN_MODULE_PROPERTY_RESET_SENSOR_ON_STARTUP, FALSE);
+				XN_IS_STATUS_OK(nRetVal);
+				break;
+			}
+		}
+	}
+
 	XnDeviceConfig config;
 	config.cpConnectionString = m_info.uri;
-	config.pInitialValues = NULL;
+	config.pInitialValues = &initialValues;
 	XnStatus retVal = m_sensor.Init(&config);
 	XN_IS_STATUS_OK(retVal);
 
-	return FillSupportedVideoModes();
+	nRetVal = FillSupportedVideoModes();
+	XN_IS_STATUS_OK(nRetVal);
+
+	return XN_STATUS_OK;
 }
 
 OniStatus XnOniDevice::getSensorInfoList(OniSensorInfo** pSensors, int* numSensors)
@@ -369,6 +398,7 @@ OniStatus XnOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 		XnStatus nRetVal = m_sensor.DeviceModule()->GetProperty(propertyId, data, pDataSize);
 		if (nRetVal != XN_STATUS_OK)
 		{
+			m_driverServices.errorLoggerAppend("Failed to set property %x: %s", propertyId, xnGetStatusString(nRetVal));
 			return ONI_STATUS_BAD_PARAMETER;
 		}
 	}
@@ -413,6 +443,7 @@ OniStatus XnOniDevice::setProperty(int propertyId, const void* data, int dataSiz
 		XnStatus nRetVal = m_sensor.DeviceModule()->SetProperty(propertyId, data, dataSize);
 		if (nRetVal != XN_STATUS_OK)
 		{
+			m_driverServices.errorLoggerAppend("Failed to set property %x: %s", propertyId, xnGetStatusString(nRetVal));
 			return ONI_STATUS_BAD_PARAMETER;
 		}
 	}

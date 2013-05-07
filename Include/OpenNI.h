@@ -1580,6 +1580,9 @@ public:
 		return oniDeviceIsCommandSupported(m_device, commandId) == TRUE;
 	}
 
+	/** @internal **/
+	inline Status _openEx(const char* uri, const char* mode);
+
 private:
 	Device(const Device&);
 	Device& operator=(const Device&);
@@ -2643,6 +2646,35 @@ Status Device::open(const char* uri)
 
 	OniDeviceHandle deviceHandle;
 	Status rc = (Status)oniDeviceOpen(uri, &deviceHandle);
+	if (rc != STATUS_OK)
+	{
+		return rc;
+	}
+
+	_setHandle(deviceHandle);
+
+	if (isFile())
+	{
+		m_pPlaybackControl = new PlaybackControl(this);
+	}
+
+	return STATUS_OK;
+}
+
+Status Device::_openEx(const char* uri, const char* mode)
+{
+	//If we are not the owners, we stick with our own device
+	if(!m_isOwner)
+	{
+		if(isValid()){
+			return STATUS_OK;
+		}else{
+			return STATUS_OUT_OF_FLOW;
+		}
+	}
+
+	OniDeviceHandle deviceHandle;
+	Status rc = (Status)oniDeviceOpenEx(uri, mode, &deviceHandle);
 	if (rc != STATUS_OK)
 	{
 		return rc;

@@ -50,11 +50,11 @@ Device::~Device()
 	m_pInfo = NULL;
 }
 
-OniStatus Device::open()
+OniStatus Device::open(const char* mode)
 {
 	if (m_openCount == 0)
 	{
-		m_deviceHandle = m_driverHandler.deviceOpen(m_pInfo->uri);
+		m_deviceHandle = m_driverHandler.deviceOpen(m_pInfo->uri, mode);
 		if (m_deviceHandle == NULL)
 		{
 			return ONI_STATUS_ERROR;
@@ -132,7 +132,7 @@ OniStatus oni::implementation::Device::setProperty(int propertyId, const void* d
 	OniStatus rc = m_driverHandler.deviceSetProperty(m_deviceHandle, propertyId, data, dataSize);
 	if (rc != ONI_STATUS_OK)
 	{
-		m_errorLogger.Append("Device setProperty(%d) failed\n", propertyId);
+		m_errorLogger.Append("Device.setProperty(%x) failed\n", propertyId);
 	}
 	return rc;
 }
@@ -141,7 +141,7 @@ OniStatus oni::implementation::Device::getProperty(int propertyId, void* data, i
 	OniStatus rc = m_driverHandler.deviceGetProperty(m_deviceHandle, propertyId, data, pDataSize);
 	if (rc != ONI_STATUS_OK)
 	{
-		m_errorLogger.Append("Device getProperty(%d) failed\n", propertyId);
+		m_errorLogger.Append("Device.getProperty(%x) failed\n", propertyId);
 	}
 	return rc;
 }

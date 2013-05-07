@@ -101,7 +101,7 @@ void LinkOniDriver::shutdown()
 	LinkDeviceEnumeration::Shutdown();
 }
 
-oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri)
+oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri, const char* /*mode*/)
 {
 	LinkOniDevice* pDevice = NULL;
 

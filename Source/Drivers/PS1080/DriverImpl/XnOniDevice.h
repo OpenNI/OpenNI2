@@ -45,7 +45,7 @@ public:
 	XnOniDevice(const char* uri, oni::driver::DriverServices& driverServices, XnOniDriver* pDriver);
 	virtual ~XnOniDevice();
 
-	XnStatus Init();
+	XnStatus Init(const char* mode);
 
 	OniDeviceInfo* GetInfo() { return &m_info; }
 

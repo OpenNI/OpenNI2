@@ -64,7 +64,7 @@ OniStatus KinectDriver::initialize(DeviceConnectedCallback connectedCallback, De
 	return ONI_STATUS_OK;
 }
 
-DeviceBase* KinectDriver::deviceOpen(const char* uri)
+DeviceBase* KinectDriver::deviceOpen(const char* uri, const char* /*mode*/)
 {
 	for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
 	{

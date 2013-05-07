@@ -42,7 +42,7 @@ public:
 
     /// @copydoc OniDriverBase::DeviceOpen(const char*)
     /// @todo Document it.
-    oni::driver::DeviceBase* deviceOpen(const char* strUri);
+    oni::driver::DeviceBase* deviceOpen(const char* strUri, const char* mode);
 
 	void deviceClose(oni::driver::DeviceBase* pDevice);
 

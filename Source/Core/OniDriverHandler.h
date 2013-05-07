@@ -50,7 +50,7 @@ struct Funcs
 	OniStatus (ONI_C_DECL* oniDriverTryDevice)(const char* uri);
 
 	// As Device
-	void* (ONI_C_DECL* oniDriverDeviceOpen)(const char* uri);
+	void* (ONI_C_DECL* oniDriverDeviceOpen)(const char* uri, const char* mode);
 	void (ONI_C_DECL* oniDriverDeviceClose)(void* deviceHandle);
 
 	OniStatus (ONI_C_DECL* oniDriverDeviceGetSensorInfoList)(void* deviceHandle, OniSensorInfo** pSensors, int* numSensors);
@@ -118,9 +118,9 @@ public:
 		return (*funcs.oniDriverTryDevice)(uri);
 	}
 
-	void* deviceOpen(const char* uri) const 
+	void* deviceOpen(const char* uri, const char* mode) const 
 	{
-		return (*funcs.oniDriverDeviceOpen)(uri);
+		return (*funcs.oniDriverDeviceOpen)(uri, mode);
 	}
 	void deviceClose(void* deviceHandle) const 
 	{
