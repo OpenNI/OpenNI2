@@ -412,6 +412,21 @@ typedef enum XnBistError
 	XN_TEC_TEST_TEC_FAULT = 1 << 23,
 } XnBistError;
 
+typedef enum XnDepthCMOSType
+{
+	XN_DEPTH_CMOS_NONE = 0,
+	XN_DEPTH_CMOS_MT9M001 = 1,
+	XN_DEPTH_CMOS_AR130 = 2,
+} XnDepthCMOSType;
+
+typedef enum XnImageCMOSType
+{
+	XN_IMAGE_CMOS_NONE = 0,
+	XN_IMAGE_CMOS_MT9M112 = 1,
+	XN_IMAGE_CMOS_MT9D131 = 2,
+	XN_IMAGE_CMOS_MT9M114 = 3,
+} XnImageCMOSType;
+
 #define XN_IO_MAX_I2C_BUFFER_SIZE 10
 #define XN_MAX_LOG_SIZE	(6*1024)
 
