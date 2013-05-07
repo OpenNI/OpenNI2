@@ -11,7 +11,7 @@ SRC_FILES = \
 	*.cpp \
 
 LIB_DIRS = ../../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = XnLib dl pthread
+USED_LIBS = XnLib OpenNI2 dl pthread
 
 ifeq ("$(OSTYPE)","Darwin")
 	INC_DIRS += /opt/local/include
