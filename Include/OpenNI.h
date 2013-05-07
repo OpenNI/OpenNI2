@@ -1595,21 +1595,7 @@ private:
 		}
 	}
 
-	Status _setHandle(OniDeviceHandle deviceHandle)
-	{
-		if (m_device == NULL)
-		{
-			m_device = deviceHandle;
-
-			clearSensors();
-
-			oniDeviceGetInfo(m_device, &m_deviceInfo);
-			// Read deviceInfo
-			return STATUS_OK;
-		}
-
-		return STATUS_OUT_OF_FLOW;
-	}
+	inline Status _setHandle(OniDeviceHandle deviceHandle);
 
 private:
 	PlaybackControl* m_pPlaybackControl;
@@ -2653,11 +2639,6 @@ Status Device::open(const char* uri)
 
 	_setHandle(deviceHandle);
 
-	if (isFile())
-	{
-		m_pPlaybackControl = new PlaybackControl(this);
-	}
-
 	return STATUS_OK;
 }
 
@@ -2682,12 +2663,29 @@ Status Device::_openEx(const char* uri, const char* mode)
 
 	_setHandle(deviceHandle);
 
-	if (isFile())
+	return STATUS_OK;
+}
+
+Status Device::_setHandle(OniDeviceHandle deviceHandle)
+{
+	if (m_device == NULL)
 	{
-		m_pPlaybackControl = new PlaybackControl(this);
+		m_device = deviceHandle;
+
+		clearSensors();
+
+		oniDeviceGetInfo(m_device, &m_deviceInfo);
+
+		if (isFile())
+		{
+			m_pPlaybackControl = new PlaybackControl(this);
+		}
+
+		// Read deviceInfo
+		return STATUS_OK;
 	}
 
-	return STATUS_OK;
+	return STATUS_OUT_OF_FLOW;
 }
 
 void Device::close()
