@@ -66,7 +66,7 @@ public:
 	virtual const OniCropping& GetCropping() const;
 	virtual XnStatus SetCropping(OniCropping cropping);
 
-	virtual void GetFieldOfView(XnFloat* pHFOV, XnFloat* pVFOV) const { if (pHFOV) *pHFOV = m_fVFOV; if (pVFOV) *pVFOV = m_fVFOV; }
+	virtual void GetFieldOfView(XnFloat* pHFOV, XnFloat* pVFOV) const { if (pHFOV) *pHFOV = m_fHFOV; if (pVFOV) *pVFOV = m_fVFOV; }
 
 protected:
 	virtual XnStatus StartImpl();
