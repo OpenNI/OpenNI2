@@ -191,6 +191,8 @@ class Harvest:
         else:
             shutil.copytree(os.path.join(self.rootDir, 'Source', 'Documentation', 'html'), docDir)
             
+        shutil.copytree(os.path.join(self.rootDir, 'Source', 'Documentation', 'java'), os.path.join(docDir, 'java'))
+            
     def copyGLUT(self, targetDir):
         if self.osName == 'Windows':
             shutil.copy(os.path.join(rootDir, 'ThirdParty', 'GL', 'glut' + self.glutSuffix + '.dll'), targetDir)
