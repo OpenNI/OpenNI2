@@ -38,9 +38,15 @@ if platform.system() == 'Windows':
 else:
     javaDocExe = 'javadoc'
 
-javaSrc = os.path.join(scriptDir, '..', '..', 'Wrappers', 'java', 'OpenNI.java', 'src', 'org', 'openni', '*')
+javaSrc = os.path.join(scriptDir, '..', '..', 'Wrappers', 'java', 'OpenNI.java', 'src', 'org', 'openni')
+
+# workaround a strange linux behavior where you must pass the list of files
+cmd = [javaDocExe, '-d', 'java']
+for root, dirs, files in os.walk(javaSrc):
+    for file in files:
+        cmd.append(os.path.join(root, file))
 
 errfile = "Temp/javadoc_error"
-subprocess.check_call([javaDocExe, '-d', 'java', javaSrc], stdout=open(os.devnull,"w"), stderr=open(errfile,"w"))
+subprocess.check_call(cmd, stdout=open(os.devnull,"w"), stderr=open(errfile,"w"))
 
 os.chdir(beforeDir)
