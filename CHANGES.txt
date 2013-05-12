@@ -3,12 +3,15 @@ Change Log:
 
 OpenNI 2.2.0:
   - Added getDepthColorSyncEnabled() API
+  - Added log settings API
   - Add a typedef: OniGrayscale8Pixel
   - invoke() method signature was updated - data is no longer const
   - New Java Wrappers
   - New Java sample: SimpleViewer.java
   - Add support for Capri devkits
+  - Added tools: PS1080Console and PSLinkConsole (for debugging purposes)
   - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
+  - Image registration support for Kinect driver (merge pull request #4. See https://github.com/OpenNI/OpenNI2/pull/4 for details. Thanks to Tomoto)
   - Completely re-wrote frame buffers management. 
   - Added API for replacing frame buffer allocator.
   - Linux: implement connect/disconnect events
@@ -21,6 +24,8 @@ OpenNI 2.2.0:
   - PS1080: add lots of debug commands
   - PS1080: add new file type (vendor data)
   - PS1080: added support for the second alternative interface (low-bandwidth)
+  - PS1080: added support for IR stream from the AR130 CMOS
+  - PS1080: added support for turning on/off emitter
   - Bug Fixes:
     - Bug Fix: reading frames / waiting on streams did not work well from multiple threads
     - Bug Fix: Failed to use after OpenCL was initialized
