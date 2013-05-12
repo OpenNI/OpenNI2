@@ -84,6 +84,7 @@
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductShortName)" >
           <Directory Id="DocumentationMenu" Name="Documentation" />
           <Directory Id="SamplesMenu" Name="Samples" />
+          <Directory Id="ToolsMenu" Name="Tools" />
         </Directory>
       </Directory>
 
@@ -103,16 +104,21 @@
         <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
         <RemoveFolder Id="RemoveSamples" Directory="SamplesMenu" On="uninstall" />
         <RemoveFolder Id="RemoveDocumentation" Directory="DocumentationMenu" On="uninstall" />
+        <RemoveFolder Id="RemoveTools" Directory="ToolsMenu" On="uninstall" />
 
         <Shortcut Id="SimpleViewer" Name="SimpleViewer" Target="[SamplesBin]SimpleViewer.exe" 
                   WorkingDirectory="SamplesBin" Directory="SamplesMenu" />
         <Shortcut Id="SimpleRead" Name="SimpleRead" Target="[SamplesBin]SimpleRead.exe" 
                   WorkingDirectory="SamplesBin" Directory="SamplesMenu" />
+        <Shortcut Id="SamplesDir" Name="Samples Directory" Target="[Samples]"
+                  WorkingDirectory="Samples" Directory="SamplesMenu" />
 
         <Shortcut Id="OpenNIHelp" Name="OpenNI 2.0 Documentation" Target="[Documentation]OpenNI.chm" 
                   WorkingDirectory="DocumentationMenu" Directory="DocumentationMenu" />
 
-        <Shortcut Id="NiViewer" Name="NiViewer" Target="[Tools]NiViewer.exe" WorkingDirectory="Tools" />
+        <Shortcut Id="NiViewer" Name="NiViewer" Target="[Tools]NiViewer.exe" 
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
+
 
         <Shortcut Id="PrimeConsole" Name="PrimeConsole" Target="[Tools]PrimeConsole.exe" WorkingDirectory="Tools" />
 
