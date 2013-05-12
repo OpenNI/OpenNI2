@@ -55,6 +55,9 @@ XnStatus LinkOniMapStream::Init()
 	nRetVal = FillSupportedVideoModes();
 	XN_IS_STATUS_OK(nRetVal);
 
+	nRetVal = SetMirror(TRUE);
+	XN_IS_STATUS_OK(nRetVal);
+
 	return (XN_STATUS_OK);
 }
 
@@ -115,7 +118,7 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 		
 		case ONI_STREAM_PROPERTY_MIRRORING:
 			EXACT_PROP_SIZE(dataSize, OniBool);
-			nRetVal = SetMirror((OniBool*)data);
+			nRetVal = SetMirror(*(OniBool*)data);
 			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 			break;
 		
@@ -130,7 +133,8 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 				ENSURE_PROP_SIZE(dataSize, XnLinkPixelFormat);
 				XnStreamVideoMode mode = m_pInputStream->GetVideoMode();
 				mode.m_nPixelFormat = *(XnLinkPixelFormat*)data;
-				m_pInputStream->SetVideoMode(mode);
+				nRetVal = m_pInputStream->SetVideoMode(mode);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
 			}
 
@@ -139,7 +143,8 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 				ENSURE_PROP_SIZE(dataSize, XnLinkCompressionType);
 				XnStreamVideoMode mode = m_pInputStream->GetVideoMode();
 				mode.m_nCompression = *(XnLinkCompressionType*)data;
-				m_pInputStream->SetVideoMode(mode);
+				nRetVal = m_pInputStream->SetVideoMode(mode);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
 			}
 
@@ -268,10 +273,9 @@ XnStatus LinkOniMapStream::GetMirror(OniBool* pEnabled)
 	return (XN_STATUS_OK);
 }
 
-XnStatus LinkOniMapStream::SetMirror(OniBool* pEnabled)
+XnStatus LinkOniMapStream::SetMirror(OniBool enabled)
 {
-	m_pInputStream->SetMirror((XnBool)*pEnabled);
-	return (XN_STATUS_OK);
+	return m_pInputStream->SetMirror((XnBool)enabled);
 }
 
 XnStatus LinkOniMapStream::GetCropping(OniCropping &cropping)
@@ -283,7 +287,6 @@ XnStatus LinkOniMapStream::GetCropping(OniCropping &cropping)
 
 XnStatus LinkOniMapStream::SetCropping(const OniCropping &cropping)
 {
-	m_pInputStream->SetCropping(cropping);
-	return (XN_STATUS_OK);
+	return m_pInputStream->SetCropping(cropping);
 }
 

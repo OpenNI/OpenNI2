@@ -47,7 +47,7 @@ public:
 	XnStatus SetVideoMode(OniVideoMode* pVideoMode);
 
 	XnStatus GetMirror(OniBool* pEnabled);
-	XnStatus SetMirror(OniBool* pEnabled);
+	XnStatus SetMirror(OniBool enabled);
 
 	XnStatus GetCropping(OniCropping &cropping);
 	XnStatus SetCropping(const OniCropping &cropping);
