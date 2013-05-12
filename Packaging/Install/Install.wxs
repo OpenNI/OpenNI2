@@ -81,7 +81,7 @@
 
       <!-- Start Menu -->
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductShortName)" >
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductShortName) $(var.MajorVersion)" >
           <Directory Id="DocumentationMenu" Name="Documentation" />
           <Directory Id="SamplesMenu" Name="Samples" />
           <Directory Id="ToolsMenu" Name="Tools" />
@@ -113,14 +113,19 @@
         <Shortcut Id="SamplesDir" Name="Samples Directory" Target="[Samples]"
                   WorkingDirectory="Samples" Directory="SamplesMenu" />
 
-        <Shortcut Id="OpenNIHelp" Name="OpenNI 2.0 Documentation" Target="[Documentation]OpenNI.chm" 
+        <Shortcut Id="OpenNIHelp" Name="OpenNI $(var.MajorVersion).$(var.MinorVersion) Documentation" Target="[Documentation]OpenNI.chm" 
+                  WorkingDirectory="DocumentationMenu" Directory="DocumentationMenu" />
+
                   WorkingDirectory="DocumentationMenu" Directory="DocumentationMenu" />
 
         <Shortcut Id="NiViewer" Name="NiViewer" Target="[Tools]NiViewer.exe" 
                   WorkingDirectory="Tools" Directory="ToolsMenu" />
 
+        <Shortcut Id="PS1080Console" Name="PS1080Console" Target="[Tools]PS1080Console.exe"
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
 
-        <Shortcut Id="PrimeConsole" Name="PrimeConsole" Target="[Tools]PrimeConsole.exe" WorkingDirectory="Tools" />
+        <Shortcut Id="PSLinkConsole" Name="PSLinkConsole" Target="[Tools]PSLinkConsole.exe"
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
 
         <Shortcut Id="UninstallProduct" Name="Uninstall OpenNI" Target="[SystemFolder]msiexec.exe"
               Arguments="/x [ProductCode]" Directory="ApplicationProgramsFolder"/>

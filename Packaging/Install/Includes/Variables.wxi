@@ -18,13 +18,11 @@
   -->
   <?define ResourcesDir="$(var.SolutionDir)\Packaging\Install\Resources" ?>
 
-  <?define MinOpenNIVersion="1.0.0"?>
-
   <?if $(var.Platform)="x86"?>
   <?define PlatformSuffix=""?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
-  <?define ProductFullName=!(loc.ProductName) $(var.VersionNumber) !(loc.ProductNameSuffix)?>
+  <?define ProductFullName=!(loc.ProductName) $(var.MajorVersion).$(var.MinorVersion).$(var.MaintenanceVersion) !(loc.ProductNameSuffix)?>
   <?define ProductShortName=!(loc.ProductName)?>
   <?define OpenNI2ProductId="1D46409B-59CA-4C19-9C45-558CDC40DBB3" ?>
   <?define UpgradeCode="C3CFE8A9-C65C-460F-8D36-F6B1501EC46B" ?>
@@ -34,7 +32,7 @@
   <?define PlatformSuffix="64"?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
-  <?define ProductFullName=!(loc.ProductName) $(var.VersionNumber) !(loc.ProductNameSuffix) !(loc.ProductName64Suffix)?>
+  <?define ProductFullName=!(loc.ProductName) $(var.MajorVersion).$(var.MinorVersion).$(var.MaintenanceVersion) !(loc.ProductNameSuffix) !(loc.ProductName64Suffix)?>
   <?define ProductShortName=!(loc.ProductName) !(loc.ProductName64Suffix)?>
   <?define OpenNI2ProductId="77BCECDE-CB4F-4458-8CF4-42E23221D3B0" ?>
   <?define UpgradeCode="5740E5A0-316A-463E-AB73-B6891EDD9421"  ?>

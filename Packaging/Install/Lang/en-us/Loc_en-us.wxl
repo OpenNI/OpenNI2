@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization" Codepage="1252">
   <String Id="LANG">1033</String>
-  <String Id="ProductName">OpenNI2</String>
+  <String Id="ProductName">OpenNI</String>
   <String Id="ProductNameSuffix">for Windows</String>
   <String Id="ProductName64Suffix">64-bit</String>
   <!--<String Id="LicenseRtf" Overridable="yes">\Lang\en-us\EULA_en-us.rtf</String> -->
