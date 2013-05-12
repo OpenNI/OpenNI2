@@ -29,9 +29,9 @@ public class Device {
    * select a specific device to open. There are two ways to obtain a URI: from a DeviceConnected
    * event, or by calling {@link org.openni.OpenNI#enumerateDevices()}.
    * 
-   * In the case of a DeviceConnected event, the {@link OpenNI.IDeviceConnectedListener} will be
+   * In the case of a DeviceConnected event, the {@link OpenNI.DeviceConnectedListener} will be
    * provided with a DeviceInfo object as an argument to its {}
-   * {@link OpenNI.IDeviceConnectedListener#onDeviceConnected(DeviceInfo)} function. The
+   * {@link OpenNI.DeviceConnectedListener#onDeviceConnected(DeviceInfo)} function. The
    * {@link org.openni.DeviceInfo#getUri()} function can then be used to obtain the URI.
    * 
    * If the application is not using event handlers, then it can also call the static function
