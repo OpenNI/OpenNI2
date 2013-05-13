@@ -27,11 +27,12 @@
 #include "XnMemory.h"
 #include "OniProperties.h"
 #include "XnPlatform.h"
+#include <XnLog.h>
 
 namespace oni_file {
 
 PlayerStream::PlayerStream(PlayerSource* pSource) :
-	m_pSource(pSource), m_pLastFrame(NULL), m_newDataHandle(NULL), m_isStarted(false)
+	m_pSource(pSource), m_pLastFrame(NULL), m_newDataHandle(NULL), m_isStarted(false), m_requiredFrameSize(0)
 {
 }
 
@@ -84,6 +85,7 @@ void PlayerStream::destroy()
 OniStatus PlayerStream::start()
 {
 	m_isStarted = true;
+	m_requiredFrameSize = getRequiredFrameSize();
 	return ONI_STATUS_OK;
 }
 
@@ -239,6 +241,12 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 	pFrame->sensorType = pStream->m_pSource->GetInfo()->sensorType;
 	pFrame->timestamp = newDataEventArgs.nTimeStamp;
 	pFrame->dataSize = newDataEventArgs.nSize;
+	if (pFrame->dataSize > pStream->m_requiredFrameSize)
+	{
+		xnLogWarning("Player", "File contains a frame with size %d whereas required frame size is %d", pFrame->dataSize, pStream->m_requiredFrameSize);
+		XN_ASSERT(FALSE);
+		pFrame->dataSize = pStream->m_requiredFrameSize;
+	}
 	memcpy(pFrame->data, newDataEventArgs.pData, pFrame->dataSize);
 
 	pStream->m_cs.Unlock();
@@ -246,6 +254,18 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 	// Process the new frame.
 	pStream->raiseNewFrame(pStream->m_pLastFrame);
 	pStream->m_pLastFrame = NULL;
+}
+
+int PlayerStream::getRequiredFrameSize()
+{
+	int requiredFrameSize = m_pSource->GetRequiredFrameSize();
+	if (requiredFrameSize == 0)
+	{
+		// not set for some reason, use default one
+		requiredFrameSize = StreamBase::getRequiredFrameSize();
+	}
+
+	return requiredFrameSize;
 }
 
 } // namespace oni_files_player

@@ -88,6 +88,8 @@ public:
 	OniStatus convertWorldToDepthCoordinates(float worldX, float worldY, float worldZ, float* pDepthX, float* pDepthY, float* pDepthZ);
 	OniStatus convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
+	int getRequiredFrameSize();
+
 protected:
 	XN_EVENT_HANDLE m_newFrameInternalEvent;
 	XN_EVENT_HANDLE m_newFrameInternalEventForFrameHolder;

@@ -28,7 +28,8 @@ namespace oni_file {
 
 /// Constructor.
 PlayerSource::PlayerSource(const XnChar* strNodeName, OniSensorType sensorType) :
-	m_nodeName(strNodeName)
+	m_nodeName(strNodeName),
+	m_requiredFrameSize(0)
 {
 	m_sourceInfo.sensorType = sensorType;
 	m_sourceInfo.numSupportedVideoModes = 0;

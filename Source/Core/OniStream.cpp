@@ -130,7 +130,7 @@ OniStatus VideoStream::start()
 		xnl::AutoCSLocker lock(m_pSensor->m_refCountCS);
 		if (m_pSensor->m_startedStreamCount == 0)
 		{
-			int requiredFrameSize = m_driverHandler.streamGetRequiredFrameSize(m_pSensor->streamHandle());
+			int requiredFrameSize = getRequiredFrameSize();
 			m_pSensor->setRequiredFrameSize(requiredFrameSize);
 
 			OniStatus rc = m_driverHandler.streamStart(m_pSensor->streamHandle());
@@ -529,6 +529,11 @@ void ONI_CALLBACK_TYPE VideoStream::releaseFrameCallback(void* streamServices, O
 {
 	VideoStream* pThis = (VideoStream*)streamServices;
 	return pThis->releaseFrame(pFrame);
+}
+
+int VideoStream::getRequiredFrameSize()
+{
+	return m_driverHandler.streamGetRequiredFrameSize(m_pSensor->streamHandle());
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

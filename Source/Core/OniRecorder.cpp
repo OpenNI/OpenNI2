@@ -715,6 +715,15 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
         ))
     undoPoint.Reuse();
 
+	// required data size (for cases where data is larger than video mode)
+	EMIT(RECORD_INT_PROPERTY(
+		nodeId,
+		getLastPropertyRecordPos(nodeId, "oniRequiredFrameSize", undoPoint.GetPosition()),
+		"oniRequiredFrameSize",
+		pStream->getRequiredFrameSize()
+		));
+	undoPoint.Reuse();
+
 	// isGenerating (needed for OpenNI 1.x playback)
 	EMIT(RECORD_INT_PROPERTY(
 		nodeId,

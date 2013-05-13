@@ -83,6 +83,9 @@ public:
 	// Unregister from new data event.
 	void UnregisterNewDataEvent(OniCallbackHandle handle);
 
+	void SetRequiredFrameSize(int requiredFrameSize) { m_requiredFrameSize = requiredFrameSize; }
+	int GetRequiredFrameSize() const { return m_requiredFrameSize; }
+
 protected:
 	XN_DISABLE_COPY_AND_ASSIGN(PlayerSource);
 
@@ -97,6 +100,8 @@ protected:
 
 	// Data ready event.
 	NewDataEvent m_newDataEvent;
+
+	int m_requiredFrameSize;
 };
 
 } // namespace oni_files_player

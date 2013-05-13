@@ -67,6 +67,8 @@ public:
     /// Initialize the stream object.
     OniStatus Initialize();
 
+	virtual int getRequiredFrameSize();
+	
     /// @copydoc OniStreamBase::start()
     virtual OniStatus start();
 
@@ -135,6 +137,8 @@ private:
 
 	// Are we streaming right now?
 	bool m_isStarted;
+
+	int m_requiredFrameSize;
 };
 
 } // namespace oni_files_player
