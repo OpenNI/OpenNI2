@@ -4,7 +4,7 @@ May 12 2013
 Minimum Requirements:
 ---------------------
 - Operating Systems: 
-  - Windows XP (32/64) with SP2 and above, Windows 7 (32/64)
+  - Windows XP with SP2 and above, Windows 7, Windows 8, on x86 (32/64 bit)
   - Ubuntu 12.04 (32/64/arm) and above
   - Android 2.3 and above
   - Mac OSX 10.7 and above
