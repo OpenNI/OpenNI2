@@ -25,8 +25,6 @@ enum
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
 	/* Int. Set only */
 	LINK_PROP_FORMAT_ZONE = 0x1200000f, // "FormatZone"
-	/* String, get only */
-	LINK_PROP_SERIAL_NUMBER = 0x12000010, // "ID"
 
 	/**** Stream properties ****/
 	/* Int. 1 - Shifts 9.3, 2 - Grayscale16, 3 - YUV422, 4 - Bayer8 */
