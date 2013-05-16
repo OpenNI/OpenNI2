@@ -51,6 +51,7 @@ Device::~Device()
 	{
 		close();
 	}
+
 	XN_DELETE(m_pInfo);
 	m_pInfo = NULL;
 }
@@ -76,6 +77,15 @@ OniStatus Device::close()
 
 	if (m_openCount == 0)
 	{
+		for (int i = 0; i < MAX_SENSORS_PER_DEVICE; ++i)
+		{
+			if (m_sensors[i] != NULL)
+			{
+				XN_DELETE(m_sensors[i]);
+				m_sensors[i] = NULL;
+			}
+		}
+
 		if (m_deviceHandle != NULL)
 		{
 			m_driverHandler.deviceClose(m_deviceHandle);
@@ -116,7 +126,7 @@ VideoStream* Device::createStream(OniSensorType sensorType)
 	}
 
 	// make sure our sensor array is big enough
-	if (sensorType >= sizeof(m_sensors))
+	if (sensorType >= MAX_SENSORS_PER_DEVICE)
 	{
 		xnLogError(XN_MASK_ONI_DEVICE, "Internal error!");
 		m_errorLogger.Append("Device: Can't find this source %d", sensorType);

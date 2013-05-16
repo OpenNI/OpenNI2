@@ -98,7 +98,8 @@ private:
 	OniFrameSyncHandle m_depthColorSyncHandle;
 	Context* m_pContext;
 	OniBool m_syncEnabled;
-	Sensor* m_sensors[10];
+	enum { MAX_SENSORS_PER_DEVICE = 10 };
+	Sensor* m_sensors[MAX_SENSORS_PER_DEVICE];
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END
