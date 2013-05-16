@@ -130,7 +130,6 @@ private:
 	xnl::List<oni::implementation::VideoStream*> m_streams;
     xnl::List<oni::implementation::Recorder*> m_recorders;
 
-	xnl::Hash<oni::implementation::Device*, OniDeviceHandle> m_deviceToHandle;
 	xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE> m_waitingThreads;
 
 	xnl::CriticalSection m_cs;

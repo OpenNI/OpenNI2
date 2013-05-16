@@ -453,7 +453,6 @@ OniStatus Context::deviceOpen(const char* uri, const char* mode, OniDeviceHandle
 	}
 	*pDevice = pDeviceHandle;
 	pDeviceHandle->pDevice = pMyDevice;
-	m_deviceToHandle[pMyDevice] = pDeviceHandle;
 
 	return pMyDevice->open(mode);
 }
