@@ -451,13 +451,20 @@ OniStatus XnOniDevice::setProperty(int propertyId, const void* data, int dataSiz
 }
 OniBool XnOniDevice::isPropertySupported(int propertyId)
 {
-	XnBool propertyExists = FALSE;
-	m_sensor.DeviceModule()->DoesPropertyExist(propertyId, &propertyExists);
-
-	return (propertyId == ONI_DEVICE_PROPERTY_DRIVER_VERSION ||
+	if (propertyId == ONI_DEVICE_PROPERTY_DRIVER_VERSION ||
 		propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION ||
-		propertyExists);
-		
+		propertyId == ONI_DEVICE_PROPERTY_FIRMWARE_VERSION ||
+		propertyId == ONI_DEVICE_PROPERTY_HARDWARE_VERSION ||
+		propertyId == ONI_DEVICE_PROPERTY_SERIAL_NUMBER)
+	{
+		return TRUE;
+	}
+	else
+	{
+		XnBool propertyExists = FALSE;
+		m_sensor.DeviceModule()->DoesPropertyExist(propertyId, &propertyExists);
+		return propertyExists;
+	}
 }
 
 void XnOniDevice::notifyAllProperties()
