@@ -268,8 +268,7 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 		}
 	}
 
-	XnUInt32 nFrameSize = nXRes * nYRes * GetStream()->GetBytesPerPixel();
-	XnUInt32 nExpectedBufferSize = nFrameSize;
+	XnUInt32 nExpectedBufferSize = nXRes * nYRes * GetStream()->GetBytesPerPixel();
 
 	if (GetWriteBuffer()->GetSize() != nExpectedBufferSize)
 	{
@@ -277,8 +276,8 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 		FrameIsCorrupted();
 	}
 
-	// don't report additional rows out
-	GetWriteBuffer()->UnsafeSetSize(nFrameSize);
+	// don't report additional rows out (so we're not using the expected buffer size)
+	GetWriteBuffer()->UnsafeSetSize(GetStream()->GetXRes() * GetStream()->GetYRes() * GetStream()->GetBytesPerPixel());
 
 	OniFrame* pFrame = GetWriteFrame();
 	pFrame->sensorType = ONI_SENSOR_IR;
