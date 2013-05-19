@@ -126,7 +126,7 @@ VideoStream* Device::createStream(OniSensorType sensorType)
 	}
 
 	// make sure our sensor array is big enough
-	if (sensorType >= MAX_SENSORS_PER_DEVICE)
+	if ((int)sensorType >= MAX_SENSORS_PER_DEVICE)
 	{
 		xnLogError(XN_MASK_ONI_DEVICE, "Internal error!");
 		m_errorLogger.Append("Device: Can't find this source %d", sensorType);
