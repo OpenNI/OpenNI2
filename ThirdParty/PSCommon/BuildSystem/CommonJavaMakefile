@@ -24,7 +24,7 @@ space := $(nullstring) # end of the line
 
 USED_JARS_OPTION =
 ifneq "$(USED_JARS)" ""
-	USED_JARS_PATH = $(foreach jar, $(USED_JARS), $(OUT_DIR)/$(jar).jar /usr/share/java/$(jar).jar)
+	USED_JARS_PATH = $(foreach jar, $(USED_JARS), $(OUT_DIR)/$(jar).jar)
 	USED_JARS_OPTION = -cp $(subst $(space),:,$(strip $(USED_JARS_PATH)))
 endif
 
@@ -43,7 +43,7 @@ ifneq (, $(if $(or $(MAIN_CLASS), $(USED_JARS)),1))
 		JAR_MANIFEST_CREATE_COMMAND += echo "Main-Class: $(MAIN_CLASS)";
 	endif
 	ifneq (,$(USED_JARS))
-		JAR_MANIFEST_CREATE_COMMAND += echo "Class-Path: $(USED_JARS_PATH)";
+		JAR_MANIFEST_CREATE_COMMAND += echo "Class-Path: $(foreach jar, $(USED_JARS), $(jar).jar)";
 	endif
 	JAR_MANIFEST_CREATE_COMMAND += ) > $(MANIFEST_FILE)
 endif
@@ -51,7 +51,7 @@ endif
 CREATE_SHORTCUT = 
 ifneq (, $(MAIN_CLASS))
 	SHORTCUT = $(OUT_DIR)/$(JAR_NAME)
-	CREATE_SHORTCUT = echo LD_LIBRARY_PATH=. java -Djava.library.path=. -jar $(OUTPUT_NAME) > $(SHORTCUT); chmod +x $(SHORTCUT)
+	CREATE_SHORTCUT = echo LD_LIBRARY_PATH=. java -jar $(OUTPUT_NAME) > $(SHORTCUT); chmod +x $(SHORTCUT)
 endif
 
 #############################################################################
