@@ -988,10 +988,7 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeNewData(void* pCookie, const XnCha
 				if (pStream->GetSource() == pSource)
 				{
 					hasStreams = TRUE;
-					if (pStream->IsReadyForData())
-					{
-						ready = TRUE;
-					}
+					ready = TRUE;
 					break;
 				}
 			}

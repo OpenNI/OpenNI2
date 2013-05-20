@@ -32,7 +32,7 @@
 namespace oni_file {
 
 PlayerStream::PlayerStream(PlayerSource* pSource) :
-	m_pSource(pSource), m_pLastFrame(NULL), m_newDataHandle(NULL), m_isStarted(false), m_requiredFrameSize(0)
+	m_pSource(pSource), m_newDataHandle(NULL), m_isStarted(false), m_requiredFrameSize(0)
 {
 }
 
@@ -41,15 +41,6 @@ PlayerStream::~PlayerStream()
 {
 	// Destroy the stream (if it was not destroyed before).
 	destroy();
-
-	// Release last frame.
-	m_cs.Lock();
-	if (m_pLastFrame != NULL)
-	{
-		getServices().releaseFrame(m_pLastFrame);
-		m_pLastFrame = NULL;
-	}
-	m_cs.Unlock();
 }
 
 OniStatus PlayerStream::Initialize()
@@ -92,11 +83,6 @@ OniStatus PlayerStream::start()
 void PlayerStream::stop()
 {
 	m_isStarted = false;
-}
-
-OniBool PlayerStream::IsReadyForData()
-{
-	return (m_pLastFrame == NULL) ? TRUE : FALSE;
 }
 
 PlayerSource* PlayerStream::GetSource()
@@ -196,20 +182,12 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 
 	pStream->m_cs.Lock();
 
-	// Release last frame (if exists).
-	if (pStream->m_pLastFrame != NULL)
-	{
-		pStream->getServices().releaseFrame(pStream->m_pLastFrame);
-	}
-
 	// Allocate new frame and fill it.
-	pStream->m_pLastFrame = pStream->getServices().acquireFrame();
-	if (pStream->m_pLastFrame == NULL)
+	OniFrame* pFrame = pStream->getServices().acquireFrame();
+	if (pFrame == NULL)
 	{
 		return;
 	}
-
-	OniFrame* pFrame = pStream->m_pLastFrame;
 
 	// Fill the frame.
 	pFrame->frameIndex = newDataEventArgs.nFrameId;
@@ -252,8 +230,8 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 	pStream->m_cs.Unlock();
 
 	// Process the new frame.
-	pStream->raiseNewFrame(pStream->m_pLastFrame);
-	pStream->m_pLastFrame = NULL;
+	pStream->raiseNewFrame(pFrame);
+	pStream->getServices().releaseFrame(pFrame);
 }
 
 int PlayerStream::getRequiredFrameSize()

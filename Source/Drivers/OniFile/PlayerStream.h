@@ -78,9 +78,6 @@ public:
     /// @copydoc OniStreamBase::stop()
     virtual void stop();
 
-	// Return whether the stream is ready to receive data.
-	OniBool IsReadyForData();
-
 	// Return the player source the stream was created on.
 	PlayerSource* GetSource();
 
@@ -119,9 +116,6 @@ private:
 
 	// Stream properties.
     PlayerProperties m_properties;
-
-	// Pointer to last received frame.
-	OniFrame* m_pLastFrame;
 
 	// Handle to new data callback.
 	OniCallbackHandle m_newDataHandle;
