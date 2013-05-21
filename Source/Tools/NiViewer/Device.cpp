@@ -107,7 +107,7 @@ const char* getFormatName(openni::PixelFormat format)
 	}
 }
 
-void openCommon(openni::Device& device, bool defaultRightColor)
+void openCommon(openni::Device& device, DeviceConfig config)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -119,7 +119,7 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 	g_colorSensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
 	g_irSensorInfo = device.getSensorInfo(openni::SENSOR_IR);
 
-	if (g_depthSensorInfo != NULL)
+	if (config.openDepth && g_depthSensorInfo != NULL)
 	{
 		nRetVal = g_depthStream.create(device, openni::SENSOR_DEPTH);
 		if (nRetVal != openni::STATUS_OK)
@@ -139,7 +139,7 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 		g_bIsDepthOn = true;
 	}
 
-	if (g_colorSensorInfo != NULL)
+	if (config.openColor && g_colorSensorInfo != NULL)
 	{
 		nRetVal = g_colorStream.create(device, openni::SENSOR_COLOR);
 		if (nRetVal != openni::STATUS_OK)
@@ -148,21 +148,18 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 			return;
 		}
 
-		if (defaultRightColor)
+		nRetVal = g_colorStream.start();
+		if (nRetVal != openni::STATUS_OK)
 		{
-			nRetVal = g_colorStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
-				g_colorStream.destroy();
-				return;
-			}
-
-			g_bIsColorOn = true;
+			printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
+			g_colorStream.destroy();
+			return;
 		}
+
+		g_bIsColorOn = true;
 	}
 
-	if (g_irSensorInfo != NULL)
+	if (config.openIR && g_irSensorInfo != NULL && !g_bIsColorOn)
 	{
 		nRetVal = g_irStream.create(device, openni::SENSOR_IR);
 		if (nRetVal != openni::STATUS_OK)
@@ -171,18 +168,15 @@ void openCommon(openni::Device& device, bool defaultRightColor)
 			return;
 		}
 
-		if (!g_bIsColorOn)
+		nRetVal = g_irStream.start();
+		if (nRetVal != openni::STATUS_OK)
 		{
-			nRetVal = g_irStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-				g_irStream.destroy();
-				return;
-			}
-
-			g_bIsIROn = true;
+			printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
+			g_irStream.destroy();
+			return;
 		}
+
+		g_bIsIROn = true;
 	}
 
 	initConstants();
@@ -217,7 +211,7 @@ public:
 	}
 };
 
-openni::Status openDevice(const char* uri, bool defaultRightColor)
+openni::Status openDevice(const char* uri, DeviceConfig config)
 {
 	openni::Status nRetVal = openni::OpenNI::initialize();
 	if (nRetVal != openni::STATUS_OK)
@@ -240,12 +234,12 @@ openni::Status openDevice(const char* uri, bool defaultRightColor)
 
 	g_pPlaybackControl = g_device.getPlaybackControl();
 
-	openCommon(g_device, defaultRightColor);
+	openCommon(g_device, config);
 
 	return openni::STATUS_OK;
 }
 
-openni::Status openDeviceFromList(bool defaultRightColor)
+openni::Status openDeviceFromList(DeviceConfig config)
 {
 	openni::Status rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
@@ -286,7 +280,7 @@ openni::Status openDeviceFromList(bool defaultRightColor)
 
 	g_pPlaybackControl = g_device.getPlaybackControl();
 
-	openCommon(g_device, defaultRightColor);
+	openCommon(g_device, config);
 
 	return openni::STATUS_OK;
 }

@@ -572,26 +572,69 @@ int changeDirectory(char* arg0)
 int main(int argc, char **argv)
 {
 	XnBool bChooseDevice = FALSE;
-	bool bDefaultRightColor = true;
 	const char* uri = NULL;
+
+	DeviceConfig config;
+	config.openDepth = true;
+	config.openColor = true;
+	config.openIR = false;
 
 	for (int i = 1; i < argc; ++i)
 	{
-		if (strcmp(argv[i], "-devices") == 0)
+		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+		{
+			printf("Usage: %s [OPTIONS] [URI]\n\n", argv[0]);
+			printf("When URI is provided, OpenNI will attempt to open the device with said URI. When not provided, \n");
+			printf("any device might be opened.\n\n");
+			printf("Options:\n");
+			printf("-h, --help\n");
+			printf("	Shows this help screen and exits\n");
+			printf("-devices\n");
+			printf("	Allows to choose the device to open from the list of connected devices\n");
+			printf("-depth=<on|off>\n");
+			printf("	Toggles whether or not to open the depth stream (on by default)\n");
+			printf("-color=<on|off>\n");
+			printf("	Toggles whether or not to open the color stream (on by default)\n");
+			printf("-ir=<on|off>\n");
+			printf("	Toggles whether or not to open the IR stream (off by default)\n");
+			return 0;
+		}
+		else if (strcmp(argv[i], "-devices") == 0)
 		{
 			bChooseDevice = TRUE;
 		}
-		else if (strcmp(argv[i], "-right=ir") == 0)
+		else if (strcmp(argv[i], "-depth=on") == 0)
 		{
-			bDefaultRightColor = false;
+			config.openDepth = true;
 		}
-		else if (strcmp(argv[i], "-right=color") == 0)
+		else if (strcmp(argv[i], "-depth=off") == 0)
 		{
-			bDefaultRightColor = true;
+			config.openDepth = false;
+		}
+		else if (strcmp(argv[i], "-color=on") == 0)
+		{
+			config.openColor = true;
+		}
+		else if (strcmp(argv[i], "-color=off") == 0)
+		{
+			config.openColor = false;
+		}
+		else if (strcmp(argv[i], "-ir=on") == 0)
+		{
+			config.openIR = true;
+		}
+		else if (strcmp(argv[i], "-ir=off") == 0)
+		{
+			config.openIR = false;
 		}
 		else if (uri == NULL)
 		{
 			uri = argv[i];
+		}
+		else
+		{
+			printf("unknown argument: %s\n", argv[i]);
+			return -1;
 		}
 	}
 
@@ -600,11 +643,11 @@ int main(int argc, char **argv)
 
 	if (bChooseDevice)
 	{
-		rc = openDeviceFromList(bDefaultRightColor);
+		rc = openDeviceFromList(config);
 	}
 	else
 	{
-		rc = openDevice(uri, bDefaultRightColor);
+		rc = openDevice(uri, config);
 	}
 
 	if (rc != openni::STATUS_OK)

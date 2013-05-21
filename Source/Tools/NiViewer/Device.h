@@ -47,6 +47,13 @@ typedef struct
 	const char* pValues[MAX_STRINGS];
 } DeviceStringProperty;
 
+typedef struct
+{
+	bool openDepth;
+	bool openColor;
+	bool openIR;
+} DeviceConfig;
+
 // --------------------------------
 // Global Variables
 // --------------------------------
@@ -56,8 +63,8 @@ extern DeviceParameter g_Registration;
 // --------------------------------
 // Function Declarations
 // --------------------------------
-openni::Status openDevice(const char* uri, bool defaultRightColor);
-openni::Status openDeviceFromList(bool defaultRightColor);
+openni::Status openDevice(const char* uri, DeviceConfig config);
+openni::Status openDeviceFromList(DeviceConfig config);
 void closeDevice();
 void readFrame();
 void changeRegistration(int nValue);
