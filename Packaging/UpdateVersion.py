@@ -60,6 +60,13 @@ class UpdateVersion:
             sys.exit()
 
         self.strVersion = str(self.version_major) + "." + str(self.version_minor) + "." + str(self.version_maintenance) + "." + str(self.version_build)
+        
+        if (self.version_maintenance != 0):
+            self.versionName = str(self.version_major) + "." + str(self.version_minor) + "." + str(self.version_maintenance)
+        elif (self.version_minor != 0):
+            self.versionName = str(self.version_major) + "." + str(self.version_minor)
+        else:
+            self.versionName = str(self.version_major)
 
         print (("Going to update files to version: %d.%d.%d.%d" % (self.version_major, self.version_minor, self.version_maintenance, self.version_build)))
 
@@ -107,14 +114,15 @@ class UpdateVersion:
         self.regx_replace("define MinorVersion=(.*)", "define MinorVersion=" + str(self.version_minor) + "?>", filePath)
         self.regx_replace("define MaintenanceVersion=(.*)", "define MaintenanceVersion=" + str(self.version_maintenance) + "?>", filePath)
         self.regx_replace("define BuildVersion=(.*)", "define BuildVersion=" + str(self.version_build) + "?>", filePath)
+        self.regx_replace("define VersionName=(.*)", "define VersionName=\"" + str(self.versionName) + "\"?>", filePath)
 
     def update_wix_project (self,filePath):
         print (("Updating wix project: " + filePath))
-        self.regx_replace("<OutputName>(.*)</OutputName>", "<OutputName>OpenNI-Windows-$(Platform)-" + str(self.version_major) + "." + str(self.version_minor) + "." + str(self.version_maintenance) + "</OutputName>", filePath)
+        self.regx_replace("<OutputName>(.*)</OutputName>", "<OutputName>OpenNI-Windows-$(Platform)-" + self.versionName + "</OutputName>", filePath)
 
     def update_doxygen (self,filePath):
         print (("Updating doxygen: " + filePath))
-        self.regx_replace("PROJECT_NAME\s*=\s*\"OpenNI (\d+)\.(\d+)\.(\d+)\"", "PROJECT_NAME = \"OpenNI " + str(self.version_major) + "." + str(self.version_minor) + "." + str(self.version_maintenance) + "\"", filePath)
+        self.regx_replace("PROJECT_NAME\s*=\s*\"OpenNI (\d+)\.(\d+)\.(\d+)\"", "PROJECT_NAME = \"OpenNI " + self.versionName + "\"", filePath)
 
     def update_release_notes (self,filePath):
         print (("Updating release notes: " + filePath))
