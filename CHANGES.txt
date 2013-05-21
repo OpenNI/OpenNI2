@@ -20,7 +20,7 @@ OpenNI 2.2.0:
   - PS1080: Add NESA unlimited to BIST
   - PrimeSense: move common properties (PS1080 and Capri) to PrimeSense.h
   - PS1080: add new property for turning on hardware frame sync, with no OpenNI checks
-  - New pixel format: YUYV. PS1080 now supports it (on newer firmwares), and so does NiViewer.
+  - New pixel format: YUYV. PS1080 now supports it (on newer firmwares), and so does NiViewer and recordings.
   - PS1080: add lots of debug commands
   - PS1080: add new file type (vendor data)
   - PS1080: added support for the second alternative interface (low-bandwidth)
