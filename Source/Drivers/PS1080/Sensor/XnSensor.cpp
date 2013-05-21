@@ -241,7 +241,7 @@ XnStatus XnSensor::InitSensor(const XnDeviceConfig* pDeviceConfig)
 	pDevicePrivateData->pSensor = this;
 
 	// open IO
-	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString, *m_Firmware.GetInfo());
+	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// initialize
@@ -594,16 +594,17 @@ XnStatus XnSensor::InitReading()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	XnBool bChangingInterface = (m_Interface.GetValue() != XN_SENSOR_USB_INTERFACE_DEFAULT);
+	XnSensorUsbInterface prevInterface = GetCurrentUsbInterface();
 
 	// open data endpoints
 	nRetVal = m_SensorIO.OpenDataEndPoints((XnSensorUsbInterface)m_Interface.GetValue(), *m_Firmware.GetInfo());
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = m_Interface.UnsafeUpdateValue(m_SensorIO.GetCurrentInterface());
+	XnSensorUsbInterface currInterface = GetCurrentUsbInterface();
+	nRetVal = m_Interface.UnsafeUpdateValue(currInterface);
 	XN_IS_STATUS_OK(nRetVal);
 
-	if (bChangingInterface)
+	if (prevInterface != currInterface)
 	{
 		nRetVal = XnHostProtocolUpdateSupportedImageModes(&m_DevicePrivateData);
 		XN_IS_STATUS_OK(nRetVal);
@@ -1093,7 +1094,7 @@ XnStatus XnSensor::SetInterface(XnSensorUsbInterface nInterface)
 	// we don't allow change if requested value is specific and different than current
 	if (m_ReadData.GetValue() == TRUE &&
 		nInterface != XN_SENSOR_USB_INTERFACE_DEFAULT &&
-		nInterface != m_SensorIO.GetCurrentInterface())
+		nInterface != GetCurrentUsbInterface())
 	{
 		return (XN_STATUS_DEVICE_PROPERTY_READ_ONLY);
 	}

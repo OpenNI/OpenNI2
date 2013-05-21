@@ -67,7 +67,7 @@ public:
 
 	inline XnBool IsMiscSupported() const { return m_SensorIO.IsMiscEndpointSupported(); }
 	inline XnBool IsLowBandwidth() const { return m_SensorIO.IsLowBandwidth(); }
-	inline XnSensorUsbInterface GetCurrentUsbInterface() const { return m_SensorIO.GetCurrentInterface(); }
+	inline XnSensorUsbInterface GetCurrentUsbInterface() const { return m_SensorIO.GetCurrentInterface(*m_Firmware.GetInfo()); }
 
 	XnStatus GetStream(const XnChar* strStream, XnDeviceStream** ppStream);
 

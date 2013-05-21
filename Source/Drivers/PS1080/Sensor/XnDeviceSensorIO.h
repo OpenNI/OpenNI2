@@ -75,11 +75,11 @@ public:
 	XnSensorIO(XN_SENSOR_HANDLE* pSensorHandle);
 	~XnSensorIO();
 
-	XnStatus OpenDevice(const XnChar* strPath, const XnFirmwareInfo& fwInfo);
+	XnStatus OpenDevice(const XnChar* strPath);
 
 	XnStatus OpenDataEndPoints(XnSensorUsbInterface nInterface, const XnFirmwareInfo& fwInfo);
 
-	XnSensorUsbInterface GetCurrentInterface() const { return m_interface; }
+	XnSensorUsbInterface GetCurrentInterface(const XnFirmwareInfo& fwInfo) const;
 
 	XnStatus CloseDevice();
 
@@ -89,11 +89,8 @@ public:
 	const XnChar* GetDevicePath();
 
 private:
-	XnStatus UpdateCurrentInterface(const XnFirmwareInfo& fwInfo);
-
 	XN_SENSOR_HANDLE* m_pSensorHandle;
 	XnBool m_bMiscSupported;
-	XnSensorUsbInterface m_interface;
 	XnChar m_strDeviceName[XN_DEVICE_MAX_STRING_LENGTH];
 	XnBool m_bIsLowBandwidth;
 	XnUSBEventCallbackFunctionPtr m_pCallbackPtr; 

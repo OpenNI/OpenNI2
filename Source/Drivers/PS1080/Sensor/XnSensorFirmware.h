@@ -41,6 +41,7 @@ public:
 	void Free();
 
 	inline XnFirmwareInfo* GetInfo() { return m_pInfo; }
+	inline const XnFirmwareInfo* GetInfo() const { return m_pInfo; }
 	inline XnFirmwareCommands* GetCommands() { return &m_Commands; }
 	inline XnSensorFirmwareParams* GetParams() { return &m_Params; }
 	inline XnFirmwareStreams* GetStreams() { return &m_Streams; }

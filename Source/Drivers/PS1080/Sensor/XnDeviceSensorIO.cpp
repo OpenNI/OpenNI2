@@ -32,7 +32,6 @@
 XnSensorIO::XnSensorIO(XN_SENSOR_HANDLE* pSensorHandle) :
 	m_pSensorHandle(pSensorHandle),
 	m_bMiscSupported(FALSE),
-	m_interface(XN_SENSOR_USB_INTERFACE_DEFAULT),
 	m_bIsLowBandwidth(FALSE)
 {
 }
@@ -41,7 +40,7 @@ XnSensorIO::~XnSensorIO()
 {
 }
 
-XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, const XnFirmwareInfo& fwInfo)
+XnStatus XnSensorIO::OpenDevice(const XnChar* strPath)
 {
 	XnStatus nRetVal;
 
@@ -50,9 +49,6 @@ XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, const XnFirmwareInfo& fwI
 	// try to open the device
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Trying to open sensor '%s'...", strPath);
 	nRetVal = xnUSBOpenDeviceByPath(strPath, &m_pSensorHandle->USBDevice);
-	XN_IS_STATUS_OK(nRetVal);
-
-	nRetVal = UpdateCurrentInterface(fwInfo);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// on older firmwares, control was sent over BULK endpoints. Check if this is the case
@@ -116,9 +112,6 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 
 		xnLogVerbose(XN_MASK_DEVICE_IO, "Setting USB alternative interface to %d...", nAlternativeInterface);
 		nRetVal = xnUSBSetInterface(m_pSensorHandle->USBDevice, 0, nAlternativeInterface);
-		XN_IS_STATUS_OK(nRetVal);
-
-		nRetVal = UpdateCurrentInterface(fwInfo);
 		XN_IS_STATUS_OK(nRetVal);
 	}
 
@@ -322,31 +315,33 @@ const XnChar* XnSensorIO::GetDevicePath()
 	return m_strDeviceName;
 }
 
-XnStatus XnSensorIO::UpdateCurrentInterface(const XnFirmwareInfo& fwInfo)
+XnSensorUsbInterface XnSensorIO::GetCurrentInterface(const XnFirmwareInfo& fwInfo) const
 {
 	XnUInt8 nActualInterface = 0;
 	XnUInt8 nAlternativeInterface = 0;
 	XnStatus nRetVal = xnUSBGetInterface(m_pSensorHandle->USBDevice, &nActualInterface, &nAlternativeInterface);
-	XN_IS_STATUS_OK(nRetVal);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		XN_ASSERT(FALSE);
+		return (XnSensorUsbInterface)-1;
+	}
 
 	if (nAlternativeInterface == fwInfo.nISOAlternativeInterface)
 	{
-		m_interface = XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS;
+		return XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS;
 	}
 	else if (nAlternativeInterface == fwInfo.nBulkAlternativeInterface)
 	{
-		m_interface = XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS;
+		return XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS;
 	}
 	else if (nAlternativeInterface == fwInfo.nISOLowDepthAlternativeInterface)
 	{
-		m_interface = XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH;
+		return XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH;
 	}
 	else
 	{
 		XN_ASSERT(FALSE);
 		xnLogError(XN_MASK_DEVICE_IO, "Unexpected alternative interface: %d", nAlternativeInterface);
-		return XN_STATUS_ERROR;
+		return (XnSensorUsbInterface)-1;
 	}
-
-	return XN_STATUS_OK;
 }
