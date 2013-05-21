@@ -11,6 +11,7 @@ OpenNI 2.2.0:
   - Add support for Capri devkits
   - Added tools: PS1080Console and PSLinkConsole (for debugging purposes)
   - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
+  - NiViewer: Allow choosing which streams to open (run "NiViewer --help" for details)
   - Image registration support for Kinect driver (merge pull request #4. See https://github.com/OpenNI/OpenNI2/pull/4 for details. Thanks to Tomoto)
   - Completely re-wrote frame buffers management. 
   - Added API for replacing frame buffer allocator.
@@ -26,7 +27,7 @@ OpenNI 2.2.0:
   - PS1080: added support for the second alternative interface (low-bandwidth)
   - PS1080: added support for IR stream from the AR130 CMOS
   - PS1080: added support for turning on/off emitter
-- Bug Fixes:
+  - Bug Fixes:
     - Bug Fix: reading frames / waiting on streams did not work well from multiple threads
     - Bug Fix: Failed to use after OpenCL was initialized
     - Bug Fix: Visual Sutdio 2008 wasn't supported
@@ -38,6 +39,7 @@ OpenNI 2.2.0:
     - PS1080 Bug Fix: debug dumps were not closed properly
     - Kinect Bug Fix: wrong error code returned when trying to change video mode while streaming
     - PS1080 Bug Fix: isPropertySupported() didn't return true for ONI_DEVICE_PROPERTY_FIRMWARE_VERSION, ONI_DEVICE_PROPERTY_HARDWARE_VERSION and ONI_DEVICE_PROPERTY_SERIAL_NUMBER.
+    - PS1080 Bug Fix: potential crash when corrupt data arrives on BAYER stream
   - Build:
     - Rename Redist dir to Packaging
     - Remove all warnings during build. Treat all warnings as errors.
