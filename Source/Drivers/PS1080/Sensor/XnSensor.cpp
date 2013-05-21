@@ -241,7 +241,7 @@ XnStatus XnSensor::InitSensor(const XnDeviceConfig* pDeviceConfig)
 	pDevicePrivateData->pSensor = this;
 
 	// open IO
-	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString);
+	nRetVal = m_SensorIO.OpenDevice(pDeviceConfig->cpConnectionString, *m_Firmware.GetInfo());
 	XN_IS_STATUS_OK(nRetVal);
 
 	// initialize
@@ -594,12 +594,20 @@ XnStatus XnSensor::InitReading()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
+	XnBool bChangingInterface = (m_Interface.GetValue() != XN_SENSOR_USB_INTERFACE_DEFAULT);
+
 	// open data endpoints
 	nRetVal = m_SensorIO.OpenDataEndPoints((XnSensorUsbInterface)m_Interface.GetValue(), *m_Firmware.GetInfo());
 	XN_IS_STATUS_OK(nRetVal);
 
 	nRetVal = m_Interface.UnsafeUpdateValue(m_SensorIO.GetCurrentInterface());
 	XN_IS_STATUS_OK(nRetVal);
+
+	if (bChangingInterface)
+	{
+		nRetVal = XnHostProtocolUpdateSupportedImageModes(&m_DevicePrivateData);
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	// take frequency information
 	XnFrequencyInformation FrequencyInformation;

@@ -41,7 +41,7 @@ XnSensorIO::~XnSensorIO()
 {
 }
 
-XnStatus XnSensorIO::OpenDevice(const XnChar* strPath)
+XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, const XnFirmwareInfo& fwInfo)
 {
 	XnStatus nRetVal;
 
@@ -50,6 +50,9 @@ XnStatus XnSensorIO::OpenDevice(const XnChar* strPath)
 	// try to open the device
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Trying to open sensor '%s'...", strPath);
 	nRetVal = xnUSBOpenDeviceByPath(strPath, &m_pSensorHandle->USBDevice);
+	XN_IS_STATUS_OK(nRetVal);
+
+	nRetVal = UpdateCurrentInterface(fwInfo);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// on older firmwares, control was sent over BULK endpoints. Check if this is the case
@@ -89,7 +92,6 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	// try to set requested interface
 	if (nInterface != XN_SENSOR_USB_INTERFACE_DEFAULT)
 	{
-
 		switch (nInterface)
 		{
 		case XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS:
@@ -115,10 +117,10 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 		xnLogVerbose(XN_MASK_DEVICE_IO, "Setting USB alternative interface to %d...", nAlternativeInterface);
 		nRetVal = xnUSBSetInterface(m_pSensorHandle->USBDevice, 0, nAlternativeInterface);
 		XN_IS_STATUS_OK(nRetVal);
-	}
 
-	nRetVal = UpdateCurrentInterface(fwInfo);
-	XN_IS_STATUS_OK(nRetVal);
+		nRetVal = UpdateCurrentInterface(fwInfo);
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Opening endpoints...");
 

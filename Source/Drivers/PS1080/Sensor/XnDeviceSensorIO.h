@@ -75,7 +75,7 @@ public:
 	XnSensorIO(XN_SENSOR_HANDLE* pSensorHandle);
 	~XnSensorIO();
 
-	XnStatus OpenDevice(const XnChar* strPath);
+	XnStatus OpenDevice(const XnChar* strPath, const XnFirmwareInfo& fwInfo);
 
 	XnStatus OpenDataEndPoints(XnSensorUsbInterface nInterface, const XnFirmwareInfo& fwInfo);
 
