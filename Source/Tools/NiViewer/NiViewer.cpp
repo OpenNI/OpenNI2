@@ -572,8 +572,8 @@ int changeDirectory(char* arg0)
 int main(int argc, char **argv)
 {
 	XnBool bChooseDevice = FALSE;
-	const char* csRecordingName = NULL;
 	bool bDefaultRightColor = true;
+	const char* uri = NULL;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -589,37 +589,22 @@ int main(int argc, char **argv)
 		{
 			bDefaultRightColor = true;
 		}
-		else if (csRecordingName == NULL)
+		else if (uri == NULL)
 		{
-			csRecordingName = argv[i];
-		}
-	}
-
-
-	if (csRecordingName != NULL)
-	{	
-		// check if running from a different directory. If so, we need to change directory
-		// to the real one, so that path to INI file will be OK (for log initialization, for example)
-		if (0 != changeDirectory(argv[0]))
-		{
-			return(ERR_DEVICE);
+			uri = argv[i];
 		}
 	}
 
 	// Xiron Init
 	XnStatus rc = XN_STATUS_OK;
 
-	if (csRecordingName != NULL)
-	{	
-		rc = openDevice(argv[1], bDefaultRightColor);
-	}
-	else if (bChooseDevice)
+	if (bChooseDevice)
 	{
 		rc = openDeviceFromList(bDefaultRightColor);
 	}
 	else
 	{
-		rc = openDevice(NULL, bDefaultRightColor);
+		rc = openDevice(uri, bDefaultRightColor);
 	}
 
 	if (rc != openni::STATUS_OK)
