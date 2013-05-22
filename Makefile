@@ -24,7 +24,7 @@ ifeq ("$(OSTYPE)","Darwin")
 else
 	OS_NAME = Linux
 endif
-PRODUCT_STRING = OpenNI-$(OS_NAME)-$(PLATFORM)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MAINT_VERSION)
+PRODUCT_STRING = OpenNI-$(OS_NAME)-$(PLATFORM)-$(shell cd Packaging && python -c "import UpdateVersion; print UpdateVersion.getVersionName()" && cd ..)
 FINAL_DIR = Packaging/Final
 
 OPENNI = Source/Core
