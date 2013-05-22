@@ -45,7 +45,7 @@ if len(sys.argv) >= 3 and sys.argv[2] == 'UpdateVersion':
 if shouldUpdate == 1:
     # Increase Build
     UpdateVersion.VERSION_BUILD += 1
-    UpdateVersion.UpdateVersion().main()
+    UpdateVersion.update()
 
 def get_reg_values(reg_key, value_list):
     # open the reg key
@@ -88,7 +88,7 @@ def calc_jobs_number():
     return str(cores * 2)
 
 # Create installer
-strVersion = str(UpdateVersion.VERSION_MAJOR) + "." + str(UpdateVersion.VERSION_MINOR) + "." + str(UpdateVersion.VERSION_MAINTENANCE)
+strVersion = UpdateVersion.getVersionName()
 print "Creating installer for OpenNI " + strVersion + " " + plat
 finalDir = "Final"
 if not os.path.isdir(finalDir):
