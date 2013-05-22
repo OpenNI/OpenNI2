@@ -168,6 +168,7 @@ private:
 			pFrame->timestamp = frameId*33000;
 
 			raiseNewFrame(pFrame);
+			getServices().releaseFrame(pFrame);
 
 			frameId++;
 
@@ -255,6 +256,7 @@ private:
 			pFrame->timestamp = frameId*33000;
 
 			raiseNewFrame(pFrame);
+			getServices().releaseFrame(pFrame);
 
 			frameId++;
 		}

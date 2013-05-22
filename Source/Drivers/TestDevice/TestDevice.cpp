@@ -132,6 +132,7 @@ protected:
 					OniFrame* pFrame = pStream->getServices().acquireFrame();
 					pStream->BuildFrame(pFrame);
 					pStream->raiseNewFrame(pFrame);
+					pStream->getServices().releaseFrame(pFrame);
 				}
 
 			} while (count > 0);
