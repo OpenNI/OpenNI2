@@ -1,5 +1,5 @@
-OpenNI 2.2.0 Build 17
-May 21 2013
+OpenNI 2.2.0 Build 18
+May 22 2013
 
 Minimum Requirements:
 ---------------------
