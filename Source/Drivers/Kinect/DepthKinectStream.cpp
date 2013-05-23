@@ -197,6 +197,7 @@ void DepthKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	}
 
 	raiseNewFrame(pFrame);
+	getServices().releaseFrame(pFrame);
 }
 
 OniStatus DepthKinectStream::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)

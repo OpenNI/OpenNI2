@@ -139,6 +139,7 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	pFrame->frameIndex = imageFrame.dwFrameNumber;
 	pFrame->timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
+	getServices().releaseFrame(pFrame);
 }
 
 OniStatus ColorKinectStream::getProperty(int propertyId, void* data, int* pDataSize)

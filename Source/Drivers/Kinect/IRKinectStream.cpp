@@ -166,6 +166,7 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 	pFrame->frameIndex = imageFrame.dwFrameNumber;
 	pFrame->timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
+	getServices().releaseFrame(pFrame);
 }
 
 
