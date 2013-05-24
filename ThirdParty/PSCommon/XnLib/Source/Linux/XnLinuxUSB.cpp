@@ -26,7 +26,7 @@
 #if (XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
 #include <libusb.h>
 #else
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 #endif
 
 #include "XnLinuxUSB.h"
