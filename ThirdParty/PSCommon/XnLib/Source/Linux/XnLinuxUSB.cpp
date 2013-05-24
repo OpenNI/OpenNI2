@@ -1151,9 +1151,16 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 						{
 							for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
 							{
-								XnUSBEventCallback* pCallback = *it;
+                                // Create uri for this device
+                                XnUSBConnectionString aResult;
+                                libusb_device* dev = libusb_get_device(pTransfer->dev_handle);
+                                libusb_device_descriptor desc;
+                                libusb_get_device_descriptor(dev, &desc);
+                                sprintf(aResult, "%04hx/%04hx@%hhu/%hhu", desc.idVendor, desc.idProduct, libusb_get_bus_number(dev), libusb_get_device_address(dev));
+
+                                XnUSBEventCallback* pCallback = *it;
 								XnUSBEventArgs args;
-								args.strDevicePath = NULL;
+								args.strDevicePath = aResult;
 								args.eventType = XN_USB_EVENT_DEVICE_DISCONNECT;
 								pCallback->pFunc(&args, pCallback->pCookie);
 							}
