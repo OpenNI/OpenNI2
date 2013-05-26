@@ -454,73 +454,51 @@ void seekFrame(int nDiff)
 	}
 }
 
-void toggleDepthState(int )
+void toggleStreamState(openni::VideoStream& stream, openni::VideoFrameRef& frame, bool& isOn, openni::SensorType type, const char* name)
 {
-	if (g_depthStream.isValid()) 
-	{
-		if(g_bIsDepthOn)
-		{
-			g_depthStream.stop();
-			g_depthFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_depthStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start depth stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
+	openni::Status nRetVal = openni::STATUS_OK;
 
-		g_bIsDepthOn = !g_bIsDepthOn;
+	if (!stream.isValid())
+	{
+		nRetVal = stream.create(g_device, type);
+		if (nRetVal != openni::STATUS_OK)
+		{
+			displayError("Failed to create %s stream:\n%s", name, openni::OpenNI::getExtendedError());
+			return;
+		}
 	}
+
+	if (isOn)
+	{
+		stream.stop();
+		frame.release();
+	}
+	else
+	{
+		nRetVal = stream.start();
+		if (nRetVal != openni::STATUS_OK)
+		{
+			displayError("Failed to start %s stream:\n%s", name, openni::OpenNI::getExtendedError());
+			return;
+		}
+	}
+
+	isOn = !isOn;
 }
 
-void toggleColorState(int )
+void toggleDepthState(int)
 {
-	if (g_colorStream.isValid()) 
-	{
-		if(g_bIsColorOn)
-		{
-			g_colorStream.stop();
-			g_colorFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_colorStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start color stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
-
-		g_bIsColorOn = !g_bIsColorOn;
-	}
+	toggleStreamState(g_depthStream, g_depthFrame, g_bIsDepthOn, openni::SENSOR_DEPTH, "depth");
 }
 
-void toggleIRState(int )
+void toggleColorState(int)
 {
-	if (g_irStream.isValid()) 
-	{
-		if(g_bIsIROn)
-		{
-			g_irStream.stop();
-			g_irFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_irStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start IR stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
+	toggleStreamState(g_colorStream, g_colorFrame, g_bIsColorOn, openni::SENSOR_COLOR, "color");
+}
 
-		g_bIsIROn = !g_bIsIROn;
-	}
+void toggleIRState(int)
+{
+	toggleStreamState(g_irStream, g_irFrame, g_bIsIROn, openni::SENSOR_IR, "IR");
 }
 
 bool isDepthOn()
