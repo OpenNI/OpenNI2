@@ -335,8 +335,7 @@ void XnPixelStream::NewDataAvailable(OniFrame* pFrame)
 
 XnStatus XnPixelStream::Mirror(OniFrame* pFrame) const
 {
-	XnUInt32 nXRes = GetCropping()->enabled ? GetCropping()->width : GetXRes();
-	return XnFormatsMirrorPixelData(GetOutputFormat(), (XnUChar*)pFrame->data, pFrame->dataSize, nXRes);
+	return XnFormatsMirrorPixelData(GetOutputFormat(), (XnUChar*)pFrame->data, pFrame->dataSize, pFrame->width);
 }
 
 XnStatus XnPixelStream::CropImpl(OniFrame* pFrame, const OniCropping* pCropping)
