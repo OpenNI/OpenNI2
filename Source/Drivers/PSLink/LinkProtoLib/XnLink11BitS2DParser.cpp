@@ -7,9 +7,9 @@ namespace xn
 {
 
 Link11BitS2DParser::Link11BitS2DParser(const XnShiftToDepthTables& shiftToDepthTables) :
-	m_pShiftToDepth(shiftToDepthTables.pShiftToDepthTable),
 	m_nState(0),
-	m_nShift(0)
+	m_nShift(0),
+	m_pShiftToDepth(shiftToDepthTables.pShiftToDepthTable)
 {
 }
 

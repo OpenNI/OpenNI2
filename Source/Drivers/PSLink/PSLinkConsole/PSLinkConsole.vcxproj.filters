@@ -9,35 +9,290 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="LinkProtoLib">
+      <UniqueIdentifier>{4cd27b0b-e859-4e47-94ef-f3e94c8ad8c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PSLinkConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\LinkProtoLib\XnLinkStatusCodes.cpp">
+    <ClCompile Include="..\LinkProtoLib\XnClientSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnClientSyncSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBConnectionFactory.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBControlEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBInDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBOutDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLink6BitParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLink11BitS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLink12BitS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLink16zParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLink24zYuv422Parser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkContInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkControlEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkFrameInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputStreamsMgr.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkLogParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkMsgEncoder.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkMsgParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputStreamsMgr.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkPacked10BitParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkProtoUtils.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkResponseMsgParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkUnpackedDataReductionParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkUnpackedS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkYuv422ToRgb888Parser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnLinkYuvToRgb.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnServerSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnShiftToDepth.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnSocketConnectionFactory.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnSyncServerSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LinkProtoLib\XnSyncSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PrimeClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\PSLink\LenaDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PSLink\PrimeClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PSLink\PS1200Device.cpp">
+    <ClCompile Include="..\PS1200Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\PSLink\XnPsVersion.h">
+    <ClInclude Include="..\LinkProtoLib\IAsyncInputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\IConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\IConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\ILinkOutputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\IOutputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\ISyncInputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\ISyncIOConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\LinkProtoLibVersion.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientSyncSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBInDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBOutDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnCyclicBuffer.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLink6BitParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLink11BitS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLink12BitS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLink16zParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLink24zYuv422Parser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkContInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkFrameInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputStreamsMgr.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkLogParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkMsgEncoder.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkMsgParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputStreamsMgr.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkPacked10BitParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkProtoLibDefs.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkProtoUtils.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkResponseMsgParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkStatusCodes.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkUnpackedDataReductionParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkUnpackedS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkYuv422ToRgb888Parser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnLinkYuvToRgb.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnMapSequenceListConverter.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnServerSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxOutDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnShiftToDepth.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnSocketConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnSyncServerSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LinkProtoLib\XnSyncSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PrimeClient.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\PSLink\LenaDevice.h">
+    <ClInclude Include="..\PS1200Device.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\PSLink\PrimeClient.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PSLink\PS1200Device.h">
+    <ClInclude Include="..\XnPsVersion.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

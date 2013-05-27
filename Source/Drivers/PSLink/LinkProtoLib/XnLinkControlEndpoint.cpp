@@ -642,7 +642,6 @@ XnStatus LinkControlEndpoint::ExecuteImpl(XnUInt16 nMsgType,
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	XnUInt32 nReceivedResponsePacketSize = 0;
-	XnUInt16 nResponsePacketSize = 0;
 	XnUInt16 nPacketSize = 0;
 	XnLinkFragmentation responseFragmentation = XN_LINK_FRAG_MIDDLE;
 
@@ -682,7 +681,6 @@ XnStatus LinkControlEndpoint::ExecuteImpl(XnUInt16 nMsgType,
 		XN_IS_STATUS_OK_LOG_ERROR("Receive response packet", nRetVal);
 		XN_ASSERT(nReceivedResponsePacketSize < XN_MAX_UINT16);
 		nRetVal = ValidateResponsePacket(m_pIncomingPacket, nMsgType, nStreamID, nReceivedResponsePacketSize);
-		nResponsePacketSize = m_pIncomingPacket->GetSize();
 		responseFragmentation = m_pIncomingPacket->GetFragmentationFlags();
 		XN_IS_STATUS_OK_LOG_ERROR("Parse response packet header", nRetVal);
 		nRetVal = m_responseMsgParser.BeginParsing(pResponseData, nResponseSize);

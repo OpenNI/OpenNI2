@@ -126,10 +126,8 @@ XnStatus LinkYuvToRgb::Yuv422ToRgb888(const XnUInt8* pSrc, XnSizeT srcSize, XnUI
 	}
 #else
 	const XnUInt8* pCurrYUV = pSrc;
-	const XnUInt8* pOrigRGB = pDst;
 	XnUInt8* pCurrRGB = pDst;
 	const XnUInt8* pLastYUV = pSrc + srcSize - YUV_422_BYTES_PER_PIXEL;
-	const XnUInt8* pLastRGB = pDst + dstSize - RGB_888_BYTES_PER_PIXEL;
 
 	while (pCurrYUV <= pLastYUV)
 	{

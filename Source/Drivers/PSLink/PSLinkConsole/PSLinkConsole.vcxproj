@@ -76,7 +76,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\PSLink;..\LinkProtoLib\Protocols\XnLinkProto;..\LinkProtoLib\Include;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Protocols\XnLinkProto;..\LinkProtoLib;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -90,7 +90,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>XnLib.lib;LinkProtoLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Bin/$(Platform)-$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -104,7 +104,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\PSLink;..\LinkProtoLib\Protocols\XnLinkProto;..\LinkProtoLib\Include;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Protocols\XnLinkProto;..\LinkProtoLib;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -117,7 +117,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>XnLib.lib;LinkProtoLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Bin/$(Platform)-$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -130,7 +130,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\PSLink;..\LinkProtoLib\Protocols\XnLinkProto;..\LinkProtoLib\Include;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Protocols\XnLinkProto;..\LinkProtoLib;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -142,7 +142,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>XnLib.lib;LinkProtoLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Bin/$(Platform)-$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -160,7 +160,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\PSLink;..\LinkProtoLib\Protocols\XnLinkProto;..\LinkProtoLib\Include;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Protocols\XnLinkProto;..\LinkProtoLib;..\..\..\..\Include;..\..\..\..\ThirdParty\PSCommon\XnLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -172,7 +172,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>XnLib.lib;LinkProtoLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Bin/$(Platform)-$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -183,23 +183,101 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\LinkProtoLib\XnLinkStatusCodes.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientSocketInConnection.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientSyncSocketConnection.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBConnectionFactory.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBControlEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBInDataEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnClientUSBOutDataEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLink11BitS2DParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLink12BitS2DParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLink16zParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLink24zYuv422Parser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLink6BitParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkContInputStream.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkControlEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkFrameInputStream.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputDataEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputStream.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkInputStreamsMgr.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkLogParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkMsgEncoder.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkMsgParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputDataEndpoint.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputStream.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkOutputStreamsMgr.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkPacked10BitParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkProtoUtils.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkResponseMsgParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkUnpackedDataReductionParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkUnpackedS2DParser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkYuv422ToRgb888Parser.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnLinkYuvToRgb.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnServerSocketInConnection.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnShiftToDepth.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnSocketConnectionFactory.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnSocketInConnection.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnSyncServerSocketConnection.cpp" />
+    <ClCompile Include="..\LinkProtoLib\XnSyncSocketConnection.cpp" />
+    <ClCompile Include="..\PrimeClient.cpp" />
+    <ClCompile Include="..\PS1200Device.cpp" />
     <ClCompile Include="PSLinkConsole.cpp" />
-    <ClCompile Include="..\PSLink\LenaDevice.cpp" />
-    <ClCompile Include="..\PSLink\PrimeClient.cpp" />
-    <ClCompile Include="..\PSLink\PS1200Device.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\PSLink\LenaDevice.h" />
-    <ClInclude Include="..\PSLink\PrimeClient.h" />
-    <ClInclude Include="..\PSLink\PS1200Device.h" />
-    <ClInclude Include="..\PSLink\XnPsVersion.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LinkProtoLib\LinkProtoLib.vcxproj">
-      <Project>{96447e8b-ab23-4a4f-9fb3-7705c10ad4bd}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+    <ClInclude Include="..\LinkProtoLib\IAsyncInputConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\IConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\IConnectionFactory.h" />
+    <ClInclude Include="..\LinkProtoLib\ILinkOutputStream.h" />
+    <ClInclude Include="..\LinkProtoLib\IOutputConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\ISyncInputConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\ISyncIOConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\LinkProtoLibVersion.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientSocketInConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientSyncSocketConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBConnectionFactory.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBControlEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBInDataEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnClientUSBOutDataEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnCyclicBuffer.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLink11BitS2DParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLink12BitS2DParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLink16zParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLink24zYuv422Parser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLink6BitParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkContInputStream.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkControlEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkFrameInputStream.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputDataEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputStream.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkInputStreamsMgr.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkLogParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkMsgEncoder.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkMsgParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputDataEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputStream.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkOutputStreamsMgr.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkPacked10BitParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkProtoLibDefs.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkProtoUtils.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkResponseMsgParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkStatusCodes.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkUnpackedDataReductionParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkUnpackedS2DParser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkYuv422ToRgb888Parser.h" />
+    <ClInclude Include="..\LinkProtoLib\XnLinkYuvToRgb.h" />
+    <ClInclude Include="..\LinkProtoLib\XnMapSequenceListConverter.h" />
+    <ClInclude Include="..\LinkProtoLib\XnServerSocketInConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxConnectionFactory.h" />
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxControlEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnServerUSBLinuxOutDataEndpoint.h" />
+    <ClInclude Include="..\LinkProtoLib\XnShiftToDepth.h" />
+    <ClInclude Include="..\LinkProtoLib\XnSocketConnectionFactory.h" />
+    <ClInclude Include="..\LinkProtoLib\XnSocketInConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\XnSyncServerSocketConnection.h" />
+    <ClInclude Include="..\LinkProtoLib\XnSyncSocketConnection.h" />
+    <ClInclude Include="..\PrimeClient.h" />
+    <ClInclude Include="..\PS1200Device.h" />
+    <ClInclude Include="..\XnPsVersion.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

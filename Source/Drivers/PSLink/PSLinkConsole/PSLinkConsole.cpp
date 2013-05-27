@@ -5,7 +5,6 @@
 // Includes
 //---------------------------------------------------------------------------
 #include "PrimeClient.h"
-#include "LenaDevice.h"
 #include "PS1200Device.h"
 #include "XnLinkInputStream.h"
 #include "XnLinkFrameInputStream.h"
@@ -1502,10 +1501,6 @@ int main(int argc, char* argv[])
 	{
 		g_pPS1200Device = XN_NEW(xn::PS1200Device);
 		g_pPrimeClient = g_pPS1200Device; 
-	}
-	else
-	{
-		g_pPrimeClient = XN_NEW(xn::LenaDevice);
 	}
 
 	if (g_pPrimeClient == NULL)
