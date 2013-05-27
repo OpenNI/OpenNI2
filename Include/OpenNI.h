@@ -2277,7 +2277,7 @@ public:
 	* @retval ONI_STATUS_OK Upon successful completion.
 	* @retval ONI_STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus setLogConsoleOutput(OniBool bConsoleOutput)
+	static OniStatus setLogConsoleOutput(bool bConsoleOutput)
 	{
 		return oniSetLogConsoleOutput(bConsoleOutput);
 	}
@@ -2290,7 +2290,7 @@ public:
 	* @retval ONI_STATUS_OK Upon successful completion.
 	* @retval ONI_STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus setLogFileOutput(OniBool bFileOutput)
+	static OniStatus setLogFileOutput(bool bFileOutput)
 	{
 		return oniSetLogFileOutput(bFileOutput);
 	}
@@ -2305,7 +2305,7 @@ public:
 	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
 	 */
 	
-	static OniStatus setLogAndroidOutput(OniBool bAndroidOutput)
+	static OniStatus setLogAndroidOutput(bool bAndroidOutput)
 	{
 		return oniSetLogAndroidOutput(bAndroidOutput);
 	}
