@@ -130,6 +130,7 @@ void XnBayerImageProcessor::OnStartOfFrame(const XnSensorProtocolResponseHeader*
 {
 	XnImageProcessor::OnStartOfFrame(pHeader);
 	m_ContinuousBuffer.Reset();
+	m_UncompressedBayerBuffer.Reset();
 }
 
 void XnBayerImageProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
