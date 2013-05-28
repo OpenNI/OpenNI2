@@ -118,11 +118,12 @@ protected:
 		AutoCSLocker locker(m_hLock);
 		ApplyListChanges();
 
-		for (typename CallbackPtrList::ConstIterator it = m_callbacks.Begin(); it != m_callbacks.End(); ++it)
-		{
-			Callback* pCallback = *it;
-			XN_DELETE(pCallback);
-		}
+        if(!m_callbacks.IsEmpty())
+            for (typename CallbackPtrList::ConstIterator it = m_callbacks.Begin(); it != m_callbacks.End(); ++it)
+            {
+                Callback* pCallback = *it;
+                XN_DELETE(pCallback);
+            }
 
 		m_callbacks.Clear();
 		m_toRemove.Clear();
