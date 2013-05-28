@@ -1,6 +1,3 @@
-# XnCore Android makefile.
-# libXnCore.so
-#
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS) 
@@ -11,6 +8,7 @@ MY_PREFIX := $(LOCAL_PATH)
 # list all source files
 MY_SRC_FILES := \
 	$(MY_PREFIX)/*.cpp \
+	$(MY_PREFIX)/LinkProtoLib/*.cpp \
 	$(MY_PREFIX)/DriverImpl/*.cpp
 
 # expand the wildcards
@@ -20,17 +18,17 @@ MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../../../Include/ \
-	$(LOCAL_PATH)/../../../../ThirdParty/PSCommon/XnLib/Include \
+	$(LOCAL_PATH)/../../../Include \
+	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include \
 	$(LOCAL_PATH) \
-	$(LOCAL_PATH)/../LinkProtoLib/Protocols/XnLinkProto \
-	$(LOCAL_PATH)/../LinkProtoLib/Include \
+	$(LOCAL_PATH)/Protocols/XnLinkProto \
+	$(LOCAL_PATH)/LinkProtoLib \
 
 LOCAL_CFLAGS:= -fvisibility=hidden -DXN_CORE_EXPORTS
 
 LOCAL_LDFLAGS += -Wl,--export-dynamic 
 
-LOCAL_STATIC_LIBRARIES := LinkProtoLib XnLib
+LOCAL_STATIC_LIBRARIES := XnLib
 LOCAL_SHARED_LIBRARIES := liblog libdl libusb libgabi++
 LOCAL_PREBUILT_LIBS := libc 
 
