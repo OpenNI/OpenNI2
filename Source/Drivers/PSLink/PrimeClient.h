@@ -61,14 +61,14 @@ public:
 	virtual XnStatus GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& supportedFiles);
 
 	virtual XnStatus RunPresetFile(const XnChar* strFileName);
-	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBistTest>& supportedTests);
-	virtual XnStatus ExecuteBist(XnUInt32 nID, XnBistTestResponse* pResponse, XnUInt32 nResponseStructSize);
+	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBist>& supportedTests);
+	virtual XnStatus ExecuteBist(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	virtual XnStatus FormatZone(XnUInt8 nZone);
     //TODO: Implement Get emitter active
 
     /* Stream Management */
-    virtual XnStatus EnumerateStreams(xnl::Array<XnStreamInfo>& aStreamInfos);
-    virtual XnStatus EnumerateStreams(XnStreamType streamType, xnl::Array<XnStreamInfo>& aStreamInfos);
+    virtual XnStatus EnumerateStreams(xnl::Array<XnFwStreamInfo>& aStreamInfos);
+    virtual XnStatus EnumerateStreams(XnStreamType streamType, xnl::Array<XnFwStreamInfo>& aStreamInfos);
     virtual XnStatus CreateInputStream(XnStreamType nodeType, const XnChar* strCreationInfo, XnUInt16& nStreamID);
 
     virtual XnStatus DestroyInputStream(XnUInt16 nStreamID);

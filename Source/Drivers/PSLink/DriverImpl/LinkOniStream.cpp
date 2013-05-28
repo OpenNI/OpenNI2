@@ -111,19 +111,53 @@ void LinkOniStream::stop()
 	}
 }
 
-OniStatus LinkOniStream::getProperty(int /*propertyId*/, void* /*data*/, int* /*pDataSize*/)
+OniStatus LinkOniStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
-	return ONI_STATUS_BAD_PARAMETER;
+	switch(propertyId)
+	{
+	case PS_PROPERTY_DUMP_DATA:
+		{
+			XnChar strDumpName[XN_FILE_MAX_PATH] = "";
+			xnLinkGetStreamDumpName(m_streamId, strDumpName, sizeof(strDumpName));
+			XnBool bEnabled = xnLogIsDumpMaskEnabled(strDumpName);
+			ENSURE_PROP_SIZE(*pDataSize, bool);
+			ASSIGN_PROP_VALUE_INT(data, *pDataSize, bEnabled);
+		}
+		break;
+	default:
+		return ONI_STATUS_BAD_PARAMETER;
+	}
+
+	return ONI_STATUS_OK;
 }
 
-OniStatus LinkOniStream::setProperty(int /*propertyId*/, const void* /*data*/, int /*dataSize*/)
+OniStatus LinkOniStream::setProperty(int propertyId, const void* data, int dataSize)
 {
-	return ONI_STATUS_BAD_PARAMETER;
+	switch(propertyId)
+	{
+	case PS_PROPERTY_DUMP_DATA:
+		{
+			if (dataSize != sizeof(bool))
+			{
+				xnLogWarning(XN_MASK_LINK_STREAM, "Property 'PS_PROPERTY_DUMP_DATA' requires bool data. Got data of size %d", dataSize);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnChar strDumpName[XN_FILE_MAX_PATH] = "";
+			xnLinkGetStreamDumpName(m_streamId, strDumpName, sizeof(strDumpName));
+			xnDumpSetMaskState(strDumpName, *(bool*)data);
+		}
+		break;
+	default:
+		return ONI_STATUS_BAD_PARAMETER;
+	}
+
+	return ONI_STATUS_OK;
 }
 
-OniBool LinkOniStream::isPropertySupported(int /*propertyId*/)
+OniBool LinkOniStream::isPropertySupported(int propertyId)
 {
-	return FALSE;
+	return (propertyId == PS_PROPERTY_DUMP_DATA);
 }
 
 void XN_CALLBACK_TYPE LinkOniStream::OnNewStreamDataEventHandler(const xn::NewFrameEventArgs& args, void* pCookie)

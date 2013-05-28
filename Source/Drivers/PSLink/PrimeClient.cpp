@@ -227,22 +227,22 @@ XnStatus PrimeClient::ReadAHB(XnUInt32 nAddress, XnUInt8 nBitOffset, XnUInt8 nBi
 	return m_linkControlEndpoint.ReadAHB(nAddress, nBitOffset, nBitWidth, nValue);
 }
 
-XnStatus PrimeClient::EnumerateStreams(xnl::Array<XnStreamInfo>& aStreamInfos)
+XnStatus PrimeClient::EnumerateStreams(xnl::Array<XnFwStreamInfo>& aStreamInfos)
 {
 	return m_linkControlEndpoint.EnumerateStreams(aStreamInfos);
 }
 
-XnStatus PrimeClient::EnumerateStreams(XnStreamType streamType, xnl::Array<XnStreamInfo>& aStreamInfos)
+XnStatus PrimeClient::EnumerateStreams(XnStreamType streamType, xnl::Array<XnFwStreamInfo>& aStreamInfos)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	xnl::Array<XnStreamInfo> aAll;
+	xnl::Array<XnFwStreamInfo> aAll;
 	nRetVal = m_linkControlEndpoint.EnumerateStreams(aAll);
 	XN_IS_STATUS_OK(nRetVal);
 
 	for (XnUInt32 i = 0; i < aAll.GetSize(); ++i)
 	{
-		if (aAll[i].m_nStreamType == streamType)
+		if ((XnUInt32)aAll[i].type == streamType)
 		{
 			aStreamInfos.AddLast(aAll[i]);
 		}
@@ -407,7 +407,7 @@ XnStatus PrimeClient::CloseFWLogFile(XnUInt8 logID)
 XnStatus PrimeClient::StartFWLog()
 {
     XnStatus nRetVal = XN_STATUS_OK;
-    xnl::Array<XnStreamInfo> fwLogStreamInfos;
+    xnl::Array<XnFwStreamInfo> fwLogStreamInfos;
     XnUInt16 nEndpointID = 0;
 
     //Enumerate log streams (there should be exactly one)
@@ -428,7 +428,7 @@ XnStatus PrimeClient::StartFWLog()
     }
 
     //Create log stream (from first enumeration result)
-    nRetVal = CreateInputStreamImpl(XN_LINK_STREAM_TYPE_LOG, fwLogStreamInfos[0].m_strCreationInfo, m_nFWLogStreamID, nEndpointID);
+    nRetVal = CreateInputStreamImpl(XN_LINK_STREAM_TYPE_LOG, fwLogStreamInfos[0].creationInfo, m_nFWLogStreamID, nEndpointID);
     XN_IS_STATUS_OK_LOG_ERROR("Create log input stream", nRetVal);
     LinkInputStream* pFWLogStream = GetInputStream(m_nFWLogStreamID);
     if (pFWLogStream == NULL)
@@ -609,7 +609,7 @@ XnStatus PrimeClient::RunPresetFile(const XnChar* strFileName)
 	return (XN_STATUS_OK);
 }
 
-XnStatus PrimeClient::GetSupportedBistTests(xnl::Array<XnBistTest>& supportedTests)
+XnStatus PrimeClient::GetSupportedBistTests(xnl::Array<XnBist>& supportedTests)
 {
 	return m_linkControlEndpoint.GetSupportedBistTests(supportedTests);
 }
@@ -624,9 +624,9 @@ XnStatus PrimeClient::GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& supportedF
 	return m_linkControlEndpoint.GetSupportedLogFiles(supportedFiles);
 }
 
-XnStatus PrimeClient::ExecuteBist(XnUInt32 nID, XnBistTestResponse* pResponse, XnUInt32 nResponseStructSize)
+XnStatus PrimeClient::ExecuteBist(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData)
 {
-	return m_linkControlEndpoint.ExecuteBistTests(nID, pResponse, nResponseStructSize);
+	return m_linkControlEndpoint.ExecuteBistTests(nID, errorCode, extraDataSize, extraData);
 }
 
 XnBool PrimeClient::IsPropertySupported(XnUInt16 propID)

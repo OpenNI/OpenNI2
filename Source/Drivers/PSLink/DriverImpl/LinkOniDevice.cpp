@@ -34,7 +34,7 @@
 #define XN_MASK_LINK_DEVICE "LinkDevice"
 
 LinkOniDevice::LinkOniDevice(const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
-	m_pSensor(NULL), m_didReset(false), m_driverServices(driverServices), m_pDriver(pDriver)
+	m_pSensor(NULL), m_driverServices(driverServices), m_pDriver(pDriver)
 {
 	xnOSMemCopy(&m_info, LinkDeviceEnumeration::GetDeviceInfo(uri), sizeof(m_info));
 }
@@ -50,10 +50,10 @@ LinkOniDevice::~LinkOniDevice()
 	Destroy();
 }
 
-XnStatus LinkOniDevice::readSupportedModesFromStream(XnStreamInfo &info, xnl::Array<XnStreamVideoMode> &aSupportedModes)
+XnStatus LinkOniDevice::readSupportedModesFromStream(XnFwStreamInfo &info, xnl::Array<XnFwStreamVideoMode> &aSupportedModes)
 {
 	XnUInt16 streamId;
-	XnStatus nRetVal = m_pSensor->CreateInputStream(info.m_nStreamType, info.m_strCreationInfo, streamId);
+	XnStatus nRetVal = m_pSensor->CreateInputStream(info.type, info.creationInfo, streamId);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// TODO: make sure this cast doesn't make us problems
@@ -69,9 +69,9 @@ XnStatus LinkOniDevice::readSupportedModesFromStream(XnStreamInfo &info, xnl::Ar
 XnStatus LinkOniDevice::FillSupportedVideoModes()
 {
 	int                           nSupportedModes = 0;
-	xnl::Array<XnStreamVideoMode> aSupportedModes;
+	xnl::Array<XnFwStreamVideoMode> aSupportedModes;
 	
-	xnl::Array<XnStreamInfo> aEnumerated;
+	xnl::Array<XnFwStreamInfo> aEnumerated;
 
 	int s = -1;
 	int writeIndex;
@@ -226,9 +226,28 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkOniDevice::Init()
+XnStatus LinkOniDevice::Init(const char* mode)
 {
-	xn::PrimeClient *pPrimeClient = new xn::PS1200Device();
+	XnBool performReset = TRUE;
+	XnBool leanInit = FALSE;
+
+	for (const char* option = mode; *option != '\0'; ++option)
+	{
+		switch (*option)
+		{
+		case 'r':
+			performReset = FALSE;
+			break;
+		case 'l':
+			leanInit = TRUE;
+			break;
+		default:
+			m_driverServices.errorLoggerAppend("Invalid mode: %c", *option);
+			return XN_STATUS_BAD_PARAM;
+		}
+	}
+
+	xn::PS1200Device *pPrimeClient = new xn::PS1200Device();
 	XN_VALIDATE_ALLOC_PTR(pPrimeClient);
 
 	XnStatus retVal = pPrimeClient->Init(m_info.uri, XN_TRANSPORT_TYPE_USB);
@@ -249,32 +268,33 @@ XnStatus LinkOniDevice::Init()
         return retVal;
     }
     
-    if (!m_didReset)
-    {
-        retVal = pPrimeClient->SoftReset();
-        if (retVal != XN_STATUS_OK)
-        {
-            xnLogError(XN_MASK_LINK_DEVICE, "Failed to reset device: %s", xnGetStatusString(retVal));
-            XN_ASSERT(FALSE);
-            XN_DELETE(pPrimeClient);
-            return retVal;
-        }
-
-        m_didReset = TRUE;
-    }
-/* TODO can we actually create more than one?
-	retVal = m_createdDevices.Set(strCreationInfo, pPrimeClient);
-	if (retVal != XN_STATUS_OK)
+	if (performReset)
 	{
-		xnLogError(XN_MASK_EXPORTED_PRIME_CLIENT, "Can't add device to created list: %s", xnGetStatusString(retVal));
-		XN_ASSERT(FALSE);
-		XN_DELETE(pPrimeClient);
-		return retVal;
+		retVal = pPrimeClient->SoftReset();
+		if (retVal != XN_STATUS_OK)
+		{
+			xnLogError(XN_MASK_LINK_DEVICE, "Failed to reset device: %s", xnGetStatusString(retVal));
+			XN_ASSERT(FALSE);
+			XN_DELETE(pPrimeClient);
+			return retVal;
+		}
 	}
-	*/
+
 	m_pSensor = pPrimeClient;
 
-	return FillSupportedVideoModes();
+	if (!leanInit)
+	{
+		retVal = FillSupportedVideoModes();
+		if (retVal != XN_STATUS_OK)
+		{
+			xnLogError(XN_MASK_LINK_DEVICE, "Failed to read device video modes: %s", xnGetStatusString(retVal));
+			XN_ASSERT(FALSE);
+			XN_DELETE(pPrimeClient);
+			return retVal;
+		}
+	}
+
+	return XN_STATUS_OK;
 }
 
 void LinkOniDevice::Destroy()
@@ -474,13 +494,12 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 			break;
 		}
 
-	// PS1200Device only
 	case PS_PROPERTY_USB_INTERFACE:
 		{
 			ENSURE_PROP_SIZE(*pDataSize, XnUInt8);
 			ASSIGN_PROP_VALUE_INT(data, *pDataSize, 0);
 			XnUInt8 nInterface = 0;
-			nRetVal = ((xn::PS1200Device*)m_pSensor)->GetUsbAltInterface(nInterface);
+			nRetVal = m_pSensor->GetUsbAltInterface(nInterface);
 			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 			if (nInterface == 0)
 			{
@@ -495,6 +514,15 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 				XN_ASSERT(FALSE);
 				return ONI_STATUS_ERROR;
 			}
+		}
+		break;
+
+	case LINK_PROP_BOOT_STATUS:
+		{
+			EXACT_PROP_SIZE(*pDataSize, XnBootStatus);
+			XnBootStatus* pStatus = (XnBootStatus*)data;
+			nRetVal = m_pSensor->GetBootStatus(*pStatus);
+			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
 
@@ -549,54 +577,24 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Set emitter active", nRetVal, ONI_STATUS_ERROR);
 		break;
 
-	case LINK_PROP_FW_LOG:
-		if (*(int*)data != 0)
-		{
-			nRetVal = m_pSensor->StartFWLog();
-			XN_IS_STATUS_OK_LOG_ERROR_RET("Start FW Log", nRetVal, ONI_STATUS_ERROR);
-		}
-		else
-		{
-			nRetVal = m_pSensor->StopFWLog();
-			XN_IS_STATUS_OK_LOG_ERROR_RET("Stop FW Log", nRetVal, ONI_STATUS_ERROR);
-		}
-		break;
-
-		// general props
-	case LINK_PROP_FORMAT_ZONE:
-		{
-			EXACT_PROP_SIZE_DO(dataSize, XnPropFormatZone)
-			{
-				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnPropFormatZone));
-				XN_ASSERT(FALSE);
-				return ONI_STATUS_BAD_PARAMETER;
-			}
-
-			const XnPropFormatZone* pPropFormatZone = reinterpret_cast<const XnPropFormatZone*>(data);
-			nRetVal = m_pSensor->FormatZone(pPropFormatZone->m_nZone);
-			XN_IS_STATUS_OK_LOG_ERROR_RET("Format Zone", nRetVal, ONI_STATUS_ERROR);
-			break;
-		}
-
 		// string props
 	case LINK_PROP_PRESET_FILE:
 		nRetVal = m_pSensor->RunPresetFile((XnChar *)data);
 		XN_IS_STATUS_OK_LOG_ERROR_RET("RunPresetFile", nRetVal, ONI_STATUS_ERROR);
 		break;
 	
-	// PS1200Device only
 	case PS_PROPERTY_USB_INTERFACE:
 		{
 			ENSURE_PROP_SIZE(dataSize, XnUInt8);
 			XnUsbInterfaceType type = (XnUsbInterfaceType)*(XnUInt8*)data;
 			if (type == PS_USB_INTERFACE_ISO_ENDPOINTS)
 			{
-				nRetVal = ((xn::PS1200Device*)m_pSensor)->SetUsbAltInterface(0);
+				nRetVal = m_pSensor->SetUsbAltInterface(0);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 			}
 			else if (type == PS_USB_INTERFACE_BULK_ENDPOINTS)
 			{
-				nRetVal = ((xn::PS1200Device*)m_pSensor)->SetUsbAltInterface(1);
+				nRetVal = m_pSensor->SetUsbAltInterface(1);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 			}
 			else if (type != PS_USB_INTERFACE_DONT_CARE)
@@ -628,13 +626,9 @@ OniBool LinkOniDevice::isPropertySupported(int propertyId)
 	case LINK_PROP_VERSIONS_INFO_COUNT:
 	case LINK_PROP_VERSIONS_INFO:
 	case LINK_PROP_EMITTER_ACTIVE:
-	case LINK_PROP_FW_LOG:
-	case LINK_PROP_FORMAT_ZONE:
-	case LINK_PROP_UPLOAD_FILE:
-	case LINK_PROP_DOWNLOAD_FILE:
 	case LINK_PROP_PRESET_FILE:
-	// PS1200Device only
 	case PS_PROPERTY_USB_INTERFACE:
+	case LINK_PROP_BOOT_STATUS:
 		return true;
 	default:
 		return false;
@@ -687,7 +681,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 				return ONI_STATUS_BAD_PARAMETER;
 			}
 
-			const XnCommandAHB* pPropWriteAHB = reinterpret_cast<const XnCommandAHB*>(data);
+			XnCommandAHB* pPropWriteAHB = reinterpret_cast<XnCommandAHB*>(data);
 			nRetVal = m_pSensor->WriteAHB(pPropWriteAHB->address, 
 				pPropWriteAHB->value, 
 				static_cast<XnUInt8>(pPropWriteAHB->offsetInBits), 
@@ -725,7 +719,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 				return ONI_STATUS_BAD_PARAMETER;
 			}
 
-			const XnCommandI2C* pPropWriteI2C = reinterpret_cast<const XnCommandI2C*>(data);
+			XnCommandI2C* pPropWriteI2C = reinterpret_cast<XnCommandI2C*>(data);
 			nRetVal = m_pSensor->WriteI2C(static_cast<XnUInt8>(pPropWriteI2C->deviceID), 
 				static_cast<XnUInt8>(pPropWriteI2C->addressSize), 
 				pPropWriteI2C->address, 
@@ -746,6 +740,527 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Power reset", nRetVal, ONI_STATUS_ERROR);
 		break;
 
+	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
+		nRetVal = m_pSensor->BeginUploadFileOnControlEP();
+		XN_IS_STATUS_OK_LOG_ERROR_RET("Begin update", nRetVal, ONI_STATUS_ERROR);
+		break;
+
+	case PS_COMMAND_END_FIRMWARE_UPDATE:
+		nRetVal = m_pSensor->EndUploadFileOnControlEP();
+		XN_IS_STATUS_OK_LOG_ERROR_RET("End update", nRetVal, ONI_STATUS_ERROR);
+		break;
+
+	case PS_COMMAND_UPLOAD_FILE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandUploadFile)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandUploadFile));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandUploadFile* pArgs = reinterpret_cast<XnCommandUploadFile*>(data);
+			nRetVal = m_pSensor->UploadFileOnControlEP(pArgs->filePath, pArgs->uploadToFactory);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Upload File", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_DOWNLOAD_FILE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandDownloadFile)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandDownloadFile));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandDownloadFile* pArgs = reinterpret_cast<XnCommandDownloadFile*>(data);
+			nRetVal = m_pSensor->DownloadFile(static_cast<XnUInt>(pArgs->zone),  
+				pArgs->firmwareFileName, pArgs->targetPath);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Download File", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_GET_FILE_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetFileList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetFileList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetFileList* pArgs = reinterpret_cast<XnCommandGetFileList*>(data);
+			if (pArgs->files == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Files array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnl::Array<XnFileEntry> files;
+			nRetVal = m_pSensor->GetFileList(files);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Get file list", nRetVal, ONI_STATUS_ERROR);
+
+			if (pArgs->count < files.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for files list. available: %d, required: %d\n", pArgs->count, files.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnOSMemCopy(pArgs->files, files.GetData(), files.GetSize() * sizeof(XnFileEntry));
+			pArgs->count = files.GetSize();
+		}
+		break;
+
+	case PS_COMMAND_FORMAT_ZONE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandFormatZone)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandFormatZone));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			const XnCommandFormatZone* pArgs = reinterpret_cast<const XnCommandFormatZone*>(data);
+			nRetVal = m_pSensor->FormatZone(pArgs->zone);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Format Zone", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_DUMP_ENDPOINT:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandDumpEndpoint)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandDumpEndpoint));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			const XnCommandDumpEndpoint* pArgs = reinterpret_cast<const XnCommandDumpEndpoint*>(data);
+			XnChar strDumpName[XN_FILE_MAX_PATH] = "";
+			xnLinkGetEPDumpName(pArgs->endpoint, strDumpName, sizeof(strDumpName));
+			xnDumpSetMaskState(strDumpName, pArgs->enabled);
+		}
+		break;
+
+	case PS_COMMAND_GET_I2C_DEVICE_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetI2CDeviceList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetI2CDeviceList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetI2CDeviceList* pArgs = reinterpret_cast<XnCommandGetI2CDeviceList*>(data);
+			if (pArgs->devices == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Devices array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnl::Array<XnLinkI2CDevice> devices;
+			nRetVal = m_pSensor->GetSupportedI2CDevices(devices);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Get i2c device list", nRetVal, ONI_STATUS_ERROR);
+
+			if (pArgs->count < devices.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for device list. available: %d, required: %d\n", pArgs->count, devices.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			for (int i = 0; i < (int)devices.GetSize(); ++i)
+			{
+				pArgs->devices[i].id = devices[i].m_nID;
+				xnOSStrCopy(pArgs->devices[i].name, devices[i].m_strName, sizeof(pArgs->devices[i].name));
+			}
+			pArgs->count = devices.GetSize();
+		}
+		break;
+
+	case PS_COMMAND_GET_BIST_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetBistList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetBistList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetBistList* pArgs = reinterpret_cast<XnCommandGetBistList*>(data);
+			if (pArgs->tests == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Bist array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnl::Array<XnBist> tests;
+			nRetVal = m_pSensor->GetSupportedBistTests(tests);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Get bist list", nRetVal, ONI_STATUS_ERROR);
+
+			if (pArgs->count < tests.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for tests list. available: %d, required: %d\n", pArgs->count, tests.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			for (int i = 0; i < (int)tests.GetSize(); ++i)
+			{
+				pArgs->tests[i] = tests[i];
+			}
+			pArgs->count = tests.GetSize();
+		}
+		break;
+
+	case PS_COMMAND_EXECUTE_BIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandExecuteBist)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandExecuteBist));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandExecuteBist* pArgs = reinterpret_cast<XnCommandExecuteBist*>(data);
+			if (pArgs->extraData == NULL)
+			{
+				m_driverServices.errorLoggerAppend("extra data array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			nRetVal = m_pSensor->ExecuteBist(pArgs->id, pArgs->errorCode, pArgs->extraDataSize, pArgs->extraData);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("execute bist", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_USB_TEST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandUsbTest)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandUsbTest));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandUsbTest* pArgs = reinterpret_cast<XnCommandUsbTest*>(data);
+			if (pArgs->endpoints == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Endpoints array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			nRetVal = m_pSensor->UsbTest(pArgs->seconds, pArgs->endpointCount, pArgs->endpoints);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Usb test", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_GET_LOG_MASK_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetLogMaskList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetLogMaskList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetLogMaskList* pArgs = reinterpret_cast<XnCommandGetLogMaskList*>(data);
+			if (pArgs->masks == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Mask array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnl::Array<XnLinkLogFile> masks;
+			nRetVal = m_pSensor->GetSupportedLogFiles(masks);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Get log mask list", nRetVal, ONI_STATUS_ERROR);
+
+			if (pArgs->count < masks.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for masks list. available: %d, required: %d\n", pArgs->count, masks.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			for (int i = 0; i < (int)masks.GetSize(); ++i)
+			{
+				pArgs->masks[i].id = masks[i].m_nID;
+				xnOSStrCopy(pArgs->masks[i].name, masks[i].m_strName, sizeof(pArgs->masks[i].name));
+			}
+			pArgs->count = masks.GetSize();
+		}
+		break;
+
+	case PS_COMMAND_SET_LOG_MASK_STATE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandSetLogMaskState)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandSetLogMaskState));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandSetLogMaskState* pArgs = reinterpret_cast<XnCommandSetLogMaskState*>(data);
+			if (pArgs->enabled)
+			{
+				nRetVal = m_pSensor->OpenFWLogFile((XnUInt8)pArgs->mask);
+			}
+			else
+			{
+				nRetVal = m_pSensor->CloseFWLogFile((XnUInt8)pArgs->mask);
+			}
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Set log mask state", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_START_LOG:
+		{
+			nRetVal = m_pSensor->StartFWLog();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Start log", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case PS_COMMAND_STOP_LOG:
+		{
+			nRetVal = m_pSensor->StopFWLog();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Stop log", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_GET_FW_STREAM_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetFwStreamList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetLogMaskList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetFwStreamList* pArgs = reinterpret_cast<XnCommandGetFwStreamList*>(data);
+			if (pArgs->streams == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Streams array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xnl::Array<XnFwStreamInfo> streams;
+			nRetVal = m_pSensor->EnumerateStreams(streams);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Get log mask list", nRetVal, ONI_STATUS_ERROR);
+
+			if (pArgs->count < streams.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for stream list. available: %d, required: %d\n", pArgs->count, streams.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			for (int i = 0; i < (int)streams.GetSize(); ++i)
+			{
+				pArgs->streams[i] = streams[i];
+			}
+			pArgs->count = streams.GetSize();
+		}
+		break;
+
+	case LINK_COMMAND_CREATE_FW_STREAM:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandCreateStream)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandCreateStream));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandCreateStream* pArgs = reinterpret_cast<XnCommandCreateStream*>(data);
+			XnUInt16 id;
+			nRetVal = m_pSensor->CreateInputStream(pArgs->type, pArgs->creationInfo, id);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Create stream", nRetVal, ONI_STATUS_ERROR);
+			pArgs->id = id;
+		}
+		break;
+
+	case LINK_COMMAND_DESTROY_FW_STREAM:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandDestroyStream)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandDestroyStream));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandDestroyStream* pArgs = reinterpret_cast<XnCommandDestroyStream*>(data);
+			nRetVal = m_pSensor->DestroyInputStream((XnUInt16)pArgs->id);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Destroy stream", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_START_FW_STREAM:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandStartStream)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandStartStream));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandStartStream* pArgs = reinterpret_cast<XnCommandStartStream*>(data);
+			xn::LinkInputStream* pInputStream = m_pSensor->GetInputStream((XnUInt16)pArgs->id);
+			if (pInputStream == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d wasn't created\n", pArgs->id);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			nRetVal = pInputStream->Start();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Start stream", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_STOP_FW_STREAM:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandStopStream)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandStopStream));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandStopStream* pArgs = reinterpret_cast<XnCommandStopStream*>(data);
+			xn::LinkInputStream* pInputStream = m_pSensor->GetInputStream((XnUInt16)pArgs->id);
+			if (pInputStream == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d wasn't created\n", pArgs->id);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			nRetVal = pInputStream->Stop();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Stop stream", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE_LIST:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetFwStreamVideoModeList)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetFwStreamVideoModeList));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetFwStreamVideoModeList* pArgs = reinterpret_cast<XnCommandGetFwStreamVideoModeList*>(data);
+			if (pArgs->videoModes == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Streams array must point to valid memory: \n");
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xn::LinkInputStream* pInputStream = m_pSensor->GetInputStream((XnUInt16)pArgs->streamId);
+			if (pInputStream == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d wasn't created\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d is not a frame stream\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
+			xnl::Array<XnFwStreamVideoMode> videoModes = pFrameInputStream->GetSupportedVideoModes();
+			if (pArgs->count < videoModes.GetSize())
+			{
+				m_driverServices.errorLoggerAppend("Insufficient memory for stream list. available: %d, required: %d\n", pArgs->count, videoModes.GetSize());
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			for (int i = 0; i < (int)videoModes.GetSize(); ++i)
+			{
+				pArgs->videoModes[i] = videoModes[i];
+			}
+			pArgs->count = videoModes.GetSize();
+		}
+		break;
+
+	case LINK_COMMAND_SET_FW_STREAM_VIDEO_MODE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandSetFwStreamVideoMode)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandSetFwStreamVideoMode));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandSetFwStreamVideoMode* pArgs = reinterpret_cast<XnCommandSetFwStreamVideoMode*>(data);
+
+			xn::LinkInputStream* pInputStream = m_pSensor->GetInputStream((XnUInt16)pArgs->streamId);
+			if (pInputStream == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d wasn't created\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d is not a frame stream\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
+			nRetVal = pFrameInputStream->SetVideoMode(pArgs->videoMode);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Set video mode", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandGetFwStreamVideoMode)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetFwStreamVideoMode));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandGetFwStreamVideoMode* pArgs = reinterpret_cast<XnCommandGetFwStreamVideoMode*>(data);
+
+			xn::LinkInputStream* pInputStream = m_pSensor->GetInputStream((XnUInt16)pArgs->streamId);
+			if (pInputStream == NULL)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d wasn't created\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
+			{
+				m_driverServices.errorLoggerAppend("Stream with ID %d is not a frame stream\n", pArgs->streamId);
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
+			pArgs->videoMode = pFrameInputStream->GetVideoMode();
+		}
+		break;
+
 	default:
 		return DeviceBase::invoke(commandId, data, dataSize);
 	}
@@ -763,46 +1278,31 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_I2C_WRITE:
 	case PS_COMMAND_SOFT_RESET:
 	case PS_COMMAND_POWER_RESET:
+	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
+	case PS_COMMAND_END_FIRMWARE_UPDATE:
+	case PS_COMMAND_UPLOAD_FILE:
+	case PS_COMMAND_DOWNLOAD_FILE:
+	case PS_COMMAND_GET_FILE_LIST:
+	case PS_COMMAND_FORMAT_ZONE:
+	case PS_COMMAND_DUMP_ENDPOINT:
+	case PS_COMMAND_GET_I2C_DEVICE_LIST:
+	case PS_COMMAND_GET_BIST_LIST:
+	case PS_COMMAND_EXECUTE_BIST:
+	case PS_COMMAND_USB_TEST:
+	case PS_COMMAND_GET_LOG_MASK_LIST:
+	case PS_COMMAND_SET_LOG_MASK_STATE:
+	case PS_COMMAND_START_LOG:
+	case PS_COMMAND_STOP_LOG:
+	case LINK_COMMAND_GET_FW_STREAM_LIST:
+	case LINK_COMMAND_CREATE_FW_STREAM:
+	case LINK_COMMAND_DESTROY_FW_STREAM:
+	case LINK_COMMAND_START_FW_STREAM:
+	case LINK_COMMAND_STOP_FW_STREAM:
+	case LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE_LIST:
+	case LINK_COMMAND_SET_FW_STREAM_VIDEO_MODE:
+	case LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE:
 		return true;
 	default:
 		return DeviceBase::isCommandSupported(commandId);
 	}
 }
-
-/*OniStatus LinkOniDevice::EnableFrameSync(LinkOniStream** pStreams, int streamCount)
-{
-
-	// Translate the LinkOniStream to XnDeviceStream.
-	xnl::Array<XnDeviceStream*> streams(streamCount);
-	streams.SetSize(streamCount);
-	for (int i = 0; i < streamCount; ++i)
-	{
-		streams[i] = pStreams[i]->GetDeviceStream();
-	}
-
-	// Set the frame sync group.
-	XnStatus rc = m_sensor.SetFrameSyncStreamGroup(streams.GetData(), streamCount);
-	if (rc != XN_STATUS_OK)
-	{
-		m_driverServices.errorLoggerAppend("Error setting frame-sync group (rc=%d)\n", rc);
-		return ONI_STATUS_ERROR;
-	}
-
-	return ONI_STATUS_OK;
-}
-
-
-void LinkOniDevice::DisableFrameSync()
-{
-	XnStatus rc = m_sensor.SetFrameSyncStreamGroup(NULL, 0);
-	if (rc != XN_STATUS_OK)
-	{
-		m_driverServices.errorLoggerAppend("Error setting frame-sync group (rc=%d)\n", rc);
-	}
-}
-
-OniBool LinkOniDevice::isImageRegistrationModeSupported(OniImageRegistrationMode mode)
-{
-	return (mode == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR || mode == ONI_IMAGE_REGISTRATION_OFF);
-}
-*/

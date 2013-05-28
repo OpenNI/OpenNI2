@@ -147,7 +147,7 @@ private:
 	int m_nCounter;
 };
 
-XnStatus PS1200Device::UsbTest(XnUInt32 nSeconds, UsbTestResults* pResults)
+XnStatus PS1200Device::UsbTest(XnUInt32 nSeconds, XnUInt32& endpointsCount, XnUsbTestEndpointResult* endpoints)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	
@@ -160,8 +160,14 @@ XnStatus PS1200Device::UsbTest(XnUInt32 nSeconds, UsbTestResults* pResults)
 	}
 
 	XnUInt16 nNumEndpoints = pConnFactory->GetNumInputDataConnections();
-	xn::IAsyncInputConnection* aEndpoints[XN_MAX_ENDPOINTS];
-	UsbEndpointTester aTesters[XN_MAX_ENDPOINTS];
+	if (nNumEndpoints > endpointsCount)
+	{
+		xnLogWarning(XN_MASK_PS1200_DEVICE, "Endpoints array is too small");
+		return XN_STATUS_BAD_PARAM;
+	}
+
+	xn::IAsyncInputConnection* aEndpoints[20];
+	UsbEndpointTester aTesters[20];
 
 	for (int i = 0; i < nNumEndpoints; ++i)
 	{
@@ -201,13 +207,14 @@ XnStatus PS1200Device::UsbTest(XnUInt32 nSeconds, UsbTestResults* pResults)
 		XN_ASSERT(FALSE);
 	}
 
-	pResults->nNumEndpoints = nNumEndpoints;
 	for (int i = 0; i < nNumEndpoints; ++i)
 	{
 		XN_DELETE(aEndpoints[i]);
-		pResults->aEndpoints[i].nAverageBytesPerSecond = aTesters[i].m_nTotalBytes / (XnDouble)nSeconds;
-		pResults->aEndpoints[i].nLostPackets = aTesters[i].m_nLostPackets;
+		
+		endpoints[i].averageBytesPerSecond = aTesters[i].m_nTotalBytes / (XnDouble)nSeconds;
+		endpoints[i].lostPackets = aTesters[i].m_nLostPackets;
 	}
+	endpointsCount = nNumEndpoints;
 
 	return (XN_STATUS_OK);
 }

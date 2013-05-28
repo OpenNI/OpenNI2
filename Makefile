@@ -129,6 +129,7 @@ Source/Drivers/RawDevice:   $(OPENNI) $(XNLIB)
 Source/Drivers/PS1080:      $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
 Source/Drivers/PS1080/PS1080Console: $(OPENNI) $(XNLIB)
 Source/Drivers/PSLink:      $(OPENNI) $(XNLIB)
+Source/Drivers/PSLink/PSLinkConsole: $(OPENNI) $(XNLIB)
 Source/Drivers/OniFile:     $(OPENNI) $(XNLIB)
 
 Source/Tools/NiViewer:      $(OPENNI) $(XNLIB)

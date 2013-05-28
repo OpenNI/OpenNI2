@@ -10,6 +10,7 @@
 #include <XnDataStructures.h>
 #include <XnArray.h>
 #include <XnBitSet.h>
+#include <PSLink.h>
 
 #define XN_MASK_LINK "xnLink"
 
@@ -61,10 +62,10 @@ XnStreamType xnLinkStreamTypeFromString(const XnChar* strType);
 const XnChar* xnLinkGestureTypeToName(XnUInt32 gestureType);
 XnUInt32 xnLinkGestureNameToType(const XnChar* strGesture);
 
-const XnChar* xnLinkPixelFormatToName(XnLinkPixelFormat pixelFormat);
-XnLinkPixelFormat xnLinkPixelFormatFromName(const XnChar* name);
-const XnChar* xnLinkCompressionToName(XnLinkCompressionType compression);
-XnLinkCompressionType xnLinkCompressionFromName(const XnChar* name);
+const XnChar* xnLinkPixelFormatToName(XnFwPixelFormat pixelFormat);
+XnFwPixelFormat xnLinkPixelFormatFromName(const XnChar* name);
+const XnChar* xnLinkCompressionToName(XnFwCompressionType compression);
+XnFwCompressionType xnLinkCompressionFromName(const XnChar* name);
 
 const XnChar* xnLinkPoseTypeToName(XnUInt32 poseType);
 XnUInt32 xnLinkPoseNameToType(const XnChar* strPose);
@@ -95,8 +96,8 @@ const XnChar* xnLinkInterfaceIDToNICapability(XnUInt8 nInterfaceID);
 XnProductionNodeType xnLinkStreamTypeToNINodeType(XnLinkStreamType streamType);
 XnLinkStreamType xnLinkNINodeTypeToStreamType(XnProductionNodeType  nodeType);
 */
-void xnLinkParseVideoMode(XnStreamVideoMode& videoMode, const XnLinkVideoMode& linkVideoMode);
-void xnLinkEncodeVideoMode(XnLinkVideoMode& linkVideoMode, const XnStreamVideoMode& videoMode);
+void xnLinkParseVideoMode(XnFwStreamVideoMode& videoMode, const XnLinkVideoMode& linkVideoMode);
+void xnLinkEncodeVideoMode(XnLinkVideoMode& linkVideoMode, const XnFwStreamVideoMode& videoMode);
 
 const XnChar* xnLinkPropTypeToStr(XnLinkPropType propType);
 
@@ -106,7 +107,7 @@ void xnLinkParseLeanVersion(XnLeanVersion& version, const XnLinkLeanVersion& lin
 void xnEncodeLeanVersion(XnLinkLeanVersion& linkVersion, const XnLeanVersion& version);
 
 /* nNumModes is max number of modes on input, actual number on output. */
-XnStatus xnLinkParseSupportedVideoModes(xnl::Array<XnStreamVideoMode>& aModes, 
+XnStatus xnLinkParseSupportedVideoModes(xnl::Array<XnFwStreamVideoMode>& aModes, 
                                                 const XnLinkSupportedVideoModes* pLinkSupportedModes,
                                                 XnUInt32 nBufferSize);
 XnStatus xnLinkParseBitSet(xnl::BitSet& bitSet, const XnLinkBitSet* pBitSet, XnUInt32 nBufferSize);
@@ -150,7 +151,7 @@ XnStatus xnLinkParseBitSetProp(XnLinkPropType propType, const void* pValue, XnUI
 XnStatus xnLinkParseFrameSyncStreamIDsProp(XnLinkPropType propType, const void* pValue, XnUInt32 nValueSize, xnl::Array<XnUInt16>& streamIDs);
 XnStatus xnLinkParseComponentVersionsListProp(XnLinkPropType propType, const void* pValue, XnUInt32 nValueSize, xnl::Array<XnComponentVersion>& componentVersions);
 
-XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBistTest>& supportedTests);
+XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBist>& supportedTests);
 XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnLinkI2CDevice>& supportedDevices);
 XnStatus xnLinkParseSupportedLogFiles(const XnLinkSupportedLogFiles* pFilesList, XnUInt32 nBufferSize, xnl::Array<XnLinkLogFile>& supportedFiles);
 
@@ -158,5 +159,5 @@ void xnLinkParseBootStatus(XnBootStatus& bootStatus, const XnLinkBootStatus& lin
 
 XnUInt32 xnLinkGetPixelSizeByStreamType(XnLinkStreamType streamType);
 
-void xnLinkVideoModeToString(XnStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize);
+void xnLinkVideoModeToString(XnFwStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize);
 #endif // __XNLINKPROTOUTILS_H__

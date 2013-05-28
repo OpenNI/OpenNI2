@@ -9,6 +9,7 @@
 #include "XnLinkProtoLibDefs.h"
 #include <XnBitSet.h>
 #include <OpenNI.h>
+#include <PrimeSense.h>
 
 struct XnShiftToDepthConfig;
 
@@ -63,8 +64,8 @@ public:
 	XnStatus StopStreaming(XnUInt16 nStreamID);
 	XnStatus SoftReset();
 	XnStatus HardReset();
-	XnStatus GetSupportedBistTests(xnl::Array<XnBistTest>& supportedTests);
-	XnStatus ExecuteBistTests(XnUInt32 nID, XnBistTestResponse* pResponse, XnUInt32 nResponseStructSize);
+	XnStatus GetSupportedBistTests(xnl::Array<XnBist>& supportedTests);
+	XnStatus ExecuteBistTests(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	XnStatus StartUsbTest();
 	XnStatus StopUsbTest();
 	XnStatus GetSupportedI2CDevices(xnl::Array<XnLinkI2CDevice>& supporteddevices);
@@ -73,10 +74,10 @@ public:
 	XnStatus WriteAHB(XnUInt32 nAddress, XnUInt32 nValue, XnUInt8 nBitOffset, XnUInt8 nBitWidth);
 	XnStatus ReadAHB(XnUInt32 nAddress, XnUInt8 nBitOffset, XnUInt8 nBitWidth, XnUInt32& nValue);
 	XnStatus GetShiftToDepthConfig(XnUInt16 nStreamID, XnShiftToDepthConfig& shiftToDepthConfig);
-	XnStatus SetVideoMode(XnUInt16 nStreamID, const XnStreamVideoMode& videoMode);
-	XnStatus GetVideoMode(XnUInt16 nStreamID, XnStreamVideoMode& videoMode);
-	XnStatus GetSupportedVideoModes(XnUInt16 nStreamID, xnl::Array<XnStreamVideoMode>& supportedVideoModes);
-	XnStatus EnumerateStreams(xnl::Array<XnStreamInfo>& aStreamInfos);
+	XnStatus SetVideoMode(XnUInt16 nStreamID, const XnFwStreamVideoMode& videoMode);
+	XnStatus GetVideoMode(XnUInt16 nStreamID, XnFwStreamVideoMode& videoMode);
+	XnStatus GetSupportedVideoModes(XnUInt16 nStreamID, xnl::Array<XnFwStreamVideoMode>& supportedVideoModes);
+	XnStatus EnumerateStreams(xnl::Array<XnFwStreamInfo>& aStreamInfos);
     XnStatus CreateInputStream(XnStreamType streamType, const XnChar* strCreationInfo, XnUInt16& nStreamID, XnUInt16& nEndpointID);
 	XnStatus DestroyInputStream(XnUInt16 nStreamID);
 	XnStatus SetCropping(XnUInt16 nStreamID, const OniCropping& cropping);

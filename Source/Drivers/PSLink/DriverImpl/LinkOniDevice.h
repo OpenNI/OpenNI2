@@ -30,7 +30,7 @@
 #include "LinkOniIRStream.h"
 //#include "LinkOniColorStream.h"
 
-#include <PrimeClient.h>
+#include <PS1200Device.h>
 
 //---------------------------------------------------------------------------
 // Types
@@ -46,7 +46,7 @@ public:
 	LinkOniDevice(const char* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver);
 	virtual ~LinkOniDevice();
 
-	XnStatus Init();
+	XnStatus Init(const char* mode);
 	void     Destroy();
 
 	OniDeviceInfo* GetInfo() { return &m_info; }
@@ -82,14 +82,12 @@ public:
 private:
 	XN_DISABLE_COPY_AND_ASSIGN(LinkOniDevice)
 
-	XnStatus readSupportedModesFromStream(XnStreamInfo &info, xnl::Array<XnStreamVideoMode> &aSupportedModes);
+	XnStatus readSupportedModesFromStream(XnFwStreamInfo &info, xnl::Array<XnFwStreamVideoMode> &aSupportedModes);
 	XnStatus FillSupportedVideoModes();
 
 	OniDeviceInfo m_info;
 	// the device we wrap
-	xn::PrimeClient* m_pSensor;
-
-	XnBool m_didReset;
+	xn::PS1200Device* m_pSensor;
 
 	// what we supply
 	int m_numSensors;

@@ -56,7 +56,7 @@ protected:
 	struct SupportedVideoMode
 	{
 		OniVideoMode OutputMode;
-		XnLinkPixelFormat nInputFormat;
+		XnFwPixelFormat nInputFormat;
 	};
 
 	int                 m_nSupportedModesCount;

@@ -101,7 +101,7 @@ void LinkOniDriver::shutdown()
 	LinkDeviceEnumeration::Shutdown();
 }
 
-oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri, const char* /*mode*/)
+oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri, const char* mode)
 {
 	LinkOniDevice* pDevice = NULL;
 
@@ -113,7 +113,7 @@ oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri, const char* 
 	}
 
 	pDevice = XN_NEW(LinkOniDevice, uri, getServices(), this);
-	XnStatus nRetVal = pDevice->Init();
+	XnStatus nRetVal = pDevice->Init(mode);
 	if (nRetVal != XN_STATUS_OK)
 	{
 		getServices().errorLoggerAppend("Could not open \"%s\": %s", uri, xnGetStatusString(nRetVal));

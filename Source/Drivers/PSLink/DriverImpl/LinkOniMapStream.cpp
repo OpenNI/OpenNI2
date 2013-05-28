@@ -131,8 +131,8 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 		case LINK_PROP_PIXEL_FORMAT:
 			{
 				ENSURE_PROP_SIZE(dataSize, XnLinkPixelFormat);
-				XnStreamVideoMode mode = m_pInputStream->GetVideoMode();
-				mode.m_nPixelFormat = *(XnLinkPixelFormat*)data;
+				XnFwStreamVideoMode mode = m_pInputStream->GetVideoMode();
+				mode.m_nPixelFormat = *(XnFwPixelFormat*)data;
 				nRetVal = m_pInputStream->SetVideoMode(mode);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
@@ -141,8 +141,8 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 		case LINK_PROP_COMPRESSION:
 			{
 				ENSURE_PROP_SIZE(dataSize, XnLinkCompressionType);
-				XnStreamVideoMode mode = m_pInputStream->GetVideoMode();
-				mode.m_nCompression = *(XnLinkCompressionType*)data;
+				XnFwStreamVideoMode mode = m_pInputStream->GetVideoMode();
+				mode.m_nCompression = *(XnFwCompressionType*)data;
 				nRetVal = m_pInputStream->SetVideoMode(mode);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
@@ -213,7 +213,7 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 	}
 
 	// now look for the first mode that matches
-	const xnl::Array<XnStreamVideoMode>& supportedModes = m_pInputStream->GetSupportedVideoModes();
+	const xnl::Array<XnFwStreamVideoMode>& supportedModes = m_pInputStream->GetSupportedVideoModes();
 	XnInt32 selectedIndex = -1;
 	for (XnUInt32 i = 0; i < supportedModes.GetSize(); ++i)
 	{
@@ -246,7 +246,7 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 XnStatus LinkOniMapStream::FillSupportedVideoModes()
 {
 	int nCount;
-	const xnl::Array<XnStreamVideoMode> *pSupported;
+	const xnl::Array<XnFwStreamVideoMode> *pSupported;
 	pSupported = &m_pInputStream->GetSupportedVideoModes();
 	nCount = (int)pSupported->GetSize();
 

@@ -4,22 +4,18 @@
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
-#include "PrimeClient.h"
-#include "PS1200Device.h"
-#include "XnLinkInputStream.h"
-#include "XnLinkFrameInputStream.h"
-#include "XnPsVersion.h"
-#include "IConnectionFactory.h"
-#include "XnClientUSBConnectionFactory.h"
-#include "XnSocketConnectionFactory.h"
+#include <OpenNI.h>
+#include <PSLink.h>
 #include <XnStringsHash.h>
 #include <XnList.h>
 #include <XnArray.h>
-#include <XnLog.h>
+#include <XnBitSet.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+
+using namespace openni;
 
 //---------------------------------------------------------------------------
 // Macros
@@ -27,7 +23,7 @@
 #define CHECK_RC(what, nRetVal) \
 	if (nRetVal != XN_STATUS_OK) \
 	{ \
-		printf("Failed to %s: %s\n", what, xnGetStatusString(nRetVal)); \
+		printf("Failed to %s: %s\n", what, OpenNI::getExtendedError()); \
 		XN_ASSERT(FALSE); \
 		return nRetVal; \
 	}
@@ -35,7 +31,7 @@
 #define CHECK_RC_NO_RET(what, nRetVal) \
 	if (nRetVal != XN_STATUS_OK) \
 	{ \
-		printf("Failed to %s: %s\n", what, xnGetStatusString(nRetVal)); \
+		printf("Failed to %s: %s\n", what, OpenNI::getExtendedError()); \
 		XN_ASSERT(FALSE); \
 	}
 
@@ -45,7 +41,7 @@
 #define WAIT_FOR_DEVICE_TIMEOUT 10000
 #define WAIT_FOR_DEVICE_CHECK_INTERVAL_MS 5000
 #define XN_MASK_PRIME_CONSOLE "PSLinkConsole"
-#define MAX_DEVICES_COUNT 10
+#define MAX_STREAMS_COUNT 10
 
 //---------------------------------------------------------------------------
 // Types
@@ -58,15 +54,41 @@ typedef struct
 	CommandHandler handler;
 } Command;
 
+typedef struct
+{
+	XnFwStreamType type;
+	const char* name;
+} FwStreamName;
+
+typedef struct
+{
+	XnUsbInterfaceType type;
+	const char* name;
+} UsbInterfaceName;
+
 //---------------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------------
-static xn::PrimeClient* g_pPrimeClient = NULL;
-static xn::PS1200Device* g_pPS1200Device = NULL;
+static Device g_device;
+static xnl::Array<VideoStream*> g_streams;
 static xnl::List<const XnChar*> g_commandsList;
 static XnStringsHashT<Command> g_commands;
 static XnBool g_continue = TRUE;
-static XnConnectionString g_connectionStrings[MAX_DEVICES_COUNT];
+
+static FwStreamName g_fwStreamNames[] = {
+	{ XN_FW_STREAM_TYPE_COLOR, "Color" },
+	{ XN_FW_STREAM_TYPE_IR, "IR" },
+	{ XN_FW_STREAM_TYPE_SHIFTS, "Depth" },
+	{ XN_FW_STREAM_TYPE_AUDIO, "Audio" },
+	{ XN_FW_STREAM_TYPE_DY, "DY" },
+	{ XN_FW_STREAM_TYPE_LOG, "Log" },
+};
+
+static UsbInterfaceName g_usbInterfaceNames[] = {
+	{ PS_USB_INTERFACE_DONT_CARE, "ANY"	},
+	{ PS_USB_INTERFACE_ISO_ENDPOINTS, "ISO"	},
+	{ PS_USB_INTERFACE_BULK_ENDPOINTS, "BULK" },
+};
 
 //---------------------------------------------------------------------------
 // Forward Declarations
@@ -117,6 +139,130 @@ XnChar* ToLower(XnChar* str)
 		*p = (XnChar)tolower(*p);
 	}
 	return str;
+}
+
+const char* fwStreamTypeToName(XnFwStreamType type)
+{
+	for (size_t i = 0; i < sizeof(g_fwStreamNames) / sizeof(g_fwStreamNames[0]); ++i)
+	{
+		if (g_fwStreamNames[i].type == type)
+		{
+			return g_fwStreamNames[i].name;
+		}
+	}
+
+	XN_ASSERT(FALSE);
+	return NULL;
+}
+
+XnFwStreamType fwStreamNameToType(const char* name)
+{
+	for (size_t i = 0; i < sizeof(g_fwStreamNames) / sizeof(g_fwStreamNames[0]); ++i)
+	{
+		if (xnOSStrCaseCmp(g_fwStreamNames[i].name, name) == 0)
+		{
+			return g_fwStreamNames[i].type;
+		}
+	}
+
+	return (XnFwStreamType)-1;
+}
+
+const XnChar* fwPixelFormatToName(XnFwPixelFormat pixelFormat)
+{
+	switch (pixelFormat)
+	{
+	case XN_FW_PIXEL_FORMAT_SHIFTS_9_3:
+		return "Shifts9.3";
+	case XN_FW_PIXEL_FORMAT_GRAYSCALE16:
+		return "Grayscale16";
+	case XN_FW_PIXEL_FORMAT_YUV422:
+		return "YUV422";
+	case XN_FW_PIXEL_FORMAT_BAYER8:
+		return "BAYER8";
+	default:
+		XN_ASSERT(FALSE);
+		return "UNKNOWN";
+	}
+}
+
+XnFwPixelFormat fwPixelFormatNameToType(const XnChar* name)
+{
+	if (xnOSStrCmp(name, "Shifts9.3") == 0)
+		return XN_FW_PIXEL_FORMAT_SHIFTS_9_3;
+	else if (xnOSStrCmp(name, "Grayscale16") == 0)
+		return XN_FW_PIXEL_FORMAT_GRAYSCALE16;
+	else if (xnOSStrCmp(name, "YUV422") == 0)
+		return XN_FW_PIXEL_FORMAT_YUV422;
+	else if (xnOSStrCmp(name, "BAYER8") == 0)
+		return XN_FW_PIXEL_FORMAT_BAYER8;
+	else
+	{
+		XN_ASSERT(FALSE);
+		return (XnFwPixelFormat)(-1);
+	}
+}
+
+const XnChar* fwCompressionTypeToName(XnFwCompressionType compression)
+{
+	switch (compression)
+	{
+	case XN_FW_COMPRESSION_NONE:
+		return "None";
+	case XN_FW_COMPRESSION_8Z:
+		return "8z";
+	case XN_FW_COMPRESSION_16Z:
+		return "16z";
+	case XN_FW_COMPRESSION_24Z:
+		return "24z";
+	case XN_FW_COMPRESSION_6_BIT_PACKED:
+		return "6bit";
+	case XN_FW_COMPRESSION_10_BIT_PACKED:
+		return "10bit";
+	case XN_FW_COMPRESSION_11_BIT_PACKED:
+		return "11bit";
+	case XN_FW_COMPRESSION_12_BIT_PACKED:
+		return "12bit";
+	default:
+		XN_ASSERT(FALSE);
+		return "UNKNOWN";
+	}
+}
+
+XnFwCompressionType fwCompressionNameToType(const XnChar* name)
+{
+	if (xnOSStrCmp(name, "None") == 0)
+		return XN_FW_COMPRESSION_NONE;
+	else if (xnOSStrCmp(name, "8z") == 0)
+		return XN_FW_COMPRESSION_8Z;
+	else if (xnOSStrCmp(name, "16z") == 0)
+		return XN_FW_COMPRESSION_16Z;
+	else if (xnOSStrCmp(name, "24z") == 0)
+		return XN_FW_COMPRESSION_24Z;
+	else if (xnOSStrCmp(name, "6bit") == 0)
+		return XN_FW_COMPRESSION_6_BIT_PACKED;
+	else if (xnOSStrCmp(name, "10bit") == 0)
+		return XN_FW_COMPRESSION_10_BIT_PACKED;
+	else if (xnOSStrCmp(name, "11bit") == 0)
+		return XN_FW_COMPRESSION_11_BIT_PACKED;
+	else if (xnOSStrCmp(name, "12bit") == 0)
+		return XN_FW_COMPRESSION_12_BIT_PACKED;
+	else
+	{
+		XN_ASSERT(FALSE);
+		return (XnFwCompressionType)-1;
+	}
+}
+
+const char* fwVideoModeToString(XnFwStreamVideoMode videoMode)
+{
+	static char buffer[256];
+	XnUInt32 charsWritten = 0;
+	xnOSStrFormat(buffer, sizeof(buffer), &charsWritten, "%ux%u@%u (%s, %s)", 
+		videoMode.m_nXRes, videoMode.m_nYRes, videoMode.m_nFPS, 
+		fwPixelFormatToName(videoMode.m_nPixelFormat),
+		fwCompressionTypeToName(videoMode.m_nCompression));
+	return buffer;
 }
 
 //---------------------------------------------------------------------------
@@ -208,7 +354,7 @@ int RunScript(const XnChar* strFileName)
 	nRetVal = xnOSDoesFileExist(strFileName, &bExists);
 	if (nRetVal != XN_STATUS_OK)
 	{
-		printf("Failed checking for file existence: %s\n", xnGetStatusString(nRetVal));
+		printf("Failed checking for file existence: %s\n", OpenNI::getExtendedError());
 		return -1;
 	}
 
@@ -246,54 +392,35 @@ int Help(int /*argc*/, const char* /*argv*/[])
 	return 0;
 }
 
-int ComponentsVersions(int /*argc*/, const char* /*argv*/[])
-{
-	xnl::Array<XnComponentVersion> components;
-	XnStatus nRetVal = g_pPrimeClient->GetComponentsVersions(components);
-	if (nRetVal != XN_STATUS_OK)
-	{
-		printf("Failed to get components versions: %s\n\n", xnGetStatusString(nRetVal));
-		return nRetVal;
-	}
-
-	for (XnUInt32 i = 0; i < components.GetSize(); ++i)
-	{
-		printf("%s: %s\n", components[i].m_strName, components[i].m_strVersion);
-	}
-
-	return 0;
-}
-
 int BeginUpload(int /*argc*/, const char* /*argv*/[])
 {
-	XnStatus nRetVal = g_pPrimeClient->BeginUploadFileOnControlEP();
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_BEGIN_FIRMWARE_UPDATE, NULL, 0);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Begin upload successful\n\n");
 		return 0;
 	}
 	else
 	{
-		printf("Begin upload failed: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Begin upload failed: %s\n\n", OpenNI::getExtendedError());
 		return nRetVal;
 	}
 }
 
 int EndUpload(int /*argc*/, const char* /*argv*/[])
 {
-	XnStatus nRetVal = g_pPrimeClient->EndUploadFileOnControlEP();
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_END_FIRMWARE_UPDATE, NULL, 0);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("End upload successful\n\n");
 		return 0;
 	}
 	else
 	{
-		printf("End upload failed: %s\n\n", xnGetStatusString(nRetVal));
+		printf("End upload failed: %s\n\n", OpenNI::getExtendedError());
 		return nRetVal;
 	}
 }
-
 
 int Upload(int argc, const char* argv[])
 {
@@ -304,31 +431,37 @@ int Upload(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnBool bOverrideFactorySettings = (argc > 2);
+	XnCommandUploadFile uploadCommand;
+	uploadCommand.uploadToFactory = (argc > 2);
+	uploadCommand.filePath = argv[1];
 
-	const XnChar* strFileName = argv[1];
-	printf("Uploading file '%s'...", strFileName);
-	XnStatus nRetVal = g_pPrimeClient->UploadFileOnControlEP(strFileName, bOverrideFactorySettings);
+	printf("Uploading file '%s'...", uploadCommand.filePath);
+
+	Status nRetVal = g_device.invoke(PS_COMMAND_UPLOAD_FILE, uploadCommand);
 	printf("\n");
-	if (nRetVal == XN_STATUS_OK)
+	if (nRetVal == STATUS_OK)
 	{
 		printf("File uploaded successfully\n\n");
 		return 0;
 	}
 	else
 	{
-		printf("Failed to upload file '%s': %s\n\n", strFileName, xnGetStatusString(nRetVal));
+		printf("Failed to upload file '%s': %s\n\n", uploadCommand.filePath, OpenNI::getExtendedError());
 		return nRetVal;
 	}
 }
 
 int Dir(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnFileEntry> files;
-	XnStatus nRetVal = g_pPrimeClient->GetFileList(files);
-	if (nRetVal != XN_STATUS_OK)
+	XnFileEntry files[50];
+	XnCommandGetFileList args;
+	args.count = sizeof(files) / sizeof(files[0]);
+	args.files = files;
+
+	Status nRetVal = g_device.invoke(PS_COMMAND_GET_FILE_LIST, args);
+	if (nRetVal != STATUS_OK)
 	{
-		printf("Failed to get file list: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to get file list: %s\n\n", OpenNI::getExtendedError());
 		return nRetVal;
 	}
 	else
@@ -338,16 +471,16 @@ int Dir(int /*argc*/, const char* /*argv*/[])
 		printf("%-4s  %-32s  %-8s  %-10s  %-6s  %-6s  %-15s\n", "ZONE", "NAME", "VERSION", "ADDRESS", "SIZE", "CRC", "FLAGS");
 		printf("%-4s  %-32s  %-8s  %-10s  %-6s  %-6s  %-15s\n", "====", "====", "=======", "=======", "====", "===", "=====");
 
-		for (XnUInt32 i = 0; i < files.GetSize(); ++i)
+		for (XnUInt32 i = 0; i < args.count; ++i)
 		{
 			XnFileEntry& file = files[i];
 			printf("%-4u  %-32s  %01u.%01u.%01u.%02u  0x%08x  %6u  0x%04x  ", 
-				file.m_nZone, file.m_strName, 
-				file.m_nVersion.m_nMajor, file.m_nVersion.m_nMinor, file.m_nVersion.m_nMaintenance, file.m_nVersion.m_nBuild,
-				file.m_nAddress, file.m_nSize, file.m_nCRC);
+				file.zone, file.name, 
+				file.version.major, file.version.minor, file.version.maintenance, file.version.build,
+				file.address, file.size, file.crc);
 
 			// flags
-			if ((file.m_nFlags & XN_LINK_FILE_FLAG_BAD_CRC) != 0)
+			if ((file.flags & XN_FILE_FLAG_BAD_CRC) != 0)
 			{
 				printf("CORRUPT");
 			}
@@ -369,12 +502,15 @@ int Download(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 zone = (XnUInt16)MyAtoi(argv[1]);
+	XnCommandDownloadFile args;
+	args.zone = (uint16_t)MyAtoi(argv[1]);
+	args.firmwareFileName = argv[2];
+	args.targetPath = argv[3];
 
-	XnStatus nRetVal = g_pPrimeClient->DownloadFile(zone, argv[2], argv[3]);
-	if (nRetVal != XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_DOWNLOAD_FILE, args);
+	if (nRetVal != STATUS_OK)
 	{
-		printf("Failed to download file '%s' from zone %u: %s\n\n", argv[1], zone, xnGetStatusString(nRetVal));
+		printf("Failed to download file '%s' from zone %u: %s\n\n", args.firmwareFileName, args.zone, OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -382,8 +518,16 @@ int Download(int argc, const char* argv[])
 
 int PrintFirmwareVersion(int /*argc*/, const char* /*argv*/[])
 {
-	const XnDetailedVersion& fwVersion = g_pPrimeClient->GetFWVersion();
-	printf("FW version from device: %u.%u.%u.%u-%s\n\n", fwVersion.m_nMajor, fwVersion.m_nMinor, fwVersion.m_nMaintenance, fwVersion.m_nBuild, fwVersion.m_strModifier);
+	char strVersion[200];
+	int size = sizeof(strVersion);
+	Status nRetVal = g_device.getProperty(DEVICE_PROPERTY_FIRMWARE_VERSION, strVersion, &size);
+	if (nRetVal != STATUS_OK)
+	{
+		printf("Failed to get firmware version!");
+		return -1;
+	}
+
+	printf("FW version from device: %s\n\n", strVersion);
 	return 0;
 }
 
@@ -397,16 +541,15 @@ int DumpStream(int argc, const char* argv[])
 
 	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
 	XnBool bDumpOn = (xnOSStrCaseCmp(argv[2], "on") == 0);
-	XnChar strDumpName[XN_FILE_MAX_PATH] = "";
-	xnLinkGetStreamDumpName(nStreamID, strDumpName, sizeof(strDumpName));
-	xnDumpSetMaskState(strDumpName, bDumpOn);
+	if (STATUS_OK != g_device.setProperty(PS_PROPERTY_DUMP_DATA, bDumpOn))
+	{
+		printf("Failed to toggle dump for stream\n");
+		return -2;
+	}
+
 	if (bDumpOn)
 	{
-		XnChar strCurrentDir[XN_FILE_MAX_PATH];
-		XnStatus nRetVal = xnOSGetCurrentDir(strCurrentDir, sizeof(strCurrentDir));
-		XN_REFERENCE_VARIABLE(nRetVal);
-		XN_ASSERT(nRetVal == XN_STATUS_OK);
-		printf("Dumping stream %u to directory '%s%sLog'\n\n", nStreamID, strCurrentDir, XN_FILE_DIR_SEP);
+		printf("Dumping stream %u to directory 'Log'\n\n", nStreamID);
 	}
 	else
 	{
@@ -424,22 +567,25 @@ int DumpEP(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nEPID = (XnUInt16)MyAtoi(argv[1]);
-	XnBool bDumpOn = (xnOSStrCaseCmp(argv[2], "on") == 0);
-	XnChar strDumpName[XN_FILE_MAX_PATH] = "";
-	xnLinkGetEPDumpName(nEPID, strDumpName, sizeof(strDumpName));
-	xnDumpSetMaskState(strDumpName, bDumpOn);
-	if (bDumpOn)
+	XnCommandDumpEndpoint args;
+
+	args.endpoint = (uint8_t)MyAtoi(argv[1]);
+	args.enabled = xnOSStrCaseCmp(argv[2], "on") == 0;
+
+	Status nRetVal = g_device.invoke(PS_COMMAND_DUMP_ENDPOINT, args);
+	if (nRetVal != STATUS_OK)
 	{
-		XnChar strCurrentDir[XN_FILE_MAX_PATH];
-		XnStatus nRetVal = xnOSGetCurrentDir(strCurrentDir, sizeof(strCurrentDir));
-		XN_REFERENCE_VARIABLE(nRetVal);
-		XN_ASSERT(nRetVal == XN_STATUS_OK);
-		printf("Dumping endpoint %u to directory '%s%sLog'\n\n", nEPID, strCurrentDir, XN_FILE_DIR_SEP);
+		printf("Failed to set endpoint dump: %s\n", OpenNI::getExtendedError());
+		return 1;
+	}
+
+	if (args.enabled)
+	{
+		printf("Dumping endpoint %u to directory 'Log'\n\n", args.endpoint);
 	}
 	else
 	{
-		printf("Endpoint %u dump is now off\n\n", nEPID);
+		printf("Endpoint %u dump is now off\n\n", args.endpoint);
 	}
 
 	return 0;
@@ -447,7 +593,6 @@ int DumpEP(int argc, const char* argv[])
 
 int EnumerateStreams(int argc, const char* argv[])
 {
-	XnStatus nRetVal = XN_STATUS_OK;
 	if (argc < 2)
 	{
 		printf("Usage: %s <stream type|ALL>\n", argv[0]);
@@ -456,36 +601,39 @@ int EnumerateStreams(int argc, const char* argv[])
 		return -1;
 	}
 
-	xnl::Array<XnStreamInfo> streamInfos;
-	if (strcmp(argv[1], "ALL") == 0)
+	XnFwStreamType type = (XnFwStreamType)-1;
+	if (xnOSStrCaseCmp(argv[1], "all") != 0)
 	{
-		nRetVal = g_pPrimeClient->EnumerateStreams(streamInfos);
-	}
-	else
-	{
-		XnStreamType streamType = xnLinkStreamTypeFromString(argv[1]);
-		if (streamType == XN_LINK_STREAM_TYPE_INVALID)
+		type = fwStreamNameToType(argv[1]);
+		if (type == (XnFwStreamType)-1)
 		{
 			printf("Bad stream type '%s'\n\n", argv[1]);
 			return -2;
 		}
-		nRetVal = g_pPrimeClient->EnumerateStreams(streamType, streamInfos);
 	}
 
-	if (nRetVal == XN_STATUS_OK)
+	XnFwStreamInfo streams[20];
+	XnCommandGetFwStreamList args;
+	args.count = sizeof(streams)/sizeof(streams[0]);
+	args.streams = streams;
+	Status nRetVal = g_device.invoke(LINK_COMMAND_GET_FW_STREAM_LIST, args);
+	if (nRetVal == STATUS_OK)
 	{
-		printf("Successfully enumerated streams of type '%s'. Got %u results:\n", argv[1], streamInfos.GetSize());
-		for (XnUInt32 i = 0; i < streamInfos.GetSize(); i++)
+		int index = 0;
+		for (uint32_t i = 0; i < args.count; ++i)
 		{
-			printf("\t[%u] stream type='%s', creationInfo='%s'\n", 
-				i,
-				xnLinkStreamTypeToString(streamInfos[i].m_nStreamType), 
-				streamInfos[i].m_strCreationInfo);
+			if (type == (XnFwStreamType)-1 || type == streams[i].type)
+			{
+				printf("\t[%u] stream type='%s', creationInfo='%s'\n", 
+					index++,
+					fwStreamTypeToName(streams[i].type), 
+					streams[i].creationInfo);
+			}
 		}
 	}
 	else
 	{
-		printf("Failed to enumerate streams: %s\n", xnGetStatusString(nRetVal));
+		printf("Failed to enumerate streams: %s\n", OpenNI::getExtendedError());
 	}
 	printf("\n");
 
@@ -501,23 +649,25 @@ int CreateStream(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = 0;
-
-	XnStreamType streamType = xnLinkStreamTypeFromString(argv[1]);
-	if (streamType == XN_LINK_STREAM_TYPE_INVALID)
+	XnFwStreamType streamType = fwStreamNameToType(argv[1]);
+	if (streamType == (XnFwStreamType)-1)
 	{
 		printf("Bad stream type '%s'.\n\n", argv[1]);
 		return -2;
 	}
 
-	XnStatus nRetVal = g_pPrimeClient->CreateInputStream(streamType, argv[2], nStreamID);
+	XnCommandCreateStream args;
+	args.type = streamType;
+	args.creationInfo = argv[2];
+
+	Status nRetVal = g_device.invoke(LINK_COMMAND_CREATE_FW_STREAM, args);
 	if (nRetVal == XN_STATUS_OK)
 	{
-		printf("Successfully created stream of type %s with ID %u.\n\n", argv[1], nStreamID);
+		printf("Successfully created stream of type %s with ID %u.\n\n", argv[1], args.id);
 	}
 	else
 	{
-		printf("Failed to create stream: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to create stream: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -532,15 +682,16 @@ int DestroyStream(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
-	XnStatus nRetVal = g_pPrimeClient->DestroyInputStream(nStreamID);
-	if (nRetVal == XN_STATUS_OK)
+	XnCommandDestroyStream args;
+	args.id = MyAtoi(argv[1]);
+	Status nRetVal = g_device.invoke(LINK_COMMAND_DESTROY_FW_STREAM, args);
+	if (nRetVal == STATUS_OK)
 	{
-		printf("Successfully destroyed stream %u\n\n", nStreamID);
+		printf("Successfully destroyed stream %u\n\n", args.id);
 	}
 	else
 	{
-		printf("Failed to destroy stream: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to destroy stream: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -554,22 +705,16 @@ int StartStream(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
-	xn::LinkInputStream* pInputStream = g_pPrimeClient->GetInputStream(nStreamID);
-	if (pInputStream == NULL)
+	XnCommandStartStream args;
+	args.id = MyAtoi(argv[1]);
+	Status nRetVal = g_device.invoke(LINK_COMMAND_START_FW_STREAM, args);
+	if (nRetVal == STATUS_OK)
 	{
-		printf("Stream %u was not created.\n\n", nStreamID);
-		return -2;
-	}
-
-	XnStatus nRetVal = pInputStream->Start();
-	if (nRetVal == XN_STATUS_OK)
-	{
-		printf("Successfully started stream %u.\n\n", nStreamID);
+		printf("Successfully started stream %u\n\n", args.id);
 	}
 	else
 	{
-		printf("Failed to start stream %u: %s\n\n", nStreamID, xnGetStatusString(nRetVal));
+		printf("Failed to start stream %u: %s\n\n", args.id, OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -583,22 +728,16 @@ int StopStream(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
-	xn::LinkInputStream* pInputStream = g_pPrimeClient->GetInputStream(nStreamID);
-	if (pInputStream == NULL)
+	XnCommandStopStream args;
+	args.id = MyAtoi(argv[1]);
+	Status nRetVal = g_device.invoke(LINK_COMMAND_STOP_FW_STREAM, args);
+	if (nRetVal == STATUS_OK)
 	{
-		printf("Stream %u was not created.\n\n", nStreamID);
-		return -2;
-	}
-
-	XnStatus nRetVal = pInputStream->Stop();
-	if (nRetVal == XN_STATUS_OK)
-	{
-		printf("Successfully stopped stream %u.\n\n", nStreamID);
+		printf("Successfully stopped stream %u\n\n", args.id);
 	}
 	else
 	{
-		printf("Failed to stop stream %u: %s\n\n", nStreamID, xnGetStatusString(nRetVal));
+		printf("Failed to stop stream %u: %s\n\n", args.id, OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -613,30 +752,23 @@ int PrintModes(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
+	XnFwStreamVideoMode modes[50];
+	XnCommandGetFwStreamVideoModeList args;
+	args.videoModes = modes;
+	args.count = sizeof(modes)/sizeof(modes[0]);
+	args.streamId = MyAtoi(argv[1]);
 
-	xn::LinkInputStream* pInputStream = g_pPrimeClient->GetInputStream(nStreamID);
-	if (pInputStream == NULL)
+	Status nRetVal = g_device.invoke(LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE_LIST, args);
+	if (nRetVal != STATUS_OK)
 	{
-		printf("Input stream %u was not created.\n\n", nStreamID);
+		printf("Failed getting video modes list for stream %d: %s\n\n", args.streamId, OpenNI::getExtendedError());
 		return -2;
 	}
 
-	if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
+	printf("Got %u modes:\n", args.count);
+	for (uint32_t i = 0; i < args.count; i++)
 	{
-		printf("Stream %u is not a frame stream.\n\n", nStreamID);
-		return -3;
-	}
-
-	xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
-
-	const xnl::Array<XnStreamVideoMode>& supportedVideoModes = pFrameInputStream->GetSupportedVideoModes();
-	printf("Got %u modes:\n", supportedVideoModes.GetSize());
-	XnChar strVideoMode[100];
-	for (XnUInt32 i = 0; i < supportedVideoModes.GetSize(); i++)
-	{
-		xnLinkVideoModeToString(supportedVideoModes[i], strVideoMode, sizeof(strVideoMode));
-		printf("\t[%u] %s\n", i, strVideoMode);
+		printf("\t[%u] %s\n", i, fwVideoModeToString(modes[i]));
 	}
 	printf("\n");
 
@@ -650,47 +782,32 @@ int SetMode(int argc, const char* argv[])
 		printf("Usage: %s <StreamID> <XRes> <YRes> <FPS> <format> <compression>\n", argv[0]);
 		printf("Sets the video mode of the specified stream.\n");
 		printf("Allowed formats: ");
-		for (int i = 1; i <= XN_LINK_PIXEL_FORMAT_BAYER8; ++i)
-			printf("%s, ", xnLinkPixelFormatToName((XnLinkPixelFormat)i));
+		for (int i = 1; i <= XN_FW_PIXEL_FORMAT_BAYER8; ++i)
+			printf("%s, ", fwPixelFormatToName((XnFwPixelFormat)i));
 		printf("\n");
 		printf("Allowed compressions: ");
-		for (int i = 0; i <= XN_LINK_COMPRESSION_12_BIT_PACKED; ++i)
-			printf("%s, ", xnLinkCompressionToName((XnLinkCompressionType)i));
+		for (int i = 0; i <= XN_FW_COMPRESSION_12_BIT_PACKED; ++i)
+			printf("%s, ", fwCompressionTypeToName((XnFwCompressionType)i));
 		printf("\n\n");
 		return -1;
 	}
 
-	XnStreamVideoMode videoMode;
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
-	videoMode.m_nXRes = MyAtoi(argv[2]);
-	videoMode.m_nYRes = MyAtoi(argv[3]);
-	videoMode.m_nFPS = MyAtoi(argv[4]);
-	videoMode.m_nPixelFormat = xnLinkPixelFormatFromName(argv[5]);
-	videoMode.m_nCompression = xnLinkCompressionFromName(argv[6]);
+	XnCommandSetFwStreamVideoMode args;
+	args.streamId = MyAtoi(argv[1]);
+	args.videoMode.m_nXRes = MyAtoi(argv[2]);
+	args.videoMode.m_nYRes = MyAtoi(argv[3]);
+	args.videoMode.m_nFPS = MyAtoi(argv[4]);
+	args.videoMode.m_nPixelFormat = fwPixelFormatNameToType(argv[5]);
+	args.videoMode.m_nCompression = fwCompressionNameToType(argv[6]);
 
-	xn::LinkInputStream* pInputStream = g_pPrimeClient->GetInputStream(nStreamID);
-	if (pInputStream == NULL)
-	{
-		printf("Stream %u was not created.\n\n", nStreamID);
-		return -2;
-	}
-
-	if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
-	{
-		printf("Stream %u is not a frame stream.\n\n", nStreamID);
-		return -3;
-	}
-
-	xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
-
-	XnStatus nRetVal = pFrameInputStream->SetVideoMode(videoMode);
+	Status nRetVal = g_device.invoke(LINK_COMMAND_SET_FW_STREAM_VIDEO_MODE, args);
 	if (nRetVal == XN_STATUS_OK)
 	{
 		printf("Successfully set video mode.\n\n");
 	}
 	else
 	{
-		printf("Failed to set video mode: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to set video mode: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -705,52 +822,60 @@ int PrintMode(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt16 nStreamID = (XnUInt16)MyAtoi(argv[1]);
-	xn::LinkInputStream* pInputStream = g_pPrimeClient->GetInputStream(nStreamID);
-	if (pInputStream == NULL)
+	XnCommandSetFwStreamVideoMode args;
+	args.streamId = MyAtoi(argv[1]);
+
+	Status nRetVal = g_device.invoke(LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE, args);
+	if (nRetVal == XN_STATUS_OK)
 	{
-		printf("Stream %u was not created.\n\n", nStreamID);
-		return -2;
+		printf("Video mode of stream %u: %s\n\n", args.streamId, fwVideoModeToString(args.videoMode));
 	}
-
-	if (pInputStream->GetStreamFragLevel() != XN_LINK_STREAM_FRAG_LEVEL_FRAMES)
+	else
 	{
-		printf("Stream %u is not a frame stream.\n\n", nStreamID);
-		return -3;
+		printf("Failed to set video mode: %s\n\n", OpenNI::getExtendedError());
 	}
-
-	xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
-
-	const XnStreamVideoMode& videoMode = pFrameInputStream->GetVideoMode();
-	XnChar strVideoMode[100];
-	xnLinkVideoModeToString(videoMode, strVideoMode, sizeof(strVideoMode));
-	printf("Video mode of stream %u: %s\n\n", nStreamID, strVideoMode);
 
 	return 0;
 }
 
-XnStatus GetI2CDeviceIDFromName(const char* deviceName, XnUInt8* result)
+xnl::Array<XnI2CDevice>& GetI2CDeviceList()
 {
-	static xnl::Array<XnLinkI2CDevice> s_deviceList;
+	static xnl::Array<XnI2CDevice> s_i2cDevices;
+
+	if (s_i2cDevices.GetSize() == 0)
+	{
+		XnI2CDevice devices[20];
+
+		XnCommandGetI2CDeviceList args;
+		args.devices = devices;
+		args.count = sizeof(devices)/sizeof(devices[0]);
+
+		if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_I2C_DEVICE_LIST, args))
+		{
+			printf("Failed getting device list: %s\n\n", OpenNI::getExtendedError());
+		}
+		else
+		{
+			s_i2cDevices.SetData(args.devices, args.count);
+		}
+	}
+
+	return s_i2cDevices;
+}
+
+XnStatus GetI2CDeviceIDFromName(const char* deviceName, uint32_t* result)
+{
 	XnStatus nRetVal = XN_STATUS_NO_MATCH;
 	
-	//Fetch device list if needed
-	if(s_deviceList.GetSize() == 0)
-	{
-		nRetVal = g_pPrimeClient->GetSupportedI2CDevices(s_deviceList);
-		XN_IS_STATUS_OK_LOG_ERROR("Get device list", nRetVal);
+	xnl::Array<XnI2CDevice>& devices = GetI2CDeviceList();
 
-		for(XnUInt32 i=0; i<s_deviceList.GetSize(); i++)
-			ToLower(s_deviceList[i].m_strName);
-	}
-	
 	nRetVal = XN_STATUS_NO_MATCH;
-	for(XnUInt32 i=0; i<s_deviceList.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
+	for (XnUInt32 i = 0; i < devices.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
 	{
-		if(xnOSStrCaseCmp(s_deviceList[i].m_strName, deviceName) == 0)
+		if(xnOSStrCaseCmp(devices[i].name, deviceName) == 0)
 		{
 			nRetVal = XN_STATUS_OK;
-			*result = (XnUInt8)s_deviceList[i].m_nID;
+			*result = (XnUInt8)devices[i].id;
 		}
 	}
 
@@ -766,25 +891,27 @@ int WriteI2C(int argc, const char* argv[])
 		return -1;
 	}
 
+	XnCommandI2C args;
+
 	//Try to get parse ID by name, and then by number
-	XnUInt8 deviceID = 0;
-	if(GetI2CDeviceIDFromName(argv[1], &deviceID) == XN_STATUS_NO_MATCH)
-		deviceID = (XnUInt8)MyAtoi(argv[1]);
+	args.deviceID = 0;
+	if (GetI2CDeviceIDFromName(argv[1], &args.deviceID) == XN_STATUS_NO_MATCH)
+		args.deviceID = MyAtoi(argv[1]);
 
-	XnUInt8 addressSize = (XnUInt8)MyAtoi(argv[2]);
-	XnUInt32 address = (XnUInt32)MyAtoi(argv[3]);
-	XnUInt8 valueSize = (XnUInt8)MyAtoi(argv[4]);
-	XnUInt32 value = (XnUInt32)MyAtoi(argv[5]);
-	XnUInt32 mask = (argc > 6) ? (XnUInt32)MyAtoi(argv[6]) : 0xFFFFFFFF;
+	args.addressSize = MyAtoi(argv[2]);
+	args.address = MyAtoi(argv[3]);
+	args.valueSize = MyAtoi(argv[4]);
+	args.value = MyAtoi(argv[5]);
+	args.mask = (argc > 6) ? MyAtoi(argv[6]) : 0xFFFFFFFF;
 
-	XnStatus nRetVal = g_pPrimeClient->WriteI2C(deviceID, addressSize, address, valueSize, value, mask);
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_I2C_WRITE, args);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully written I2C value.\n\n");
 	}
 	else
 	{
-		printf("Failed to write I2C value: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to write I2C value: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -799,24 +926,26 @@ int ReadI2C(int argc, const char* argv[])
 		return -1;
 	}
 
+	XnCommandI2C args;
+
 	//Try to get parse ID by name, and then by number
-	XnUInt8 deviceID = 0;
-	if(GetI2CDeviceIDFromName(argv[1], &deviceID) == XN_STATUS_NO_MATCH)
-		deviceID = (XnUInt8)MyAtoi(argv[1]);
+	args.deviceID = 0;
+	if (GetI2CDeviceIDFromName(argv[1], &args.deviceID) == XN_STATUS_NO_MATCH)
+		args.deviceID = MyAtoi(argv[1]);
 
-	XnUInt8 addressSize = (XnUInt8)MyAtoi(argv[2]);
-	XnUInt32 address = (XnUInt32)MyAtoi(argv[3]);
-	XnUInt8 valueSize = (XnUInt8)MyAtoi(argv[4]);
+	args.addressSize = MyAtoi(argv[2]);
+	args.address = MyAtoi(argv[3]);
+	args.valueSize = MyAtoi(argv[4]);
+	args.value = 0;
 
-	XnUInt32 value = 0;
-	XnStatus nRetVal = g_pPrimeClient->ReadI2C(deviceID, addressSize, address, valueSize, value);
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_I2C_READ, args);
+	if (nRetVal == STATUS_OK)
 	{
-		printf("Successfully read I2C value: %u (0x%X)\n\n", value, value);
+		printf("Successfully read I2C value: %u (0x%X)\n\n", args.value, args.value);
 	}
 	else
 	{
-		printf("Failed to read I2C value: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to read I2C value: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -830,17 +959,21 @@ int WriteAHB(int argc, const char* argv[])
 		printf("Note - each parameter may be in hex, indicated by an '0x' prefix.\n\n");
 		return -1;
 	}
-	XnStatus nRetVal = g_pPrimeClient->WriteAHB(MyAtoi(argv[1]), //Address
-		MyAtoi(argv[2]), //Value
-		(XnUInt8)MyAtoi(argv[3]), //BitOffset
-		(XnUInt8)MyAtoi(argv[4])); //BitWidth
-	if (nRetVal == XN_STATUS_OK)
+
+	XnCommandAHB args;
+	args.address = MyAtoi(argv[1]);
+	args.value = MyAtoi(argv[2]);
+	args.offsetInBits = MyAtoi(argv[3]);
+	args.widthInBits = MyAtoi(argv[4]);
+
+	Status nRetVal = g_device.invoke(PS_COMMAND_AHB_WRITE, args);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully written AHB value.\n\n");
 	}
 	else
 	{
-		printf("Failed to write AHB value: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to write AHB value: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -848,24 +981,26 @@ int WriteAHB(int argc, const char* argv[])
 
 int ReadAHB(int argc, const char* argv[])
 {
-	XnUInt32 nValue = 0;
 	if (argc < 4)
 	{
 		printf("Usage: %s <Address> <BitOffset> <BitWidth>\n", argv[0]);
 		printf("Note - each parameter may be in hex, indicated by an '0x' prefix.\n\n");
 		return -1;
 	}
-	XnStatus nRetVal = g_pPrimeClient->ReadAHB(MyAtoi(argv[1]), //Address
-		(XnUInt8)MyAtoi(argv[2]), //Bit Offset
-		(XnUInt8)MyAtoi(argv[3]), //Bit Width
-		nValue); //Value
+
+	XnCommandAHB args;
+	args.address = MyAtoi(argv[1]);
+	args.offsetInBits = MyAtoi(argv[2]);
+	args.widthInBits = MyAtoi(argv[3]);
+
+	Status nRetVal = g_device.invoke(PS_COMMAND_AHB_READ, args);
 	if (nRetVal == XN_STATUS_OK)
 	{
-		printf("Successfully read AHB value: %u (0x%X)\n\n", nValue, nValue);
+		printf("Successfully read AHB value: %u (0x%X)\n\n", args.value, args.value);
 	}
 	else
 	{
-		printf("Failed to read I2C value: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to read I2C value: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -874,15 +1009,15 @@ int ReadAHB(int argc, const char* argv[])
 int SoftReset(int /*argc*/, const char* /*argv*/[])
 {
 	printf("Resetting device...");
-	XnStatus nRetVal = g_pPrimeClient->SoftReset();
+	Status nRetVal = g_device.invoke(PS_COMMAND_SOFT_RESET, NULL, 0);
 	printf("\n");
-	if (nRetVal == XN_STATUS_OK)
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully executed Soft Reset.\n\n");
 	}
 	else
 	{
-		printf("Failed to execute soft reset: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to execute soft reset: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -891,9 +1026,9 @@ int SoftReset(int /*argc*/, const char* /*argv*/[])
 int HardReset(int /*argc*/, const char* /*argv*/[])
 {
 	printf("Resetting device...");
-	XnStatus nRetVal = g_pPrimeClient->HardReset();
+	Status nRetVal = g_device.invoke(PS_COMMAND_POWER_RESET, NULL, 0);
 	printf("\n");
-	if (nRetVal == XN_STATUS_OK)
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully executed Hard Reset.\n\n");
 		printf("**********************************************\n");
@@ -902,7 +1037,7 @@ int HardReset(int /*argc*/, const char* /*argv*/[])
 	}
 	else
 	{
-		printf("Failed to execute hard reset: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to execute hard reset: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -913,46 +1048,61 @@ int Emitter(int argc, const char* argv[])
 	if ((argc < 2) || 
 		((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0)))
 	{
-		printf("Usage: %s <on or off>\n\n", argv[0]);
+		printf("Usage: %s <on|off>\n\n", argv[0]);
 		return -1;
 	}
 	const XnChar* strEmitterActive = argv[1];
 	XnBool bEmitterActive = (xnOSStrCaseCmp(strEmitterActive, "on") == 0);
-	XnStatus nRetVal = g_pPrimeClient->SetEmitterActive(bEmitterActive);
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.setProperty(LINK_PROP_EMITTER_ACTIVE, bEmitterActive);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Emitter is now %s.\n\n", strEmitterActive);
 	}
 	else
 	{
-		printf("Failed to set emitter %s: %s\n\n", strEmitterActive, xnGetStatusString(nRetVal));
+		printf("Failed to set emitter %s: %s\n\n", strEmitterActive, OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
 }
 
-XnStatus GetLogIDFromName(const char* logName, XnUInt8* result) 
+xnl::Array<XnLogMask>& GetLogMaskList()
 {
-	static xnl::Array<XnLinkLogFile> s_fileList;
-	XnStatus nRetVal = XN_STATUS_NO_MATCH;
+	static xnl::Array<XnLogMask> s_masks;
 
-	//Fetch files list if needed
-	if(s_fileList.GetSize() == 0)
+	if (s_masks.GetSize() == 0)
 	{
-		nRetVal = g_pPrimeClient->GetSupportedLogFiles(s_fileList);
-		XN_IS_STATUS_OK_LOG_ERROR("Get log file list", nRetVal);
+		XnLogMask masks[20];
+		XnCommandGetLogMaskList args;
+		args.masks = masks;
+		args.count = sizeof(masks)/sizeof(masks[0]);
 
-		for(XnUInt32 i=0; i<s_fileList.GetSize(); i++)
-			ToLower(s_fileList[i].m_strName);
+		if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_LOG_MASK_LIST, args))
+		{
+			printf("Failed getting masks list: %s\n\n", OpenNI::getExtendedError());
+		}
+		else
+		{
+			s_masks.SetData(args.masks, args.count);
+		}
 	}
 
+	return s_masks;
+}
+
+XnStatus GetLogIDFromName(const char* mask, uint32_t* result)
+{
+	XnStatus nRetVal = XN_STATUS_NO_MATCH;
+
+	xnl::Array<XnLogMask>& masks = GetLogMaskList();
+
 	nRetVal = XN_STATUS_NO_MATCH;
-	for(XnUInt32 i=0; i<s_fileList.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
+	for (XnUInt32 i = 0; i < masks.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
 	{
-		if(xnOSStrCaseCmp(s_fileList[i].m_strName, logName) == 0)
+		if(xnOSStrCaseCmp(masks[i].name, mask) == 0)
 		{
 			nRetVal = XN_STATUS_OK;
-			*result = s_fileList[i].m_nID;
+			*result = (XnUInt8)masks[i].id;
 		}
 	}
 
@@ -965,58 +1115,54 @@ int Log(int argc, const char* argv[])
 	bool isOnOffCommnad = (argc == 2) && ((xnOSStrCaseCmp(argv[1], "on") == 0) || (xnOSStrCaseCmp(argv[1], "off") == 0));
 	bool isStartStopCommnad = (argc == 3) && ((xnOSStrCaseCmp(argv[1], "open") == 0) || (xnOSStrCaseCmp(argv[1], "close") == 0));
 	
-	if(!isOnOffCommnad && !isStartStopCommnad)
+	if (!isOnOffCommnad && !isStartStopCommnad)
 	{
 		printf("Usage: %s <on|off> or <open|close> <stream name or id>\n\n", argv[0]);
 		return -1;
 	}
 
-	if(isStartStopCommnad)
+	if (isStartStopCommnad)
 	{
 		//Try to get parse ID by name, and then by number
-		XnUInt8 logID = 0;
-		if(GetLogIDFromName(argv[1], &logID) == XN_STATUS_NO_MATCH){
+		uint32_t logID = 0;
+		if (GetLogIDFromName(argv[1], &logID) == XN_STATUS_NO_MATCH)
+		{
 			logID = (XnUInt8)MyAtoi(argv[2]);
 		}
 
 		//Start command
-		if(xnOSStrCaseCmp(argv[1], "open") == 0){
-			nRetVal = g_pPrimeClient->OpenFWLogFile(logID);
-		}
-		//Stop command
-		else{
-			nRetVal = g_pPrimeClient->CloseFWLogFile(logID);
-		}
-
-		if (nRetVal == XN_STATUS_OK){
+		XnCommandSetLogMaskState args;
+		args.mask = logID;
+		args.enabled = xnOSStrCaseCmp(argv[1], "open") == 0;
+		if (STATUS_OK == g_device.invoke(PS_COMMAND_SET_LOG_MASK_STATE, args))
+		{
 			printf("Sent %s command for log #%d", argv[1], (int)logID);
-		}else{
-			printf("Failed to send %s command for log #%d: %s\n\n", argv[1], (int)logID, xnGetStatusString(nRetVal));
 		}
-
+		else
+		{
+			printf("Failed to send %s command for log #%d: %s\n\n", argv[1], (int)logID, OpenNI::getExtendedError());
+		}
 	}
 	//on/off command
 	else
 	{
 		const XnChar* strLogOn = argv[1];
 		XnBool bLogOn = (xnOSStrCaseCmp(strLogOn, "on") == 0);
+
 		if (bLogOn)
 		{
-			nRetVal = g_pPrimeClient->StartFWLog();
+			nRetVal = g_device.invoke(PS_COMMAND_START_LOG, NULL, 0);
 		}
 		else
 		{
-			nRetVal = g_pPrimeClient->StopFWLog();
+			nRetVal = g_device.invoke(PS_COMMAND_STOP_LOG, NULL, 0);
 		}
 
-		if (nRetVal == XN_STATUS_OK)
+		if (nRetVal == STATUS_OK)
 		{
 			if (bLogOn)
 			{
-				XnChar strCurrentDir[XN_FILE_MAX_PATH];
-				nRetVal = xnOSGetCurrentDir(strCurrentDir, sizeof(strCurrentDir));
-				XN_ASSERT(nRetVal == XN_STATUS_OK);
-				printf("Saving firmware log to '%s%sLog'\n\n", strCurrentDir, XN_FILE_DIR_SEP);
+				printf("Saving firmware log to 'Log'\n\n");
 			}
 			else
 			{
@@ -1025,7 +1171,7 @@ int Log(int argc, const char* argv[])
 		}
 		else
 		{
-			printf("Failed to set log %s: %s\n\n", strLogOn, xnGetStatusString(nRetVal));
+			printf("Failed to set log %s: %s\n\n", strLogOn, OpenNI::getExtendedError());
 		}
 	}
 
@@ -1046,11 +1192,10 @@ int Script(int argc, const char* argv[])
 int PrintBootStatus(int /*argc*/, const char* /*argv*/[])
 {
 	XnBootStatus bootStatus;
-	XnStatus nRetVal = g_pPrimeClient->GetBootStatus(bootStatus);
-	
-	if (nRetVal != XN_STATUS_OK)
+	Status nRetVal = g_device.getProperty(LINK_PROP_BOOT_STATUS, &bootStatus);
+	if (nRetVal != STATUS_OK)
 	{
-		printf("Failed to get boot status: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to get boot status: %s\n\n", OpenNI::getExtendedError());
 		return nRetVal;
 	}
 	else
@@ -1063,20 +1208,21 @@ int PrintBootStatus(int /*argc*/, const char* /*argv*/[])
 				case enumValue: sprintf(targetStr, "%s", enumStr); break;
 
 		//Get XnLinkBootZone string
-		switch(bootStatus.m_nZone){
-			CASE_ENUM_TOSTRING(XN_LINK_BOOT_FACTORY_ZONE, "FACTORY_ZONE", bootZoneStr)
-			CASE_ENUM_TOSTRING(XN_LINK_BOOT_UPDATE_ZONE, "UPDATE_ZONE", bootZoneStr)
+		switch(bootStatus.zone){
+			CASE_ENUM_TOSTRING(XN_ZONE_FACTORY, "FACTORY_ZONE", bootZoneStr)
+			CASE_ENUM_TOSTRING(XN_ZONE_UPDATE, "UPDATE_ZONE", bootZoneStr)
 			default:
-				sprintf(bootZoneStr, "Unexpected - %d",bootStatus.m_nZone);
+				sprintf(bootZoneStr, "Unexpected - %d",bootStatus.zone);
 		}
 
 		//Get XnLinkBootErrorCode string
-		switch(bootStatus.m_nErrorCode){
-			CASE_ENUM_TOSTRING(XN_LINK_BOOT_OK, "BOOT_OK", bootZoneErr)
-			CASE_ENUM_TOSTRING(XN_LINK_BOOT_BAD_CRC, "BAD_CRC", bootZoneErr)
-			CASE_ENUM_TOSTRING(XN_LINK_BOOT_UPLOAD_IN_PROGRESS, "UPLOAD_IN_PROGRESS", bootZoneErr)
+		switch(bootStatus.errorCode){
+			CASE_ENUM_TOSTRING(XN_BOOT_OK, "BOOT_OK", bootZoneErr)
+			CASE_ENUM_TOSTRING(XN_BOOT_BAD_CRC, "BAD_CRC", bootZoneErr)
+			CASE_ENUM_TOSTRING(XN_BOOT_UPLOAD_IN_PROGRESS, "UPLOAD_IN_PROGRESS", bootZoneErr)
+			CASE_ENUM_TOSTRING(XN_BOOT_FW_LOAD_FAILED, "FW_LOAD_FAILED", bootZoneErr)
 			default:
-				sprintf(bootZoneErr, "Unexpected - %d",bootStatus.m_nErrorCode);
+				sprintf(bootZoneErr, "Unexpected - %d",bootStatus.errorCode);
 		}
 
 		printf("Zone: %s\nError code: %s\n\n", bootZoneStr, bootZoneErr);
@@ -1085,73 +1231,59 @@ int PrintBootStatus(int /*argc*/, const char* /*argv*/[])
 	}
 }
 
-
 int PrintLogFilesList(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnLinkLogFile> fileList;
-	XnStatus nRetVal = g_pPrimeClient->GetSupportedLogFiles(fileList);
-	if (nRetVal != XN_STATUS_OK)
-	{
-		printf("Failed to get log files list: %s\n\n", xnGetStatusString(nRetVal));
-	}
-	else
-	{
-		for (XnUInt32 i = 0; i < fileList.GetSize(); ++i)
-		{
-			printf("%4u %s\n", (unsigned int)fileList[i].m_nID, fileList[i].m_strName);
-		}
+	xnl::Array<XnLogMask>& masks = GetLogMaskList();
 
-		printf("\n");
+	for (XnUInt32 i = 0; i < masks.GetSize(); ++i)
+	{
+		printf("%4u %s\n", masks[i].id, masks[i].name);
 	}
 
-	return nRetVal;
+	printf("\n");
+
+	return 0;
 }
 
 int PrintI2CList(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnLinkI2CDevice> deviceList;
-	XnStatus nRetVal = g_pPrimeClient->GetSupportedI2CDevices(deviceList);
-	if (nRetVal != XN_STATUS_OK)
+	xnl::Array<XnI2CDevice>& deviceList = GetI2CDeviceList();
+	for (XnUInt32 i = 0; i < deviceList.GetSize(); ++i)
 	{
-		printf("Failed to get device list: %s\n\n", xnGetStatusString(nRetVal));
-	}
-	else
-	{
-		for (XnUInt32 i = 0; i < deviceList.GetSize(); ++i)
-		{
-			printf("%4u %s\n", deviceList[i].m_nID, deviceList[i].m_strName);
-		}
-
-		printf("\n");
+		printf("%4u %s\n", deviceList[i].id, deviceList[i].name);
 	}
 
-	return nRetVal;
+	return 0;
 }
 
 int PrintBistList(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnBistTest> testsList;
-	XnStatus nRetVal = g_pPrimeClient->GetSupportedBistTests(testsList);
-	if (nRetVal != XN_STATUS_OK)
+	XnBist tests[20];
+	XnCommandGetBistList args;
+	args.tests = tests;
+	args.count = sizeof(tests)/sizeof(tests[0]);
+
+	if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, args))
 	{
-		printf("Failed to get tests list: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
+		return 1;
 	}
 	else
 	{
-		for (XnUInt32 i = 0; i < testsList.GetSize(); ++i)
+		for (XnUInt32 i = 0; i < args.count; ++i)
 		{
-			printf("%4u %s\n", testsList[i].m_nID, testsList[i].m_strName);
+			printf("%4u %s\n", tests[i].id, tests[i].name);
 		}
 
 		printf("\n");
 	}
 
-	return nRetVal;
+	return 0;
 }
 
 int RunBist(int argc, const char* argv[])
 {
-	XnStatus nRetVal = XN_STATUS_OK;
+	Status nRetVal = STATUS_OK;
 
 	if (argc < 2)
 	{
@@ -1163,17 +1295,20 @@ int RunBist(int argc, const char* argv[])
 
 	if (xnOSStrCaseCmp(argv[1], "ALL") == 0)
 	{
-		xnl::Array<XnBistTest> supportedTests;
-		nRetVal = g_pPrimeClient->GetSupportedBistTests(supportedTests);
-		if (nRetVal != XN_STATUS_OK)
+		XnBist tests[20];
+		XnCommandGetBistList args;
+		args.tests = tests;
+		args.count = sizeof(tests)/sizeof(tests[0]);
+
+		if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, args))
 		{
-			printf("Failed to get supported tests list: %s\n\n", xnGetStatusString(nRetVal));
-			return nRetVal;
+			printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
+			return -2;
 		}
 
-		for (XnUInt32 i = 0; i < supportedTests.GetSize(); ++i)
+		for (XnUInt32 i = 0; i < args.count; ++i)
 		{
-			requestedTests.Set(supportedTests[i].m_nID, TRUE);
+			requestedTests.Set(tests[i].id, TRUE);
 		}
 	}
 	else
@@ -1185,7 +1320,8 @@ int RunBist(int argc, const char* argv[])
 	}
 
 	XnUInt8 response[512];
-	XnBistTestResponse* pBistResponse = reinterpret_cast<XnBistTestResponse*>(response);
+	XnCommandExecuteBist args;
+	args.extraData = response;
 
 	for (XnUInt32 i = 0; i < requestedTests.GetSize(); ++i)
 	{
@@ -1195,18 +1331,20 @@ int RunBist(int argc, const char* argv[])
 		}
 
 		printf("Executing test %u...\n", i);
-		nRetVal = g_pPrimeClient->ExecuteBist(i, pBistResponse, sizeof(response));
-		if (nRetVal != XN_STATUS_OK)
+		args.id = i;
+		args.extraDataSize = sizeof(response);
+		nRetVal = g_device.invoke(PS_COMMAND_EXECUTE_BIST, args);
+		if (nRetVal != STATUS_OK)
 		{
-			printf("\nFailed to execute: %s\n\n", xnGetStatusString(nRetVal));
+			printf("\nFailed to execute: %s\n\n", OpenNI::getExtendedError());
 			return nRetVal;
 		}
 
 		printf("Test %u ", i);
 
-		if (pBistResponse->m_nErrorCode != 0)
+		if (args.errorCode != 0)
 		{
-			printf("Failed (error code 0x%04X).", pBistResponse->m_nErrorCode);
+			printf("Failed (error code 0x%04X).", args.errorCode);
 		}
 		else
 		{
@@ -1216,12 +1354,12 @@ int RunBist(int argc, const char* argv[])
 		printf("\n");
 
 		// extra data
-		if (pBistResponse->m_nExtraDataSize > 0)
+		if (args.extraDataSize > 0)
 		{
 			printf("Extra Data: ");
-			for (XnUInt32 j = 0; j < pBistResponse->m_nExtraDataSize; ++j)
+			for (XnUInt32 j = 0; j < args.extraDataSize; ++j)
 			{
-				printf("%02X ", pBistResponse->m_extraData[j]);
+				printf("%02X ", args.extraData[j]);
 			}
 			printf("\n");
 		}
@@ -1240,38 +1378,52 @@ int Quit(int /*argc*/, const char* /*argv*/[])
 
 int UsbInterface(int argc, const char* argv[])
 {
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	if (g_pPS1200Device == NULL)
-	{
-		printf("Device does not support setting the usb interface!\n\n");
-		return -2;
-	}
+	Status nRetVal = STATUS_OK;
 
 	if (argc == 1)
 	{
-		XnUInt8 altInterface;
-		nRetVal = g_pPS1200Device->GetUsbAltInterface(altInterface);
-		if (nRetVal != XN_STATUS_OK)
+		XnUsbInterfaceType type;
+		nRetVal = g_device.getProperty(PS_PROPERTY_USB_INTERFACE, &type);
+		if (nRetVal != STATUS_OK)
 		{
-			printf("Failed to get interface: %s\n\n", xnGetStatusString(nRetVal));
+			printf("Failed to get interface: %s\n\n", OpenNI::getExtendedError());
 			return -3;
 		}
-		printf("Current USB alternative interface is %u\n\n", (XnUInt32)altInterface);
+
+		for (size_t i = 0; i < sizeof(g_usbInterfaceNames)/sizeof(g_usbInterfaceNames[0]); ++i)
+		{
+			if (g_usbInterfaceNames[i].type == type)
+			{
+				printf("Current USB alternative interface is %s (%d)\n\n", g_usbInterfaceNames[i].name, type);
+				return 0;
+			}
+		}
+
+		printf("Unknown USB interface: %d\n\n", type);
+		return -4;
 	}
 	else if (argc == 2)
 	{
-		XnUInt32 altInterface = MyAtoi(argv[1]);
-		nRetVal = g_pPS1200Device->SetUsbAltInterface((XnUInt8)altInterface);
-		if (nRetVal != XN_STATUS_OK)
+		for (size_t i = 0; i < sizeof(g_usbInterfaceNames)/sizeof(g_usbInterfaceNames[0]); ++i)
 		{
-			printf("Failed to set interface: %s\n\n", xnGetStatusString(nRetVal));
-			return -3;
+			if (xnOSStrCaseCmp(g_usbInterfaceNames[i].name, argv[1]) == 0)
+			{
+				nRetVal = g_device.setProperty(PS_PROPERTY_USB_INTERFACE, g_usbInterfaceNames[i].type);
+				if (nRetVal != STATUS_OK)
+				{
+					printf("Failed to set interface: %s\n\n", OpenNI::getExtendedError());
+					return -3;
+				}
+				else
+				{
+					return 0;
+				}
+			}
 		}
 	}
 	else
 	{
-		printf("Usage: %s [num]\n\n", argv[0]);
+		printf("Usage: %s [ANY|ISO|BULK]\n\n", argv[0]);
 		return -4;
 	}
 
@@ -1288,14 +1440,14 @@ int FormatZone(int argc, const char* argv[])
 	}
 
 	XnUInt32 nZone = MyAtoi(argv[1]);
-	XnStatus nRetVal = g_pPrimeClient->FormatZone((XnUInt8)nZone); //Zone
-	if (nRetVal == XN_STATUS_OK)
+	Status nRetVal = g_device.invoke(PS_COMMAND_FORMAT_ZONE, nZone);
+	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully formatZone.\n\n");
 	}
 	else
 	{
-		printf("Failed to format Zone value: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to format Zone value: %s\n\n", OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
@@ -1311,26 +1463,23 @@ int UsbTest(int argc, const char* argv[])
 		return -1;
 	}
 
-	XnUInt32 nSeconds = MyAtoi(argv[1]);
+	XnUsbTestEndpointResult endpoints[10];
+	XnCommandUsbTest args;
+	args.seconds = MyAtoi(argv[1]);
+	args.endpointCount = sizeof(endpoints)/sizeof(endpoints[0]);
+	args.endpoints = endpoints;
 
-	if (g_pPS1200Device == NULL)
+	nRetVal = g_device.invoke(PS_COMMAND_USB_TEST, args);
+	if (nRetVal != STATUS_OK)
 	{
-		printf("Device does not support setting the usb interface!\n\n");
-		return -2;
-	}
-
-	xn::UsbTestResults results;
-	nRetVal = g_pPS1200Device->UsbTest(nSeconds, &results);
-	if (nRetVal != XN_STATUS_OK)
-	{
-		printf("Failed to perform USB test: %s\n\n", xnGetStatusString(nRetVal));
+		printf("Failed to perform USB test: %s\n\n", OpenNI::getExtendedError());
 		return -3;
 	}
 
 	printf("USB Test done:\n");
-	for (XnUInt32 i = 0; i < results.nNumEndpoints; ++i)
+	for (XnUInt32 i = 0; i < args.endpointCount; ++i)
 	{
-		printf("\tEndpoint %u - Avg. Bandwidth: %.3f KB/s, Lost Packets: %u\n", i, results.aEndpoints[i].nAverageBytesPerSecond / 1000., results.aEndpoints[i].nLostPackets);
+		printf("\tEndpoint %u - Avg. Bandwidth: %.3f KB/s, Lost Packets: %u\n", i, args.endpoints[i].averageBytesPerSecond / 1000., args.endpoints[i].lostPackets);
 	}
 
 	return XN_STATUS_OK;
@@ -1350,7 +1499,7 @@ int TestAll(int /*argc*/, const char* /*argv*/[])
 void RegisterCommands()
 {
 	RegisterCommand("Help", Help);
-	RegisterCommand("Versions", ComponentsVersions);
+//	RegisterCommand("Versions", ComponentsVersions);
 	RegisterCommand("BeginUpload", BeginUpload);
 	RegisterCommand("Upload", Upload);
 	RegisterCommand("EndUpload", EndUpload);
@@ -1361,13 +1510,13 @@ void RegisterCommands()
 	RegisterCommand("DumpStream", DumpStream);
 	RegisterCommand("DumpEP", DumpEP);
 	RegisterCommand("Enum", EnumerateStreams);
-	RegisterCommand("Create", CreateStream);
+ 	RegisterCommand("Create", CreateStream);
 	RegisterCommand("Destroy", DestroyStream);
 	RegisterCommand("Start", StartStream);
 	RegisterCommand("Stop", StopStream);
-	RegisterCommand("Modes", PrintModes);
-	RegisterCommand("SetMode", SetMode);
-	RegisterCommand("GetMode", PrintMode);
+ 	RegisterCommand("Modes", PrintModes);
+ 	RegisterCommand("SetMode", SetMode);
+ 	RegisterCommand("GetMode", PrintMode);
 	RegisterCommand("I2CList", PrintI2CList);
 	RegisterCommand("WriteI2C", WriteI2C);
 	RegisterCommand("ReadI2C", ReadI2C);
@@ -1390,75 +1539,24 @@ void RegisterCommands()
 	RegisterCommand("Exit", Quit);
 }
 
-XnStatus EnumerateAllUsbDevices(XnUInt16 /*nProductID*/, XnConnectionString*& astrConnStrings, XnUInt32& nCount)
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-	XnUInt32 nTotalCount = 0;
-
-	XnUInt16 productIDs[] = 
-	{
-		XN_PRODUCT_ID_PS1250,
-		XN_PRODUCT_ID_PS1260,
-		XN_PRODUCT_ID_PS1270,
-		XN_PRODUCT_ID_PS1290,
-	};
-
-	int nProductIDs = sizeof(productIDs)/sizeof(productIDs[0]);
-
-	for (int i = 0; i < nProductIDs; ++i)
-	{
-		XnUInt32 nCount = 0;
-		nRetVal = xn::ClientUSBConnectionFactory::EnumerateConnStrings(productIDs[i], astrConnStrings, nCount);
-		CHECK_RC("Enumerate connection strings", nRetVal);
-		xnOSMemCopy(g_connectionStrings[nTotalCount], astrConnStrings, sizeof(astrConnStrings[0])*nCount);
-		xn::ClientUSBConnectionFactory::FreeConnStringsList(astrConnStrings);
-		nTotalCount += nCount;
-	}
-
-	astrConnStrings = g_connectionStrings;
-	nCount = nTotalCount;
-	return XN_STATUS_OK;
-}
-
-typedef XnStatus (*EnumerateFunc)(XnUInt16 nProductID, XnConnectionString*& astrConnStrings, XnUInt32& nCount);
-
 int main(int argc, char* argv[])
 {
-	XnStatus nRetVal = XN_STATUS_OK;
+	Status nRetVal = STATUS_OK;
 	const XnChar* strScriptFile = NULL;
-	XnTransportType transportType = XN_TRANSPORT_TYPE_USB;
 	XnUInt16 nProductID = 0;
     XnBool bQuit = FALSE;
-	EnumerateFunc pEnumerateConnStringsFunc = EnumerateAllUsbDevices;
 
-	printf("PSLinkConsole version %s\n", XN_PS_VERSION_STRING);
+//	printf("PSLinkConsole version %s\n", XN_PS_VERSION_STRING);
 
 	XnInt32 nArgIndex = 1;
 	while (nArgIndex < argc)
 	{
 		if (argv[nArgIndex][0] == '-')
 		{
-			if (xnOSStrCaseCmp(argv[nArgIndex], "-transport") == 0)
-			{
-				++nArgIndex;
-				if (xnOSStrCaseCmp(argv[nArgIndex], "usb") == 0)
-				{
-					transportType = XN_TRANSPORT_TYPE_USB;
-					pEnumerateConnStringsFunc = EnumerateAllUsbDevices;
-				}
-				else
-				{
-					transportType = XN_TRANSPORT_TYPE_SOCKETS;
-					xn::SocketConnectionFactory::AddEnumerationTarget(argv[nArgIndex]);
-					pEnumerateConnStringsFunc = &xn::SocketConnectionFactory::EnumerateConnStrings;
-				}
-				++nArgIndex;
-			}
-			else if (xnOSStrCaseCmp(argv[nArgIndex], "-product") == 0)
+			if (xnOSStrCaseCmp(argv[nArgIndex], "-product") == 0)
 			{
 				++nArgIndex;
 				nProductID = (XnUInt16)MyAtoi(argv[nArgIndex++]);
-				pEnumerateConnStringsFunc = &(xn::ClientUSBConnectionFactory::EnumerateConnStrings);
 			}
 			else if (xnOSStrCaseCmp(argv[nArgIndex], "-script") == 0)
 			{
@@ -1494,55 +1592,58 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	xnLogSetConsoleOutput(TRUE);
-	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, XN_LOG_VERBOSE);
+	OpenNI::setLogConsoleOutput(true);
+	OpenNI::setLogMinSeverity(0);
 
-	if (transportType == XN_TRANSPORT_TYPE_USB)
+	Status rc = OpenNI::initialize();
+	if (rc != STATUS_OK)
 	{
-		g_pPS1200Device = XN_NEW(xn::PS1200Device);
-		g_pPrimeClient = g_pPS1200Device; 
+		printf("Failed to initialize OpenNI. Extended info: %s\n", OpenNI::getExtendedError());
+		return -2;
 	}
 
-	if (g_pPrimeClient == NULL)
-	{
-		printf("Failed to create prime client :(\n");
-		return -3;
-	}
-
-	/* Wait for EE Device to become available */
 	XnUInt32 nWaitTimeRemaining = WAIT_FOR_DEVICE_TIMEOUT;
 
-	XnConnectionString* pastrConnStrings = NULL;
-	XnUInt32 nConnStrings = 0;
-	nRetVal = pEnumerateConnStringsFunc(nProductID, pastrConnStrings, nConnStrings);
-	CHECK_RC("Enumerate connection strings", nRetVal);
-	while ((nConnStrings == 0) && (nWaitTimeRemaining > 0))
+	Array<DeviceInfo> devices;
+	OpenNI::enumerateDevices(&devices);
+
+	const char* uri = NULL;
+
+	while (uri == NULL && nWaitTimeRemaining > 0)
 	{
-		nRetVal = pEnumerateConnStringsFunc(nProductID, pastrConnStrings, nConnStrings);
-		CHECK_RC("Enumerate connection strings", nRetVal);
 		nWaitTimeRemaining = XN_MAX(0, (XnInt32)(nWaitTimeRemaining - WAIT_FOR_DEVICE_CHECK_INTERVAL_MS));
-		if (nConnStrings == 0)
+		
+		// check if the requested device is connected
+		for (int i = 0; i < devices.getSize(); ++i)
+		{
+			if (nProductID == 0 || devices[i].getUsbProductId() == nProductID)
+			{
+				uri = devices[i].getUri();
+				break;
+			}
+		}
+
+		if (uri == NULL)
 		{
 			xnOSSleep(WAIT_FOR_DEVICE_CHECK_INTERVAL_MS);
 		}
 	}
 
-	if (nConnStrings == 0)
+	if (uri == NULL)
 	{
-		xnLogError(XN_MASK_PRIME_CONSOLE, "Device not found (after %u milliseconds)", WAIT_FOR_DEVICE_TIMEOUT);
+		printf("Device not found (after %u milliseconds)\n", WAIT_FOR_DEVICE_TIMEOUT);
 		XN_ASSERT(FALSE);
-		return XN_STATUS_DEVICE_NOT_CONNECTED;
+		return -3;
 	}
 
 	printf("Device found, connecting...\n");
-	
-	/* Initialize Prime Client with first connection string */
-	nRetVal = g_pPrimeClient->Init(pastrConnStrings[0], transportType);
-	XN_IS_STATUS_OK_LOG_ERROR("Init EE Device", nRetVal);
 
-	/* Connect PrimeClient */
-	nRetVal = g_pPrimeClient->Connect();
-	CHECK_RC("Connect Prime Client", nRetVal);
+	nRetVal = g_device._openEx(uri, "lr");
+	if (nRetVal != STATUS_OK)
+	{
+		printf("Failed to open device. Extended info: %s\n", OpenNI::getExtendedError());
+		return -4;
+	}
 
     //Prime Client is now connected :)
 
@@ -1550,11 +1651,10 @@ int main(int argc, char* argv[])
 
 	if (strScriptFile != NULL)
 	{
-		nRetVal = RunScript(strScriptFile);
-		if (nRetVal != XN_STATUS_OK)
+		if (XN_STATUS_OK != RunScript(strScriptFile))
 		{
 			// error is returned only if script could not be run, not if any command in it failed.
-			return -3;
+			return -5;
 		}
 
         if (bQuit)
@@ -1565,7 +1665,8 @@ int main(int argc, char* argv[])
 
 	ExecuteCommandsFromStream(stdin, TRUE);
 
-	g_pPrimeClient->Shutdown();
+	g_device.close();
+	OpenNI::shutdown();
 
 	return 0;
 }

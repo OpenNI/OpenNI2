@@ -458,16 +458,16 @@ XnStatus LinkControlEndpoint::GetFileList(xnl::Array<XnFileEntry>& files)
 	{
 		XnLinkFileEntry* pLinkEntry = &pGetFileListResponse->m_aFileEntries[i];
 		XnFileEntry entry;
-		xnOSStrCopy(entry.m_strName, pLinkEntry->m_strName, sizeof(entry.m_strName));
-		entry.m_nVersion.m_nMajor = pLinkEntry->m_nVersion.m_nMajor;
-		entry.m_nVersion.m_nMinor = pLinkEntry->m_nVersion.m_nMinor;
-		entry.m_nVersion.m_nMaintenance = pLinkEntry->m_nVersion.m_nMaintenance;
-		entry.m_nVersion.m_nBuild = pLinkEntry->m_nVersion.m_nBuild;
-		entry.m_nAddress = XN_PREPARE_VAR32_IN_BUFFER(pLinkEntry->m_nAddress);
-		entry.m_nSize = XN_PREPARE_VAR32_IN_BUFFER(pLinkEntry->m_nSize);
-		entry.m_nCRC = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nCRC);
-		entry.m_nZone = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nZone);
-		entry.m_nFlags = pLinkEntry->m_nFlags;
+		xnOSStrCopy(entry.name, pLinkEntry->m_strName, sizeof(entry.name));
+		entry.version.major = pLinkEntry->m_nVersion.m_nMajor;
+		entry.version.minor = pLinkEntry->m_nVersion.m_nMinor;
+		entry.version.maintenance = pLinkEntry->m_nVersion.m_nMaintenance;
+		entry.version.build = pLinkEntry->m_nVersion.m_nBuild;
+		entry.address = XN_PREPARE_VAR32_IN_BUFFER(pLinkEntry->m_nAddress);
+		entry.size = XN_PREPARE_VAR32_IN_BUFFER(pLinkEntry->m_nSize);
+		entry.crc = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nCRC);
+		entry.zone = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nZone);
+		entry.flags = (XnFileFlags)pLinkEntry->m_nFlags;
 
 		nRetVal = files.AddLast(entry);
 		XN_IS_STATUS_OK(nRetVal);
@@ -871,7 +871,7 @@ XnStatus LinkControlEndpoint::GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& su
 }
 
 
-XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBistTest>& supportedTests)
+XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBist>& supportedTests)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -890,7 +890,7 @@ XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBistTest>& supp
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, XnBistTestResponse* pResponse, XnUInt32 nResponseStructSize)
+XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -913,9 +913,9 @@ XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, XnBistTestResponse*
 		return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
 	}
 
-	if (nResponseStructSize < nResponseSize)
+	if (extraDataSize < nResponseSize)
 	{
-		xnLogError(XN_MASK_LINK, "LINK: Response struct for test is too small (%u instead of %u)", nResponseStructSize, nResponseSize);
+		xnLogError(XN_MASK_LINK, "LINK: Response struct for test is too small (%u instead of %u)", extraDataSize, nResponseSize);
 		return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
 	}
 
@@ -926,11 +926,11 @@ XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, XnBistTestResponse*
 		return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
 	}
 
-	pResponse->m_nErrorCode = XN_PREPARE_VAR32_IN_BUFFER(pExecuteBistResponse->m_nErrorCode);
-	pResponse->m_nExtraDataSize = nExtraDataSize;
-	xnOSMemCopy(pResponse->m_extraData, pExecuteBistResponse->m_ExtraData, nExtraDataSize);
+	errorCode = XN_PREPARE_VAR32_IN_BUFFER(pExecuteBistResponse->m_nErrorCode);
+	extraDataSize = nExtraDataSize;
+	xnOSMemCopy(extraData, pExecuteBistResponse->m_ExtraData, nExtraDataSize);
 
-	xnLogInfo(XN_MASK_LINK, "LINK: BIST %u completed with error code %u", nID, pResponse->m_nErrorCode);
+	xnLogInfo(XN_MASK_LINK, "LINK: BIST %u completed with error code %u", nID, errorCode);
 	
 	return XN_STATUS_OK;
 }
@@ -1054,7 +1054,7 @@ XnStatus LinkControlEndpoint::GetShiftToDepthConfig(XnUInt16 nStreamID, XnShiftT
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::SetVideoMode(XnUInt16 nStreamID, const XnStreamVideoMode& videoMode)
+XnStatus LinkControlEndpoint::SetVideoMode(XnUInt16 nStreamID, const XnFwStreamVideoMode& videoMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1070,7 +1070,7 @@ XnStatus LinkControlEndpoint::SetVideoMode(XnUInt16 nStreamID, const XnStreamVid
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::GetVideoMode(XnUInt16 nStreamID, XnStreamVideoMode& videoMode)
+XnStatus LinkControlEndpoint::GetVideoMode(XnUInt16 nStreamID, XnFwStreamVideoMode& videoMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1099,7 +1099,7 @@ XnStatus LinkControlEndpoint::GetVideoMode(XnUInt16 nStreamID, XnStreamVideoMode
 }
 
 XnStatus LinkControlEndpoint::GetSupportedVideoModes(XnUInt16 nStreamID, 
-														 xnl::Array<XnStreamVideoMode>& supportedVideoModes)
+														 xnl::Array<XnFwStreamVideoMode>& supportedVideoModes)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1134,7 +1134,7 @@ XnStatus LinkControlEndpoint::GetSupportedVideoModes(XnUInt16 nStreamID,
 }
 
 
-XnStatus LinkControlEndpoint::EnumerateStreams(xnl::Array<XnStreamInfo>& aStreamInfos)
+XnStatus LinkControlEndpoint::EnumerateStreams(xnl::Array<XnFwStreamInfo>& aStreamInfos)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1170,11 +1170,11 @@ XnStatus LinkControlEndpoint::EnumerateStreams(xnl::Array<XnStreamInfo>& aStream
 	XN_IS_STATUS_OK_LOG_ERROR("Allocate node infos array", nRetVal);
 	for (XnUInt32 i = 0; i < nNumNodes; i++)
 	{
-		aStreamInfos[i].m_nStreamType = XN_PREPARE_VAR32_IN_BUFFER(pEnumerateNodesResponse->m_streamInfos[i].m_nStreamType);
-		XN_COMPILER_ASSERT(sizeof(aStreamInfos[i].m_strCreationInfo) >= sizeof(pEnumerateNodesResponse->m_streamInfos[i].m_strCreationInfo));
-		xnOSStrCopy(aStreamInfos[i].m_strCreationInfo, 
+		aStreamInfos[i].type = (XnFwStreamType)XN_PREPARE_VAR32_IN_BUFFER(pEnumerateNodesResponse->m_streamInfos[i].m_nStreamType);
+		XN_COMPILER_ASSERT(sizeof(aStreamInfos[i].creationInfo) >= sizeof(pEnumerateNodesResponse->m_streamInfos[i].m_strCreationInfo));
+		xnOSStrCopy(aStreamInfos[i].creationInfo, 
 			pEnumerateNodesResponse->m_streamInfos[i].m_strCreationInfo, 
-			sizeof(aStreamInfos[i].m_strCreationInfo));
+			sizeof(aStreamInfos[i].creationInfo));
 	}
 
 	return XN_STATUS_OK;

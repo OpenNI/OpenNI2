@@ -53,9 +53,9 @@ public:
 
 	virtual XnBool IsOutputFormatSupported(OniPixelFormat format) const;
 
-	virtual const xnl::Array<XnStreamVideoMode>& GetSupportedVideoModes() const;
-	virtual const XnStreamVideoMode& GetVideoMode() const;
-	virtual XnStatus SetVideoMode(const XnStreamVideoMode& videoMode);
+	virtual const xnl::Array<XnFwStreamVideoMode>& GetSupportedVideoModes() const;
+	virtual const XnFwStreamVideoMode& GetVideoMode() const;
+	virtual XnStatus SetVideoMode(const XnFwStreamVideoMode& videoMode);
 
 	virtual const XnShiftToDepthConfig& GetShiftToDepthConfig() const;
 	virtual XnStatus GetShiftToDepthTables(const XnShiftToDepthTables*& pTables) const;
@@ -116,8 +116,8 @@ private:
 	XnChar m_strDumpName[XN_FILE_MAX_PATH];
 	XnUInt32 m_nDumpFrameID;
 
-	xnl::Array<XnStreamVideoMode> m_supportedVideoModes;
-	XnStreamVideoMode m_videoMode;
+	xnl::Array<XnFwStreamVideoMode> m_supportedVideoModes;
+	XnFwStreamVideoMode m_videoMode;
 
 	int m_frameIndex;
 	OniCropping m_cropping;

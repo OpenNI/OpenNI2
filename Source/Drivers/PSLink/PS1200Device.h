@@ -9,20 +9,6 @@ namespace xn
 
 class ClientUSBConnectionFactory;
 
-#define XN_MAX_ENDPOINTS 10
-
-typedef struct UsbTestEndpointResults
-{
-	XnDouble nAverageBytesPerSecond;
-	XnUInt32 nLostPackets;
-} UsbTestEndpointResults;
-
-typedef struct UsbTestResults
-{
-	XnUInt32 nNumEndpoints;
-	UsbTestEndpointResults aEndpoints[XN_MAX_ENDPOINTS];
-} UsbTestResults;
-
 class PS1200Device : public PrimeClient
 {
 public:
@@ -36,7 +22,7 @@ public:
 	XnStatus SetUsbAltInterface(XnUInt8 altInterface);
 	XnStatus GetUsbAltInterface(XnUInt8& altInterface) const;
 
-	virtual XnStatus UsbTest(XnUInt32 nSeconds, UsbTestResults* pResults);
+	virtual XnStatus UsbTest(XnUInt32 nSeconds, XnUInt32& endpointsCount, XnUsbTestEndpointResult* endpoints);
 
 protected:
 	const ClientUSBConnectionFactory* GetConnectionFactory() const;

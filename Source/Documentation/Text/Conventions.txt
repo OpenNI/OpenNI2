@@ -41,5 +41,18 @@ not try to use it to access methods of the @ref openni::DeviceInfo object.
 Some methods return an array of items. We created a very simple template class, @ref openni::Array, which only holds the pointer to the underlying C array
 and the number of elements in that array. Once the array has been released, the elements are no longer accessible. Do not keep a pointer to a specific
 item in the array and use it after releasing it.
+
+@section properties_and_commands Properties and Commands
+
+OpenNI has a mechanism for generic properties and commands, both for devices and for streams. Commands are used by calling @ref openni::Device::invoke() or 
+@ref openni::VideoStream::invoke() and Properties can be read via @ref openni::Device::getProperty() and @ref openni::VideoStream::getProperty() and written via
+@ref openni::Device::setProperty() and @ref openni::VideoStream::setProperty().
+
+Though both might use both primitives and complex types, generally, properties are used to encapsulate a logical data unit (even though complex) while commands are used in the following cases:
+- The action requires some arguments (that are not part of the data unit).
+- Obtaining a data unit via getProperty() have side effects.
+- The operation is expensive enough that you want to communicate it to the user.
+- The action has side effects.
+- The data unit might be changed over time without an outside request.
   
 */
