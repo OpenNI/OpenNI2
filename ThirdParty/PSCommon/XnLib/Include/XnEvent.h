@@ -154,6 +154,9 @@ protected:
 
 	bool RemoveCallback(CallbackPtrList& list, Callback* pCallback)
 	{
+        if(pCallback == NULL)
+            return true;
+
 		typename CallbackPtrList::Iterator it = list.Find(pCallback);
 		if (it != list.End())
 		{
