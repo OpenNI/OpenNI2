@@ -246,11 +246,12 @@ public:
 		AutoCSLocker locker(this->m_hLock);
 		this->ApplyListChanges();
 
-		for (typename Base::CallbackPtrList::ConstIterator it = this->m_callbacks.Begin(); it != this->m_callbacks.End(); ++it)
-		{
-			typename Base::Callback* pCallback = *it;
-			pCallback->pFunc(arg, pCallback->pCookie);
-		}
+        if(!this->m_callbacks.IsEmpty())
+            for (typename Base::CallbackPtrList::ConstIterator it = this->m_callbacks.Begin(); it != this->m_callbacks.End(); ++it)
+            {
+                typename Base::Callback* pCallback = *it;
+                pCallback->pFunc(arg, pCallback->pCookie);
+            }
 
 		this->ApplyListChanges();
 		return XN_STATUS_OK;
