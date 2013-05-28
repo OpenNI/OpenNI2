@@ -33,6 +33,8 @@ DepthKinectStream::DepthKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.fps = DEFAULT_FPS;
 	m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
 	m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
+
+	m_mirroring = false;
 }
 
 // Discard the depth value equal or greater than the max value.

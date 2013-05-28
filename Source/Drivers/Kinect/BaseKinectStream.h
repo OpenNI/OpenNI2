@@ -53,8 +53,9 @@ protected:
 	KinectStreamImpl *m_pStreamImpl;
 	OniVideoMode m_videoMode;
 	OniCropping m_cropping;
+	OniBool m_mirroring;
 	bool m_running;
-	
+
 private:
 	void destroy();
 
