@@ -453,7 +453,7 @@ int Upload(int argc, const char* argv[])
 
 int Dir(int /*argc*/, const char* /*argv*/[])
 {
-	XnFileEntry files[50];
+	XnFwFileEntry files[50];
 	XnCommandGetFileList args;
 	args.count = sizeof(files) / sizeof(files[0]);
 	args.files = files;
@@ -473,7 +473,7 @@ int Dir(int /*argc*/, const char* /*argv*/[])
 
 		for (XnUInt32 i = 0; i < args.count; ++i)
 		{
-			XnFileEntry& file = files[i];
+			XnFwFileEntry& file = files[i];
 			printf("%-4u  %-32s  %01u.%01u.%01u.%02u  0x%08x  %6u  0x%04x  ", 
 				file.zone, file.name, 
 				file.version.major, file.version.minor, file.version.maintenance, file.version.build,
@@ -838,13 +838,13 @@ int PrintMode(int argc, const char* argv[])
 	return 0;
 }
 
-xnl::Array<XnI2CDevice>& GetI2CDeviceList()
+xnl::Array<XnI2CDeviceInfo>& GetI2CDeviceList()
 {
-	static xnl::Array<XnI2CDevice> s_i2cDevices;
+	static xnl::Array<XnI2CDeviceInfo> s_i2cDevices;
 
 	if (s_i2cDevices.GetSize() == 0)
 	{
-		XnI2CDevice devices[20];
+		XnI2CDeviceInfo devices[20];
 
 		XnCommandGetI2CDeviceList args;
 		args.devices = devices;
@@ -867,7 +867,7 @@ XnStatus GetI2CDeviceIDFromName(const char* deviceName, uint32_t* result)
 {
 	XnStatus nRetVal = XN_STATUS_NO_MATCH;
 	
-	xnl::Array<XnI2CDevice>& devices = GetI2CDeviceList();
+	xnl::Array<XnI2CDeviceInfo>& devices = GetI2CDeviceList();
 
 	nRetVal = XN_STATUS_NO_MATCH;
 	for (XnUInt32 i = 0; i < devices.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
@@ -1066,13 +1066,13 @@ int Emitter(int argc, const char* argv[])
 	return nRetVal;
 }
 
-xnl::Array<XnLogMask>& GetLogMaskList()
+xnl::Array<XnFwLogMask>& GetLogMaskList()
 {
-	static xnl::Array<XnLogMask> s_masks;
+	static xnl::Array<XnFwLogMask> s_masks;
 
 	if (s_masks.GetSize() == 0)
 	{
-		XnLogMask masks[20];
+		XnFwLogMask masks[20];
 		XnCommandGetLogMaskList args;
 		args.masks = masks;
 		args.count = sizeof(masks)/sizeof(masks[0]);
@@ -1094,7 +1094,7 @@ XnStatus GetLogIDFromName(const char* mask, uint32_t* result)
 {
 	XnStatus nRetVal = XN_STATUS_NO_MATCH;
 
-	xnl::Array<XnLogMask>& masks = GetLogMaskList();
+	xnl::Array<XnFwLogMask>& masks = GetLogMaskList();
 
 	nRetVal = XN_STATUS_NO_MATCH;
 	for (XnUInt32 i = 0; i < masks.GetSize() && nRetVal==XN_STATUS_NO_MATCH; i++)
@@ -1233,7 +1233,7 @@ int PrintBootStatus(int /*argc*/, const char* /*argv*/[])
 
 int PrintLogFilesList(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnLogMask>& masks = GetLogMaskList();
+	xnl::Array<XnFwLogMask>& masks = GetLogMaskList();
 
 	for (XnUInt32 i = 0; i < masks.GetSize(); ++i)
 	{
@@ -1247,7 +1247,7 @@ int PrintLogFilesList(int /*argc*/, const char* /*argv*/[])
 
 int PrintI2CList(int /*argc*/, const char* /*argv*/[])
 {
-	xnl::Array<XnI2CDevice>& deviceList = GetI2CDeviceList();
+	xnl::Array<XnI2CDeviceInfo>& deviceList = GetI2CDeviceList();
 	for (XnUInt32 i = 0; i < deviceList.GetSize(); ++i)
 	{
 		printf("%4u %s\n", deviceList[i].id, deviceList[i].name);
@@ -1258,7 +1258,7 @@ int PrintI2CList(int /*argc*/, const char* /*argv*/[])
 
 int PrintBistList(int /*argc*/, const char* /*argv*/[])
 {
-	XnBist tests[20];
+	XnBistInfo tests[20];
 	XnCommandGetBistList args;
 	args.tests = tests;
 	args.count = sizeof(tests)/sizeof(tests[0]);
@@ -1295,7 +1295,7 @@ int RunBist(int argc, const char* argv[])
 
 	if (xnOSStrCaseCmp(argv[1], "ALL") == 0)
 	{
-		XnBist tests[20];
+		XnBistInfo tests[20];
 		XnCommandGetBistList args;
 		args.tests = tests;
 		args.count = sizeof(tests)/sizeof(tests[0]);

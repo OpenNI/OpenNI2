@@ -1019,7 +1019,7 @@ XnStatus xnLinkParseSupportedLogFiles(const XnLinkSupportedLogFiles* pFilesList,
 	return XN_STATUS_OK;
 }
 
-XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBist>& supportedTests)
+XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBistInfo>& supportedTests)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	XnUInt32 nTests = 0;

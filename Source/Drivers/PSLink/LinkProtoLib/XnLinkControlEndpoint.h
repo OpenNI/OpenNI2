@@ -58,13 +58,13 @@ public:
 	XnStatus GetSupportedInterfaces(XnUInt16 nStreamID, xnl::BitSet& supportedInterfaces);
 	XnStatus GetBootStatus(XnBootStatus& bootStatus);
 	XnStatus UploadFile(const XnChar* strFileName, XnBool bOverrideFactorySettings);
-	XnStatus GetFileList(xnl::Array<XnFileEntry>& files);
+	XnStatus GetFileList(xnl::Array<XnFwFileEntry>& files);
 	XnStatus DownloadFile(XnUInt16 zone, const XnChar* fwFileName, const XnChar* targetFile);
 	XnStatus StartStreaming(XnUInt16 nStreamID);
 	XnStatus StopStreaming(XnUInt16 nStreamID);
 	XnStatus SoftReset();
 	XnStatus HardReset();
-	XnStatus GetSupportedBistTests(xnl::Array<XnBist>& supportedTests);
+	XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
 	XnStatus ExecuteBistTests(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	XnStatus StartUsbTest();
 	XnStatus StopUsbTest();

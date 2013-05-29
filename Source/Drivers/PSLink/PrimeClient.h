@@ -61,7 +61,7 @@ public:
 	virtual XnStatus GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& supportedFiles);
 
 	virtual XnStatus RunPresetFile(const XnChar* strFileName);
-	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBist>& supportedTests);
+	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
 	virtual XnStatus ExecuteBist(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	virtual XnStatus FormatZone(XnUInt8 nZone);
     //TODO: Implement Get emitter active
@@ -86,7 +86,7 @@ public:
 	virtual	XnStatus BeginUploadFileOnControlEP();
 	virtual	XnStatus EndUploadFileOnControlEP();
 	virtual XnStatus UploadFileOnControlEP(const XnChar* strFileName, XnBool bOverrideFactorySettings);
-	virtual XnStatus GetFileList(xnl::Array<XnFileEntry>& files);
+	virtual XnStatus GetFileList(xnl::Array<XnFwFileEntry>& files);
 	virtual XnStatus DownloadFile(XnUInt16 zone, const XnChar* strFirmwareFileName, const XnChar* strTargetFile);
 	
 	virtual void HandleLinkDataEndpointDisconnection(XnUInt16 nEndpointID);

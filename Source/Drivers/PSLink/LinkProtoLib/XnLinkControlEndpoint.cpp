@@ -423,7 +423,7 @@ XnStatus LinkControlEndpoint::UploadFile(const XnChar* strFileName, XnBool bOver
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::GetFileList(xnl::Array<XnFileEntry>& files)
+XnStatus LinkControlEndpoint::GetFileList(xnl::Array<XnFwFileEntry>& files)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -457,7 +457,7 @@ XnStatus LinkControlEndpoint::GetFileList(xnl::Array<XnFileEntry>& files)
 	for (XnUInt32 i = 0; i < nCount; ++i)
 	{
 		XnLinkFileEntry* pLinkEntry = &pGetFileListResponse->m_aFileEntries[i];
-		XnFileEntry entry;
+		XnFwFileEntry entry;
 		xnOSStrCopy(entry.name, pLinkEntry->m_strName, sizeof(entry.name));
 		entry.version.major = pLinkEntry->m_nVersion.m_nMajor;
 		entry.version.minor = pLinkEntry->m_nVersion.m_nMinor;
@@ -467,7 +467,7 @@ XnStatus LinkControlEndpoint::GetFileList(xnl::Array<XnFileEntry>& files)
 		entry.size = XN_PREPARE_VAR32_IN_BUFFER(pLinkEntry->m_nSize);
 		entry.crc = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nCRC);
 		entry.zone = XN_PREPARE_VAR16_IN_BUFFER(pLinkEntry->m_nZone);
-		entry.flags = (XnFileFlags)pLinkEntry->m_nFlags;
+		entry.flags = (XnFwFileFlags)pLinkEntry->m_nFlags;
 
 		nRetVal = files.AddLast(entry);
 		XN_IS_STATUS_OK(nRetVal);
@@ -871,7 +871,7 @@ XnStatus LinkControlEndpoint::GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& su
 }
 
 
-XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBist>& supportedTests)
+XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 

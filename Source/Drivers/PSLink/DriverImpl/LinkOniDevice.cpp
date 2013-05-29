@@ -798,7 +798,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 				return ONI_STATUS_BAD_PARAMETER;
 			}
 
-			xnl::Array<XnFileEntry> files;
+			xnl::Array<XnFwFileEntry> files;
 			nRetVal = m_pSensor->GetFileList(files);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Get file list", nRetVal, ONI_STATUS_ERROR);
 
@@ -809,7 +809,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 				return ONI_STATUS_BAD_PARAMETER;
 			}
 
-			xnOSMemCopy(pArgs->files, files.GetData(), files.GetSize() * sizeof(XnFileEntry));
+			xnOSMemCopy(pArgs->files, files.GetData(), files.GetSize() * sizeof(XnFwFileEntry));
 			pArgs->count = files.GetSize();
 		}
 		break;
@@ -899,7 +899,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 				return ONI_STATUS_BAD_PARAMETER;
 			}
 
-			xnl::Array<XnBist> tests;
+			xnl::Array<XnBistInfo> tests;
 			nRetVal = m_pSensor->GetSupportedBistTests(tests);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Get bist list", nRetVal, ONI_STATUS_ERROR);
 

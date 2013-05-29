@@ -320,7 +320,7 @@ XnStatus PrimeClient::ConnectOutputDataEndpoint()
 	return XN_STATUS_OK;
 }
 
-XnStatus PrimeClient::GetFileList(xnl::Array<XnFileEntry>& files)
+XnStatus PrimeClient::GetFileList(xnl::Array<XnFwFileEntry>& files)
 {
 	return m_linkControlEndpoint.GetFileList(files);
 }
@@ -609,7 +609,7 @@ XnStatus PrimeClient::RunPresetFile(const XnChar* strFileName)
 	return (XN_STATUS_OK);
 }
 
-XnStatus PrimeClient::GetSupportedBistTests(xnl::Array<XnBist>& supportedTests)
+XnStatus PrimeClient::GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests)
 {
 	return m_linkControlEndpoint.GetSupportedBistTests(supportedTests);
 }

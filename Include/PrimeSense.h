@@ -87,47 +87,47 @@ typedef enum XnUsbInterfaceType
 #pragma pack (push, 1)
 
 // Data Types
-typedef struct XnFileVersion
+typedef struct XnFwFileVersion
 {
 	uint8_t major;
 	uint8_t minor;
 	uint8_t maintenance;
 	uint8_t build;
-} XnFileVersion;
+} XnFwFileVersion;
 
-typedef enum XnFileFlags
+typedef enum XnFwFileFlags
 {
 	XN_FILE_FLAG_BAD_CRC					= 0x0001,
-} XnFileFlags;
+} XnFwFileFlags;
 
-typedef struct XnFileEntry
+typedef struct XnFwFileEntry
 {
 	char name[32];
-	XnFileVersion version;
+	XnFwFileVersion version;
 	uint32_t address;
 	uint32_t size;
 	uint16_t crc;
 	uint16_t zone;
-	XnFileFlags flags; // bitmap 
-} XnFileEntry;
+	XnFwFileFlags flags; // bitmap 
+} XnFwFileEntry;
 
-typedef struct XnI2CDevice
+typedef struct XnI2CDeviceInfo
 {
 	uint32_t id;
 	char name[32];
-} XnI2CDevice;
+} XnI2CDeviceInfo;
 
-typedef struct XnBist
+typedef struct XnBistInfo
 {
 	uint32_t id;
 	char name[32];
-} XnBist;
+} XnBistInfo;
 
-typedef struct XnLogMask
+typedef struct XnFwLogMask
 {
 	uint32_t id;
 	char name[32];
-} XnLogMask;
+} XnFwLogMask;
 
 typedef struct XnUsbTestEndpointResult
 {
@@ -171,7 +171,7 @@ typedef struct XnCommandDownloadFile
 typedef struct XnCommandGetFileList
 {
 	uint32_t count;		// in: number of allocated elements in files array. out: number of written elements in the array
-	XnFileEntry* files;
+	XnFwFileEntry* files;
 } XnCommandGetFileList;
 
 typedef struct XnCommandFormatZone 
@@ -188,13 +188,13 @@ typedef struct XnCommandDumpEndpoint
 typedef struct XnCommandGetI2CDeviceList
 {
 	uint32_t count;	// in: number of allocated elements in devices array. out: number of written elements in the array
-	XnI2CDevice* devices;
+	XnI2CDeviceInfo* devices;
 } XnCommandGetI2CDeviceList;
 
 typedef struct XnCommandGetBistList
 {
 	uint32_t count;	// in: number of allocated elements in tests array. out: number of written elements in the array
-	XnBist* tests;
+	XnBistInfo* tests;
 } XnCommandGetBistList;
 
 typedef struct XnCommandExecuteBist
@@ -215,7 +215,7 @@ typedef struct XnCommandUsbTest
 typedef struct XnCommandGetLogMaskList
 {
 	uint32_t count;	// in: number of allocated elements in masks array. out: number of written elements in the array
-	XnLogMask* masks;
+	XnFwLogMask* masks;
 } XnCommandGetLogMaskList;
 
 typedef struct XnCommandSetLogMaskState
