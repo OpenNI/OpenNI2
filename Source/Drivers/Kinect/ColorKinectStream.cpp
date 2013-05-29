@@ -122,34 +122,77 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	}
 	else
 	{
-		if (!m_cropping.enabled)
+		if( m_mirroring )
 		{
-			xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
-			pFrame->dataSize = LockedRect.size;
-			pFrame->stride = m_videoMode.resolutionX * 2;
+			int iStartX, iEndX, iStartY, iEndY;
+			if (m_cropping.enabled)
+			{
+				pFrame->dataSize = m_cropping.height * m_cropping.width * 2;
+				pFrame->stride = m_cropping.width * 2;
+
+				iStartX	= m_cropping.originX;
+				iStartY	= m_cropping.originY;
+				iEndX	= m_cropping.originX + m_cropping.width;
+				iEndY	= m_cropping.originY + m_cropping.height;
+			}
+			else
+			{
+				pFrame->dataSize = LockedRect.size;
+				pFrame->stride = m_videoMode.resolutionX * 2;
+
+				iStartX	= 0;
+				iStartY	= 0;
+				iEndX	= m_videoMode.resolutionX;
+				iEndY	= m_videoMode.resolutionY;
+			}
+
+			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
+			unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
+
+			// I am not sure this  process method is correct for YUV422, but the result looks right
+			for( int y = iStartY; y < iEndY; ++ y )
+			{
+				int iShift = y * m_videoMode.resolutionX;
+				for( int x = iStartX; x < iEndX; x += 2 )
+				{
+					*data_out = data_in[ m_videoMode.resolutionX - x + iShift ];
+					++data_out;
+					*data_out = data_in[ m_videoMode.resolutionX - 1 - x + iShift ];
+					++data_out;
+				}
+			}
 		}
 		else
 		{
-			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-			unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
-			pFrame->dataSize = m_cropping.height * m_cropping.width * 2;
-
-			int cropX = m_cropping.originX;
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
+			if (!m_cropping.enabled)
 			{
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short* iter = data_in + (cropX + m_videoMode.resolutionX * cropY);
-					*data_out = *iter;
-					++data_out;
-					++cropX;
-				}
-				cropY++;
-				cropX = m_cropping.originX;
+				pFrame->dataSize = LockedRect.size;
+				pFrame->stride = m_videoMode.resolutionX * 2;
+				xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
 			}
-			pFrame->stride = m_cropping.width * 2;
+			else
+			{
+				unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
+				unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
+				pFrame->dataSize = m_cropping.height * m_cropping.width * 2;
+				pFrame->stride = m_cropping.width * 2;
 
+				int cropX = m_cropping.originX;
+				int cropY = m_cropping.originY;
+
+				while (cropY < m_cropping.originY + m_cropping.height)
+				{
+					while (cropX < m_cropping.originX + m_cropping.width)
+					{
+						unsigned short* iter = data_in + (cropX + m_videoMode.resolutionX * cropY);
+						*data_out = *iter;
+						++data_out;
+						++cropX;
+					}
+					cropY++;
+					cropX = m_cropping.originX;
+				}
+			}
 		}
 	}
 	pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
