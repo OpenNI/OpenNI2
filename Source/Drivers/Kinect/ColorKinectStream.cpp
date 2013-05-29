@@ -43,30 +43,53 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	{
 		struct Rgba { unsigned char b, g, r, a; };
 		struct Rgb { unsigned char r, g, b;    };
+
 		Rgba* data_in = reinterpret_cast<Rgba*>(LockedRect.pBits);
 		Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
-		
-		if (!m_cropping.enabled)
+
+		if( m_mirroring )
 		{
-			pFrame->dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
-			pFrame->stride = m_videoMode.resolutionX * 3;
-			if( m_mirroring )
+			int iStartX, iEndX, iStartY, iEndY;
+			if (m_cropping.enabled)
 			{
-				for( int y = 0; y < m_videoMode.resolutionY; ++ y )
-				{
-					int iShift = y * m_videoMode.resolutionX;
-					for( int x = 0; x < m_videoMode.resolutionX; ++ x )
-					{
-						Rgb& rOut = data_out[ x + iShift ];
-						Rgba& rIn = data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ];
-						rOut.b = rIn.b;
-						rOut.r = rIn.r;
-						rOut.g = rIn.g;
-					}
-				}
+				pFrame->dataSize = m_cropping.height * m_cropping.width * 3;
+				pFrame->stride = m_cropping.width * 3;
+
+				iStartX	= m_cropping.originX;
+				iStartY	= m_cropping.originY;
+				iEndX	= m_cropping.originX + m_cropping.width;
+				iEndY	= m_cropping.originY + m_cropping.height;
 			}
 			else
 			{
+				pFrame->dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
+				pFrame->stride = m_videoMode.resolutionX * 3;
+
+				iStartX	= 0;
+				iStartY	= 0;
+				iEndX	= m_videoMode.resolutionX;
+				iEndY	= m_videoMode.resolutionY;
+			}
+
+			// I am not sure this  process method is correct for YUV422, but the result looks right
+			for( int y = iStartY; y < iEndY; ++ y )
+			{
+				int iShift = y * m_videoMode.resolutionX;
+				for( int x = iStartX; x < iEndX; ++ x )
+				{
+					Rgba& rIn = data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ];
+					(*data_out).b = rIn.b;
+					(*data_out).r = rIn.r;
+					(*data_out).g = rIn.g;
+					++ data_out;
+				}
+			}
+		}
+		else
+		{
+			if (!m_cropping.enabled)
+			{
+				pFrame->dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
 				Rgba * data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
 				while (data_in < data_in_end)
 				{
@@ -76,30 +99,11 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 					++data_in;
 					++data_out;
 				}
-			}
-		}
-		else
-		{
-			pFrame->dataSize = m_cropping.height * m_cropping.width * 3;
-			pFrame->stride = m_cropping.width * 3;
-
-			if( m_mirroring )
-			{
-				for( int y = m_cropping.originY; y < m_cropping.originY + m_cropping.height; ++ y )
-				{
-					int iShift = y * m_videoMode.resolutionX;
-					for( int x = m_cropping.originX; x < m_cropping.originX + m_cropping.width; ++ x )
-					{
-						Rgba& rIn = data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ];
-						data_out->b = rIn.b;
-						data_out->r = rIn.r;
-						data_out->g = rIn.g;
-						++data_out;
-					}
-				}
+				pFrame->stride = m_videoMode.resolutionX * 3;
 			}
 			else
 			{
+				pFrame->dataSize = m_cropping.height * m_cropping.width * 3;
 				int cropX = m_cropping.originX;
 				int cropY = m_cropping.originY;
 				while (cropY < m_cropping.originY + m_cropping.height)
@@ -117,6 +121,7 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 					++cropY;
 					cropX = m_cropping.originX;
 				}
+				pFrame->stride = m_cropping.width * 3;
 			}
 		}
 	}
@@ -166,20 +171,18 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 		{
 			if (!m_cropping.enabled)
 			{
+				xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
 				pFrame->dataSize = LockedRect.size;
 				pFrame->stride = m_videoMode.resolutionX * 2;
-				xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
 			}
 			else
 			{
 				unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
 				unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
 				pFrame->dataSize = m_cropping.height * m_cropping.width * 2;
-				pFrame->stride = m_cropping.width * 2;
 
 				int cropX = m_cropping.originX;
 				int cropY = m_cropping.originY;
-
 				while (cropY < m_cropping.originY + m_cropping.height)
 				{
 					while (cropX < m_cropping.originX + m_cropping.width)
@@ -192,6 +195,7 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 					cropY++;
 					cropX = m_cropping.originX;
 				}
+				pFrame->stride = m_cropping.width * 2;
 			}
 		}
 	}
