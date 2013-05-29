@@ -19,6 +19,7 @@ IRKinectStream::IRKinectStream(KinectStreamImpl* pStreamImpl):
 	m_videoMode.fps = DEFAULT_FPS;
 	m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
 	m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
+	m_mirroring = false;
 }
 
 OniStatus IRKinectStream::start()
@@ -38,111 +39,189 @@ OniStatus IRKinectStream::start()
 void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
 	OniFrame* pFrame = getServices().acquireFrame();
-	if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY16)
+	if( m_mirroring )
 	{
 		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
-		if (!m_cropping.enabled)
+		int iStartX, iEndX, iStartY, iEndY;
+		if( m_cropping.enabled )
 		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
-			{
-				unsigned short intensity = (*data_in)>> 6;
-				*data_out = intensity;
-				++data_in;
-				++data_out;
-			}
-			pFrame->stride = m_videoMode.resolutionX * 2;
-		}
-		else
-		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					*(data_out++) = (*iter) >> 6;
-				}
-				cropY++;
-			}
-			pFrame->stride = m_cropping.width * 2;
-		}
-	}
-	else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY8)
-	{
-		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		char* data_out = reinterpret_cast<char*>(pFrame->data);
-		if (!m_cropping.enabled)
-		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
-			{
-				char intensity = (*data_in)>> 8;
-				(*data_out) = intensity;
-				++data_in;
-				++data_out;
-			}
-			pFrame->stride = m_videoMode.resolutionX;
-		}
-		else
-		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					char intensity = (*iter) >> 8;
-					*(data_out++) = intensity;
-				}
-				cropY++;
-			}
-			pFrame->stride = m_cropping.width * 2;
+			pFrame->dataSize = m_cropping.height * m_cropping.width * 3;
+			pFrame->stride = m_cropping.width * 3;
 
+			iStartX	= m_cropping.originX;
+			iStartY	= m_cropping.originY;
+			iEndX	= m_cropping.originX + m_cropping.width;
+			iEndY	= m_cropping.originY + m_cropping.height;
 		}
+		else
+		{
+			pFrame->dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
+			pFrame->stride = m_videoMode.resolutionX * 3;
+
+			iStartX	= 0;
+			iStartY	= 0;
+			iEndX	= m_videoMode.resolutionX;
+			iEndY	= m_videoMode.resolutionY;
+		}
+
+		if( m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY16 )
+		{
+			pFrame->stride = ( iEndX - iStartX ) * 2;
+
+			unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
+			for( int y = iStartY; y < iEndY; ++ y )
+			{
+				int iShift = y * m_videoMode.resolutionX;
+				for( int x = iStartX; x < iEndX; ++ x )
+				{
+					*data_out = ( data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ] >> 6 );
+					++ data_out;
+				}
+			}
+		}
+		else if( m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY8 )
+		{
+			pFrame->stride = ( iEndX - iStartX );
+
+			char* data_out = reinterpret_cast<char*>(pFrame->data);
+			for( int y = iStartY; y < iEndY; ++ y )
+			{
+				int iShift = y * m_videoMode.resolutionX;
+				for( int x = iStartX; x < iEndX; ++ x )
+				{
+					*data_out = ( data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ] >> 8 );
+					++ data_out;
+				}
+			}
+		}
+		else
+		{
+			pFrame->stride = ( iEndX - iStartX ) * 3;
+
+			struct Rgb { unsigned char r, g, b; };
+			Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
+			for( int y = iStartY; y < iEndY; ++ y )
+			{
+				int iShift = y * m_videoMode.resolutionX;
+				for( int x = iStartX; x < iEndX; ++ x )
+				{
+					char intensity = ( data_in[ ( m_videoMode.resolutionX - 1 - x ) + iShift ] >> 8 );
+					data_out->b = intensity;
+					data_out->r = intensity;
+					data_out->g = intensity;
+					++ data_out;
+				}
+			}
+		}
+		pFrame->dataSize = pFrame->stride * ( iEndY - iEndX );
 	}
 	else
 	{
-		struct Rgb { unsigned char r, g, b;    };
-		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
-		if (!m_cropping.enabled)
+		if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY16)
 		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
+			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
+			unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
+			if (!m_cropping.enabled)
 			{
-				char intensity = (*data_in)>> 8;
-				data_out->b = intensity;
-				data_out->r = intensity;
-				data_out->g = intensity;
-				++data_in;
-				++data_out;
+				unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
+				while (data_in < data_in_end)
+				{
+					unsigned short intensity = (*data_in)>> 6;
+					*data_out = intensity;
+					++data_in;
+					++data_out;
+				}
+				pFrame->stride = m_videoMode.resolutionX * 2;
 			}
-			pFrame->stride = m_videoMode.resolutionX * 3;
+			else
+			{
+				int cropY = m_cropping.originY;
+				while (cropY < m_cropping.originY + m_cropping.height)
+				{
+					int cropX = m_cropping.originX;
+					while (cropX < m_cropping.originX + m_cropping.width)
+					{
+						unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
+						*(data_out++) = (*iter) >> 6;
+					}
+					cropY++;
+				}
+				pFrame->stride = m_cropping.width * 2;
+			}
+		}
+		else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY8)
+		{
+			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
+			char* data_out = reinterpret_cast<char*>(pFrame->data);
+			if (!m_cropping.enabled)
+			{
+				unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
+				while (data_in < data_in_end)
+				{
+					char intensity = (*data_in)>> 8;
+					(*data_out) = intensity;
+					++data_in;
+					++data_out;
+				}
+				pFrame->stride = m_videoMode.resolutionX;
+			}
+			else
+			{
+				int cropY = m_cropping.originY;
+				while (cropY < m_cropping.originY + m_cropping.height)
+				{
+					int cropX = m_cropping.originX;
+					while (cropX < m_cropping.originX + m_cropping.width)
+					{
+						unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
+						char intensity = (*iter) >> 8;
+						*(data_out++) = intensity;
+					}
+					cropY++;
+				}
+				pFrame->stride = m_cropping.width * 2;
+
+			}
 		}
 		else
 		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
+			struct Rgb { unsigned char r, g, b;    };
+			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
+			Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
+			if (!m_cropping.enabled)
 			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
+				unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
+				while (data_in < data_in_end)
 				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					char intensity = (*iter) >> 8;
+					char intensity = (*data_in)>> 8;
 					data_out->b = intensity;
 					data_out->r = intensity;
-					data_out++->g = intensity;
+					data_out->g = intensity;
+					++data_in;
+					++data_out;
 				}
-				cropY++;
+				pFrame->stride = m_videoMode.resolutionX * 3;
 			}
-			pFrame->stride = m_cropping.width * 3;
+			else
+			{
+				int cropY = m_cropping.originY;
+				while (cropY < m_cropping.originY + m_cropping.height)
+				{
+					int cropX = m_cropping.originX;
+					while (cropX < m_cropping.originX + m_cropping.width)
+					{
+						unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
+						char intensity = (*iter) >> 8;
+						data_out->b = intensity;
+						data_out->r = intensity;
+						data_out++->g = intensity;
+					}
+					cropY++;
+				}
+				pFrame->stride = m_cropping.width * 3;
+			}
 		}
 	}
-		
 	if (!m_cropping.enabled)
 	{
 		pFrame->width = pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
