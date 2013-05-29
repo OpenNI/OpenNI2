@@ -30,6 +30,7 @@
 #include "XnDeviceSensor.h"
 #include "XnHostProtocol.h"
 #include "XnDeviceSensorInit.h"
+#include "XnDeviceEnumeration.h"
 #include <XnPsVersion.h>
 
 //---------------------------------------------------------------------------
@@ -66,6 +67,7 @@ typedef struct XnWaitForSycnhedFrameData
 //---------------------------------------------------------------------------
 XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FALSE */) :
 	XnDeviceBase(),
+	m_hDisconnectedCallback(NULL),
 	m_ErrorState(XN_MODULE_PROPERTY_ERROR_STATE, "ErrorState", XN_STATUS_OK),
 	m_ResetSensorOnStartup(XN_MODULE_PROPERTY_RESET_SENSOR_ON_STARTUP, "ResetOnStartup", bResetOnStartup),
 	m_LeanInit(XN_MODULE_PROPERTY_LEAN_INIT, "LeanInit", bLeanInit),
@@ -228,6 +230,9 @@ XnStatus XnSensor::InitImpl(const XnDeviceConfig *pDeviceConfig)
 		return (nRetVal);
 	}
 
+	nRetVal = XnDeviceEnumeration::DisconnectedEvent().Register(OnDeviceDisconnected, this, m_hDisconnectedCallback);
+	XN_IS_STATUS_OK(nRetVal);
+
 	xnLogInfo(XN_MASK_DEVICE_SENSOR, "Device sensor initialized");
 
 	return (XN_STATUS_OK);
@@ -286,6 +291,12 @@ XnStatus XnSensor::InitSensor(const XnDeviceConfig* pDeviceConfig)
 XnStatus XnSensor::Destroy()
 {
 	XnDevicePrivateData* pDevicePrivateData = GetDevicePrivateData();
+
+	if (m_hDisconnectedCallback != NULL)
+	{
+		XnDeviceEnumeration::DisconnectedEvent().Unregister(m_hDisconnectedCallback);
+		m_hDisconnectedCallback = NULL;
+	}
 
 	// close Commands.txt thread
 	if (pDevicePrivateData->LogThread.hThread != NULL)
@@ -1935,5 +1946,14 @@ XnStatus XN_CALLBACK_TYPE XnSensor::RunBISTCallback(XnGeneralProperty* /*pSender
 	XnStatus nRetVal = pThis->RunBIST(pBist->nTestsMask, &pBist->nFailures);
 	XN_IS_STATUS_OK(nRetVal);
 	return XN_STATUS_OK;
+}
+
+void XN_CALLBACK_TYPE XnSensor::OnDeviceDisconnected(const OniDeviceInfo& deviceInfo, void* pCookie)
+{
+	XnSensor* pThis = (XnSensor*)pCookie;
+	if (xnOSStrCmp(deviceInfo.uri, pThis->GetUSBPath()) == 0)
+	{
+		pThis->SetErrorState(XN_STATUS_DEVICE_NOT_CONNECTED);
+	}
 }
 

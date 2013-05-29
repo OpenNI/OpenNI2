@@ -169,6 +169,8 @@ private:
 	//---------------------------------------------------------------------------
 	// Callbacks
 	//---------------------------------------------------------------------------
+	static void XN_CALLBACK_TYPE OnDeviceDisconnected(const OniDeviceInfo& deviceInfo, void* pCookie);
+
 	static XnStatus XN_CALLBACK_TYPE SetInterfaceCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetHostTimestampsCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetNumberOfBuffersCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
@@ -223,6 +225,7 @@ private:
 	//---------------------------------------------------------------------------
 	// Members
 	//---------------------------------------------------------------------------
+	XnCallbackHandle m_hDisconnectedCallback;
 	XnActualIntProperty m_ErrorState;
 	XnActualIntProperty m_ResetSensorOnStartup;
 	XnActualIntProperty m_LeanInit;
