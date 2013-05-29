@@ -1090,6 +1090,12 @@ XnStatus XnHostProtocolExecute(const XnDevicePrivateData* pDevicePrivateData,
 		return (XN_STATUS_DEVICE_PROTOCOL_UNSUPPORTED_OPCODE);
 	}
 
+	// don't bother trying to communicate with the device if it was disconnected
+	if (pDevicePrivateData->pSensor->GetErrorState() == XN_STATUS_DEVICE_NOT_CONNECTED)
+	{
+		return (XN_STATUS_DEVICE_NOT_CONNECTED);
+	}
+
 	XnUInt32 nTimeOut = XnHostProtocolGetTimeOut(pDevicePrivateData, nOpcode);
 
 	// store request (in case we need to retry it)
@@ -1604,18 +1610,22 @@ XnStatus XnHostProtocolSetParam(XnDevicePrivateData* pDevicePrivateData, XnUInt1
 
 	XnInt32 nTimesLeft = 5;
 	XnStatus rc = XN_STATUS_ERROR;
-	while (rc != XN_STATUS_OK && rc != XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS && 
-		rc != XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND && nTimesLeft > 0)
+	while (nTimesLeft > 0)
 	{
 		rc = XnHostProtocolExecute(pDevicePrivateData, 
 										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16)*2, pDevicePrivateData->FWInfo.nOpcodeSetParam,
 										NULL, nDataSize, XnHostProtocolGetSetParamRecvTimeOut(pDevicePrivateData, nParam));
 		nTimesLeft--;
 
-		if (rc != XN_STATUS_OK)
+		if (rc == XN_STATUS_OK ||
+			rc == XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS || 
+			rc == XN_STATUS_DEVICE_NOT_CONNECTED ||
+			rc == XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND)
 		{
-			xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Retrying to set the param... rc=%d", rc);
+			break;
 		}
+
+		xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Retrying to set the param... rc=%d", rc);
 	}
 
 	if (rc != XN_STATUS_OK)
