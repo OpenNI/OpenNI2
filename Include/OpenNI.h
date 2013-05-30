@@ -2233,12 +2233,12 @@ public:
 	
 	 * @param	const char * strLogOutputFolder	[in]	log required folder
 	 *
-	 * @retval ONI_STATUS_OK Upon successful completion.
-	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus setLogOutputFolder(const char *strLogOutputFolder)
+	static Status setLogOutputFolder(const char *strLogOutputFolder)
 	{
-		return oniSetLogOutputFolder(strLogOutputFolder);
+		return (Status)oniSetLogOutputFolder(strLogOutputFolder);
 	}
 
 	/** 
@@ -2247,12 +2247,12 @@ public:
 	 * @param	char * strFileName	[out]	returned file name buffer
 	 * @param	int	nBufferSize	[in]	Buffer size
 	 *
-	 * @retval ONI_STATUS_OK Upon successful completion.
-	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus getLogFileName(char *strFileName, int nBufferSize)
+	static Status getLogFileName(char *strFileName, int nBufferSize)
 	{
-		return oniGetLogFileName(strFileName, nBufferSize);
+		return (Status)oniGetLogFileName(strFileName, nBufferSize);
 	}
 
 	/** 
@@ -2261,12 +2261,12 @@ public:
 	 * @param	const char * strMask	[in]	Logger name
 	 * @param	int nMinSeverity	[in]	Logger severity
 	 *
-	 * @retval ONI_STATUS_OK Upon successful completion.
-	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus  setLogMinSeverity(int nMinSeverity)
+	static Status setLogMinSeverity(int nMinSeverity)
 	{
-		return oniSetLogMinSeverity(nMinSeverity);
+		return(Status) oniSetLogMinSeverity(nMinSeverity);
 	}
 	
 	/** 
@@ -2274,12 +2274,12 @@ public:
 
 	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to console, FALSE otherwise.
 	*
-	* @retval ONI_STATUS_OK Upon successful completion.
-	* @retval ONI_STATUS_ERROR Upon any kind of failure.
+	* @retval STATUS_OK Upon successful completion.
+	* @retval STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus setLogConsoleOutput(bool bConsoleOutput)
+	static Status setLogConsoleOutput(bool bConsoleOutput)
 	{
-		return oniSetLogConsoleOutput(bConsoleOutput);
+		return (Status)oniSetLogConsoleOutput(bConsoleOutput);
 	}
 
 	/** 
@@ -2287,12 +2287,12 @@ public:
 
 	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to file, FALSE otherwise.
 	*
-	* @retval ONI_STATUS_OK Upon successful completion.
-	* @retval ONI_STATUS_ERROR Upon any kind of failure.
+	* @retval STATUS_OK Upon successful completion.
+	* @retval STATUS_ERROR Upon any kind of failure.
 	 */
-	static OniStatus setLogFileOutput(bool bFileOutput)
+	static Status setLogFileOutput(bool bFileOutput)
 	{
-		return oniSetLogFileOutput(bFileOutput);
+		return (Status)oniSetLogFileOutput(bFileOutput);
 	}
 
 	#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
@@ -2301,13 +2301,13 @@ public:
 
 	 * @param	OniBool bAndroidOutput bAndroidOutput	[in]	TRUE to print log entries to the Android log, FALSE otherwise.
 	 *
-	 * @retval ONI_STATUS_OK Upon successful completion.
-	 * @retval ONI_STATUS_ERROR Upon any kind of failure.
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
 	 */
 	
-	static OniStatus setLogAndroidOutput(bool bAndroidOutput)
+	static Status setLogAndroidOutput(bool bAndroidOutput)
 	{
-		return oniSetLogAndroidOutput(bAndroidOutput);
+		return (Status)oniSetLogAndroidOutput(bAndroidOutput);
 	}
 	#endif
 	
