@@ -96,16 +96,30 @@ void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* sou
 	const unsigned int height = pFrame->height;
 	const unsigned int skipWidth = m_videoMode.resolutionX - width;
 
-	// Offset the starting position
-	source += pFrame->cropOriginX + pFrame->cropOriginY * m_videoMode.resolutionX;
-
-	for (unsigned int y = 0; y < height; y++)
+	if( m_mirroring )
 	{
-		for (unsigned int x = 0; x < width; x++)
+		for (unsigned int y = 0; y < height; y++)
 		{
-			*(target++) = filterReliableDepthValue((source++)->depth);
+			unsigned int uRowShift = m_videoMode.resolutionX * ( y + pFrame->cropOriginY );
+			for (unsigned int x = 0; x < width; x++)
+			{
+				*(target++) = filterReliableDepthValue( source[m_videoMode.resolutionX - 1 - ( x + pFrame->cropOriginX ) + uRowShift ].depth );
+			}
 		}
-		source += skipWidth;
+	}
+	else
+	{
+		// Offset the starting position
+		source += pFrame->cropOriginX + pFrame->cropOriginY * m_videoMode.resolutionX;
+
+		for (unsigned int y = 0; y < height; y++)
+		{
+			for (unsigned int x = 0; x < width; x++)
+			{
+				*(target++) = filterReliableDepthValue((source++)->depth);
+			}
+			source += skipWidth;
+		}
 	}
 
 	// FIXME: for preliminary benchmarking purpose
@@ -159,16 +173,34 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMA
 	const unsigned int height = pFrame->height;
 	const LONG* mappedCoordsIter = m_mappedCoordsBuffer.GetData();
 
-	for (int i = 0; i < numPoints; i++)
+	if( m_mirroring )
 	{
-		const unsigned int x = *mappedCoordsIter++ - minX;
-		const unsigned int y = *mappedCoordsIter++ - minY;
-		if (x < width - 1 && y < height) {
-			const unsigned short d = filterReliableDepthValue((source+i)->depth);
-			unsigned short* p = target + x + y * width;
-			if (*p == 0 || *p > d) *p = d;
-			p++;
-			if (*p == 0 || *p > d) *p = d;
+		for (int i = 0; i < numPoints; i++)
+		{
+			const unsigned int x = ( m_videoMode.resolutionX - 1 - *mappedCoordsIter++ ) - minX;
+			const unsigned int y = *mappedCoordsIter++ - minY;
+			if (x < width - 1 && y < height) {
+				const unsigned short d = filterReliableDepthValue((source+i)->depth);
+				unsigned short* p = target + x + y * width;
+				if (*p == 0 || *p > d) *p = d;
+				p++;
+				if (*p == 0 || *p > d) *p = d;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < numPoints; i++)
+		{
+			const unsigned int x = *mappedCoordsIter++ - minX;
+			const unsigned int y = *mappedCoordsIter++ - minY;
+			if (x < width - 1 && y < height) {
+				const unsigned short d = filterReliableDepthValue((source+i)->depth);
+				unsigned short* p = target + x + y * width;
+				if (*p == 0 || *p > d) *p = d;
+				p++;
+				if (*p == 0 || *p > d) *p = d;
+			}
 		}
 	}
 
@@ -216,13 +248,6 @@ OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataS
 		{
 			XnInt * val = (XnInt *)data;
 			*val = DEVICE_MAX_DEPTH_VAL;
-			status = ONI_STATUS_OK;
-			break;
-		}
-	case ONI_STREAM_PROPERTY_MIRRORING:
-		{
-			XnBool * val = (XnBool *)data;
-			*val = TRUE;
 			status = ONI_STATUS_OK;
 			break;
 		}
