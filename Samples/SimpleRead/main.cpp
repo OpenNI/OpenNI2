@@ -73,7 +73,7 @@ int main()
 		if (rc != STATUS_OK)
 		{
 			printf("Wait failed! (timeout is %d ms)\n%s\n", SAMPLE_READ_WAIT_TIMEOUT, OpenNI::getExtendedError());
-			break;
+			continue;
 		}
 
 		rc = depth.readFrame(&frame);
@@ -94,7 +94,6 @@ int main()
 		int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
 
 		printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);
-
 	}
 
 	depth.stop();

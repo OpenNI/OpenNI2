@@ -5,17 +5,17 @@ BIN_DIR = ../../../../Bin
 INC_DIRS = \
 	../../../../Include \
 	../../../../ThirdParty/PSCommon/XnLib/Include \
-	../PSLink \
-	../LinkProtoLib/Protocols/XnLinkProto \
-	../LinkProtoLib/Protocols/XnPabloProto \
-	../LinkProtoLib/Include \
+	../ \
+	../Protocols/XnLinkProto \
+	../LinkProtoLib \
 
 SRC_FILES = \
 	*.cpp \
-	../PSLink/*.cpp \
+	../LinkProtoLib/*.cpp \
+	../*.cpp \
 
 LIB_DIRS = ../../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = LinkProtoLib XnLib dl pthread
+USED_LIBS = OpenNI2 XnLib dl pthread
 
 ifeq ("$(OSTYPE)","Darwin")
 	INC_DIRS += /opt/local/include

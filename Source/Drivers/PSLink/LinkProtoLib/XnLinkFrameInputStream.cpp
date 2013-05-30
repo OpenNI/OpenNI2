@@ -488,27 +488,27 @@ XnBool LinkFrameInputStream::IsOutputFormatSupported(OniPixelFormat format) cons
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
 		return (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS);
 	case ONI_PIXEL_FORMAT_YUV422:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_LINK_PIXEL_FORMAT_YUV422);
+		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
 	case ONI_PIXEL_FORMAT_RGB888:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_LINK_PIXEL_FORMAT_BAYER8);
+		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_BAYER8);
 	case ONI_PIXEL_FORMAT_GRAY16:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_LINK_PIXEL_FORMAT_GRAYSCALE16);
+		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_GRAYSCALE16);
 	default:
 		return LinkInputStream::IsOutputFormatSupported(format);
 	}
 }
 
-const xnl::Array<XnStreamVideoMode>& LinkFrameInputStream::GetSupportedVideoModes() const
+const xnl::Array<XnFwStreamVideoMode>& LinkFrameInputStream::GetSupportedVideoModes() const
 {
 	return m_supportedVideoModes;
 }
 
-const XnStreamVideoMode& LinkFrameInputStream::GetVideoMode() const
+const XnFwStreamVideoMode& LinkFrameInputStream::GetVideoMode() const
 {
 	return m_videoMode;
 }
 
-XnStatus LinkFrameInputStream::SetVideoMode(const XnStreamVideoMode& videoMode)
+XnStatus LinkFrameInputStream::SetVideoMode(const XnFwStreamVideoMode& videoMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	XnBool bModeSupported = FALSE;
@@ -629,8 +629,8 @@ XnStatus LinkFrameInputStream::SetCropping(OniCropping cropping)
 LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 {
 	OniPixelFormat outputFormat = m_outputFormat;
-	XnLinkPixelFormat pixelFormat = m_videoMode.m_nPixelFormat;
-	XnLinkCompressionType compression = m_videoMode.m_nCompression;
+	XnFwPixelFormat pixelFormat = m_videoMode.m_nPixelFormat;
+	XnFwCompressionType compression = m_videoMode.m_nCompression;
 
 	// TODO: validate this is a depth stream if format requires S2D
 
@@ -641,15 +641,15 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 	{
 		switch (compression)
 		{
-		case XN_LINK_COMPRESSION_NONE:
+		case XN_FW_COMPRESSION_NONE:
 			return XN_NEW(LinkMsgParser);
-		case XN_LINK_COMPRESSION_6_BIT_PACKED:
+		case XN_FW_COMPRESSION_6_BIT_PACKED:
 			return XN_NEW(Link6BitParser);
-		case XN_LINK_COMPRESSION_10_BIT_PACKED:
+		case XN_FW_COMPRESSION_10_BIT_PACKED:
 			return XN_NEW(LinkPacked10BitParser);
-		case XN_LINK_COMPRESSION_16Z:
+		case XN_FW_COMPRESSION_16Z:
 			return XN_NEW(Link16zParser<false>, m_shiftToDepthTables);
-		case XN_LINK_COMPRESSION_24Z:
+		case XN_FW_COMPRESSION_24Z:
 			return XN_NEW(Link24zYuv422Parser, m_videoMode.m_nXRes, m_videoMode.m_nYRes, FALSE);
 		default:
 			xnLogError(XN_MASK_LINK, "Unknown compression for pass-through: %d", compression);
@@ -661,7 +661,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 	{
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
 		{
-			if (pixelFormat != XN_LINK_PIXEL_FORMAT_SHIFTS_9_3)
+			if (pixelFormat != XN_FW_PIXEL_FORMAT_SHIFTS_9_3)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to depth!", pixelFormat);
 				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_SHIFTS_9_3);
@@ -670,13 +670,13 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 
 			switch (compression)
 			{
-			case XN_LINK_COMPRESSION_NONE:
+			case XN_FW_COMPRESSION_NONE:
 				return XN_NEW(LinkUnpackedS2DParser, m_shiftToDepthTables);
-			case XN_LINK_COMPRESSION_11_BIT_PACKED:
+			case XN_FW_COMPRESSION_11_BIT_PACKED:
 				return XN_NEW(Link11BitS2DParser, m_shiftToDepthTables);
-			case XN_LINK_COMPRESSION_12_BIT_PACKED:
+			case XN_FW_COMPRESSION_12_BIT_PACKED:
 				return XN_NEW(Link12BitS2DParser, m_shiftToDepthTables);
-			case XN_LINK_COMPRESSION_16Z:
+			case XN_FW_COMPRESSION_16Z:
 				return XN_NEW(Link16zParser<true>, m_shiftToDepthTables);
 			default:
 				xnLogError(XN_MASK_LINK, "Unknown compression for shifts: %d", compression);
@@ -686,7 +686,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 		}
 	case ONI_PIXEL_FORMAT_YUV422:
 		{
-			if (pixelFormat != XN_LINK_PIXEL_FORMAT_YUV422)
+			if (pixelFormat != XN_FW_PIXEL_FORMAT_YUV422)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to YUV422!", pixelFormat);
 				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_YUV422);
@@ -695,9 +695,9 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 
 			switch (compression)
 			{
-			case XN_LINK_COMPRESSION_NONE:
+			case XN_FW_COMPRESSION_NONE:
 				return XN_NEW(LinkMsgParser);
-			case XN_LINK_COMPRESSION_24Z:
+			case XN_FW_COMPRESSION_24Z:
 				return XN_NEW(Link24zYuv422Parser, m_videoMode.m_nXRes, m_videoMode.m_nYRes, FALSE);
 			default:
 				xnLogError(XN_MASK_LINK, "Unknown compression YUV422: %d", compression);
@@ -707,13 +707,13 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 		}
 	case ONI_PIXEL_FORMAT_RGB888:
 		{
-			if (pixelFormat == XN_LINK_PIXEL_FORMAT_YUV422)
+			if (pixelFormat == XN_FW_PIXEL_FORMAT_YUV422)
 			{
 				switch (compression)
 				{
-				case XN_LINK_COMPRESSION_NONE:
+				case XN_FW_COMPRESSION_NONE:
 					return XN_NEW(LinkYuv422ToRgb888Parser);
-				case XN_LINK_COMPRESSION_24Z:
+				case XN_FW_COMPRESSION_24Z:
 					return XN_NEW(Link24zYuv422Parser, m_videoMode.m_nXRes, m_videoMode.m_nYRes, TRUE);
 				default:
 					xnLogError(XN_MASK_LINK, "Unknown compression YUV422: %d", compression);
@@ -721,7 +721,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 					return NULL;
 				}
 			}
-			else if (pixelFormat == XN_LINK_PIXEL_FORMAT_BAYER8)
+			else if (pixelFormat == XN_FW_PIXEL_FORMAT_BAYER8)
 			{
 				xnLogError(XN_MASK_LINK, "Bayer to RGB888 conversion is not supported yet");
 				XN_ASSERT(FALSE);
@@ -731,9 +731,9 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 	case ONI_PIXEL_FORMAT_GRAY16:
 		switch (compression)
 		{
-		case XN_LINK_COMPRESSION_NONE:
+		case XN_FW_COMPRESSION_NONE:
 			return XN_NEW(LinkMsgParser);
-		case XN_LINK_COMPRESSION_10_BIT_PACKED:
+		case XN_FW_COMPRESSION_10_BIT_PACKED:
 			return XN_NEW(LinkPacked10BitParser);
 		default:
 			xnLogError(XN_MASK_LINK, "Unknown compression for grey16: %d", compression);

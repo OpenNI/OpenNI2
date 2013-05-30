@@ -95,6 +95,7 @@ OniStatus PlayerSource::SetProperty(int propertyId, const void* data, int dataSi
 			}
 			case ONI_PIXEL_FORMAT_GRAY16:
 			case ONI_PIXEL_FORMAT_YUV422:
+			case ONI_PIXEL_FORMAT_YUYV:
 			{
 				bytesPerPixel = 2;
 				stride = pVideoMode->resolutionX * bytesPerPixel;

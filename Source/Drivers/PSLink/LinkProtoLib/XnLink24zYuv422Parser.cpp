@@ -7,11 +7,11 @@ namespace xn
 {
 
 Link24zYuv422Parser::Link24zYuv422Parser(XnUInt32 xRes, XnUInt32 yRes, XnBool transformToRGB) : 
-	m_lineWidthBytes(xRes * LinkYuvToRgb::YUV_422_BYTES_PER_PIXEL), // 4 bytes for every 2 pixels
 	m_dataFromPrevPacket(NULL),
 	m_dataFromPrevPacketBytes(0),
-	m_expectedFrameSize(xRes * yRes * LinkYuvToRgb::YUV_422_BYTES_PER_PIXEL),
+	m_lineWidthBytes(xRes * LinkYuvToRgb::YUV_422_BYTES_PER_PIXEL), // 4 bytes for every 2 pixels
 	m_rgbFrameSize(xRes * yRes * LinkYuvToRgb::RGB_888_BYTES_PER_PIXEL),
+	m_expectedFrameSize(xRes * yRes * LinkYuvToRgb::YUV_422_BYTES_PER_PIXEL),
 	m_transformToRGB(transformToRGB),
 	m_tempYuvImage(NULL),
 	m_tempYuvImageBytes(0)

@@ -246,8 +246,7 @@ XnStatus XnStreamUncompressImageNew(const XnUInt8* pInput, const XnUInt32 nInput
 			// take low-element
 			cInput &= 0x0f;
 			bReadByte = TRUE;
-			if (++pInput == pInputEnd)
-				break;
+			pInput++;
 
 			if (cInput < 0xd) // 0x0 to 0xc are diffs
 			{
@@ -271,7 +270,7 @@ XnStatus XnStreamUncompressImageNew(const XnUInt8* pInput, const XnUInt32 nInput
 		}
 
 		// write output
-		if (pOutput > pOutputEnd)
+		if (pOutput >= pOutputEnd)
 		{
 			return (XN_STATUS_OUTPUT_BUFFER_OVERFLOW);
 		}

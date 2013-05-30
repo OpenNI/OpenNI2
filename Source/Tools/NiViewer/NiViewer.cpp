@@ -285,7 +285,7 @@ void createKeyboardMap()
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
 
 			registerKey('a', "toggle Auto Exposure", toggleImageAutoExposure, 0);
-			registerKey('q', "toggle Auto Balance", toggleImageAutoWhiteBalance, 0);
+			registerKey('q', "toggle AWB", toggleImageAutoWhiteBalance, 0);
 			registerKey('e', "Increase Exposure", changeImageExposure, 1);
 			registerKey('E', "Decrease Exposure", changeImageExposure, -1);
 			registerKey('g', "Increase Gain", changeImageGain, 10);

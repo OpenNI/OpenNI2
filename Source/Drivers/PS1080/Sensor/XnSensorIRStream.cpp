@@ -431,6 +431,11 @@ XnStatus XnSensorIRStream::CropImpl(OniFrame* pFrame, const OniCropping* pCroppi
 		nRetVal = XnIRStream::CropImpl(pFrame, pCropping);
 		XN_IS_STATUS_OK(nRetVal);
 	}
+	else if (IsMirrored())
+	{
+		// mirror is done in software and cropping in chip, so we crop the other side (see SetCroppingImpl()).
+		pFrame->cropOriginX = GetXRes() - pFrame->cropOriginX - pFrame->width;
+	}
 	
 	return (XN_STATUS_OK);
 }

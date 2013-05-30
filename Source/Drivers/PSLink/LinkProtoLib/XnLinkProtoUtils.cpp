@@ -650,16 +650,16 @@ void xnEncodeLeanVersion(XnLinkLeanVersion& linkVersion, const XnLeanVersion& ve
 	linkVersion.m_nMinor = version.m_nMinor;
 }
 
-void xnLinkParseVideoMode(XnStreamVideoMode& videoMode, const XnLinkVideoMode& linkVideoMode)
+void xnLinkParseVideoMode(XnFwStreamVideoMode& videoMode, const XnLinkVideoMode& linkVideoMode)
 {
 	videoMode.m_nXRes = XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nXRes);
 	videoMode.m_nYRes = XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nYRes);
 	videoMode.m_nFPS = XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nFPS);
-	videoMode.m_nPixelFormat = (XnLinkPixelFormat)XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nPixelFormat);
-	videoMode.m_nCompression = (XnLinkCompressionType)XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nCompression);
+	videoMode.m_nPixelFormat = (XnFwPixelFormat)XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nPixelFormat);
+	videoMode.m_nCompression = (XnFwCompressionType)XN_PREPARE_VAR16_IN_BUFFER(linkVideoMode.m_nCompression);
 }
 
-void xnLinkEncodeVideoMode(XnLinkVideoMode& linkVideoMode, const XnStreamVideoMode& videoMode)
+void xnLinkEncodeVideoMode(XnLinkVideoMode& linkVideoMode, const XnFwStreamVideoMode& videoMode)
 {
 	linkVideoMode.m_nXRes = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)videoMode.m_nXRes);
 	linkVideoMode.m_nYRes = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)videoMode.m_nYRes);
@@ -668,7 +668,7 @@ void xnLinkEncodeVideoMode(XnLinkVideoMode& linkVideoMode, const XnStreamVideoMo
 	linkVideoMode.m_nCompression = (XnUInt8)videoMode.m_nCompression;
 }
 
-XnStatus xnLinkParseSupportedVideoModes(xnl::Array<XnStreamVideoMode>& aModes, 
+XnStatus xnLinkParseSupportedVideoModes(xnl::Array<XnFwStreamVideoMode>& aModes, 
                                                 const XnLinkSupportedVideoModes* pLinkSupportedModes, 
                                                 XnUInt32 nBufferSize)
 {
@@ -1019,7 +1019,7 @@ XnStatus xnLinkParseSupportedLogFiles(const XnLinkSupportedLogFiles* pFilesList,
 	return XN_STATUS_OK;
 }
 
-XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBistTest>& supportedTests)
+XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBistInfo>& supportedTests)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	XnUInt32 nTests = 0;
@@ -1050,25 +1050,25 @@ XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupporte
 
 	for (XnUInt32 i = 0; i < nTests; i++)
 	{
-		supportedTests[i].m_nID = XN_PREPARE_VAR32_IN_BUFFER(pSupportedTests->m_aTests[i].m_nID);
-		nRetVal = xnOSStrCopy(supportedTests[i].m_strName, pSupportedTests->m_aTests[i].m_strName, sizeof(supportedTests[i].m_strName));
+		supportedTests[i].id = XN_PREPARE_VAR32_IN_BUFFER(pSupportedTests->m_aTests[i].m_nID);
+		nRetVal = xnOSStrCopy(supportedTests[i].name, pSupportedTests->m_aTests[i].m_strName, sizeof(supportedTests[i].name));
 		XN_IS_STATUS_OK_LOG_ERROR("Copy BIST test name", nRetVal);
 	}
 
 	return XN_STATUS_OK;
 }
 
-const XnChar* xnLinkPixelFormatToName(XnLinkPixelFormat pixelFormat)
+const XnChar* xnLinkPixelFormatToName(XnFwPixelFormat pixelFormat)
 {
 	switch (pixelFormat)
 	{
-	case XN_LINK_PIXEL_FORMAT_SHIFTS_9_3:
+	case XN_FW_PIXEL_FORMAT_SHIFTS_9_3:
 		return "Shifts9.3";
-	case XN_LINK_PIXEL_FORMAT_GRAYSCALE16:
+	case XN_FW_PIXEL_FORMAT_GRAYSCALE16:
 		return "Grayscale16";
-	case XN_LINK_PIXEL_FORMAT_YUV422:
+	case XN_FW_PIXEL_FORMAT_YUV422:
 		return "YUV422";
-	case XN_LINK_PIXEL_FORMAT_BAYER8:
+	case XN_FW_PIXEL_FORMAT_BAYER8:
 		return "BAYER8";
 	default:
 		XN_ASSERT(FALSE);
@@ -1076,42 +1076,42 @@ const XnChar* xnLinkPixelFormatToName(XnLinkPixelFormat pixelFormat)
 	}
 }
 
-XnLinkPixelFormat xnLinkPixelFormatFromName(const XnChar* name)
+XnFwPixelFormat xnLinkPixelFormatFromName(const XnChar* name)
 {
 	if (xnOSStrCmp(name, "Shifts9.3") == 0)
-		return XN_LINK_PIXEL_FORMAT_SHIFTS_9_3;
+		return XN_FW_PIXEL_FORMAT_SHIFTS_9_3;
 	else if (xnOSStrCmp(name, "Grayscale16") == 0)
-		return XN_LINK_PIXEL_FORMAT_GRAYSCALE16;
+		return XN_FW_PIXEL_FORMAT_GRAYSCALE16;
 	else if (xnOSStrCmp(name, "YUV422") == 0)
-		return XN_LINK_PIXEL_FORMAT_YUV422;
+		return XN_FW_PIXEL_FORMAT_YUV422;
 	else if (xnOSStrCmp(name, "BAYER8") == 0)
-		return XN_LINK_PIXEL_FORMAT_BAYER8;
+		return XN_FW_PIXEL_FORMAT_BAYER8;
 	else
 	{
 		XN_ASSERT(FALSE);
-		return (XnLinkPixelFormat)(-1);
+		return (XnFwPixelFormat)(-1);
 	}
 }
 
-const XnChar* xnLinkCompressionToName(XnLinkCompressionType compression)
+const XnChar* xnLinkCompressionToName(XnFwCompressionType compression)
 {
 	switch (compression)
 	{
-	case XN_LINK_COMPRESSION_NONE:
+	case XN_FW_COMPRESSION_NONE:
 		return "None";
-	case XN_LINK_COMPRESSION_8Z:
+	case XN_FW_COMPRESSION_8Z:
 		return "8z";
-	case XN_LINK_COMPRESSION_16Z:
+	case XN_FW_COMPRESSION_16Z:
 		return "16z";
-	case XN_LINK_COMPRESSION_24Z:
+	case XN_FW_COMPRESSION_24Z:
 		return "24z";
-	case XN_LINK_COMPRESSION_6_BIT_PACKED:
+	case XN_FW_COMPRESSION_6_BIT_PACKED:
 		return "6bit";
-	case XN_LINK_COMPRESSION_10_BIT_PACKED:
+	case XN_FW_COMPRESSION_10_BIT_PACKED:
 		return "10bit";
-	case XN_LINK_COMPRESSION_11_BIT_PACKED:
+	case XN_FW_COMPRESSION_11_BIT_PACKED:
 		return "11bit";
-	case XN_LINK_COMPRESSION_12_BIT_PACKED:
+	case XN_FW_COMPRESSION_12_BIT_PACKED:
 		return "12bit";
 	default:
 		XN_ASSERT(FALSE);
@@ -1119,32 +1119,32 @@ const XnChar* xnLinkCompressionToName(XnLinkCompressionType compression)
 	}
 }
 
-XnLinkCompressionType xnLinkCompressionFromName(const XnChar* name)
+XnFwCompressionType xnLinkCompressionFromName(const XnChar* name)
 {
 	if (xnOSStrCmp(name, "None") == 0)
-		return XN_LINK_COMPRESSION_NONE;
+		return XN_FW_COMPRESSION_NONE;
 	else if (xnOSStrCmp(name, "8z") == 0)
-		return XN_LINK_COMPRESSION_8Z;
+		return XN_FW_COMPRESSION_8Z;
 	else if (xnOSStrCmp(name, "16z") == 0)
-		return XN_LINK_COMPRESSION_16Z;
+		return XN_FW_COMPRESSION_16Z;
 	else if (xnOSStrCmp(name, "24z") == 0)
-		return XN_LINK_COMPRESSION_24Z;
+		return XN_FW_COMPRESSION_24Z;
 	else if (xnOSStrCmp(name, "6bit") == 0)
-		return XN_LINK_COMPRESSION_6_BIT_PACKED;
+		return XN_FW_COMPRESSION_6_BIT_PACKED;
 	else if (xnOSStrCmp(name, "10bit") == 0)
-		return XN_LINK_COMPRESSION_10_BIT_PACKED;
+		return XN_FW_COMPRESSION_10_BIT_PACKED;
 	else if (xnOSStrCmp(name, "11bit") == 0)
-		return XN_LINK_COMPRESSION_11_BIT_PACKED;
+		return XN_FW_COMPRESSION_11_BIT_PACKED;
 	else if (xnOSStrCmp(name, "12bit") == 0)
-		return XN_LINK_COMPRESSION_12_BIT_PACKED;
+		return XN_FW_COMPRESSION_12_BIT_PACKED;
 	else
 	{
 		XN_ASSERT(FALSE);
-		return (XnLinkCompressionType)-1;
+		return (XnFwCompressionType)-1;
 	}
 }
 
-void xnLinkVideoModeToString(XnStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize)
+void xnLinkVideoModeToString(XnFwStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize)
 {
 	XnUInt32 charsWritten = 0;
 	xnOSStrFormat(buffer, bufferSize, &charsWritten, "%ux%u@%u (%s, %s)", 
@@ -1155,6 +1155,6 @@ void xnLinkVideoModeToString(XnStreamVideoMode videoMode, XnChar* buffer, XnUInt
 
 void xnLinkParseBootStatus(XnBootStatus& bootStatus, const XnLinkBootStatus& linkBootStatus)
 {
-	bootStatus.m_nErrorCode = (XnLinkBootErrorCode)XN_PREPARE_VAR32_IN_BUFFER(linkBootStatus.m_nErrorCode);
-	bootStatus.m_nZone = (XnLinkBootZone)XN_PREPARE_VAR32_IN_BUFFER(linkBootStatus.m_nZone);
+	bootStatus.errorCode = (XnBootErrorCode)XN_PREPARE_VAR32_IN_BUFFER(linkBootStatus.m_nErrorCode);
+	bootStatus.zone = (XnFileZone)XN_PREPARE_VAR32_IN_BUFFER(linkBootStatus.m_nZone);
 }

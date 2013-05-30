@@ -14,31 +14,5 @@
     <ClCompile Include="PSLinkConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\LinkProtoLib\XnLinkStatusCodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PSLink\LenaDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PSLink\PrimeClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\PSLink\PS1200Device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\PSLink\XnPsVersion.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PSLink\LenaDevice.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PSLink\PrimeClient.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PSLink\PS1200Device.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

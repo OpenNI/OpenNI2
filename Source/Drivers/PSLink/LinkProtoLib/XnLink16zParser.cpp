@@ -11,8 +11,8 @@ namespace xn
 template<bool TS2D>
 Link16zParser<TS2D>::Link16zParser(const XnShiftToDepthTables& shiftToDepthTables) :
 	m_pShiftToDepth(shiftToDepthTables.pShiftToDepthTable),
-	m_nState(STATE_OPCODE),
 	m_nShift(0),
+	m_nState(STATE_OPCODE),
 	m_nBigDiff(0),
 	m_nMaxShift((XnUInt16)(shiftToDepthTables.nShiftsCount - 1))
 {
