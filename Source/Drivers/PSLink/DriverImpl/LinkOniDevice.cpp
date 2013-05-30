@@ -231,19 +231,22 @@ XnStatus LinkOniDevice::Init(const char* mode)
 	XnBool performReset = TRUE;
 	XnBool leanInit = FALSE;
 
-	for (const char* option = mode; *option != '\0'; ++option)
+	if (mode != NULL)
 	{
-		switch (*option)
+		for (const char* option = mode; *option != '\0'; ++option)
 		{
-		case 'r':
-			performReset = FALSE;
-			break;
-		case 'l':
-			leanInit = TRUE;
-			break;
-		default:
-			m_driverServices.errorLoggerAppend("Invalid mode: %c", *option);
-			return XN_STATUS_BAD_PARAM;
+			switch (*option)
+			{
+			case 'r':
+				performReset = FALSE;
+				break;
+			case 'l':
+				leanInit = TRUE;
+				break;
+			default:
+				m_driverServices.errorLoggerAppend("Invalid mode: %c", *option);
+				return XN_STATUS_BAD_PARAM;
+			}
 		}
 	}
 
