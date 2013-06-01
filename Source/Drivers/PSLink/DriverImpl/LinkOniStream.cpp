@@ -165,7 +165,6 @@ void XN_CALLBACK_TYPE LinkOniStream::OnNewStreamDataEventHandler(const xn::NewFr
 	LinkOniStream* pThis = (LinkOniStream*)pCookie;
 	if (pThis->m_started)
 	{
-		pThis->getServices().addFrameRef(args.pFrame);
 		pThis->raiseNewFrame(args.pFrame);
 	}
 }
