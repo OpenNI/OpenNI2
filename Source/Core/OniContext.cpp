@@ -700,6 +700,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 
 	XnUInt64 passedTime;
 	XnOSTimer workTimer;
+	XnUInt32 timeToWait = timeout;
 	xnOSStartTimer(&workTimer);
 
 	do
@@ -732,8 +733,15 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			deviceList[j]->tryManualTrigger();
 		}
 
-		xnOSQueryTimer(workTimer, &passedTime);
-	} while (XN_STATUS_OK == xnOSWaitEvent(hEvent, passedTime < timeout ? (timeout - (int)passedTime) : 0));
+		if(timeout != ONI_TIMEOUT_FOREVER)
+		{
+			xnOSQueryTimer(workTimer, &passedTime);
+			if(passedTime < timeout)
+				timeToWait = timeout - (int)passedTime;
+			else
+				timeToWait = 0;
+		}
+	} while (XN_STATUS_OK == xnOSWaitEvent(hEvent, timeToWait));
 	
 	xnOSStopTimer(&workTimer);
 
