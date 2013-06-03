@@ -213,6 +213,27 @@ void seek(int nDiff)
 	}
 }
 
+void seekToUserInputEnd(bool ok, const char* userInput)
+{
+	if (ok)
+	{
+		long seekFrame = atoi(userInput);
+		seekFrameAbs(seekFrame);
+
+		// now step the last one (that way, if seek is not supported, as in sensor, at least one frame
+		// will be read).
+		if (g_bPause)
+		{
+			step(0);
+		}
+	}
+}
+
+void seekToUserInputBegin(int)
+{
+	startKeyboardInputMode("Seek to frame: ", true, seekToUserInputEnd);
+}
+
 void init_opengl()
 {
 	glClearStencil(128);
@@ -325,9 +346,9 @@ void createKeyboardMap()
 				registerSpecialKey(GLUT_KEY_UP,    "Jump 10 frames forward",   seek, 10);
 				registerSpecialKey(GLUT_KEY_LEFT,  "Jump 1 frame backwards",   seek, -1);
 				registerSpecialKey(GLUT_KEY_DOWN,  "Jump 10 frames backwards", seek, -10);
+				registerKey(':', "Jump to frame", seekToUserInputBegin, 0);
 
 				registerKey('r', "Toggle playback repeat", togglePlaybackRepeat, 0);
-
 				registerKey('[', "Decrease playback speed", changePlaybackSpeed, -1);
 				registerKey(']', "Increase playback speed", changePlaybackSpeed, 1);
 			}

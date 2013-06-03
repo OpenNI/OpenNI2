@@ -1431,6 +1431,12 @@ void drawUserMessage()
 		{ 1, 0, 0 }, /*ERROR_MESSAGE*/
 		{ 1, 0, 0 }, /*FATAL_MESSAGE*/
 	};
+
+	if (isInKeyboardInputMode())
+	{
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
+	}
+
 	static XnUInt64 nStartShowMessage = 0;
 
 	if (g_DrawConfig.bShowMessage)

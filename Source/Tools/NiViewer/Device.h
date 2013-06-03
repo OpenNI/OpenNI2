@@ -71,6 +71,7 @@ void changeRegistration(int nValue);
 void changePrimaryStream(int nValue);
 void toggleMirror(int);
 void seekFrame(int nDiff);
+void seekFrameAbs(int frameId);
 void toggleDepthState(int nDummy);
 void toggleColorState(int nDummy);
 void toggleIRState(int nDummy);

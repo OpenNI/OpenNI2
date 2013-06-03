@@ -381,48 +381,42 @@ void toggleImageRegistration(int)
 
 }
 
-void seekFrame(int nDiff)
+openni::VideoStream* getSeekingStream(openni::VideoFrameRef*& pCurFrame)
 {
-	// Make sure seek is required.
-	if (nDiff == 0)
-	{
-		return;
-	}
-
 	if (g_pPlaybackControl == NULL)
 	{
-		return;
+		return NULL;
 	}
 
-	int frameId = 0, numberOfFrames = 0;
-	openni::VideoStream* pStream = NULL;
-	openni::VideoFrameRef* pCurFrame;
 	if (g_bIsDepthOn)
 	{
 		pCurFrame = &g_depthFrame;
-		pStream = &g_depthStream;
+		return &g_depthStream;
 	}
 	else if (g_bIsColorOn)
 	{
 		pCurFrame = &g_colorFrame;
-		pStream = &g_colorStream;
+		return &g_colorStream;
 	}
 	else if (g_bIsIROn)
 	{
 		pCurFrame = &g_irFrame;
-		pStream = &g_irStream;
+		return &g_irStream;
 	}
 	else
 	{
-		return;
+		return NULL;
 	}
-	frameId = pCurFrame->getFrameIndex();
+}
+
+void seekStream(openni::VideoStream* pStream, openni::VideoFrameRef* pCurFrame, int frameId)
+{
+	int numberOfFrames = 0;
 
 	// Get number of frames
 	numberOfFrames = g_pPlaybackControl->getNumberOfFrames(*pStream);
 
-	// Calculate the new frame ID and seek stream.
-	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+	// Seek
 	openni::Status rc = g_pPlaybackControl->seek(*pStream, frameId);
 	if (rc == openni::STATUS_OK)
 	{
@@ -439,10 +433,11 @@ void seekFrame(int nDiff)
 		{
 			g_irStream.readFrame(&g_irFrame);
 		}
+
 		// the new frameId might be different than expected (due to clipping to edges)
 		frameId = pCurFrame->getFrameIndex();
 
-		displayMessage("Seeked to frame %u/%u", frameId, numberOfFrames);
+		displayMessage("Current frame: %u/%u", frameId, numberOfFrames);
 	}
 	else if ((rc == openni::STATUS_NOT_IMPLEMENTED) || (rc == openni::STATUS_NOT_SUPPORTED) || (rc == openni::STATUS_BAD_PARAMETER) || (rc == openni::STATUS_NO_DEVICE))
 	{
@@ -452,6 +447,40 @@ void seekFrame(int nDiff)
 	{
 		displayError("Error seeking to frame:\n%s", openni::OpenNI::getExtendedError());
 	}
+}
+
+void seekFrame(int nDiff)
+{
+	// Make sure seek is required.
+	if (nDiff == 0)
+	{
+		return;
+	}
+
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
+
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	int frameId = pCurFrame->getFrameIndex();
+	// Calculate the new frame ID
+	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+
+	seekStream(pStream, pCurFrame, frameId);
+}
+
+void seekFrameAbs(int frameId)
+{
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
+
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	seekStream(pStream, pCurFrame, frameId);
 }
 
 void toggleStreamState(openni::VideoStream& stream, openni::VideoFrameRef& frame, bool& isOn, openni::SensorType type, const char* name)
