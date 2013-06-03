@@ -503,12 +503,12 @@ XnStatus XnSensorFirmwareParams::SetImageFormat(XnUInt64 nValue)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-/*	
+
 	if (nValue == XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER)
 	{
 		nValue = XN_IO_IMAGE_FORMAT_BAYER;
 	}
-*/
+
 
 	nRetVal = SetFirmwareParam(&m_ImageFormat, nValue);
 	XN_IS_STATUS_OK(nRetVal);
