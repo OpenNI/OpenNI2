@@ -148,7 +148,7 @@ void handleKey(unsigned char k)
 			return;
 		}
 
-		int len = strlen(g_strUserInput);
+		int len = (int)strlen(g_strUserInput);
 		g_strUserInput[len] = k;
 		g_strUserInput[++len] = '\0';
 
@@ -216,7 +216,7 @@ void startKeyboardInputMode(const char* message, bool numbersOnly, KeyboardInput
 	g_bUserInput = true;
 	g_bUserInputNumbersOnly = numbersOnly;
 	xnOSStrCopy(g_strUserInput, message, sizeof(g_strUserInput));
-	g_userInputStartPos = strlen(message);
+	g_userInputStartPos = (int)strlen(message);
 	g_userInputCallback = callback;
 }
 
