@@ -13,7 +13,7 @@
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 /** Contains stuff that is common to several streams created on the same sensor */
-class Sensor
+class Sensor : OniStreamServices
 {
 public:
 	Sensor(xnl::ErrorLogger& errorLogger, FrameManager& frameManager, const DriverHandler& driverHandler);
@@ -22,7 +22,6 @@ public:
 	void setDriverStream(void* streamHandle);
 	OniStatus setFrameBufferAllocator(OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie);
 	void setRequiredFrameSize(int requiredFrameSize);
-	OniFrame* acquireFrame();
 
 	xnl::Event1Arg<OniFrame*>::Interface& newFrameEvent() { return m_newFrameEvent; }
 	void* streamHandle() const { return m_streamHandle; }
@@ -33,6 +32,16 @@ public:
 
 private:
 	XN_DISABLE_COPY_AND_ASSIGN(Sensor);
+
+	// stream services implementation
+	int getDefaultRequiredFrameSize();
+	OniFrame* acquireFrame();
+
+	static int ONI_CALLBACK_TYPE getDefaultRequiredFrameSizeCallback(void* streamServices);
+	static OniFrame* ONI_CALLBACK_TYPE acquireFrameCallback(void* streamServices);
+	static void ONI_CALLBACK_TYPE releaseFrameCallback(void* streamServices, OniFrame* pFrame);
+	static void ONI_CALLBACK_TYPE addFrameRefCallback(void* streamServices, OniFrame* pFrame);
+
 	void resetFrameAllocator();
 
 	// frame buffer management

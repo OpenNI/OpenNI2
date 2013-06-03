@@ -37,7 +37,7 @@ class Device;
 class FrameHolder;
 class Recorder;
 
-class VideoStream : OniStreamServices
+class VideoStream
 {
 public:
 	VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& driverHandler, FrameManager& frameManager, xnl::ErrorLogger& errorLogger);
@@ -98,18 +98,6 @@ protected:
 
 private:
 	XN_DISABLE_COPY_AND_ASSIGN(VideoStream)
-
-
-	// stream services implementation
-	int getDefaultRequiredFrameSize();
-	OniFrame* acquireFrame();
-	void addFrameRef(OniFrame* pFrame);
-	void releaseFrame(OniFrame* pFrame);
-
-	static int ONI_CALLBACK_TYPE getDefaultRequiredFrameSizeCallback(void* streamServices);
-	static OniFrame* ONI_CALLBACK_TYPE acquireFrameCallback(void* streamServices);
-	static void ONI_CALLBACK_TYPE releaseFrameCallback(void* streamServices, OniFrame* pFrame);
-	static void ONI_CALLBACK_TYPE addFrameRefCallback(void* streamServices, OniFrame* pFrame);
 
 	FrameHolder* m_pFrameHolder;
 
