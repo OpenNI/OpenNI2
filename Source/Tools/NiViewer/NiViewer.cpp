@@ -596,9 +596,9 @@ int main(int argc, char **argv)
 	const char* uri = NULL;
 
 	DeviceConfig config;
-	config.openDepth = true;
-	config.openColor = true;
-	config.openIR = false;
+	config.openDepth = SENSOR_TRY;
+	config.openColor = SENSOR_TRY;
+	config.openIR = SENSOR_TRY;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -612,12 +612,12 @@ int main(int argc, char **argv)
 			printf("	Shows this help screen and exits\n");
 			printf("-devices\n");
 			printf("	Allows to choose the device to open from the list of connected devices\n");
-			printf("-depth=<on|off>\n");
-			printf("	Toggles whether or not to open the depth stream (on by default)\n");
-			printf("-color=<on|off>\n");
-			printf("	Toggles whether or not to open the color stream (on by default)\n");
-			printf("-ir=<on|off>\n");
-			printf("	Toggles whether or not to open the IR stream (off by default)\n");
+			printf("-depth=<on|off|try>\n");
+			printf("-color=<on|off|try>\n");
+			printf("-ir=<on|off|try>\n");
+			printf("	Toggles each stream state. <off> means the stream will not be opened. <on> means it will be opened, and NiViewer will\n");
+			printf("	exit if it fails. <try> means that NiViewer will try to open that stream, but continue if it fails.\n");
+			printf("	The default value is <try> for all 3 sensors.\n");
 			return 0;
 		}
 		else if (strcmp(argv[i], "-devices") == 0)
@@ -626,27 +626,39 @@ int main(int argc, char **argv)
 		}
 		else if (strcmp(argv[i], "-depth=on") == 0)
 		{
-			config.openDepth = true;
+			config.openDepth = SENSOR_ON;
 		}
 		else if (strcmp(argv[i], "-depth=off") == 0)
 		{
-			config.openDepth = false;
+			config.openDepth = SENSOR_OFF;
+		}
+		else if (strcmp(argv[i], "-depth=try") == 0)
+		{
+			config.openDepth = SENSOR_TRY;
 		}
 		else if (strcmp(argv[i], "-color=on") == 0)
 		{
-			config.openColor = true;
+			config.openColor = SENSOR_ON;
 		}
 		else if (strcmp(argv[i], "-color=off") == 0)
 		{
-			config.openColor = false;
+			config.openColor = SENSOR_OFF;
+		}
+		else if (strcmp(argv[i], "-color=try") == 0)
+		{
+			config.openColor = SENSOR_TRY;
 		}
 		else if (strcmp(argv[i], "-ir=on") == 0)
 		{
-			config.openIR = true;
+			config.openIR = SENSOR_ON;
 		}
 		else if (strcmp(argv[i], "-ir=off") == 0)
 		{
-			config.openIR = false;
+			config.openIR = SENSOR_OFF;
+		}
+		else if (strcmp(argv[i], "-ir=try") == 0)
+		{
+			config.openIR = SENSOR_TRY;
 		}
 		else if (uri == NULL)
 		{

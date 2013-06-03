@@ -107,81 +107,93 @@ const char* getFormatName(openni::PixelFormat format)
 	}
 }
 
-void openCommon(openni::Device& device, DeviceConfig config)
+int openStream(openni::Device& device, const char* name, openni::SensorType sensorType, SensorOpenType openType, openni::VideoStream& stream, const openni::SensorInfo** ppSensorInfo, bool* pbIsStreamOn)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
+	*ppSensorInfo = device.getSensorInfo(sensorType);
+	*pbIsStreamOn = false;
 
-	g_bIsDepthOn = false;
-	g_bIsColorOn = false;
-	g_bIsIROn    = false;
-
-	g_depthSensorInfo = device.getSensorInfo(openni::SENSOR_DEPTH);
-	g_colorSensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
-	g_irSensorInfo = device.getSensorInfo(openni::SENSOR_IR);
-
-	if (config.openDepth && g_depthSensorInfo != NULL)
+	if (openType == SENSOR_OFF)
 	{
-		nRetVal = g_depthStream.create(device, openni::SENSOR_DEPTH);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return 0;
+	}
 
-		nRetVal = g_depthStream.start();
-		if (nRetVal != openni::STATUS_OK)
+	if (*ppSensorInfo == NULL)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("No %s sensor available\n", name);
+			return -1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	openni::Status nRetVal = stream.create(device, sensorType);
+	if (nRetVal != openni::STATUS_OK)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("Failed to create %s stream:\n%s\n", openni::OpenNI::getExtendedError(), name);
+			return -2;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	nRetVal = stream.start();
+	if (nRetVal != openni::STATUS_OK)
+	{
+		g_depthStream.destroy();
+
+		if (openType == SENSOR_ON)
 		{
 			printf("Failed to start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_depthStream.destroy();
-			return;
+			return -3;
 		}
-
-		g_bIsDepthOn = true;
+		else
+		{
+			return 0;
+		}
 	}
 
-	if (config.openColor && g_colorSensorInfo != NULL)
+	*pbIsStreamOn = true;
+
+	return 0;
+}
+
+int openCommon(openni::Device& device, DeviceConfig config)
+{
+	g_pPlaybackControl = g_device.getPlaybackControl();
+
+	int ret;
+
+	ret = openStream(device, "depth", openni::SENSOR_DEPTH, config.openDepth, g_depthStream, &g_depthSensorInfo, &g_bIsDepthOn);
+	if (ret != 0)
 	{
-		nRetVal = g_colorStream.create(device, openni::SENSOR_COLOR);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
-
-		nRetVal = g_colorStream.start();
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_colorStream.destroy();
-			return;
-		}
-
-		g_bIsColorOn = true;
+		return ret;
 	}
 
-	if (config.openIR && g_irSensorInfo != NULL && !g_bIsColorOn)
+	ret = openStream(device, "color", openni::SENSOR_COLOR, config.openColor, g_colorStream, &g_colorSensorInfo, &g_bIsColorOn);
+	if (ret != 0)
 	{
-		nRetVal = g_irStream.create(device, openni::SENSOR_IR);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return ret;
+	}
 
-		nRetVal = g_irStream.start();
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_irStream.destroy();
-			return;
-		}
-
-		g_bIsIROn = true;
+	ret = openStream(device, "IR", openni::SENSOR_IR, config.openIR, g_irStream, &g_irSensorInfo, &g_bIsIROn);
+	if (ret != 0)
+	{
+		return ret;
 	}
 
 	initConstants();
 
 	readFrame();
+
+	return 0;
 }
 
 class OpenNIDeviceListener : public openni::OpenNI::DeviceStateChangedListener,
@@ -232,9 +244,10 @@ openni::Status openDevice(const char* uri, DeviceConfig config)
 		return nRetVal;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, config);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
@@ -278,9 +291,10 @@ openni::Status openDeviceFromList(DeviceConfig config)
 		return rc;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, config);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
