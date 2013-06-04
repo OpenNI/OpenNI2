@@ -32,9 +32,10 @@
 // LinkOniDevice class
 //---------------------------------------------------------------------------
 #define XN_MASK_LINK_DEVICE "LinkDevice"
+#define CONFIG_DEVICE_SECTION "Device"
 
-LinkOniDevice::LinkOniDevice(const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
-	m_pSensor(NULL), m_driverServices(driverServices), m_pDriver(pDriver)
+LinkOniDevice::LinkOniDevice(const char* configFile, const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
+	m_configFile(configFile), m_pSensor(NULL), m_driverServices(driverServices), m_pDriver(pDriver)
 {
 	xnOSMemCopy(&m_info, LinkDeviceEnumeration::GetDeviceInfo(uri), sizeof(m_info));
 }
@@ -285,6 +286,17 @@ XnStatus LinkOniDevice::Init(const char* mode)
 
 	m_pSensor = pPrimeClient;
 
+	XnInt32 value32;
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "UsbInterface", &value32))
+	{
+		retVal = setProperty(PS_PROPERTY_USB_INTERFACE, &value32, sizeof(value32));
+		if (retVal != XN_STATUS_OK)
+		{
+			XN_DELETE(pPrimeClient);
+			return retVal;
+		}
+	}
+
 	if (!leanInit)
 	{
 		retVal = FillSupportedVideoModes();
@@ -330,11 +342,11 @@ oni::driver::StreamBase* LinkOniDevice::createStream(OniSensorType sensorType)
 
 	if (sensorType == ONI_SENSOR_DEPTH)
 	{
-		pStream = XN_NEW(LinkOniDepthStream, m_pSensor, this);
+		pStream = XN_NEW(LinkOniDepthStream, m_configFile, m_pSensor, this);
 	}
 	else if (sensorType == ONI_SENSOR_IR)
 	{
-		pStream = XN_NEW(LinkOniIRStream, m_pSensor, this);
+		pStream = XN_NEW(LinkOniIRStream, m_configFile, m_pSensor, this);
 	}
 	//else if (sensorType == ONI_SENSOR_COLOR)
 	//{

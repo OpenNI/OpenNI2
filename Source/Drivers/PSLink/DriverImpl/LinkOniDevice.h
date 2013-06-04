@@ -43,7 +43,7 @@ class LinkOniDevice :
 	public oni::driver::DeviceBase
 {
 public:
-	LinkOniDevice(const char* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver);
+	LinkOniDevice(const char* configFile, const char* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver);
 	virtual ~LinkOniDevice();
 
 	XnStatus Init(const char* mode);
@@ -85,6 +85,7 @@ private:
 	XnStatus readSupportedModesFromStream(XnFwStreamInfo &info, xnl::Array<XnFwStreamVideoMode> &aSupportedModes);
 	XnStatus FillSupportedVideoModes();
 
+	const char* m_configFile;
 	OniDeviceInfo m_info;
 	// the device we wrap
 	xn::PS1200Device* m_pSensor;

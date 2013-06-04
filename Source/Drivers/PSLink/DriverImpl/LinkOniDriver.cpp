@@ -73,6 +73,8 @@ OniStatus LinkOniDriver::initialize(oni::driver::DeviceConnectedCallback deviceC
 		return ONI_STATUS_ERROR;
 	}
 
+	resolveConfigFilePath();
+
 	return ONI_STATUS_OK;
 }
 
@@ -112,7 +114,7 @@ oni::driver::DeviceBase* LinkOniDriver::deviceOpen(const char* uri, const char* 
 		return NULL;
 	}
 
-	pDevice = XN_NEW(LinkOniDevice, uri, getServices(), this);
+	pDevice = XN_NEW(LinkOniDevice, m_configFilePath, uri, getServices(), this);
 	XnStatus nRetVal = pDevice->Init(mode);
 	if (nRetVal != XN_STATUS_OK)
 	{
@@ -284,5 +286,19 @@ void XN_CALLBACK_TYPE LinkOniDriver::OnDeviceDisconnected(const OniDeviceInfo& d
 {
 	LinkOniDriver* pThis = (LinkOniDriver*)pCookie;
 	pThis->deviceDisconnected(&deviceInfo);
+}
+
+void LinkOniDriver::resolveConfigFilePath()
+{
+	XnChar strModulePath[XN_FILE_MAX_PATH];
+
+	if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&LinkOniDriver::OnDeviceConnected), strModulePath) != XN_STATUS_OK ||
+		xnOSGetDirName(strModulePath, m_configFilePath, sizeof(m_configFilePath)) != XN_STATUS_OK)
+	{
+		// Something wrong happened. Use the current directory as the fall-back.
+		xnOSStrCopy(m_configFilePath, ".", sizeof(m_configFilePath));
+	}
+
+	xnOSAppendFilePath(m_configFilePath, "PSLink.ini", sizeof(m_configFilePath));
 }
 

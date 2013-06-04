@@ -38,7 +38,9 @@ class LinkOniDriver :
 {
 public:
 	LinkOniDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices), m_writer(pDriverServices), m_connectedEventHandle(NULL), m_disconnectedEventHandle(NULL)
-	{}
+	{
+		m_configFilePath[0] = '\0';
+	}
 
 	virtual OniStatus initialize(oni::driver::DeviceConnectedCallback deviceConnectedCallback, oni::driver::DeviceDisconnectedCallback deviceDisconnectedCallback, oni::driver::DeviceStateChangedCallback deviceStateChangedCallback, void* pCookie);
 	virtual void shutdown();
@@ -78,9 +80,12 @@ private:
 		LinkOniDevice* pDevice;
 	} FrameSyncGroup;
 
+	void resolveConfigFilePath();
+
 	LinkOpenNILogWriter m_writer;
 	XnCallbackHandle m_connectedEventHandle;
 	XnCallbackHandle m_disconnectedEventHandle;
+	char m_configFilePath[XN_FILE_MAX_PATH];
 };
 
 #endif // __LINK_ONI_DRIVER_H__

@@ -28,8 +28,8 @@
 //---------------------------------------------------------------------------
 #define XN_MASK_LINK_STREAM "LinkDepthStream"
 
-LinkOniDepthStream::LinkOniDepthStream(xn::PrimeClient* pSensor, LinkOniDevice* pDevice) : 
-	LinkOniMapStream(pSensor, ONI_SENSOR_DEPTH, pDevice)
+LinkOniDepthStream::LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice) : 
+	LinkOniMapStream(configFile, "Depth", pSensor, ONI_SENSOR_DEPTH, pDevice)
 {
 }
 

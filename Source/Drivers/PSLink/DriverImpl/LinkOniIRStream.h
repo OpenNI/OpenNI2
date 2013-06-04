@@ -33,7 +33,7 @@ class LinkOniIRStream :
 	public LinkOniMapStream
 {
 public:
-	LinkOniIRStream(xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
+	LinkOniIRStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
 };
 
 #endif // __LINK_ONI_IR_STREAM_H__

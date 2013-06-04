@@ -41,7 +41,7 @@ class LinkOniStream :
 	public oni::driver::StreamBase
 {
 public:
-	LinkOniStream(xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice);
+	LinkOniStream(const char* configFile, const char* configSection, xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice);
 	~LinkOniStream();
 
 	virtual XnStatus Init();
@@ -61,6 +61,10 @@ public:
 	xn::LinkFrameInputStream* GetDeviceStream() { return m_pInputStream; }
 
 protected:
+	XnStatus setIntPropertyFromINI(const char* key, int propertyId);
+
+	const char* m_configFile;
+	const char* m_configSection;
 	OniSensorType m_sensorType;
 	xn::PrimeClient* m_pSensor;
 	LinkOniDevice* m_pDevice;
