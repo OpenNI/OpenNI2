@@ -736,7 +736,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		if(timeout != ONI_TIMEOUT_FOREVER)
 		{
 			xnOSQueryTimer(workTimer, &passedTime);
-			if(passedTime < timeout)
+			if((int)passedTime < timeout)
 				timeToWait = timeout - (int)passedTime;
 			else
 				timeToWait = 0;
