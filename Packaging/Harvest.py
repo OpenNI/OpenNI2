@@ -26,6 +26,7 @@ import sys
 import shutil
 import platform
 import stat
+import xml.dom.minidom
 
 class Harvest:
     def __init__(self, rootDir, outDir, arch):
@@ -135,18 +136,50 @@ class Harvest:
                 self.regxReplace(r'..\\\\..\\\\ThirdParty\\\\PSCommon\\\\BuildSystem\\\\', '', os.path.join(sampleTargetDir, 'Build.bat'))
             else:
                 shutil.copy(os.path.join(sampleSourceDir, name + '.vcxproj'), sampleTargetDir)
-                # fix output dir
-                self.regxReplace('<OutDir>\$\(SolutionDir\)Bin\\\\\$\(Platform\)-\$\(Configuration\)', '<OutDir>$(ProjectDir)..\\Bin', os.path.join(sampleTargetDir, name + '.vcxproj'))
-                # fix intermediate dir
-                self.regxReplace('<IntDir>\$\(SolutionDir\)Bin', '<IntDir>$(ProjectDir)..\\Bin', os.path.join(sampleTargetDir, name + '.vcxproj'))
-                # fix OpenNI include dir
-                self.regxReplace('..\\\\..\\\\Include', '$(OPENNI2_INCLUDE' + self.platformSuffix + ')', os.path.join(sampleTargetDir, name + '.vcxproj'))
-                # fix GL include dir
-                self.regxReplace('..\\\\..\\\\ThirdParty\\\\GL', '.', os.path.join(sampleTargetDir, name + '.vcxproj'))
-                # fix Common include dir
-                self.regxReplace('..\\\\Common', '.', os.path.join(sampleTargetDir, name + '.vcxproj'))
-                # fix library dir
-                self.regxReplace('<AdditionalLibraryDirectories>\$\(OutDir\)', '<AdditionalLibraryDirectories>$(OutDir);$(OPENNI2_LIB' + self.platformSuffix + ')', os.path.join(sampleTargetDir, name + '.vcxproj'))
+                projFile = os.path.join(sampleTargetDir, name + '.vcxproj')
+                #ET.register_namespace('', 'http://schemas.microsoft.com/developer/msbuild/2003')
+                doc = xml.dom.minidom.parse(projFile)
+                
+                # remove OutDir and IntDir (make them default)
+                for propertyGroup in doc.getElementsByTagName("PropertyGroup"):
+                    if len(propertyGroup.getElementsByTagName("OutDir")) > 0:
+                        propertyGroup.parentNode.removeChild(propertyGroup)
+                
+                for group in doc.getElementsByTagName("ItemDefinitionGroup"):
+                    condAttr = group.getAttribute('Condition')
+                    if condAttr.find('x64') != -1:
+                        postfix = '64'
+                    else: 
+                        postfix = ''
+                        
+                    incDirs = group.getElementsByTagName('ClCompile')[0].getElementsByTagName('AdditionalIncludeDirectories')[0]
+                    val = incDirs.firstChild.data
+
+                    # fix GL include dir
+                    val = re.sub('..\\\\..\\\\ThirdParty\\\\GL', r'.', val)
+                    # fix Common include dir
+                    val = re.sub('..\\\\Common', r'.', val)
+                    # fix OpenNI include dir
+                    val = re.sub('..\\\\..\\\\Include', '$(OPENNI2_INCLUDE' + postfix + ')', val)
+                    
+                    incDirs.firstChild.data = val
+
+                    # fix additional library directories
+                    libDirs = group.getElementsByTagName('Link')[0].getElementsByTagName('AdditionalLibraryDirectories')[0]
+                    val = libDirs.firstChild.data
+                    val = re.sub('\$\(OutDir\)', '$(OutDir);$(OPENNI2_LIB' + postfix + ')', val)
+                    libDirs.firstChild.data = val
+                    
+                    # add post-build event to copy OpenNI redist
+                    post = doc.createElement('PostBuildEvent')
+                    cmd = doc.createElement('Command')
+                    cmd.appendChild(doc.createTextNode('xcopy /D /S /F /Y "$(OPENNI2_REDIST' + postfix + ')\*" "$(OutDir)"'))
+                    post.appendChild(cmd)
+                    group.appendChild(post)
+                
+                proj = open(projFile, 'w')
+                proj.write(doc.toxml())
+                proj.close()
                 
         elif self.osName == 'Linux' or self.osName == 'Darwin':
             shutil.copy(os.path.join(sampleSourceDir, 'Makefile'), sampleTargetDir)
