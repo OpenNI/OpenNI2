@@ -42,7 +42,7 @@
 XnSensorImageStream::XnSensorImageStream(const XnChar* StreamName, XnSensorObjects* pObjects) : 
 	XnImageStream(StreamName, FALSE),
 	m_Helper(pObjects),
-	m_InputFormat(XN_STREAM_PROPERTY_INPUT_FORMAT, "InputFormat", XN_IMAGE_STREAM_DEFAULT_INPUT_FORMAT),
+	m_InputFormat(XN_STREAM_PROPERTY_INPUT_FORMAT, "InputFormat", pObjects->pDevicePrivateData->HWInfo.isKinect?XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER:XN_IMAGE_STREAM_DEFAULT_INPUT_FORMAT),
 	m_AntiFlicker(XN_STREAM_PROPERTY_FLICKER, "Flicker", XN_IMAGE_STREAM_DEFAULT_FLICKER),
 	m_ImageQuality(XN_STREAM_PROPERTY_QUALITY, "Quality", XN_IMAGE_STREAM_DEFAULT_QUALITY),
 	m_CroppingMode(XN_STREAM_PROPERTY_CROPPING_MODE, "CroppingMode", XN_CROPPING_MODE_NORMAL),
@@ -142,7 +142,7 @@ XnStatus XnSensorImageStream::Init()
 
 			if (aSupportedModes[i].nFormat == XN_IMAGE_STREAM_DEFAULT_INPUT_FORMAT)
 			{
-				nValidInputFormat = XN_IMAGE_STREAM_DEFAULT_INPUT_FORMAT;
+				nValidInputFormat = m_Helper.GetPrivateData()->HWInfo.isKinect?XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER:XN_IMAGE_STREAM_DEFAULT_INPUT_FORMAT;
 				break;					
 			}
 		}
