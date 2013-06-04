@@ -133,7 +133,23 @@ class Harvest:
                 shutil.copy(os.path.join(sampleSourceDir, 'Build.bat'), sampleTargetDir)
                 shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'BuildJavaWindows.py'), sampleTargetDir)
                 # fix call
-                self.regxReplace(r'..\\\\..\\\\ThirdParty\\\\PSCommon\\\\BuildSystem\\\\', '', os.path.join(sampleTargetDir, 'Build.bat'))
+                buildFile = open(os.path.join(sampleTargetDir, 'Build.bat'))
+                buildScript = buildFile.read()
+                buildFile.close()
+
+                buildScript = re.sub('..\\\\..\\\\ThirdParty\\\\PSCommon\\\\BuildSystem\\\\', '', buildScript)
+                buildScript = re.sub('..\\\\..\\\\Bin', 'Bin', buildScript)
+
+                buildFile = open(os.path.join(sampleTargetDir, 'Build.bat'), 'w')
+                buildFile.write('@echo off\n')
+                buildFile.write('IF "%1"=="x64" (\n')
+                buildFile.write('\txcopy /D /S /F /Y "%OPENNI2_REDIST64%\\*" "Bin\\x64-Release\\"\n')
+                buildFile.write(') ELSE (\n')
+                buildFile.write('\txcopy /D /S /F /Y "%OPENNI2_REDIST%\\*" "Bin\\Win32-Release\\"\n')
+                buildFile.write(')\n')
+                buildFile.write(buildScript)
+                buildFile.close()
+                
             else:
                 shutil.copy(os.path.join(sampleSourceDir, name + '.vcxproj'), sampleTargetDir)
                 projFile = os.path.join(sampleTargetDir, name + '.vcxproj')
