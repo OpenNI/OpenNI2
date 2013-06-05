@@ -53,8 +53,8 @@ XnSensorImageStream::XnSensorImageStream(const XnChar* StreamName, XnSensorObjec
 	m_FirmwareCropOffsetY(0, "FirmwareCropOffsetY", 0, StreamName),
 	m_FirmwareCropMode(0, "FirmwareCropMode", XN_FIRMWARE_CROPPING_MODE_DISABLED, StreamName),
 
-	m_AutoExposure(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, "AutoExposure", XN_IMAGE_STREAM_DEFAULT_AUTO_EXPOSURE),
-	m_AutoWhiteBalance(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, "AutoWhiteBalance", XN_IMAGE_STREAM_DEFAULT_AWB),
+	m_AutoExposure(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, "AutoExposure", pObjects->pDevicePrivateData->HWInfo.isKinect?FALSE:XN_IMAGE_STREAM_DEFAULT_AUTO_EXPOSURE),
+	m_AutoWhiteBalance(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, "AutoWhiteBalance", pObjects->pDevicePrivateData->HWInfo.isKinect?FALSE:XN_IMAGE_STREAM_DEFAULT_AWB),
 
 	m_ActualRead(XN_STREAM_PROPERTY_ACTUAL_READ_DATA, "ActualReadData", FALSE),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
@@ -355,7 +355,7 @@ XnStatus XnSensorImageStream::OpenStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareCropMode);
 	XN_IS_STATUS_OK(nRetVal);
 
-	if (m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported || m_Helper.GetPrivateData()->HWInfo.isKinect)
 	{
 		nRetVal = m_Helper.ConfigureFirmware(m_AutoExposure);
 		XN_IS_STATUS_OK(nRetVal);
