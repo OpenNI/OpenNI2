@@ -208,8 +208,22 @@ class Harvest:
                 shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonJavaMakefile'), sampleTargetDir)
             else:
                 shutil.copy(os.path.join(rootDir, 'ThirdParty', 'PSCommon', 'BuildSystem', 'CommonCppMakefile'), sampleTargetDir)
-            # fix includes
+                
+            # fix common makefiles path
             self.regxReplace('../../ThirdParty/PSCommon/BuildSystem/', '', os.path.join(sampleTargetDir, 'Makefile'))
+            
+            # fix BIN dir
+            self.regxReplace('BIN_DIR = ../../Bin', 'BIN_DIR = Bin', os.path.join(sampleTargetDir, 'Makefile'))
+            
+            # fix include dirs and copy openni_redist
+            add = r'INC_DIRS += $(OPENNI2_INCLUDE)\n\n'
+            add += r'include \1\n\n'
+            add += r'.PHONY: copy-redist\n'
+            add += r'copy-redist:\n'
+            add += r'\tcp -R $(OPENNI2_REDIST)/* $(OUT_DIR)\n'
+            add += r'$(OUTPUT_FILE): copy-redist'
+            
+            self.regxReplace(r'include (Common.*Makefile)', add, os.path.join(sampleTargetDir, 'Makefile'))
 
         # and executable
         if isJava:
