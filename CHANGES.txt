@@ -11,11 +11,13 @@ OpenNI 2.2.0:
   - Add support for Capri devkits
   - Added tools: PS1080Console and PSLinkConsole (for debugging purposes)
   - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
-  - NiViewer: Allow choosing which streams to open (run "NiViewer --help" for details)
+  - NiViewer: Allow choosing which streams to open (run "NiViewer --help" for details).
+  - NiViewer: add support for seeking to a specific frame in a recording. Use the ':' key.
   - Image registration support for Kinect driver (merge pull request #4. See https://github.com/OpenNI/OpenNI2/pull/4 for details. Thanks to Tomoto)
   - Completely re-wrote frame buffers management. 
   - Added API for replacing frame buffer allocator.
   - Linux: implement connect/disconnect events
+  - All samples are now self-contained and can be copied anywhere. In addition, compiling a sample does *not* overwrite the original precompiled binary.
   - PS1080: IR stream now also supports RGB888
   - PS1080: improved hardware name detection
   - PS1080: Add NESA unlimited to BIST
