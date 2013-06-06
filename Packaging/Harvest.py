@@ -221,7 +221,7 @@ class Harvest:
             add += r'include \1\n\n'
             add += r'.PHONY: copy-redist\n'
             add += r'copy-redist:\n'
-            add += r'\tcp -R $(OPENNI2_REDIST)/* $(OUT_DIR)\n'
+            add += r'\tcp -u -R $(OPENNI2_REDIST)/* $(OUT_DIR)\n'
             add += r'$(OUTPUT_FILE): copy-redist'
             
             self.regxReplace(r'include (Common.*Makefile)', add, os.path.join(sampleTargetDir, 'Makefile'))
