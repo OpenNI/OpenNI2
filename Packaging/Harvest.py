@@ -126,6 +126,8 @@ class Harvest:
             # and lib
             shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut32.lib'), sampleTargetDir)
             shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut64.lib'), sampleTargetDir)
+            shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut32.dll'), sampleTargetDir)
+            shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut64.dll'), sampleTargetDir)
                     
         # and project file / makefile
         if self.osName == 'Windows':
@@ -165,8 +167,10 @@ class Harvest:
                     condAttr = group.getAttribute('Condition')
                     if condAttr.find('x64') != -1:
                         postfix = '64'
+                        glPostfix = '64'
                     else: 
                         postfix = ''
+                        glPostfix = '32'
                         
                     incDirs = group.getElementsByTagName('ClCompile')[0].getElementsByTagName('AdditionalIncludeDirectories')[0]
                     val = incDirs.firstChild.data
@@ -188,9 +192,13 @@ class Harvest:
                     
                     # add post-build event to copy OpenNI redist
                     post = doc.createElement('PostBuildEvent')
-                    cmd = doc.createElement('Command')
-                    cmd.appendChild(doc.createTextNode('xcopy /D /S /F /Y "$(OPENNI2_REDIST' + postfix + ')\*" "$(OutDir)"'))
-                    post.appendChild(cmd)
+                    cmd = 'xcopy /D /S /F /Y "$(OPENNI2_REDIST' + postfix + ')\*" "$(OutDir)"\n'
+                    if isGL:
+                        cmd += 'xcopy /D /F /Y "$(ProjectDir)\\glut' + glPostfix + '.dll" "$(OutDir)"\n'
+                        
+                    cmdNode = doc.createElement('Command')
+                    cmdNode.appendChild(doc.createTextNode(cmd))
+                    post.appendChild(cmdNode)
                     group.appendChild(post)
                 
                 proj = open(projFile, 'w')
