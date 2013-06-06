@@ -507,7 +507,44 @@
 		BE2A3586174F09FE006B0ADF /* XnUncompressedYUVImageProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A357A174F09FE006B0ADF /* XnUncompressedYUVImageProcessor.h */; };
 		BE2A3587174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A357B174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.cpp */; };
 		BE2A3588174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A357C174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.h */; };
+		BE547338175FD25B00AC9FB1 /* libOpenNI2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2E96174EEBB6006B0ADF /* libOpenNI2.dylib */; };
+		BE54733E175FD38000AC9FB1 /* Viewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE54733B175FD37E00AC9FB1 /* Viewer.cpp */; };
+		BE54733F175FD38000AC9FB1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE54733C175FD37E00AC9FB1 /* main.cpp */; };
+		BE547342175FD3AE00AC9FB1 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547341175FD3AD00AC9FB1 /* OpenGL.framework */; };
+		BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547343175FD3C200AC9FB1 /* GLUT.framework */; };
+		BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
+		BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BE547334175FD25300AC9FB1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE2A2E8E174EEBB6006B0ADF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BE2A2E95174EEBB6006B0ADF;
+			remoteInfo = OpenNI2;
+		};
+		BE547336175FD25300AC9FB1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE2A2E8E174EEBB6006B0ADF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BE2A347A174EF861006B0ADF;
+			remoteInfo = PS1080;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BE547324175FD18600AC9FB1 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		BE2A2E96174EEBB6006B0ADF /* libOpenNI2.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libOpenNI2.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -931,6 +968,12 @@
 		BE2A357A174F09FE006B0ADF /* XnUncompressedYUVImageProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XnUncompressedYUVImageProcessor.h; sourceTree = "<group>"; };
 		BE2A357B174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XnUncompressedYUVtoRGBImageProcessor.cpp; sourceTree = "<group>"; };
 		BE2A357C174F09FE006B0ADF /* XnUncompressedYUVtoRGBImageProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XnUncompressedYUVtoRGBImageProcessor.h; sourceTree = "<group>"; };
+		BE547326175FD18600AC9FB1 /* NiViewer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NiViewer; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE54733B175FD37E00AC9FB1 /* Viewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Viewer.cpp; path = ../Samples/SimpleViewer/Viewer.cpp; sourceTree = "<group>"; };
+		BE54733C175FD37E00AC9FB1 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../Samples/SimpleViewer/main.cpp; sourceTree = "<group>"; };
+		BE54733D175FD37F00AC9FB1 /* Viewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Viewer.h; path = ../Samples/SimpleViewer/Viewer.h; sourceTree = "<group>"; };
+		BE547341175FD3AD00AC9FB1 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		BE547343175FD3C200AC9FB1 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -950,12 +993,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BE547323175FD18600AC9FB1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */,
+				BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */,
+				BE547342175FD3AE00AC9FB1 /* OpenGL.framework in Frameworks */,
+				BE547338175FD25B00AC9FB1 /* libOpenNI2.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		BE2A2E8D174EEBB6006B0ADF = {
 			isa = PBXGroup;
 			children = (
+				BE547343175FD3C200AC9FB1 /* GLUT.framework */,
+				BE547341175FD3AD00AC9FB1 /* OpenGL.framework */,
+				BE547340175FD39400AC9FB1 /* NiViewer */,
 				BE2A33CA174EF2CA006B0ADF /* LibJPEG */,
 				BE2A2F83174EEFBA006B0ADF /* Source */,
 				BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */,
@@ -969,6 +1026,7 @@
 			children = (
 				BE2A2E96174EEBB6006B0ADF /* libOpenNI2.dylib */,
 				BE2A347B174EF861006B0ADF /* libPS1080.dylib */,
+				BE547326175FD18600AC9FB1 /* NiViewer */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1537,6 +1595,16 @@
 			name = OniFile;
 			sourceTree = "<group>";
 		};
+		BE547340175FD39400AC9FB1 /* NiViewer */ = {
+			isa = PBXGroup;
+			children = (
+				BE54733B175FD37E00AC9FB1 /* Viewer.cpp */,
+				BE54733C175FD37E00AC9FB1 /* main.cpp */,
+				BE54733D175FD37F00AC9FB1 /* Viewer.h */,
+			);
+			name = NiViewer;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1808,6 +1876,25 @@
 			productReference = BE2A347B174EF861006B0ADF /* libPS1080.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
+		BE547325175FD18600AC9FB1 /* NiViewer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE54732C175FD18700AC9FB1 /* Build configuration list for PBXNativeTarget "NiViewer" */;
+			buildPhases = (
+				BE547322175FD18600AC9FB1 /* Sources */,
+				BE547323175FD18600AC9FB1 /* Frameworks */,
+				BE547324175FD18600AC9FB1 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE547335175FD25300AC9FB1 /* PBXTargetDependency */,
+				BE547337175FD25300AC9FB1 /* PBXTargetDependency */,
+			);
+			name = NiViewer;
+			productName = NiViewer;
+			productReference = BE547326175FD18600AC9FB1 /* NiViewer */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1831,6 +1918,7 @@
 			targets = (
 				BE2A2E95174EEBB6006B0ADF /* OpenNI2 */,
 				BE2A347A174EF861006B0ADF /* PS1080 */,
+				BE547325175FD18600AC9FB1 /* NiViewer */,
 			);
 		};
 /* End PBXProject section */
@@ -2131,7 +2219,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BE547322175FD18600AC9FB1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE54733E175FD38000AC9FB1 /* Viewer.cpp in Sources */,
+				BE54733F175FD38000AC9FB1 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BE547335175FD25300AC9FB1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BE2A2E95174EEBB6006B0ADF /* OpenNI2 */;
+			targetProxy = BE547334175FD25300AC9FB1 /* PBXContainerItemProxy */;
+		};
+		BE547337175FD25300AC9FB1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BE2A347A174EF861006B0ADF /* PS1080 */;
+			targetProxy = BE547336175FD25300AC9FB1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		BE2A2E98174EEBB6006B0ADF /* Debug */ = {
@@ -2285,6 +2395,30 @@
 			};
 			name = Release;
 		};
+		BE54732D175FD18700AC9FB1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../Include\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BE54732E175FD18700AC9FB1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../Include\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2314,6 +2448,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		BE54732C175FD18700AC9FB1 /* Build configuration list for PBXNativeTarget "NiViewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE54732D175FD18700AC9FB1 /* Debug */,
+				BE54732E175FD18700AC9FB1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
