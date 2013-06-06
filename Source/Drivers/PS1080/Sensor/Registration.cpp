@@ -77,7 +77,7 @@ XnStatus XnRegistration::BuildRegTable1000()
 	
 	// take needed parameters to perform registration
 	XnRegistrationInformation1000 regInfo1000;
-	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &regInfo1000, sizeof(regInfo1000), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
+	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, m_pDevicePrivateData->HWInfo.isKinect ? XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION_KINECT : XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &regInfo1000, sizeof(regInfo1000), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
 	XN_IS_STATUS_OK(nRetVal);
 	
 	XnUInt16* pRegTable = m_pRegistrationTable;
@@ -267,11 +267,11 @@ XnStatus XnRegistration::BuildRegTable1080()
 	
 	// take needed parameters to perform registration
 	XnRegistrationInformation1080 RegData;
-	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &RegData, sizeof(RegData), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
+	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, m_pDevicePrivateData->HWInfo.isKinect ? XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION_KINECT : XN_HOST_PROTOCOL_ALGORITHM_REGISTRATION, &RegData, sizeof(RegData), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
 	XN_IS_STATUS_OK(nRetVal);
 
 	xnOSMemSet(&m_padInfo, 0, sizeof(m_padInfo));
-	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, XN_HOST_PROTOCOL_ALGORITHM_PADDING, &m_padInfo, sizeof(m_padInfo), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
+	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, m_pDevicePrivateData->HWInfo.isKinect ? XN_HOST_PROTOCOL_ALGORITHM_PADDING_KINECT : XN_HOST_PROTOCOL_ALGORITHM_PADDING, &m_padInfo, sizeof(m_padInfo), m_pDepthStream->GetResolution(), (XnUInt16)m_pDepthStream->GetFPS());
 	XN_IS_STATUS_OK(nRetVal);
 
 	XN_VALIDATE_ALIGNED_CALLOC(m_pDepthToShiftTable, XnUInt16, m_pDepthStream->GetDeviceMaxDepth(), XN_DEFAULT_MEM_ALIGN);
