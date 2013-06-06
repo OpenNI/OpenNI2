@@ -152,6 +152,7 @@ class Harvest:
                 
             else:
                 shutil.copy(os.path.join(sampleSourceDir, name + '.vcxproj'), sampleTargetDir)
+                shutil.copy(os.path.join(sampleSourceDir, name + '.vcxproj.filters'), sampleTargetDir)
                 projFile = os.path.join(sampleTargetDir, name + '.vcxproj')
                 #ET.register_namespace('', 'http://schemas.microsoft.com/developer/msbuild/2003')
                 doc = xml.dom.minidom.parse(projFile)
