@@ -38,7 +38,7 @@ public class SimpleViewer extends Component
     }
 
     @Override
-    public void paint(Graphics g) {
+    public synchronized void paint(Graphics g) {
         if (mLastFrame == null) {
             return;
         }
@@ -59,7 +59,7 @@ public class SimpleViewer extends Component
     }
 
     @Override
-    public void onFrameReady(VideoStream stream) {
+    public synchronized void onFrameReady(VideoStream stream) {
         if (mLastFrame != null) {
             mLastFrame.release();
             mLastFrame = null;
