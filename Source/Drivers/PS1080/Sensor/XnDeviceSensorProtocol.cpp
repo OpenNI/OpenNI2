@@ -132,7 +132,8 @@ XnBool XN_CALLBACK_TYPE XnDeviceSensorProtocolUsbEpCb(XnUChar* pBuffer, XnUInt32
 				// we have entire header. Fix it
 				pCurrState->CurrHeader.nBufSize = XN_PREPARE_VAR16_IN_BUFFER(pCurrState->CurrHeader.nBufSize);
 				pCurrState->CurrHeader.nMagic = XN_PREPARE_VAR16_IN_BUFFER(pCurrState->CurrHeader.nMagic);
-				pCurrState->CurrHeader.nPacketID = XN_PREPARE_VAR16_IN_BUFFER(pCurrState->CurrHeader.nPacketID);
+				XnUInt16 packetID = pDevicePrivateData->HWInfo.isKinect?(pCurrState->CurrHeader.nPacketID >> 8):pCurrState->CurrHeader.nPacketID;
+				pCurrState->CurrHeader.nPacketID = XN_PREPARE_VAR16_IN_BUFFER(packetID);
 				pCurrState->CurrHeader.nTimeStamp = XN_PREPARE_VAR32_IN_BUFFER(pCurrState->CurrHeader.nTimeStamp);
 				pCurrState->CurrHeader.nType = XN_PREPARE_VAR16_IN_BUFFER(pCurrState->CurrHeader.nType);
 				pCurrState->CurrHeader.nBufSize = xnOSEndianSwapUINT16(pCurrState->CurrHeader.nBufSize);
