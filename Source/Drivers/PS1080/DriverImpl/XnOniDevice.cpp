@@ -456,6 +456,9 @@ void XnOniDevice::notifyAllProperties()
 
 OniStatus XnOniDevice::EnableFrameSync(XnOniStream** pStreams, int streamCount)
 {
+	if(m_sensor.GetDevicePrivateData()->HWInfo.isKinect)
+		return ONI_STATUS_ERROR;
+
 	// Translate the XnOniStream to XnDeviceStream.
 	xnl::Array<XnDeviceStream*> streams(streamCount);
 	streams.SetSize(streamCount);
