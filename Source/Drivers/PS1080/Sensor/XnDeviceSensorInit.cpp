@@ -264,5 +264,12 @@ XnStatus XnDeviceSensorConfigureVersion(XnDevicePrivateData* pDevicePrivateData)
 	pDevicePrivateData->HWInfo.nHWVer = pDevicePrivateData->Version.HWVer;
 	pDevicePrivateData->ChipInfo.nChipVer = pDevicePrivateData->Version.ChipVer;
 
+	if(pDevicePrivateData->Version.nMajor == 5 &&
+		pDevicePrivateData->Version.nMinor == 1 &&
+		pDevicePrivateData->Version.nBuild == 4)
+		pDevicePrivateData->HWInfo.isKinect = true;
+	else
+		pDevicePrivateData->HWInfo.isKinect = false;
+
 	return (XN_STATUS_OK);
 }

@@ -113,6 +113,7 @@ typedef struct XnSensorObjects
 typedef struct XnHWInfo
 {
 	XnHWVer	  nHWVer;
+	XnBool    isKinect;
 } XnHWInfo;
 
 typedef struct XnChipInfo
