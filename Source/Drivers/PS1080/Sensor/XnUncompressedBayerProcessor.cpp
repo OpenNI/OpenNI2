@@ -106,3 +106,9 @@ void XnUncompressedBayerProcessor::OnEndOfFrame(const XnSensorProtocolResponseHe
 
 	XN_PROFILING_END_SECTION
 }
+
+void XnUncompressedBayerProcessor::OnStartOfFrame(const XnSensorProtocolResponseHeader* pHeader)
+{
+	XnImageProcessor::OnStartOfFrame(pHeader);
+	m_UncompressedBayerBuffer.Reset();
+}

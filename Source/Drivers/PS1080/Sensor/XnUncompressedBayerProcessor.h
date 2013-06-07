@@ -44,7 +44,7 @@ public:
 protected:
 	virtual void ProcessFramePacketChunk(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData, XnUInt32 nDataOffset, XnUInt32 nDataSize);
 	virtual void OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader);
-
+	virtual void OnStartOfFrame(const XnSensorProtocolResponseHeader* pHeader);
 	//---------------------------------------------------------------------------
 	// Class Members
 	//---------------------------------------------------------------------------
