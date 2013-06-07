@@ -25,6 +25,7 @@
 // Defines
 //---------------------------------------------------------------------------
 #define XN_SENSOR_VENDOR_ID			0x1D27
+#define XN_SENSOR_VENDOR_ID_KINECT	0x045E
 
 //---------------------------------------------------------------------------
 // Globals
@@ -36,14 +37,19 @@ XnDeviceEnumeration::DevicesHash XnDeviceEnumeration::ms_devices;
 xnl::Array<XnRegistrationHandle> XnDeviceEnumeration::ms_aRegistrationHandles;
 XN_CRITICAL_SECTION_HANDLE XnDeviceEnumeration::ms_lock;
 
-XnUInt16 XnDeviceEnumeration::ms_supportedProducts[] = 
+XnUInt16 XnDeviceEnumeration::ms_supportedProducts[] =
 {
 	0x0500,
 	0x0600,
 	0x0601,
 };
+XnUInt16 XnDeviceEnumeration::ms_supportedProductsKinect[] =
+{
+	0x02AE
+};
 
 XnUInt32 XnDeviceEnumeration::ms_supportedProductsCount = sizeof(XnDeviceEnumeration::ms_supportedProducts) / sizeof(XnDeviceEnumeration::ms_supportedProducts[0]);
+XnUInt32 XnDeviceEnumeration::ms_supportedProductsKinectCount = sizeof(XnDeviceEnumeration::ms_supportedProductsKinect) / sizeof(XnDeviceEnumeration::ms_supportedProductsKinect[0]);
 
 //---------------------------------------------------------------------------
 // Code
@@ -66,7 +72,7 @@ XnStatus XnDeviceEnumeration::Initialize()
 	const XnUSBConnectionString* astrDevicePaths;
 	XnUInt32 nCount;
 
-	// check all products
+	// check all Primesense products
 	for (XnUInt32 i = 0; i < ms_supportedProductsCount; ++i)
 	{
 		// register for USB events
@@ -84,6 +90,29 @@ XnStatus XnDeviceEnumeration::Initialize()
 		for (XnUInt32 j = 0; j < nCount; ++j)
 		{
 			OnConnectivityEvent(astrDevicePaths[j], XN_USB_EVENT_DEVICE_CONNECT, ms_supportedProducts[i]);
+		}
+
+		xnUSBFreeDevicesList(astrDevicePaths);
+	}
+
+	// check all MSFT products
+	for (XnUInt32 i = 0; i < ms_supportedProductsKinectCount; ++i)
+	{
+		// register for USB events
+		XnRegistrationHandle hRegistration = NULL;
+		nRetVal = xnUSBRegisterToConnectivityEvents(XN_SENSOR_VENDOR_ID_KINECT, ms_supportedProductsKinect[i], OnConnectivityEventCallback, &ms_supportedProductsKinect[i], &hRegistration);
+		XN_IS_STATUS_OK(nRetVal);
+
+		nRetVal = ms_aRegistrationHandles.AddLast(hRegistration);
+		XN_IS_STATUS_OK(nRetVal);
+
+		// and enumerate for existing ones
+		nRetVal = xnUSBEnumerateDevices(XN_SENSOR_VENDOR_ID_KINECT, ms_supportedProductsKinect[i], &astrDevicePaths, &nCount);
+		XN_IS_STATUS_OK(nRetVal);
+
+		for (XnUInt32 j = 0; j < nCount; ++j)
+		{
+			OnConnectivityEvent(astrDevicePaths[j], XN_USB_EVENT_DEVICE_CONNECT, ms_supportedProductsKinect[i]);
 		}
 
 		xnUSBFreeDevicesList(astrDevicePaths);

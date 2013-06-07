@@ -54,7 +54,9 @@ private:
 	static DeviceConnectivityEvent ms_disconnectedEvent;
 
 	static XnUInt16 ms_supportedProducts[];
+	static XnUInt16 ms_supportedProductsKinect[];
 	static XnUInt32 ms_supportedProductsCount;
+	static XnUInt32 ms_supportedProductsKinectCount;
 	static DevicesHash ms_devices;
 	static xnl::Array<XnRegistrationHandle> ms_aRegistrationHandles;
 	static XN_CRITICAL_SECTION_HANDLE ms_lock;
