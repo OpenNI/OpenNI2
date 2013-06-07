@@ -21,6 +21,8 @@
 #include <OpenNI.h>
 #include "Viewer.h"
 
+using namespace openni;
+
 int main(int argc, char** argv)
 {
 	openni::Status rc = openni::STATUS_OK;
@@ -32,6 +34,8 @@ int main(int argc, char** argv)
 	{
 		deviceURI = argv[1];
 	}
+
+	setenv("OPENNI2_DRIVERS_PATH","./",1);
 
 	rc = openni::OpenNI::initialize();
 
@@ -48,31 +52,89 @@ int main(int argc, char** argv)
 	rc = depth.create(device, openni::SENSOR_DEPTH);
 	if (rc == openni::STATUS_OK)
 	{
-		rc = depth.start();
-		if (rc != openni::STATUS_OK)
-		{
-			printf("SimpleViewer: Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			depth.destroy();
-		}
-	}
-	else
-	{
 		printf("SimpleViewer: Couldn't find depth stream:\n%s\n", openni::OpenNI::getExtendedError());
 	}
 
 	rc = color.create(device, openni::SENSOR_COLOR);
-	if (rc == openni::STATUS_OK)
-	{
-		rc = color.start();
-		if (rc != openni::STATUS_OK)
-		{
-			printf("SimpleViewer: Couldn't start color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			color.destroy();
-		}
-	}
-	else
+	if (rc != openni::STATUS_OK)
 	{
 		printf("SimpleViewer: Couldn't find color stream:\n%s\n", openni::OpenNI::getExtendedError());
+	}
+
+	const SensorInfo& depth_info = depth.getSensorInfo();
+	const Array<VideoMode>& dmodes = depth_info.getSupportedVideoModes();
+	for( int i=0; i < dmodes.getSize(); i++ )
+	{
+		VideoMode bla = dmodes[i];
+		if(dmodes[i].getResolutionX() == 640 &&
+			dmodes[i].getResolutionY() == 480 &&
+			dmodes[i].getPixelFormat() == PIXEL_FORMAT_DEPTH_1_MM)
+		{
+			rc = depth.setVideoMode(dmodes[i]);
+			if(rc != STATUS_OK)
+			{
+				printf("Failed to set depth video mode");
+				return -1;
+			}
+			break;
+		}
+		else if(i == dmodes.getSize()-1)
+		{
+			printf("Failed to find a supported depth mode");
+			return -1;
+		}
+	}
+
+	const SensorInfo& color_info = color.getSensorInfo();
+	const Array<VideoMode>& cmodes = color_info.getSupportedVideoModes();
+	for( int i=0; i < cmodes.getSize(); i++ )
+	{
+		if(cmodes[i].getResolutionX() == 640 &&
+			cmodes[i].getResolutionY() == 480 &&
+			cmodes[i].getPixelFormat() == PIXEL_FORMAT_RGB888)
+		{
+			rc = color.setVideoMode(cmodes[i]);
+			if(rc != STATUS_OK)
+			{
+				printf("Failed to set color video mode\n");
+				return -1;
+			}
+			break;
+		}
+		else if(i == cmodes.getSize()-1)
+		{
+			printf("Failed to find a supported color mode\n");
+			return -1;
+		}
+	}
+
+	rc = device.setDepthColorSyncEnabled(TRUE);
+	if(rc != STATUS_OK)
+	{
+		printf("Unable to enable depth-color sync\n");
+		return -1;
+	}
+
+	rc = device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
+	if(rc != STATUS_OK)
+	{
+		printf("Failed to set image registration mode\n");
+		return -1;
+	}
+
+
+	rc = depth.start();
+	if (rc != openni::STATUS_OK)
+	{
+		printf("SimpleViewer: Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+		depth.destroy();
+	}
+
+	rc = color.start();
+	if (rc != openni::STATUS_OK)
+	{
+		printf("SimpleViewer: Couldn't start color stream:\n%s\n", openni::OpenNI::getExtendedError());
+		color.destroy();
 	}
 
 	if (!depth.isValid() || !color.isValid())
