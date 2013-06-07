@@ -76,6 +76,8 @@ XnSensorDepthStream::XnSensorDepthStream(const XnChar* strName, XnSensorObjects*
 	m_hReferenceSizeChangedCallback(NULL)
 {
 	m_ActualRead.UpdateSetCallback(SetActualReadCallback, this);
+	if(m_Helper.GetPrivateData()->HWInfo.nHWVer == XN_SENSOR_HW_VER_RD_5)
+		m_RegistrationType = XnActualIntProperty(XN_STREAM_PROPERTY_REGISTRATION_TYPE, "RegistartionType", XN_PROCESSING_SOFTWARE);
 }
 
 XnStatus XnSensorDepthStream::Init()
@@ -364,7 +366,7 @@ XnStatus XnSensorDepthStream::OpenStreamImpl()
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	// initialize registration
-	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3)
+	if (m_Helper.GetFirmwareVersion() > XN_SENSOR_FW_VER_5_3 || m_Helper.GetPrivateData()->HWInfo.isKinect)
 	{
 		nRetVal = m_Registration.Init(m_Helper.GetPrivateData(), this, GetShiftToDepthTable());
 		XN_IS_STATUS_OK(nRetVal);
