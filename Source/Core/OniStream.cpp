@@ -52,16 +52,9 @@ VideoStream::VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Devi
 	m_pSensorInfo->pSupportedVideoModes = XN_NEW_ARR(OniVideoMode, m_pSensorInfo->numSupportedVideoModes);
 	xnOSMemCopy(m_pSensorInfo->pSupportedVideoModes, pSensorInfo->pSupportedVideoModes, sizeof(OniVideoMode)*m_pSensorInfo->numSupportedVideoModes);
 
-	OniStreamServices::streamServices = this;
-	OniStreamServices::getDefaultRequiredFrameSize = getDefaultRequiredFrameSizeCallback;
-	OniStreamServices::acquireFrame = acquireFrameCallback;
-	OniStreamServices::addFrameRef = addFrameRefCallback;
-	OniStreamServices::releaseFrame = releaseFrameCallback;
-
 	m_pSensor->newFrameEvent().Register(stream_NewFrame, this, m_hNewFrameEvent);
 
     m_driverHandler.streamSetPropertyChangedCallback(m_pSensor->streamHandle(), stream_PropertyChanged, this);
-	m_driverHandler.streamSetServices(m_pSensor->streamHandle(), this);
 
 	refreshWorldConversionCache();
 }
@@ -467,68 +460,6 @@ OniStatus VideoStream::convertDepthToColorCoordinates(VideoStream* colorStream, 
 		return ONI_STATUS_NOT_SUPPORTED;
 	}
 	return m_driverHandler.convertDepthPointToColor(m_pSensor->streamHandle(), colorStream->m_pSensor->streamHandle(), depthX, depthY, depthZ, pColorX, pColorY);
-}
-
-/****************
-Stream Services
-****************/
-int VideoStream::getDefaultRequiredFrameSize()
-{
-	OniStatus nRetVal = ONI_STATUS_OK;
-
-	OniVideoMode videoMode;
-	int size = sizeof(videoMode);
-	nRetVal = getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
-	XN_ASSERT(nRetVal == ONI_STATUS_OK);
-	
-	int stride;
-	size = sizeof(stride);
-	nRetVal = getProperty(ONI_STREAM_PROPERTY_STRIDE, &stride, &size);
-	if (nRetVal != ONI_STATUS_OK)
-	{
-		stride = videoMode.resolutionX * oniFormatBytesPerPixel(videoMode.pixelFormat);
-	}
-
-	return stride * videoMode.resolutionY;
-}
-
-OniFrame* VideoStream::acquireFrame()
-{
-	return m_pSensor->acquireFrame();
-}
-
-void VideoStream::addFrameRef(OniFrame* pFrame)
-{
-	m_frameManager.addRef(pFrame);
-}
-
-void VideoStream::releaseFrame(OniFrame* pFrame)
-{
-	m_frameManager.release(pFrame);
-}
-
-int ONI_CALLBACK_TYPE VideoStream::getDefaultRequiredFrameSizeCallback(void* streamServices)
-{
-	VideoStream* pThis = (VideoStream*)streamServices;
-	return pThis->getDefaultRequiredFrameSize();
-}
-
-OniFrame* ONI_CALLBACK_TYPE VideoStream::acquireFrameCallback(void* streamServices)
-{
-	VideoStream* pThis = (VideoStream*)streamServices;
-	return pThis->acquireFrame();
-}
-
-void ONI_CALLBACK_TYPE VideoStream::addFrameRefCallback(void* streamServices, OniFrame* pFrame)
-{
-	VideoStream* pThis = (VideoStream*)streamServices;
-	return pThis->addFrameRef(pFrame);
-}
-
-void ONI_CALLBACK_TYPE VideoStream::releaseFrameCallback(void* streamServices, OniFrame* pFrame)
-{
-	VideoStream* pThis = (VideoStream*)streamServices;
-	return pThis->releaseFrame(pFrame);
 }
 
 int VideoStream::getRequiredFrameSize()

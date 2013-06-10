@@ -29,8 +29,8 @@
 // LinkOniMapStream class
 //---------------------------------------------------------------------------
 
-LinkOniMapStream::LinkOniMapStream(xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice) : 
-	LinkOniStream(pSensor, sensorType, pDevice),
+LinkOniMapStream::LinkOniMapStream(const char* configFile, const char* configSection, xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice) : 
+	LinkOniStream(configFile, configSection, pSensor, sensorType, pDevice),
 	m_nSupportedModesCount(0),
 	m_aSupportedModes(NULL)
 {
@@ -55,7 +55,46 @@ XnStatus LinkOniMapStream::Init()
 	nRetVal = FillSupportedVideoModes();
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = SetMirror(TRUE);
+	// read video mode
+	XnChar section[255];
+	sprintf(section, "%s.VideoMode", m_configSection);
+	OniVideoMode videoMode;
+	GetVideoMode(&videoMode);
+
+	XnInt32 temp32;
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "XResolution", &temp32))
+	{
+		videoMode.resolutionX = (int)temp32;
+	}
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "YResolution", &temp32))
+	{
+		videoMode.resolutionY = (int)temp32;
+	}
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "FPS", &temp32))
+	{
+		videoMode.fps = (int)temp32;
+	}
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "PixelFormat", &temp32))
+	{
+		videoMode.pixelFormat = (OniPixelFormat)temp32;
+	}
+
+	nRetVal = SetVideoMode(&videoMode);
+	XN_IS_STATUS_OK(nRetVal);
+
+	nRetVal = setIntPropertyFromINI("LinkPixelFormat", LINK_PROP_PIXEL_FORMAT);
+	XN_IS_STATUS_OK(nRetVal);
+
+	nRetVal = setIntPropertyFromINI("Compression", LINK_PROP_COMPRESSION);
+	XN_IS_STATUS_OK(nRetVal);
+
+	OniBool bMirror = TRUE;
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "Mirror", &temp32))
+	{
+		bMirror = (temp32 == 1);
+	}
+
+	nRetVal = SetMirror(bMirror);
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);

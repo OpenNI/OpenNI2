@@ -30,4 +30,11 @@
 	if     (dstSize == 8) *(XnDouble*)pDst = (XnDouble)(value); \
 	else if(dstSize == 4) *(XnFloat*) pDst = (XnFloat) (value);
 
+#define GET_PROP_VALUE_INT(dest, data, dataSize)	\
+	if      (dataSize == 8) dest = (int)*(int64_t*)data;	\
+	else if (dataSize == 4) dest = (int)*(int32_t*)data;	\
+	else if (dataSize == 2) dest = (int)*(int16_t*)data;	\
+	else if (dataSize == 1) dest = (int)*(int8_t*)data;		\
+	else return ONI_STATUS_BAD_PARAMETER;
+
 #endif // __PRIMECLIENTDEFS_H__

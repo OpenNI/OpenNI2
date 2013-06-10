@@ -28,7 +28,9 @@
 //---------------------------------------------------------------------------
 #define XN_MASK_LINK_STREAM "LinkStream"
 
-LinkOniStream::LinkOniStream(xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice) : 
+LinkOniStream::LinkOniStream(const char* configFile, const char* configSection, xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice) : 
+	m_configFile(configFile),
+	m_configSection(configSection),
 	m_sensorType(sensorType),
 	m_pSensor(pSensor),
 	m_pDevice(pDevice),
@@ -46,7 +48,7 @@ XnStatus LinkOniStream::Init()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	XnLinkStreamType linkStreamType;
-	switch(m_sensorType)
+	switch (m_sensorType)
 	{
 	case ONI_SENSOR_DEPTH:
 		linkStreamType = XN_LINK_STREAM_TYPE_SHIFTS; break;
@@ -65,6 +67,9 @@ XnStatus LinkOniStream::Init()
 	XN_VALIDATE_OUTPUT_PTR(m_pInputStream);
 
 	m_pInputStream->GetNewFrameEvent().Register(OnNewStreamDataEventHandler, this, m_hNewDataCallback);
+	XN_IS_STATUS_OK(nRetVal);
+
+	nRetVal = setIntPropertyFromINI("DumpData", PS_PROPERTY_DUMP_DATA);
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
@@ -137,15 +142,12 @@ OniStatus LinkOniStream::setProperty(int propertyId, const void* data, int dataS
 	{
 	case PS_PROPERTY_DUMP_DATA:
 		{
-			if (dataSize != sizeof(bool))
-			{
-				xnLogWarning(XN_MASK_LINK_STREAM, "Property 'PS_PROPERTY_DUMP_DATA' requires bool data. Got data of size %d", dataSize);
-				return ONI_STATUS_BAD_PARAMETER;
-			}
+			int val;
+			GET_PROP_VALUE_INT(val, data, dataSize);
 
 			XnChar strDumpName[XN_FILE_MAX_PATH] = "";
 			xnLinkGetStreamDumpName(m_streamId, strDumpName, sizeof(strDumpName));
-			xnDumpSetMaskState(strDumpName, *(bool*)data);
+			xnDumpSetMaskState(strDumpName, val == 1);
 		}
 		break;
 	default:
@@ -165,7 +167,20 @@ void XN_CALLBACK_TYPE LinkOniStream::OnNewStreamDataEventHandler(const xn::NewFr
 	LinkOniStream* pThis = (LinkOniStream*)pCookie;
 	if (pThis->m_started)
 	{
-		pThis->getServices().addFrameRef(args.pFrame);
 		pThis->raiseNewFrame(args.pFrame);
 	}
+}
+
+XnStatus LinkOniStream::setIntPropertyFromINI(const char* key, int propertyId)
+{
+	XnInt32 value;
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, m_configSection, key, &value))
+	{
+		if (ONI_STATUS_OK != setProperty(propertyId, &value, sizeof(value)))
+		{
+			return XN_STATUS_ERROR;
+		}
+	}
+
+	return XN_STATUS_OK;
 }

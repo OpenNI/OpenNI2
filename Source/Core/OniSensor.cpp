@@ -13,6 +13,12 @@ Sensor::Sensor(xnl::ErrorLogger& errorLogger, FrameManager& frameManager, const 
 	m_requiredFrameSize(0)
 {
 	resetFrameAllocator();
+
+	OniStreamServices::streamServices = this;
+	OniStreamServices::getDefaultRequiredFrameSize = getDefaultRequiredFrameSizeCallback;
+	OniStreamServices::acquireFrame = acquireFrameCallback;
+	OniStreamServices::addFrameRef = addFrameRefCallback;
+	OniStreamServices::releaseFrame = releaseFrameCallback;
 }
 
 Sensor::~Sensor()
@@ -23,6 +29,7 @@ Sensor::~Sensor()
 void Sensor::setDriverStream(void* streamHandle)
 {
 	m_streamHandle = streamHandle;
+	m_driverHandler.streamSetServices(m_streamHandle, this);
 	m_driverHandler.streamSetNewFrameCallback(m_streamHandle, newFrameCallback, this);
 }
 
@@ -186,10 +193,54 @@ void ONI_CALLBACK_TYPE Sensor::frameBackToPoolCallback(OniFrameInternal* pFrame,
 	}
 }
 
+int Sensor::getDefaultRequiredFrameSize()
+{
+	OniStatus nRetVal = ONI_STATUS_OK;
+
+	OniVideoMode videoMode;
+	int size = sizeof(videoMode);
+	nRetVal = m_driverHandler.streamGetProperty(m_streamHandle, ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
+	XN_ASSERT(nRetVal == ONI_STATUS_OK);
+
+	int stride;
+	size = sizeof(stride);
+	nRetVal = m_driverHandler.streamGetProperty(m_streamHandle, ONI_STREAM_PROPERTY_STRIDE, &stride, &size);
+	if (nRetVal != ONI_STATUS_OK)
+	{
+		stride = videoMode.resolutionX * oniFormatBytesPerPixel(videoMode.pixelFormat);
+	}
+
+	return stride * videoMode.resolutionY;
+}
+
 void ONI_CALLBACK_TYPE Sensor::newFrameCallback(void* /*streamHandle*/, OniFrame* pFrame, void* pCookie)
 {
 	Sensor* pThis = (Sensor*)pCookie;
 	pThis->m_newFrameEvent.Raise(pFrame);
+}
+
+int ONI_CALLBACK_TYPE Sensor::getDefaultRequiredFrameSizeCallback(void* streamServices)
+{
+	Sensor* pThis = (Sensor*)streamServices;
+	return pThis->getDefaultRequiredFrameSize();
+}
+
+OniFrame* ONI_CALLBACK_TYPE Sensor::acquireFrameCallback(void* streamServices)
+{
+	Sensor* pThis = (Sensor*)streamServices;
+	return pThis->acquireFrame();
+}
+
+void ONI_CALLBACK_TYPE Sensor::addFrameRefCallback(void* streamServices, OniFrame* pFrame)
+{
+	Sensor* pThis = (Sensor*)streamServices;
+	return pThis->m_frameManager.addRef(pFrame);
+}
+
+void ONI_CALLBACK_TYPE Sensor::releaseFrameCallback(void* streamServices, OniFrame* pFrame)
+{
+	Sensor* pThis = (Sensor*)streamServices;
+	return pThis->m_frameManager.release(pFrame);
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

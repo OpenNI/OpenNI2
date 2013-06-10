@@ -47,11 +47,18 @@ typedef struct
 	const char* pValues[MAX_STRINGS];
 } DeviceStringProperty;
 
+typedef enum SensorOpenType
+{
+	SENSOR_OFF,
+	SENSOR_ON,
+	SENSOR_TRY
+} SensorOpenType;
+
 typedef struct
 {
-	bool openDepth;
-	bool openColor;
-	bool openIR;
+	SensorOpenType openDepth;
+	SensorOpenType openColor;
+	SensorOpenType openIR;
 } DeviceConfig;
 
 // --------------------------------
@@ -71,6 +78,7 @@ void changeRegistration(int nValue);
 void changePrimaryStream(int nValue);
 void toggleMirror(int);
 void seekFrame(int nDiff);
+void seekFrameAbs(int frameId);
 void toggleDepthState(int nDummy);
 void toggleColorState(int nDummy);
 void toggleIRState(int nDummy);

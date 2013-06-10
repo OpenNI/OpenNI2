@@ -33,7 +33,7 @@ class LinkOniMapStream :
 	public LinkOniStream
 {
 public:
-	LinkOniMapStream(xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice);
+	LinkOniMapStream(const char* configFile, const char* configSection, xn::PrimeClient* pSensor, OniSensorType sensorType, LinkOniDevice* pDevice);
 	virtual ~LinkOniMapStream();
 
 	virtual XnStatus Init();

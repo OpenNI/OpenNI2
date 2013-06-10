@@ -27,8 +27,8 @@
 // LinkOniIRStream class
 //---------------------------------------------------------------------------
 
-LinkOniIRStream::LinkOniIRStream(xn::PrimeClient* pSensor, LinkOniDevice* pDevice) : 
-	LinkOniMapStream(pSensor, ONI_SENSOR_IR, pDevice)
+LinkOniIRStream::LinkOniIRStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice) : 
+	LinkOniMapStream(configFile, "IR", pSensor, ONI_SENSOR_IR, pDevice)
 {
 }
 

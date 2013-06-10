@@ -35,6 +35,7 @@
 // Types
 // --------------------------------
 typedef void (*ActionFunc)(int);
+typedef void (*KeyboardInputEnded)(bool ok, const char* userInput);
 
 // --------------------------------
 // Function Declarations
@@ -51,5 +52,10 @@ void handleKey(unsigned char key);
 void handleSpecialKey(int k);
 
 void getGroupItems(const char* csGroupName, int *pSpecialKeys, unsigned char* pKeys, const char** pDescs, int* pSpecialCount, int* pCount);
+
+void startKeyboardInputMode(const char* message, bool numbersOnly, KeyboardInputEnded callback);
+bool isInKeyboardInputMode();
+const char* getCurrentKeyboardInputMessage();
+
 
 #endif //__KEYBOARD_H__

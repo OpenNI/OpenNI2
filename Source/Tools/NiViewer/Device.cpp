@@ -107,81 +107,93 @@ const char* getFormatName(openni::PixelFormat format)
 	}
 }
 
-void openCommon(openni::Device& device, DeviceConfig config)
+int openStream(openni::Device& device, const char* name, openni::SensorType sensorType, SensorOpenType openType, openni::VideoStream& stream, const openni::SensorInfo** ppSensorInfo, bool* pbIsStreamOn)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
+	*ppSensorInfo = device.getSensorInfo(sensorType);
+	*pbIsStreamOn = false;
 
-	g_bIsDepthOn = false;
-	g_bIsColorOn = false;
-	g_bIsIROn    = false;
-
-	g_depthSensorInfo = device.getSensorInfo(openni::SENSOR_DEPTH);
-	g_colorSensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
-	g_irSensorInfo = device.getSensorInfo(openni::SENSOR_IR);
-
-	if (config.openDepth && g_depthSensorInfo != NULL)
+	if (openType == SENSOR_OFF)
 	{
-		nRetVal = g_depthStream.create(device, openni::SENSOR_DEPTH);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return 0;
+	}
 
-		nRetVal = g_depthStream.start();
-		if (nRetVal != openni::STATUS_OK)
+	if (*ppSensorInfo == NULL)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("No %s sensor available\n", name);
+			return -1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	openni::Status nRetVal = stream.create(device, sensorType);
+	if (nRetVal != openni::STATUS_OK)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("Failed to create %s stream:\n%s\n", openni::OpenNI::getExtendedError(), name);
+			return -2;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	nRetVal = stream.start();
+	if (nRetVal != openni::STATUS_OK)
+	{
+		g_depthStream.destroy();
+
+		if (openType == SENSOR_ON)
 		{
 			printf("Failed to start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_depthStream.destroy();
-			return;
+			return -3;
 		}
-
-		g_bIsDepthOn = true;
+		else
+		{
+			return 0;
+		}
 	}
 
-	if (config.openColor && g_colorSensorInfo != NULL)
+	*pbIsStreamOn = true;
+
+	return 0;
+}
+
+int openCommon(openni::Device& device, DeviceConfig config)
+{
+	g_pPlaybackControl = g_device.getPlaybackControl();
+
+	int ret;
+
+	ret = openStream(device, "depth", openni::SENSOR_DEPTH, config.openDepth, g_depthStream, &g_depthSensorInfo, &g_bIsDepthOn);
+	if (ret != 0)
 	{
-		nRetVal = g_colorStream.create(device, openni::SENSOR_COLOR);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
-
-		nRetVal = g_colorStream.start();
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_colorStream.destroy();
-			return;
-		}
-
-		g_bIsColorOn = true;
+		return ret;
 	}
 
-	if (config.openIR && g_irSensorInfo != NULL && !g_bIsColorOn)
+	ret = openStream(device, "color", openni::SENSOR_COLOR, config.openColor, g_colorStream, &g_colorSensorInfo, &g_bIsColorOn);
+	if (ret != 0)
 	{
-		nRetVal = g_irStream.create(device, openni::SENSOR_IR);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return ret;
+	}
 
-		nRetVal = g_irStream.start();
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_irStream.destroy();
-			return;
-		}
-
-		g_bIsIROn = true;
+	ret = openStream(device, "IR", openni::SENSOR_IR, config.openIR, g_irStream, &g_irSensorInfo, &g_bIsIROn);
+	if (ret != 0)
+	{
+		return ret;
 	}
 
 	initConstants();
 
 	readFrame();
+
+	return 0;
 }
 
 class OpenNIDeviceListener : public openni::OpenNI::DeviceStateChangedListener,
@@ -232,9 +244,10 @@ openni::Status openDevice(const char* uri, DeviceConfig config)
 		return nRetVal;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, config);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
@@ -278,9 +291,10 @@ openni::Status openDeviceFromList(DeviceConfig config)
 		return rc;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, config);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
@@ -381,48 +395,42 @@ void toggleImageRegistration(int)
 
 }
 
-void seekFrame(int nDiff)
+openni::VideoStream* getSeekingStream(openni::VideoFrameRef*& pCurFrame)
 {
-	// Make sure seek is required.
-	if (nDiff == 0)
-	{
-		return;
-	}
-
 	if (g_pPlaybackControl == NULL)
 	{
-		return;
+		return NULL;
 	}
 
-	int frameId = 0, numberOfFrames = 0;
-	openni::VideoStream* pStream = NULL;
-	openni::VideoFrameRef* pCurFrame;
 	if (g_bIsDepthOn)
 	{
 		pCurFrame = &g_depthFrame;
-		pStream = &g_depthStream;
+		return &g_depthStream;
 	}
 	else if (g_bIsColorOn)
 	{
 		pCurFrame = &g_colorFrame;
-		pStream = &g_colorStream;
+		return &g_colorStream;
 	}
 	else if (g_bIsIROn)
 	{
 		pCurFrame = &g_irFrame;
-		pStream = &g_irStream;
+		return &g_irStream;
 	}
 	else
 	{
-		return;
+		return NULL;
 	}
-	frameId = pCurFrame->getFrameIndex();
+}
+
+void seekStream(openni::VideoStream* pStream, openni::VideoFrameRef* pCurFrame, int frameId)
+{
+	int numberOfFrames = 0;
 
 	// Get number of frames
 	numberOfFrames = g_pPlaybackControl->getNumberOfFrames(*pStream);
 
-	// Calculate the new frame ID and seek stream.
-	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+	// Seek
 	openni::Status rc = g_pPlaybackControl->seek(*pStream, frameId);
 	if (rc == openni::STATUS_OK)
 	{
@@ -439,10 +447,11 @@ void seekFrame(int nDiff)
 		{
 			g_irStream.readFrame(&g_irFrame);
 		}
+
 		// the new frameId might be different than expected (due to clipping to edges)
 		frameId = pCurFrame->getFrameIndex();
 
-		displayMessage("Seeked to frame %u/%u", frameId, numberOfFrames);
+		displayMessage("Current frame: %u/%u", frameId, numberOfFrames);
 	}
 	else if ((rc == openni::STATUS_NOT_IMPLEMENTED) || (rc == openni::STATUS_NOT_SUPPORTED) || (rc == openni::STATUS_BAD_PARAMETER) || (rc == openni::STATUS_NO_DEVICE))
 	{
@@ -452,6 +461,40 @@ void seekFrame(int nDiff)
 	{
 		displayError("Error seeking to frame:\n%s", openni::OpenNI::getExtendedError());
 	}
+}
+
+void seekFrame(int nDiff)
+{
+	// Make sure seek is required.
+	if (nDiff == 0)
+	{
+		return;
+	}
+
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
+
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	int frameId = pCurFrame->getFrameIndex();
+	// Calculate the new frame ID
+	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+
+	seekStream(pStream, pCurFrame, frameId);
+}
+
+void seekFrameAbs(int frameId)
+{
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
+
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	seekStream(pStream, pCurFrame, frameId);
 }
 
 void toggleStreamState(openni::VideoStream& stream, openni::VideoFrameRef& frame, bool& isOn, openni::SensorType type, const char* name)
