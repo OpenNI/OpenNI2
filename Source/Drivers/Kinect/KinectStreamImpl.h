@@ -43,7 +43,11 @@ public:
 	OniStatus setAutoExposure(BOOL val);
 
 	OniStatus getAutoExposure(BOOL *val);
-	
+
+	OniStatus setNearMode(BOOL val);
+
+	OniStatus getNearMode(BOOL *val);
+
 	OniImageRegistrationMode getImageRegistrationMode() const { return m_imageRegistrationMode; }
 
 	void setImageRegistrationMode(OniImageRegistrationMode mode) { m_imageRegistrationMode = mode; }

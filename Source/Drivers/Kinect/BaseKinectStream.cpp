@@ -1,11 +1,13 @@
 #include "BaseKinectStream.h"
 #include "KinectStreamImpl.h"
+
 #include <Shlobj.h>
 #include "XnHash.h"
 #include "XnEvent.h"
 #include "XnPlatform.h"
 #include "NuiApi.h"
 #include "PS1080.h"
+#include "KinectProperty.h"
 #include "XnMath.h"
 
 using namespace oni::driver;
@@ -112,6 +114,12 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 			
 			break;
 		}		
+
+	case KINECT_DEPTH_PROPERTY_NEAR_MODE:
+		{
+			return m_pStreamImpl->getNearMode( (OniBool*)data );
+		}
+
 	default:
 		status = ONI_STATUS_NOT_SUPPORTED;
 		break;
@@ -150,6 +158,10 @@ OniStatus BaseKinectStream::setProperty(int propertyId, const void* data, int da
 			 status = ONI_STATUS_ERROR;
 		}
 		status = SetVideoMode((OniVideoMode*)data);
+	}
+	else if( propertyId == KINECT_DEPTH_PROPERTY_NEAR_MODE )
+	{
+		return m_pStreamImpl->setNearMode( *((OniBool*)data) );
 	}
 	return status;
 }

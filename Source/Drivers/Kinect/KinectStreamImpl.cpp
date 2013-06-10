@@ -221,6 +221,45 @@ OniStatus KinectStreamImpl::getAutoExposure(BOOL *val)
 	return status;
 }
 
+OniStatus KinectStreamImpl::setNearMode(BOOL val)
+{
+	if (m_sensorType == ONI_SENSOR_DEPTH)
+	{
+		DWORD pdwImageFrameFlags;
+		HRESULT hr = m_pNuiSensor->NuiImageStreamGetImageFrameFlags( m_hStreamHandle, &pdwImageFrameFlags );
+		if( !FAILED(hr) )
+		{
+			BOOL bEnabled = ( ( pdwImageFrameFlags & NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE ) == NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE );
+			if( bEnabled != val )
+			{
+				hr = m_pNuiSensor->NuiImageStreamSetImageFrameFlags( m_hStreamHandle, pdwImageFrameFlags ^ NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE );
+				if( !FAILED(hr) )
+					return ONI_STATUS_OK;
+			}
+			else
+				return ONI_STATUS_OK;
+		}
+		return ONI_STATUS_ERROR;
+	}
+	return ONI_STATUS_NOT_SUPPORTED;
+}
+
+OniStatus KinectStreamImpl::getNearMode(BOOL *val)
+{
+	if (m_sensorType == ONI_SENSOR_DEPTH)
+	{
+		DWORD pdwImageFrameFlags;
+		HRESULT hr = m_pNuiSensor->NuiImageStreamGetImageFrameFlags( m_hStreamHandle, &pdwImageFrameFlags );
+		if( !FAILED(hr) )
+		{
+			*val = ( ( pdwImageFrameFlags & NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE ) == NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE );
+			return ONI_STATUS_OK;
+		}
+		return ONI_STATUS_ERROR;
+	}
+	return ONI_STATUS_NOT_SUPPORTED;
+}
+
 OniStatus KinectStreamImpl::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)
 {
 	OniVideoMode videoMode;
