@@ -45,7 +45,7 @@ enum
 	KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION = 0x0360E001, // NuiCameraElevationGetAngle and NuiCameraElevationSetAngle
 
 	/** KVector4, get */
-	KINECT_DEVICE_ACCELEROMETER = 0x0360E02, // NuiAccelerometerGetCurrentReading
+	KINECT_DEVICE_PROPERTY_ACCELEROMETER = 0x0360E02, // NuiAccelerometerGetCurrentReading
 
 	/*******************************************************************/
 	/* Common stream properties                                        */

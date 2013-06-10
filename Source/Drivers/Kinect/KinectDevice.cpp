@@ -180,7 +180,7 @@ OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 				return ONI_STATUS_ERROR;
 		}
 
-	case KINECT_DEVICE_ACCELEROMETER:
+	case KINECT_DEVICE_PROPERTY_ACCELEROMETER:
 		{
 			Vector4* pRes = (Vector4*)data;
 			if( S_OK == m_pNuiSensor->NuiAccelerometerGetCurrentReading( pRes ) )
@@ -199,7 +199,7 @@ OniBool KinectDevice::isPropertySupported(int propertyId)
 {
 	if( propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION ||
 		propertyId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION ||
-		propertyId == KINECT_DEVICE_ACCELEROMETER )
+		propertyId == KINECT_DEVICE_PROPERTY_ACCELEROMETER )
 	{
 		return true;
 	}
