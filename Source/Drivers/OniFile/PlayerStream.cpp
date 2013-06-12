@@ -246,4 +246,14 @@ int PlayerStream::getRequiredFrameSize()
 	return requiredFrameSize;
 }
 
+void PlayerStream::Lock()
+{
+	m_cs.Lock();
+}
+
+void PlayerStream::Unlock()
+{
+	m_cs.Unlock();
+}
+
 } // namespace oni_files_player

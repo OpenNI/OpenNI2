@@ -167,7 +167,6 @@ public class VideoFrameRef {
   }
     
   private VideoFrameRef(long handle) { 
-    NativeMethods.oniFrameAddRef(handle);
     mFrameHandle = handle;
   }
 

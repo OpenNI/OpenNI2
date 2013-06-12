@@ -216,13 +216,9 @@ JNIEXPORT jint JNICALL Java_org_openni_NativeMethods_oniStreamReadFrame
 		  fieldID = env->GetFieldID(videoFrameRefCls, "mVideoMode", "Lorg/openni/VideoMode;");
 		  env->SetObjectField(videoFrameRefObj,fieldID, videoModeObj);
 		  SetOutArgObjectValue(env, outArgObj, videoFrameRefObj);
-		  
-		  // release this frame. The java object is its own now.
-    	  oniFrameRelease(pOniFrame);
 	  }
-	  
-	  
 	  return status;
+	  
   }
 
 

@@ -15,9 +15,9 @@
 #############################################################################
 
 # take this file's dir
-COMMON_JAVA_MAKE_FILE_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
+COMMON_CS_MAKE_FILE_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(COMMON_JAVA_MAKE_FILE_DIR)CommonDefs.mak
+include $(COMMON_CS_MAKE_FILE_DIR)CommonDefs.mak
 
 nullstring :=
 space := $(nullstring) # end of the line
@@ -57,20 +57,23 @@ endif
 #############################################################################
 # Targets
 #############################################################################
-include $(COMMON_JAVA_MAKE_FILE_DIR)CommonTargets.mak
+include $(COMMON_CS_MAKE_FILE_DIR)CommonTargets.mak
 
 .PHONY: clean-manifest clean-int
 
 # Final output file
-$(OUTPUT_FILE): $(SRC_FILES_LIST) | $(OUT_DIR) $(INT_DIR)
+$(OUTPUT_FILE): | $(INT_DIR)
 	javac $(USED_JARS_OPTION) -d $(INT_DIR) $(SRC_FILES)
 	$(JAR_MANIFEST_CREATE_COMMAND)
 	jar $(JAR_OPTIONS) $@ $(MANIFEST_FILE) -C $(INT_DIR) .
 	$(CREATE_SHORTCUT)
 
+clean-manifest:
+	rm -rf $(MANIFEST_FILE)
+	
 clean-int:
 	rm -rf $(INT_DIR)
 	
-clean: clean-int
+clean: clean-manifest clean-int
 
 

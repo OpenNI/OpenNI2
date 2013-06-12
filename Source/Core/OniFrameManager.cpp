@@ -14,29 +14,8 @@ FrameManager::~FrameManager()
 OniFrameInternal* FrameManager::acquireFrame()
 {
 	OniFrameInternal* pFrame = m_frames.Acquire();
-
-	// reset all fields
-	pFrame->dataSize = 0;
-	pFrame->data = NULL;
-	pFrame->sensorType = (OniSensorType)0;
-	pFrame->timestamp = 0;
-	pFrame->frameIndex = 0;
-	pFrame->width = 0;
-	pFrame->height = 0;
-	pFrame->videoMode.pixelFormat = (OniPixelFormat)0;
-	pFrame->videoMode.resolutionX = 0;
-	pFrame->videoMode.resolutionY = 0;
-	pFrame->videoMode.fps = 0;
-	pFrame->croppingEnabled = FALSE;
-	pFrame->cropOriginX = 0;
-	pFrame->cropOriginY = 0;
-	pFrame->stride = 0;
-	pFrame->backToPoolFunc = NULL;
-	pFrame->backToPoolFuncCookie = NULL;
-	pFrame->refCount = 1; // this is the only reference
-	pFrame->freeBufferFunc = NULL;
-	pFrame->freeBufferFuncCookie = NULL;
-
+    xnOSMemSet(pFrame, 0, sizeof(OniFrameInternal));
+	pFrame->refCount = 1;
 	return pFrame;
 }
 

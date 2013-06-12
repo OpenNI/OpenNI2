@@ -93,7 +93,7 @@ static PS1080Property PS1080PropertyList[] =
 PlayerDevice::PlayerDevice(const xnl::String& filePath) : 
 	m_filePath(filePath), m_fileHandle(0), m_threadHandle(NULL), m_running(FALSE), m_isSeeking(FALSE),
 	m_dPlaybackSpeed(1.0), m_nStartTimestamp(0), m_nStartTime(0), m_bHasTimeReference(FALSE), 
-	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL)
+	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL), m_bStreamsLocked(FALSE)
 {
 	// Create the events.
 	m_readyForDataInternalEvent.Create(FALSE);
@@ -523,6 +523,20 @@ void PlayerDevice::SleepToTimestamp(XnUInt64 nTimeStamp)
 			xnOSGetHighResTimeStamp(&m_nStartTime);
 		}
 	}
+}
+
+void PlayerDevice::LockStreams(bool toLock)
+{
+	for (StreamList::Iterator iter = m_streams.Begin(); iter != m_streams.End(); iter++)
+	{
+		PlayerStream* pStream = *iter;
+		if(toLock)
+			pStream->Lock();
+		else
+			pStream->Unlock();
+	}
+
+	m_bStreamsLocked = toLock;
 }
 
 void PlayerDevice::MainLoop()
@@ -999,6 +1013,10 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeNewData(void* pCookie, const XnCha
 			{
 				if (ready)
 				{
+					// If we have locked streams (due to reset), unlock them.
+					if(pThis->m_bStreamsLocked)
+						pThis->LockStreams(false);
+
 					// Check if waiting for manual trigger (playback speed is zero).
 					if (pThis->m_dPlaybackSpeed == XN_PLAYBACK_SPEED_MANUAL)
 					{
@@ -1045,6 +1063,11 @@ void XN_CALLBACK_TYPE PlayerDevice::OnEndOfFileReached(void* pCookie)
 	if (pThis->isPlayerEOF())
 	{
 		pThis->TriggerDriverEOFCallback();
+	}
+	//Lock the streams until new data will arrive
+	else
+	{
+		pThis->LockStreams(true);
 	}
 }
 

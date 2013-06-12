@@ -102,6 +102,8 @@ private:
 	} Seek;
 
 	void MainLoop();
+	void LockStreams(bool toLock);
+
 	static XN_THREAD_PROC ThreadProc(XN_THREAD_PARAM pThreadParam);
 
 	static void     ONI_CALLBACK_TYPE ReadyForDataCallback(const PlayerStream::ReadyForDataEventArgs& newDataEventArgs, void* pCookie);
@@ -176,6 +178,7 @@ private:
 	// List of streams.
 	typedef xnl::List<PlayerStream*> StreamList;
 	StreamList m_streams;
+	bool m_bStreamsLocked;
 
 	// Internal event for stream ready for data.
 	xnl::OSEvent m_readyForDataInternalEvent;
