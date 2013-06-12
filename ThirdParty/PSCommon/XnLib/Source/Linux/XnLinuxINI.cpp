@@ -26,8 +26,8 @@
 
 #define XN_READ_IXN_BUFFER_SIZE	10*1024
 
-#define XN_IS_SPACE(p)		(*p == ' ' || *p == '\t')
-#define XN_IS_NEWLINE(p)	(*p == '\r' || *p == '\n')
+#define XN_IS_SPACE(p)		(*(p) == ' ' || *(p) == '\t')
+#define XN_IS_NEWLINE(p)	(*(p) == '\r' || *(p) == '\n')
 
 #define XN_SKIP_LINE(p)							\
 	/* first read till end of line. */			\
