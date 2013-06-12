@@ -40,21 +40,18 @@ typedef int OniBool;
 struct OniCallbackHandleImpl;
 typedef struct OniCallbackHandleImpl* OniCallbackHandle;
 
-#define _ONI_DECLARE_VERSION(name)																\
-/** Holds an OpenNI version number, which consists of four separate numbers in the format: @c major.minor.maintenance.build. For example: 2.0.0.20. */	\
-typedef struct																					\
-{																								\
-	/** Major version number, incremented for major API restructuring. */						\
-	int major;																					\
-	/** Minor version number, incremented when signficant new features added. */				\
-	int minor;																					\
-	/** Mainenance build number, incremented for new releases that primarily provide minor bug fixes. */ \
-	int maintenance;																			\
-	/** Build number. Incremented for each new API build. Generally not shown on the installer and download site. */ \
-	int build;																					\
-} name;
-
-_ONI_DECLARE_VERSION(OniVersion);
+/** Holds an OpenNI version number, which consists of four separate numbers in the format: @c major.minor.maintenance.build. For example: 2.0.0.20. */
+typedef struct
+{
+	/** Major version number, incremented for major API restructuring. */
+	int major;
+	/** Minor version number, incremented when significant new features added. */
+	int minor;
+	/** Maintenance build number, incremented for new releases that primarily provide minor bug fixes. */
+	int maintenance;
+	/** Build number. Incremented for each new API build. Generally not shown on the installer and download site. */
+	int build;
+} OniVersion;
 
 typedef int OniHardwareVersion;
 
@@ -157,39 +154,33 @@ typedef uint8_t OniGrayscale8Pixel;
 
 #pragma pack (push, 1)
 
-#define _ONI_DECLARE_RGB888_PIXEL(name)										\
-/** Holds the value of a single color image pixel in 24-bit RGB format. */	\
-typedef struct																\
-{																			\
-	/* Red value of this pixel. */											\
-	uint8_t r;																\
-	/* Green value of this pixel. */										\
-	uint8_t g;																\
-	/* Blue value of this pixel. */											\
-	uint8_t b;																\
-} name;
+/** Holds the value of a single color image pixel in 24-bit RGB format. */
+typedef struct
+{
+	/* Red value of this pixel. */
+	uint8_t r;
+	/* Green value of this pixel. */
+	uint8_t g;
+	/* Blue value of this pixel. */
+	uint8_t b;
+} OniRGB888Pixel;
 
-_ONI_DECLARE_RGB888_PIXEL(OniRGB888Pixel)
-
-#define _ONI_DECLARE_YUV422_PIXEL(name)															\
-/**																								\
- Holds the value of two pixels in YUV422 format (Luminance/Chrominance,16-bits/pixel).			\
- The first pixel has the values y1, u, v.														\
- The second pixel has the values y2, u, v.														\
-*/																								\
-typedef struct																					\
-{																								\
-	/** First chrominance value for two pixels, stored as blue luminance difference signal. */	\
-	uint8_t u;																					\
-	/** Overall luminance value of first pixel. */												\
-	uint8_t y1;																					\
-	/** Second chrominance value for two pixels, stored as red luminance difference signal. */	\
-	uint8_t v;																					\
-	/** Overall luminance value of second pixel. */												\
-	uint8_t y2;																					\
-} name;
-
-_ONI_DECLARE_YUV422_PIXEL(OniYUV422DoublePixel)
+/**
+ Holds the value of two pixels in YUV422 format (Luminance/Chrominance,16-bits/pixel).
+ The first pixel has the values y1, u, v.
+ The second pixel has the values y2, u, v.
+*/
+typedef struct
+{
+	/** First chrominance value for two pixels, stored as blue luminance difference signal. */
+	uint8_t u;
+	/** Overall luminance value of first pixel. */
+	uint8_t y1;
+	/** Second chrominance value for two pixels, stored as red luminance difference signal. */
+	uint8_t v;
+	/** Overall luminance value of second pixel. */
+	uint8_t y2;
+} OniYUV422DoublePixel;
 
 #pragma pack (pop)
 

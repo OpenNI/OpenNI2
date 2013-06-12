@@ -36,13 +36,51 @@ namespace openni
 
 /** Pixel type used to store depth images. */
 typedef uint16_t				DepthPixel;
+
 /** Pixel type used to store IR images. */
 typedef uint16_t				Grayscale16Pixel;
 
 // structs
-_ONI_DECLARE_VERSION(Version);
-_ONI_DECLARE_RGB888_PIXEL(RGB888Pixel);
-_ONI_DECLARE_YUV422_PIXEL(YUV422DoublePixel);
+/** Holds an OpenNI version number, which consists of four separate numbers in the format: @c major.minor.maintenance.build. For example: 2.0.0.20. */
+typedef struct
+{
+	/** Major version number, incremented for major API restructuring. */
+	int major;
+	/** Minor version number, incremented when significant new features added. */
+	int minor;
+	/** Maintenance build number, incremented for new releases that primarily provide minor bug fixes. */
+	int maintenance;
+	/** Build number. Incremented for each new API build. Generally not shown on the installer and download site. */
+	int build;
+} Version;
+
+/** Holds the value of a single color image pixel in 24-bit RGB format. */
+typedef struct
+{
+	/* Red value of this pixel. */
+	uint8_t r;
+	/* Green value of this pixel. */
+	uint8_t g;
+	/* Blue value of this pixel. */
+	uint8_t b;
+} RGB888Pixel;
+
+/**
+ Holds the value of two pixels in YUV422 format (Luminance/Chrominance,16-bits/pixel).
+ The first pixel has the values y1, u, v.
+ The second pixel has the values y2, u, v.
+*/
+typedef struct
+{
+	/** First chrominance value for two pixels, stored as blue luminance difference signal. */
+	uint8_t u;
+	/** Overall luminance value of first pixel. */
+	uint8_t y1;
+	/** Second chrominance value for two pixels, stored as red luminance difference signal. */
+	uint8_t v;
+	/** Overall luminance value of second pixel. */
+	uint8_t y2;
+} YUV422DoublePixel;
 
 /** This special URI can be passed to @ref Device::open() when the application has no concern for a specific device. */
 #if ONI_PLATFORM != ONI_PLATFORM_WIN32
@@ -2075,14 +2113,13 @@ public:
 	*/
 	static Version getVersion()
 	{
-		OniVersion version = oniGetVersion();
-		union
-		{
-			OniVersion* pC;
-			Version* pCpp;
-		} a;
-		a.pC = &version;
-		return *a.pCpp;
+		OniVersion oniVersion = oniGetVersion();
+		Version version;
+		version.major = oniVersion.major;
+		version.minor = oniVersion.minor;
+		version.maintenance = oniVersion.maintenance;
+		version.build = oniVersion.build;
+		return version;
 	}
 
 	/**
