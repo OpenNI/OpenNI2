@@ -83,13 +83,13 @@ typedef struct
 } OniDeviceInfo;
 
 struct _OniDevice;
-typedef _OniDevice* OniDeviceHandle;
+typedef struct _OniDevice* OniDeviceHandle;
 
 struct _OniStream;
-typedef _OniStream* OniStreamHandle;
+typedef struct _OniStream* OniStreamHandle;
 
 struct _OniRecorder;
-typedef _OniRecorder* OniRecorderHandle;
+typedef struct _OniRecorder* OniRecorderHandle;
 
 /** All information of the current frame */
 typedef struct
