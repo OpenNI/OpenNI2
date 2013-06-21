@@ -207,9 +207,25 @@ OniBool KinectDevice::isPropertySupported(int propertyId)
 		return false;
 }
 
+OniStatus KinectDevice::invoke(int commandId, void* data, int dataSize)
+{
+	if( commandId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION )
+	{
+		if( S_OK == m_pNuiSensor->NuiCameraElevationSetAngle( *(LONG*)data ) )
+			return ONI_STATUS_OK;
+		else
+			return ONI_STATUS_ERROR;
+	}
+	return ONI_STATUS_NOT_IMPLEMENTED;
+}
+
 OniBool KinectDevice::isCommandSupported(int commandId)
 {
-	return ONI_STATUS_NOT_IMPLEMENTED;
+	if( commandId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION )
+	{
+		return true;
+	}
+	return false;
 }
 
 OniStatus KinectDevice::tryManualTrigger()

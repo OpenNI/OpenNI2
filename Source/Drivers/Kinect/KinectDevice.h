@@ -25,6 +25,7 @@ public:
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	virtual OniBool isPropertySupported(int propertyId);
+	virtual OniStatus invoke(int commandId, void* data, int dataSize);
 	virtual OniBool isCommandSupported(int commandId) ;
 	virtual OniStatus tryManualTrigger();
 
