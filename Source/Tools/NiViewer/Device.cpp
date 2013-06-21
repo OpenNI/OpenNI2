@@ -147,7 +147,7 @@ int openStream(openni::Device& device, const char* name, openni::SensorType sens
 	nRetVal = stream.start();
 	if (nRetVal != openni::STATUS_OK)
 	{
-		g_depthStream.destroy();
+		stream.destroy();
 
 		if (openType == SENSOR_ON)
 		{

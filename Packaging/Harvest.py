@@ -224,13 +224,23 @@ class Harvest:
             self.regxReplace('BIN_DIR = ../../Bin', 'BIN_DIR = Bin', os.path.join(sampleTargetDir, 'Makefile'))
             
             # fix include dirs and copy openni_redist
-            add = r'INC_DIRS += $(OPENNI2_INCLUDE)\n\n'
-            add += r'include \1\n\n'
-            add += r'.PHONY: copy-redist\n'
-            add += r'copy-redist:\n'
-            add += r'\tcp -R $(OPENNI2_REDIST)/* $(OUT_DIR)\n'
-            add += r'$(OUTPUT_FILE): copy-redist'
-            
+            add = r'''
+ifndef OPENNI2_INCLUDE
+    $(error OPENNI2_INCLUDE is not defined. Please define it or 'source' the OpenNIDevEnvironment file from the installation)
+else ifndef OPENNI2_REDIST
+    $(error OPENNI2_REDIST is not defined. Please define it or 'source' the OpenNIDevEnvironment file from the installation)
+endif
+
+INC_DIRS += $(OPENNI2_INCLUDE)
+
+include \1
+
+.PHONY: copy-redist
+copy-redist:
+	cp -R $(OPENNI2_REDIST)/* $(OUT_DIR)
+	
+$(OUTPUT_FILE): copy-redist
+'''            
             self.regxReplace(r'include (Common.*Makefile)', add, os.path.join(sampleTargetDir, 'Makefile'))
 
         # and executable
