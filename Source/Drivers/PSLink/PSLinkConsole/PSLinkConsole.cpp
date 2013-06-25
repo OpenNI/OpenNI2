@@ -268,20 +268,8 @@ const char* fwVideoModeToString(XnFwStreamVideoMode videoMode)
 //---------------------------------------------------------------------------
 // Framework
 //---------------------------------------------------------------------------
-void RunCommand(XnChar* strCmdLine)
+void RunCommand(int argc, const char* argv[])
 {
-	enum {CMD_MAX_ARGS = 256};
-	const char* argv[CMD_MAX_ARGS] = {NULL};
-	int argc = CMD_MAX_ARGS;
-
-	SplitStr(strCmdLine, argv, &argc);
-
-	if (argc == 0)
-	{
-		//Ignore empty lines
-		return;
-	}
-
 	char commandName[XN_FILE_MAX_PATH];
 	xnOSStrCopy(commandName, argv[0], sizeof(commandName));
 
@@ -301,6 +289,23 @@ void RunCommand(XnChar* strCmdLine)
 	}
 
 	command.handler(argc, argv);
+}
+
+void RunCommand(XnChar* strCmdLine)
+{
+	enum {CMD_MAX_ARGS = 256};
+	const char* argv[CMD_MAX_ARGS] = {NULL};
+	int argc = CMD_MAX_ARGS;
+
+	SplitStr(strCmdLine, argv, &argc);
+
+	if (argc == 0)
+	{
+		//Ignore empty lines
+		return;
+	}
+
+	RunCommand(argc, argv);
 }
 
 void ExecuteCommandsFromStream(FILE* pStream, XnBool bPrompt)
@@ -1544,7 +1549,8 @@ int main(int argc, char* argv[])
 	Status nRetVal = STATUS_OK;
 	const XnChar* strScriptFile = NULL;
 	XnUInt16 nProductID = 0;
-    XnBool bQuit = FALSE;
+	const char** commandArgv = NULL;
+	int commandArgc = 0;
 
 //	printf("PSLinkConsole version %s\n", XN_PS_VERSION_STRING);
 
@@ -1566,11 +1572,8 @@ int main(int argc, char* argv[])
 			else if (xnOSStrCaseCmp(argv[nArgIndex], "-help") == 0)
 			{
 				printf("USAGE\n");
-				printf("\t%s [-transport <usb|ip:port>] [-product <PID>] [-script <fileName>] [-help]\n", argv[0]);
+				printf("\t%s [-product <PID>] [-script <fileName>] [-help] [command]\n", argv[0]);
 				printf("OPTIONS\n");
-				printf("\t-transport <usb|ip:port>\n");
-				printf("\t\tOpen a device from a specific transport, either USB or from a specific IP and port number.\n");
-				printf("\t\tWhen omitted, USB will be used.\n");
 				printf("\t-product <PID>\n");
 				printf("\t\tOpen only devices with a specific product ID. By default, any device can be opened.\n");
 				printf("\t-script <filename>\n");
@@ -1587,8 +1590,9 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			printf("Unknown option: %s\n. Run %s -help for usage.\n", argv[nArgIndex], argv[0]);
-			return -1;
+			commandArgc = argc - nArgIndex;
+			commandArgv = (const char**)(argv + nArgIndex);
+			break;
 		}
 	}
 
@@ -1657,13 +1661,17 @@ int main(int argc, char* argv[])
 			return -5;
 		}
 
-        if (bQuit)
-        {
-            return 0;
-        }
+        return 0;
 	}
-
-	ExecuteCommandsFromStream(stdin, TRUE);
+	else if (commandArgc != 0)
+	{
+		RunCommand(commandArgc, commandArgv);
+		return 0;
+	}
+	else
+	{
+		ExecuteCommandsFromStream(stdin, TRUE);
+	}
 
 	g_device.close();
 	OpenNI::shutdown();
