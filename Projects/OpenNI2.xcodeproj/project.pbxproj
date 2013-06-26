@@ -85,7 +85,6 @@
 		BE2A2F6E174EED82006B0ADF /* XnUSB.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2F39174EED82006B0ADF /* XnUSB.h */; };
 		BE2A2F6F174EED82006B0ADF /* XnUSBDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2F3A174EED82006B0ADF /* XnUSBDevice.h */; };
 		BE2A2F70174EED82006B0ADF /* XnVector3D.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2F3B174EED82006B0ADF /* XnVector3D.h */; };
-		BE2A2F72174EEF10006B0ADF /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 		BE2A31ED174EEFBB006B0ADF /* OniCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2F88174EEFBA006B0ADF /* OniCommon.h */; };
 		BE2A31EE174EEFBB006B0ADF /* OniContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2F89174EEFBA006B0ADF /* OniContext.cpp */; };
 		BE2A31EF174EEFBB006B0ADF /* OniContext.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2F8A174EEFBA006B0ADF /* OniContext.h */; };
@@ -482,7 +481,6 @@
 		BE2A3530174EFFAA006B0ADF /* XnThreads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2ECF174EED10006B0ADF /* XnThreads.cpp */; };
 		BE2A3531174EFFAA006B0ADF /* XnUSB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2ED0174EED10006B0ADF /* XnUSB.cpp */; };
 		BE2A3532174EFFAA006B0ADF /* XnVector3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2ED2174EED10006B0ADF /* XnVector3D.cpp */; };
-		BE2A3535174F0002006B0ADF /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 		BE2A3543174F00D2006B0ADF /* Xn16zCodec.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A3537174F00D2006B0ADF /* Xn16zCodec.h */; };
 		BE2A3544174F00D2006B0ADF /* Xn16zEmbTablesCodec.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A3538174F00D2006B0ADF /* Xn16zEmbTablesCodec.h */; };
 		BE2A3545174F00D2006B0ADF /* Xn8zCodec.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A3539174F00D2006B0ADF /* Xn8zCodec.h */; };
@@ -514,6 +512,8 @@
 		BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547343175FD3C200AC9FB1 /* GLUT.framework */; };
 		BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 		BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
+		BEEC3121177B5BB60081B814 /* libusbx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEEC3120177B5BB40081B814 /* libusbx.dylib */; };
+		BEEC3122177B5BBC0081B814 /* libusbx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEEC3120177B5BB40081B814 /* libusbx.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -974,6 +974,7 @@
 		BE54733D175FD37F00AC9FB1 /* Viewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Viewer.h; path = ../Samples/SimpleViewer/Viewer.h; sourceTree = "<group>"; };
 		BE547341175FD3AD00AC9FB1 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		BE547343175FD3C200AC9FB1 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		BEEC3120177B5BB40081B814 /* libusbx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libusbx.dylib; path = ../../../MacOSX/Build/Products/Debug/libusbx.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -981,7 +982,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE2A2F72174EEF10006B0ADF /* libusb-1.0.0.dylib in Frameworks */,
+				BEEC3121177B5BB60081B814 /* libusbx.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -989,7 +990,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE2A3535174F0002006B0ADF /* libusb-1.0.0.dylib in Frameworks */,
+				BEEC3122177B5BBC0081B814 /* libusbx.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1010,6 +1011,7 @@
 		BE2A2E8D174EEBB6006B0ADF = {
 			isa = PBXGroup;
 			children = (
+				BEEC3120177B5BB40081B814 /* libusbx.dylib */,
 				BE547343175FD3C200AC9FB1 /* GLUT.framework */,
 				BE547341175FD3AD00AC9FB1 /* OpenGL.framework */,
 				BE547340175FD39400AC9FB1 /* NiViewer */,
@@ -2309,15 +2311,15 @@
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../libusb-1.0",
 					../ThirdParty/LibJPEG,
 					../Include,
 					../Source/Drivers/PS1080,
+					../../libusbx,
 				);
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+					"\"$(SRCROOT)/../../../MacOSX/Build/Products/Debug\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2332,15 +2334,15 @@
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../libusb-1.0",
 					../ThirdParty/LibJPEG,
 					../Include,
 					../Source/Drivers/PS1080,
+					../../libusbx,
 				);
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+					"\"$(SRCROOT)/../../../MacOSX/Build/Products/Release\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2359,12 +2361,12 @@
 					../DepthUtils,
 					../Source/Drivers/PS1080/Include,
 					../Source/Drivers/PS1080,
-					../../libusb,
+					../../libusbx,
 				);
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+					"\"$(SRCROOT)/../../../MacOSX/Build/Products/Debug\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2383,12 +2385,12 @@
 					../DepthUtils,
 					../Source/Drivers/PS1080/Include,
 					../Source/Drivers/PS1080,
-					../../libusb,
+					../../libusbx,
 				);
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../OpenNI2-libs\"",
+					"\"$(SRCROOT)/../../../MacOSX/Build/Products/Release\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2456,6 +2458,7 @@
 				BE54732E175FD18700AC9FB1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
