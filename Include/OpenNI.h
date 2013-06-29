@@ -1083,6 +1083,16 @@ public:
 	}
 
 	/**
+	Enable or disable the IR emitter for this stream.
+	@param [in] isEnabled true to enable the emitter, false to disable it.
+	@returns Status code indicating the success or failure of this operation.
+	*/
+	Status setEmitterEnabled(bool isEnabled)
+	{
+		return setProperty<OniBool>(STREAM_PROPERTY_EMITTER, isEnabled ? TRUE : FALSE);
+	}
+
+	/**
 	Gets the horizontal field of view of frames received from this stream.
 	@returns Horizontal field of view, in radians.
 	*/
