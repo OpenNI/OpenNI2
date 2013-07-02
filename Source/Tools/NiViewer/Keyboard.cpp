@@ -23,6 +23,7 @@
 // --------------------------------
 #include "Keyboard.h"
 #include <string.h>
+#include <XnOS.h>
 
 // --------------------------------
 // Types
@@ -54,6 +55,12 @@ int g_nRegisteredKeys = 0;
 int g_nRegisteredSpecialKeys = 0;
 int g_nRegisteredGroups = 0;
 
+static bool g_bUserInput = false;
+static bool g_bUserInputNumbersOnly = false;
+static char g_strUserInput[1024];
+static int g_userInputStartPos = 0;
+static KeyboardInputEnded g_userInputCallback;
+
 // --------------------------------
 // Code
 // --------------------------------
@@ -78,7 +85,7 @@ void registerKey(unsigned char key, const char* Description, ActionFunc func, in
 	pKey->nCallbackArg = arg;
 }
 
-void registerSpecialKey(int key, const char* Description, ActionFunc func, int arg)
+void registerSpecialKey(char key, const char* Description, ActionFunc func, int arg)
 {
 	XnKeyboardAction* pKey = &g_KeyboardSpecialMap[g_nRegisteredSpecialKeys++];
 	pKey->key = key;
@@ -123,6 +130,31 @@ int getRegisteredSpecialKey(ActionFunc func, int arg)
 
 void handleKey(unsigned char k)
 {
+	if (g_bUserInput)
+	{
+		if (k == 13 || k == 27) // ENTER or ESC
+		{
+			if (g_userInputCallback != NULL)
+			{
+				g_userInputCallback(k == 13, &g_strUserInput[g_userInputStartPos]);
+			}
+
+			g_bUserInput = false;
+		}
+
+		if (g_bUserInputNumbersOnly && (k < '0' || k > '9'))
+		{
+			// ignore
+			return;
+		}
+
+		int len = (int)strlen(g_strUserInput);
+		g_strUserInput[len] = k;
+		g_strUserInput[++len] = '\0';
+
+		return;
+	}
+
 	for (int i = 0; i < g_nRegisteredKeys; ++i)
 	{
 		if (k == g_KeyboardMap[i].key)
@@ -177,4 +209,23 @@ void getGroupItems(const char* csGroupName, int *pSpecialKeys, unsigned char* pK
 	}
 
 	*pCount = nCount;
+}
+
+void startKeyboardInputMode(const char* message, bool numbersOnly, KeyboardInputEnded callback)
+{
+	g_bUserInput = true;
+	g_bUserInputNumbersOnly = numbersOnly;
+	xnOSStrCopy(g_strUserInput, message, sizeof(g_strUserInput));
+	g_userInputStartPos = (int)strlen(message);
+	g_userInputCallback = callback;
+}
+
+const char* getCurrentKeyboardInputMessage()
+{
+	return g_strUserInput;
+}
+
+bool isInKeyboardInputMode()
+{
+	return g_bUserInput;
 }

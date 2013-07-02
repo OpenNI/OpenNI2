@@ -28,7 +28,6 @@
 //---------------------------------------------------------------------------
 XnFrameStream::XnFrameStream(const XnChar* csType, const XnChar* csName) :
 	XnDeviceStream(csType, csName),
-	m_pBufferManager(NULL),
 	m_nLastReadFrame(0),
 	m_IsFrameStream(XN_STREAM_PROPERTY_IS_FRAME_BASED, "IsFrameBased", TRUE),
 	m_FPS(XN_STREAM_PROPERTY_FPS, "FPS", 0)
@@ -44,50 +43,32 @@ XnStatus XnFrameStream::Init()
 	nRetVal = XnDeviceStream::Init();
 	XN_IS_STATUS_OK(nRetVal);
 
-	XN_VALIDATE_ADD_PROPERTIES(this, &m_IsFrameStream, &m_FPS );
-
-	XnCallbackHandle hDummy;
-
-	// be notified when required size changes
-	nRetVal = RequiredSizeProperty().OnChangeEvent().Register(RequiredSizeChangedCallback, this, hDummy);
+	nRetVal = m_bufferManager.Init();
 	XN_IS_STATUS_OK(nRetVal);
+
+	// register for new data events
+	m_bufferManager.SetNewFrameCallback(OnTripleBufferNewData, this);
+
+	XN_VALIDATE_ADD_PROPERTIES(this, &m_IsFrameStream, &m_FPS );
 
 	return (XN_STATUS_OK);
 }
 
-XnStatus XnFrameStream::GetTripleBuffer(XnFrameBufferManager** pBufferManager)
+XnStatus XnFrameStream::StartBufferManager(XnFrameBufferManager** pBufferManager)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
-	
-	// lazy initialization (this allows us to set buffer pool after initialization of the stream
-	// and before data actually arrives (or stream data is allocated)
-	if (m_pBufferManager == NULL)
-	{
-		// allocate buffer manager
-		XN_VALIDATE_NEW(m_pBufferManager, XnFrameBufferManager);
 
-		nRetVal = m_pBufferManager->Init(GetRequiredDataSize());
-		XN_IS_STATUS_OK(nRetVal);
+	nRetVal = m_bufferManager.Start(GetServices());
+	XN_IS_STATUS_OK(nRetVal);
 
-		// register for new data events
-		XnCallbackHandle hDummy;
-		nRetVal = m_pBufferManager->OnNewFrameEvent().Register(OnTripleBufferNewData, this, hDummy);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	*pBufferManager = m_pBufferManager;
+	*pBufferManager = &m_bufferManager;
 
 	return (XN_STATUS_OK);
 }
 
 XnStatus XnFrameStream::Free()
 {
-	if (m_pBufferManager != NULL)
-	{
-		XN_DELETE(m_pBufferManager);
-		m_pBufferManager = NULL;
-	}
-
+	m_bufferManager.Free();
 	XnDeviceStream::Free();
 	return (XN_STATUS_OK);
 }
@@ -102,54 +83,22 @@ XnStatus XnFrameStream::SetFPS(XnUInt32 nFPS)
 	return (XN_STATUS_OK);
 }
 
-XnStatus XnFrameStream::OnRequiredSizeChanging()
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	nRetVal = ReallocTripleFrameBuffer();
-	XN_IS_STATUS_OK(nRetVal);
-
-	return (XN_STATUS_OK);	
-}
-
-XnStatus XnFrameStream::ReallocTripleFrameBuffer()
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	if (m_pBufferManager != NULL)
-	{
-		nRetVal = m_pBufferManager->Reallocate(GetRequiredDataSize());
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	return (XN_STATUS_OK);
-}
-
-void XnFrameStream::AddRefToFrame(OniFrame* pFrame)
-{
-	m_pBufferManager->AddRefToFrame(pFrame);
-}
-
-void XnFrameStream::ReleaseFrame(OniFrame* pFrame)
-{
-	m_pBufferManager->ReleaseFrame(pFrame);
-}
-
 XnStatus XN_CALLBACK_TYPE XnFrameStream::SetFPSCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
 {
 	XnFrameStream* pThis = (XnFrameStream*)pCookie;
 	return pThis->SetFPS((XnUInt32)nValue);
 }
 
-XnStatus XN_CALLBACK_TYPE XnFrameStream::RequiredSizeChangedCallback(const XnProperty* /*pSender*/, void* pCookie)
+void XN_CALLBACK_TYPE XnFrameStream::OnTripleBufferNewData(OniFrame* pFrame, void* pCookie)
 {
 	XnFrameStream* pThis = (XnFrameStream*)pCookie;
-	return pThis->OnRequiredSizeChanging();
+	pThis->NewDataAvailable(pFrame);
 }
 
-void XN_CALLBACK_TYPE XnFrameStream::OnTripleBufferNewData(const XnFrameBufferManager::NewFrameEventArgs& args, void* pCookie)
+XnStatus XnFrameStream::Close()
 {
-	XnFrameStream* pThis = (XnFrameStream*)pCookie;
-	pThis->NewDataAvailable(args.pFrame);
+	m_bufferManager.Stop();
+
+	return XnDeviceStream::Close();
 }
 

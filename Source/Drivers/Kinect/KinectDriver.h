@@ -18,7 +18,7 @@ public:
 
 	virtual ~KinectDriver();
 
-	virtual oni::driver::DeviceBase* deviceOpen(const char* uri);
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* mode);
 	virtual void deviceClose(oni::driver::DeviceBase* pDevice);
 
 	virtual void shutdown();

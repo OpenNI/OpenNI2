@@ -23,8 +23,8 @@
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
-StreamFrameHolder::StreamFrameHolder(VideoStream* pStream) : 
-	FrameHolder(), m_pStream(pStream), m_pLastFrame(NULL)
+StreamFrameHolder::StreamFrameHolder(FrameManager& frameManager, VideoStream* pStream) : 
+	FrameHolder(frameManager), m_pStream(pStream), m_pLastFrame(NULL)
 {
 }
 
@@ -71,7 +71,6 @@ OniStatus StreamFrameHolder::processNewFrame(VideoStream* pStream, OniFrame* pFr
 	// Make sure frame holder is enabled.
 	if (!m_enabled)
 	{
-		pStream->frameRelease(pFrame);
 		return ONI_STATUS_OK;
 	}
 
@@ -79,9 +78,10 @@ OniStatus StreamFrameHolder::processNewFrame(VideoStream* pStream, OniFrame* pFr
 	lock();
 	if (m_pLastFrame != NULL)
 	{
-		m_pStream->frameRelease(m_pLastFrame);
+		m_frameManager.release(m_pLastFrame);
 	}
 	m_pLastFrame = pFrame;
+	m_frameManager.addRef(m_pLastFrame);
 	unlock();
 
 	// Raise the new frame event.
@@ -114,7 +114,7 @@ void StreamFrameHolder::clear()
 	lock();
 	if (m_pLastFrame != NULL)
 	{
-		m_pStream->frameRelease(m_pLastFrame);
+		m_frameManager.release(m_pLastFrame);
 	}
 	m_pLastFrame = NULL;
 	unlock();

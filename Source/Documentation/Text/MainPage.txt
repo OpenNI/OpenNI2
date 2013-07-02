@@ -1,7 +1,7 @@
 /**
 @mainpage OpenNI Overview
 
-This ovverview comprises the following major sections:
+This overview comprises the following major sections:
 
 - @subpage getting_started
 - @subpage conventions_cpp

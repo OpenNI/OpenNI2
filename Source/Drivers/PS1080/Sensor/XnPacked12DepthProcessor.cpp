@@ -87,13 +87,12 @@ XnStatus XnPacked12DepthProcessor::Unpack12to16(const XnUInt8* pcInput, const Xn
 
 	*pnActualRead = 0;
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
-	if (!CheckDepthBufferForOverflow(nNeededOutput))
+	if (!CheckWriteBufferForOverflow(nNeededOutput))
 	{
 		return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
 	}
 
-	XnUInt16* pnOutput = GetDepthOutputBuffer();
-	XnUInt16* pShiftOut = GetShiftsOutputBuffer();
+	XnUInt16* pnOutput = (XnUInt16*)pWriteBuffer->GetUnsafeWritePointer();
 	XnUInt16 shift[16];
 #ifdef XN_NEON
 	XnUInt16 depth[16];
@@ -131,39 +130,39 @@ XnStatus XnPacked12DepthProcessor::Unpack12to16(const XnUInt8* pcInput, const Xn
 		shift[14] = (XN_TAKE_BITS(pcInput[21],8,0) << 4) | XN_TAKE_BITS(pcInput[22],4,4);
 		shift[15] = (XN_TAKE_BITS(pcInput[22],4,0) << 8) | XN_TAKE_BITS(pcInput[23],8,0);
 
-		pShiftOut[0] = (((shift[0]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[0]) : 0);
-		pShiftOut[1] = (((shift[1]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[1]) : 0);
-		pShiftOut[2] = (((shift[2]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[2]) : 0);
-		pShiftOut[3] = (((shift[3]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[3]) : 0);
-		pShiftOut[4] = (((shift[4]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[4]) : 0);
-		pShiftOut[5] = (((shift[5]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[5]) : 0);
-		pShiftOut[6] = (((shift[6]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[6]) : 0);
-		pShiftOut[7] = (((shift[7]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[7]) : 0);
-		pShiftOut[8] = (((shift[8]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[8]) : 0);
-		pShiftOut[9] = (((shift[9]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[9]) : 0);
-		pShiftOut[10] = (((shift[10]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[10]) : 0);
-		pShiftOut[11] = (((shift[11]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[11]) : 0);
-		pShiftOut[12] = (((shift[12]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[12]) : 0);
-		pShiftOut[13] = (((shift[13]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[13]) : 0);
-		pShiftOut[14] = (((shift[14]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[14]) : 0);
-		pShiftOut[15] = (((shift[15]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[15]) : 0);
+		shift[0] = (((shift[0]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[0]) : 0);
+		shift[1] = (((shift[1]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[1]) : 0);
+		shift[2] = (((shift[2]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[2]) : 0);
+		shift[3] = (((shift[3]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[3]) : 0);
+		shift[4] = (((shift[4]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[4]) : 0);
+		shift[5] = (((shift[5]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[5]) : 0);
+		shift[6] = (((shift[6]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[6]) : 0);
+		shift[7] = (((shift[7]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[7]) : 0);
+		shift[8] = (((shift[8]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[8]) : 0);
+		shift[9] = (((shift[9]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[9]) : 0);
+		shift[10] = (((shift[10]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[10]) : 0);
+		shift[11] = (((shift[11]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[11]) : 0);
+		shift[12] = (((shift[12]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[12]) : 0);
+		shift[13] = (((shift[13]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[13]) : 0);
+		shift[14] = (((shift[14]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[14]) : 0);
+		shift[15] = (((shift[15]) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (shift[15]) : 0);
 
-		pnOutput[0] = GetOutput(pShiftOut[0]);
-		pnOutput[1] = GetOutput(pShiftOut[1]);
-		pnOutput[2] = GetOutput(pShiftOut[2]);
-		pnOutput[3] = GetOutput(pShiftOut[3]);
-		pnOutput[4] = GetOutput(pShiftOut[4]);
-		pnOutput[5] = GetOutput(pShiftOut[5]);
-		pnOutput[6] = GetOutput(pShiftOut[6]);
-		pnOutput[7] = GetOutput(pShiftOut[7]);
-		pnOutput[8] = GetOutput(pShiftOut[8]);
-		pnOutput[9] = GetOutput(pShiftOut[9]);
-		pnOutput[10] = GetOutput(pShiftOut[10]);
-		pnOutput[11] = GetOutput(pShiftOut[11]);
-		pnOutput[12] = GetOutput(pShiftOut[12]);
-		pnOutput[13] = GetOutput(pShiftOut[13]);
-		pnOutput[14] = GetOutput(pShiftOut[14]);
-		pnOutput[15] = GetOutput(pShiftOut[15]);
+		pnOutput[0] = GetOutput(shift[0]);
+		pnOutput[1] = GetOutput(shift[1]);
+		pnOutput[2] = GetOutput(shift[2]);
+		pnOutput[3] = GetOutput(shift[3]);
+		pnOutput[4] = GetOutput(shift[4]);
+		pnOutput[5] = GetOutput(shift[5]);
+		pnOutput[6] = GetOutput(shift[6]);
+		pnOutput[7] = GetOutput(shift[7]);
+		pnOutput[8] = GetOutput(shift[8]);
+		pnOutput[9] = GetOutput(shift[9]);
+		pnOutput[10] = GetOutput(shift[10]);
+		pnOutput[11] = GetOutput(shift[11]);
+		pnOutput[12] = GetOutput(shift[12]);
+		pnOutput[13] = GetOutput(shift[13]);
+		pnOutput[14] = GetOutput(shift[14]);
+		pnOutput[15] = GetOutput(shift[15]);
 
 #else
 		// input:	0,  1,2    (X8)
@@ -231,11 +230,6 @@ XnStatus XnPacked12DepthProcessor::Unpack12to16(const XnUInt8* pcInput, const Xn
 		//Store
 		vst1q_u16(pnOutput, depthQ);
 
-		// Load
-		depthQ = vld1q_u16(shift);
-		// Store
-		vst1q_u16(pShiftOut, depthQ);
-
 		depth[8] = GetOutput(shift[8]);
 		depth[9] = GetOutput(shift[9]);
 
@@ -253,16 +247,10 @@ XnStatus XnPacked12DepthProcessor::Unpack12to16(const XnUInt8* pcInput, const Xn
 		// Store
 		vst1q_u16(pnOutput + 8, depthQ);
 
-		// Load
-		depthQ = vld1q_u16(shift + 8);
-		// Store
-		vst1q_u16(pShiftOut + 8, depthQ);
-
 #endif
 
 		pcInput += XN_INPUT_ELEMENT_SIZE;
 		pnOutput += 16;
-		pShiftOut += 16;
 	}
 
 	*pnActualRead = (XnUInt32)(pcInput - pOrigInput);

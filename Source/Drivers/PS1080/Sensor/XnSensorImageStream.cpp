@@ -29,8 +29,9 @@
 #include "XnPSCompressedImageProcessor.h"
 #include "XnJpegImageProcessor.h"
 #include "XnJpegToRGBImageProcessor.h"
-#include "XnUncompressedYUVImageProcessor.h"
-#include "XnUncompressedYUVtoRGBImageProcessor.h"
+#include "XnPassThroughImageProcessor.h"
+#include "XnUncompressedYUV422toRGBImageProcessor.h"
+#include "XnUncompressedYUYVtoRGBImageProcessor.h"
 #include "YUV.h"
 #include "Bayer.h"
 #include <XnProfiling.h>
@@ -56,6 +57,9 @@ XnSensorImageStream::XnSensorImageStream(const XnChar* StreamName, XnSensorObjec
 	m_AutoExposure(ONI_STREAM_PROPERTY_AUTO_EXPOSURE, "AutoExposure", XN_IMAGE_STREAM_DEFAULT_AUTO_EXPOSURE),
 	m_AutoWhiteBalance(ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE, "AutoWhiteBalance", XN_IMAGE_STREAM_DEFAULT_AWB),
 
+	m_Exposure(ONI_STREAM_PROPERTY_EXPOSURE, "Exposure", XN_IMAGE_STREAM_DEFAULT_EXPOSURE_BAR),
+	m_Gain(ONI_STREAM_PROPERTY_GAIN, "Gain", XN_IMAGE_STREAM_DEFAULT_GAIN),
+
 	m_ActualRead(XN_STREAM_PROPERTY_ACTUAL_READ_DATA, "ActualReadData", FALSE),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
 	m_VerticalFOV(ONI_STREAM_PROPERTY_VERTICAL_FOV, "VerticalFov")
@@ -78,12 +82,14 @@ XnStatus XnSensorImageStream::Init()
 	m_ImageQuality.UpdateSetCallback(SetImageQualityCallback, this);
 	m_CroppingMode.UpdateSetCallback(SetCroppingModeCallback, this);
 	m_AutoExposure.UpdateSetCallback(SetAutoExposureCallback, this);
+	m_Exposure.UpdateSetCallback(SetExposureCallback, this);
+	m_Gain.UpdateSetCallback(SetGainCallback, this);
 	m_AutoWhiteBalance.UpdateSetCallback(SetAutoWhiteBalanceCallback, this);
 	m_ActualRead.UpdateSetCallback(SetActualReadCallback, this); 
 
 	// add properties
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_InputFormat, &m_AntiFlicker, &m_ImageQuality, 
-		&m_CroppingMode, &m_ActualRead, &m_HorizontalFOV, &m_VerticalFOV, &m_AutoExposure, &m_AutoWhiteBalance);
+		&m_CroppingMode, &m_ActualRead, &m_HorizontalFOV, &m_VerticalFOV, &m_AutoExposure, &m_AutoWhiteBalance, &m_Exposure, &m_Gain);
 
 	// set base properties default values
 	nRetVal = ResolutionProperty().UnsafeUpdateValue(XN_IMAGE_STREAM_DEFAULT_RESOLUTION);
@@ -206,6 +212,10 @@ XnStatus XnSensorImageStream::MapPropertiesToFirmware()
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.MapFirmwareProperty(m_AutoWhiteBalance, GetFirmwareParams()->m_ImageAutoWhiteBalance, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_Exposure, GetFirmwareParams()->m_ImageExposureBar, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
+	nRetVal = m_Helper.MapFirmwareProperty(m_Gain, GetFirmwareParams()->m_ImageGain, TRUE);
+	XN_IS_STATUS_OK(nRetVal);;
 
 	return (XN_STATUS_OK);
 }
@@ -226,6 +236,7 @@ XnStatus XnSensorImageStream::ValidateMode()
 	case ONI_PIXEL_FORMAT_RGB888:
 		if (nInputFormat != XN_IO_IMAGE_FORMAT_YUV422 &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422 &&
+			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_BAYER &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER)
 		{
@@ -239,6 +250,12 @@ XnStatus XnSensorImageStream::ValidateMode()
 			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to YUV422!", nInputFormat);
 		}
 		break;
+	case ONI_PIXEL_FORMAT_YUYV:
+		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV)
+		{
+			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to YUYV!", nInputFormat);
+		}
+		break;
 	case ONI_PIXEL_FORMAT_JPEG:
 		if (nInputFormat != XN_IO_IMAGE_FORMAT_JPEG)
 		{
@@ -246,8 +263,7 @@ XnStatus XnSensorImageStream::ValidateMode()
 		}
 		break;
 	case ONI_PIXEL_FORMAT_GRAY8:
-		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_GRAY8 &&
-			nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER &&
+		if (nInputFormat != XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER &&
 			nInputFormat != XN_IO_IMAGE_FORMAT_BAYER)
 		{
 			XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Input format %d cannot be converted to Gray8!", nInputFormat);
@@ -317,7 +333,7 @@ XnStatus XnSensorImageStream::SetActualRead(XnBool bRead)
 		{
 			xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB image read thread...");
 			XnSpecificUsbDevice* pUSB = GetHelper()->GetPrivateData()->pSpecificImageUsb;
-			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, XN_SENSOR_USB_IMAGE_BUFFERS, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
 			XN_IS_STATUS_OK(nRetVal);
 		}
 		else
@@ -355,7 +371,7 @@ XnStatus XnSensorImageStream::OpenStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareCropMode);
 	XN_IS_STATUS_OK(nRetVal);
 
-	if (m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = m_Helper.ConfigureFirmware(m_AutoExposure);
 		XN_IS_STATUS_OK(nRetVal);
@@ -384,10 +400,10 @@ XnStatus XnSensorImageStream::CloseStreamImpl()
 	nRetVal = GetFirmwareParams()->m_Stream0Mode.SetValue(XN_VIDEO_STREAM_OFF);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = XnImageStream::Close();
+	nRetVal = SetActualRead(FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = SetActualRead(FALSE);
+	nRetVal = XnImageStream::Close();
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
@@ -401,6 +417,7 @@ XnStatus XnSensorImageStream::SetOutputFormat(OniPixelFormat nOutputFormat)
 	{
 	case ONI_PIXEL_FORMAT_GRAY8:
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 	case ONI_PIXEL_FORMAT_RGB888:
 	case ONI_PIXEL_FORMAT_JPEG:
 		break;
@@ -485,6 +502,7 @@ XnStatus XnSensorImageStream::SetInputFormat(XnIOImageFormats nInputFormat)
 	{
 	case XN_IO_IMAGE_FORMAT_YUV422:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
 	case XN_IO_IMAGE_FORMAT_JPEG:
 	case XN_IO_IMAGE_FORMAT_BAYER:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER:
@@ -644,7 +662,7 @@ XnStatus XnSensorImageStream::SetAutoExposure(XnBool bAutoExposure)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (!m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = SetAutoExposureForOldFirmware(bAutoExposure);
 		XN_IS_STATUS_OK(nRetVal);
@@ -691,7 +709,7 @@ XnStatus XnSensorImageStream::SetAutoWhiteBalance(XnBool bAutoWhiteBalance)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (!m_Helper.GetPrivateData()->FWInfo.bAutoImageAdjustmentsSupported)
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
 		nRetVal = SetAutoWhiteBalanceForOldFirmware(bAutoWhiteBalance);
 		XN_IS_STATUS_OK(nRetVal);
@@ -708,31 +726,31 @@ XnStatus XnSensorImageStream::SetAutoWhiteBalance(XnBool bAutoWhiteBalance)
 	return (XN_STATUS_OK);
 }
 
-
-XnStatus XnSensorImageStream::ReallocTripleFrameBuffer()
+XnStatus XnSensorImageStream::SetExposure(XnUInt64 nValue)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (IsOpen())
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
-		// before actually replacing buffer, lock the processor (so it will not continue to 
-		// use old buffer)
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->LockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
+		return (XN_STATUS_UNSUPPORTED_VERSION);
 	}
 
-	nRetVal = XnImageStream::ReallocTripleFrameBuffer();
-	if (nRetVal != XN_STATUS_OK)
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_Exposure, (XnUInt16)nValue);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}
+XnStatus XnSensorImageStream::SetGain(XnUInt64 nValue)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (!m_Helper.GetPrivateData()->FWInfo.bImageAdjustmentsSupported)
 	{
-		m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		return (nRetVal);
+		return (XN_STATUS_UNSUPPORTED_VERSION);
 	}
 
-	if (IsOpen())
-	{
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
-	}
+	nRetVal = m_Helper.SimpleSetFirmwareParam(m_Gain, (XnUInt16)nValue);
+	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
 }
@@ -780,6 +798,7 @@ XnUInt32 XnSensorImageStream::CalculateExpectedSize()
 	{
 	case XN_IO_IMAGE_FORMAT_YUV422:
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
 		// in YUV each pixel is represented in 2 bytes (actually 2 pixels are represented by 4 bytes)
 		nExpectedImageBufferSize *= 2;
 		break;
@@ -802,7 +821,7 @@ XnStatus XnSensorImageStream::CreateDataProcessor(XnDataProcessor** ppProcessor)
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	XnFrameBufferManager* pBufferManager;
-	nRetVal = GetTripleBuffer(&pBufferManager);
+	nRetVal = StartBufferManager(&pBufferManager);
 	XN_IS_STATUS_OK(nRetVal);
 
 	XnStreamProcessor* pNew;
@@ -832,11 +851,25 @@ XnStatus XnSensorImageStream::CreateDataProcessor(XnDataProcessor** ppProcessor)
 	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422:
 		if (GetOutputFormat() == ONI_PIXEL_FORMAT_YUV422)
 		{
-			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUVImageProcessor, this, &m_Helper, pBufferManager);
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnPassThroughImageProcessor, this, &m_Helper, pBufferManager);
 		}
 		else if (GetOutputFormat() == ONI_PIXEL_FORMAT_RGB888)
 		{
-			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUVtoRGBImageProcessor, this, &m_Helper, pBufferManager);
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUV422toRGBImageProcessor, this, &m_Helper, pBufferManager);
+		}
+		else
+		{
+			XN_LOG_WARNING_RETURN(XN_STATUS_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "invalid output format %d!", pBufferManager);
+		}
+		break;
+	case XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV:
+		if (GetOutputFormat() == ONI_PIXEL_FORMAT_YUYV)
+		{
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnPassThroughImageProcessor, this, &m_Helper, pBufferManager);
+		}
+		else if (GetOutputFormat() == ONI_PIXEL_FORMAT_RGB888)
+		{
+			XN_VALIDATE_NEW_AND_INIT(pNew, XnUncompressedYUYVtoRGBImageProcessor, this, &m_Helper, pBufferManager);
 		}
 		else
 		{
@@ -895,4 +928,16 @@ XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetAutoWhiteBalanceCallback(XnAct
 {
 	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
 	return pStream->SetAutoWhiteBalance((XnBool)nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetExposureCallback(XnActualIntProperty*, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
+	return pStream->SetExposure(nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensorImageStream::SetGainCallback(XnActualIntProperty*, XnUInt64 nValue, void* pCookie)
+{
+	XnSensorImageStream* pStream = (XnSensorImageStream*)pCookie;
+	return pStream->SetGain(nValue);
 }

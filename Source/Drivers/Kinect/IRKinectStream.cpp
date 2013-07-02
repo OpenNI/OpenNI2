@@ -17,8 +17,8 @@ IRKinectStream::IRKinectStream(KinectStreamImpl* pStreamImpl):
 {
 	m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_GRAY8;
 	m_videoMode.fps = DEFAULT_FPS;
-	m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-	m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+	m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+	m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 }
 
 OniStatus IRKinectStream::start()
@@ -35,20 +35,13 @@ OniStatus IRKinectStream::start()
 	return status;
 }
 
-
 void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
-	OniDriverFrame* pFrame = NULL;
-	pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-	pFrame->pDriverCookie = xnOSMalloc(sizeof(KinectStreamFrameCookie));
-	((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
+	OniFrame* pFrame = getServices().acquireFrame();
 	if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY16)
 	{
-		pFrame->frame.dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 2;
-		pFrame->frame.data =  xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-
 		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->frame.data);
+		unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
 		if (!m_cropping.enabled)
 		{
 			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
@@ -59,7 +52,7 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				++data_in;
 				++data_out;
 			}
-			pFrame->frame.stride = m_videoMode.resolutionX * 2;
+			pFrame->stride = m_videoMode.resolutionX * 2;
 		}
 		else
 		{
@@ -74,16 +67,13 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				}
 				cropY++;
 			}
-			pFrame->frame.stride = m_cropping.width * 2;
+			pFrame->stride = m_cropping.width * 2;
 		}
 	}
 	else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY8)
 	{
-		pFrame->frame.dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX;
-		pFrame->frame.data =  xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-
 		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		char* data_out = reinterpret_cast<char*>(pFrame->frame.data);
+		char* data_out = reinterpret_cast<char*>(pFrame->data);
 		if (!m_cropping.enabled)
 		{
 			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
@@ -94,7 +84,7 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				++data_in;
 				++data_out;
 			}
-			pFrame->frame.stride = m_videoMode.resolutionX;
+			pFrame->stride = m_videoMode.resolutionX;
 		}
 		else
 		{
@@ -110,18 +100,15 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				}
 				cropY++;
 			}
-			pFrame->frame.stride = m_cropping.width * 2;
+			pFrame->stride = m_cropping.width * 2;
 
 		}
 	}
 	else
 	{
-		pFrame->frame.dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
-		pFrame->frame.data =  xnOSMallocAligned(pFrame->frame.dataSize, XN_DEFAULT_MEM_ALIGN);
-
 		struct Rgb { unsigned char r, g, b;    };
 		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->frame.data);
+		Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
 		if (!m_cropping.enabled)
 		{
 			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
@@ -134,7 +121,7 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				++data_in;
 				++data_out;
 			}
-			pFrame->frame.stride = m_videoMode.resolutionX * 3;
+			pFrame->stride = m_videoMode.resolutionX * 3;
 		}
 		else
 		{
@@ -152,33 +139,34 @@ void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT 
 				}
 				cropY++;
 			}
-			pFrame->frame.stride = m_cropping.width * 3;
+			pFrame->stride = m_cropping.width * 3;
 		}
 	}
 		
 	if (!m_cropping.enabled)
 	{
-		pFrame->frame.width = pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
-		pFrame->frame.height = pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.cropOriginX = pFrame->frame.cropOriginY = 0;
-		pFrame->frame.croppingEnabled = FALSE;
+		pFrame->width = pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->height = pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->cropOriginX = pFrame->cropOriginY = 0;
+		pFrame->croppingEnabled = FALSE;
 	}
 	else
 	{
-		pFrame->frame.width = m_cropping.width;
-		pFrame->frame.videoMode.resolutionX = m_videoMode.resolutionX;
-		pFrame->frame.height = m_cropping.height; 
-		pFrame->frame.videoMode.resolutionY = m_videoMode.resolutionY;
-		pFrame->frame.cropOriginX = m_cropping.originX;
-		pFrame->frame.cropOriginY = m_cropping.originY;
-		pFrame->frame.croppingEnabled = TRUE;
+		pFrame->width = m_cropping.width;
+		pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
+		pFrame->height = m_cropping.height; 
+		pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
+		pFrame->cropOriginX = m_cropping.originX;
+		pFrame->cropOriginY = m_cropping.originY;
+		pFrame->croppingEnabled = TRUE;
 	}
-	pFrame->frame.videoMode.pixelFormat = m_videoMode.pixelFormat;
-	pFrame->frame.videoMode.fps = m_videoMode.fps;
-	pFrame->frame.sensorType = ONI_SENSOR_IR;
-	pFrame->frame.frameIndex = imageFrame.dwFrameNumber;
-	pFrame->frame.timestamp = imageFrame.liTimeStamp.QuadPart*1000;
+	pFrame->videoMode.pixelFormat = m_videoMode.pixelFormat;
+	pFrame->videoMode.fps = m_videoMode.fps;
+	pFrame->sensorType = ONI_SENSOR_IR;
+	pFrame->frameIndex = imageFrame.dwFrameNumber;
+	pFrame->timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
+	getServices().releaseFrame(pFrame);
 }
 
 

@@ -47,6 +47,20 @@ typedef struct
 	const char* pValues[MAX_STRINGS];
 } DeviceStringProperty;
 
+typedef enum SensorOpenType
+{
+	SENSOR_OFF,
+	SENSOR_ON,
+	SENSOR_TRY
+} SensorOpenType;
+
+typedef struct
+{
+	SensorOpenType openDepth;
+	SensorOpenType openColor;
+	SensorOpenType openIR;
+} DeviceConfig;
+
 // --------------------------------
 // Global Variables
 // --------------------------------
@@ -56,14 +70,15 @@ extern DeviceParameter g_Registration;
 // --------------------------------
 // Function Declarations
 // --------------------------------
-openni::Status openDevice(const char* uri, bool defaultRightColor);
-openni::Status openDeviceFromList(bool defaultRightColor);
+openni::Status openDevice(const char* uri, DeviceConfig config);
+openni::Status openDeviceFromList(DeviceConfig config);
 void closeDevice();
 void readFrame();
 void changeRegistration(int nValue);
 void changePrimaryStream(int nValue);
 void toggleMirror(int);
 void seekFrame(int nDiff);
+void seekFrameAbs(int frameId);
 void toggleDepthState(int nDummy);
 void toggleColorState(int nDummy);
 void toggleIRState(int nDummy);
@@ -93,7 +108,8 @@ void toggleIRMirror(int);
 
 void toggleImageAutoExposure(int);
 void toggleImageAutoWhiteBalance(int);
-void toggleCMOSAutoLoops(int);
+void changeImageExposure(int);
+void changeImageGain(int);
 
 void toggleCloseRange(int);
 void toggleImageRegistration(int);

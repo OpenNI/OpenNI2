@@ -26,9 +26,8 @@
 //---------------------------------------------------------------------------
 #include <DDK/XnDepthStream.h>
 #include "XnDeviceSensorProtocol.h"
-#include "Registration.h"
 #include "XnSensorStreamHelper.h"
-
+#include <DepthUtils.h>
 
 //---------------------------------------------------------------------------
 // Defines
@@ -52,6 +51,9 @@
 #define XN_DEPTH_STREAM_DEFAULT_CLOSE_RANGE					FALSE
 #define XN_DEPTH_STREAM_DEFAULT_SHIFT_MAP_APPENDED			TRUE
 
+#define XN_DEPTH_STREAM_DEFAULT_GMC_DEBUG					FALSE
+#define XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION		FALSE
+#define XN_DEPTH_STREAM_DEFAULT_WAVELENGTH_CORRECTION_DEBUG	FALSE
 
 //---------------------------------------------------------------------------
 // XnSensorDepthStream class
@@ -72,6 +74,7 @@ public:
 	inline XnSensorStreamHelper* GetHelper() { return &m_Helper; }
 
 	friend class XnDepthProcessor;
+	friend class XnOniDepthStream;
 
 protected:
 	inline XnSensorFirmwareParams* GetFirmwareParams() const { return m_Helper.GetFirmware()->GetParams(); }
@@ -81,8 +84,6 @@ protected:
 	//---------------------------------------------------------------------------
 	XnStatus Open() { return m_Helper.Open(); }
 	XnStatus Close() { return m_Helper.Close(); }
-	XnStatus CalcRequiredSize(XnUInt32* pnRequiredSize) const;
-	XnStatus ReallocTripleFrameBuffer();
 	XnStatus CropImpl(OniFrame* pFrame, const OniCropping* pCropping);
 	XnStatus Mirror(OniFrame* pFrame) const;
 	XnStatus ConfigureStreamImpl();
@@ -92,8 +93,9 @@ protected:
 	XnStatus MapPropertiesToFirmware();
 	void GetFirmwareStreamConfig(XnResolutions* pnRes, XnUInt32* pnFPS) { *pnRes = GetResolution(); *pnFPS = GetFPS(); }
 
-	XnRegistration& GetRegistration() { return m_Registration; }
-
+	XnStatus ApplyRegistration(OniDepthPixel* pDetphmap);
+	OniStatus GetSensorCalibrationInfo(void* data, int* dataSize);
+	XnStatus PopulateSensorCalibrationInfo();
 
 protected:
 	//---------------------------------------------------------------------------
@@ -117,7 +119,9 @@ protected:
 	virtual XnStatus SetCloseRange(XnBool bCloseRange);
 	virtual XnStatus SetCroppingMode(XnCroppingMode mode);
 	XnStatus GetImageCoordinatesOfDepthPixel(XnUInt32 x, XnUInt32 y, OniDepthPixel z, XnUInt32 imageXRes, XnUInt32 imageYRes, XnUInt32& imageX, XnUInt32& imageY);
-
+	virtual XnStatus SetGMCDebug(XnBool bGMCDebug);
+	virtual XnStatus SetWavelengthCorrection(XnBool bWavelengthCorrection);
+	virtual XnStatus SetWavelengthCorrectionDebug(XnBool bWavelengthCorrectionDebug);
 
 private:
 	XnUInt32 CalculateExpectedSize();
@@ -142,7 +146,9 @@ private:
 	static XnStatus XN_CALLBACK_TYPE SetCloseRangeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetCroppingModeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE GetPixelRegistrationCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
-
+	static XnStatus XN_CALLBACK_TYPE SetGMCDebugCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetWavelengthCorrectionCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetWavelengthCorrectionDebugCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
@@ -174,8 +180,12 @@ private:
 	XnActualRealProperty m_HorizontalFOV;
 	XnActualRealProperty m_VerticalFOV;
 
+	XnActualIntProperty m_GMCDebug;
+	XnActualIntProperty m_WavelengthCorrection;
+	XnActualIntProperty m_WavelengthCorrectionDebug;
 
-	XnRegistration m_Registration;
+	DepthUtilsHandle m_depthUtilsHandle;
+	DepthUtilsSensorCalibrationInfo m_calibrationInfo;
 	XnCallbackHandle m_hReferenceSizeChangedCallback;
 };
 

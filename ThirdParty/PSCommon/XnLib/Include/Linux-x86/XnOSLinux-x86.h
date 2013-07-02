@@ -48,6 +48,7 @@ typedef XnInt XN_FILE_HANDLE;
 
 /** The file directory separator. */ 
 #define XN_FILE_DIR_SEP "/"
+#define XN_FILE_DIR_SEPS "/"
 
 /** The file extension separator. */ 
 #define XN_FILE_EXT_SEP "."
@@ -99,7 +100,7 @@ typedef void* (*XN_THREAD_PROC_PROTO)(void* arg);
 #define	XN_THREAD_PROC void*
 
 /** The thread return function. */
-#define	XN_THREAD_PROC_RETURN(ret) return((void*)ret)
+#define	XN_THREAD_PROC_RETURN(ret) return(NULL)
 
 /** The thread passable data pointer type. */ 
 typedef	void* XN_THREAD_PARAM;

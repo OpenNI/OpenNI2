@@ -58,6 +58,7 @@ typedef enum
 	ONI_PIXEL_FORMAT_GRAY8 = 202,
 	ONI_PIXEL_FORMAT_GRAY16 = 203,
 	ONI_PIXEL_FORMAT_JPEG = 204,
+	ONI_PIXEL_FORMAT_YUYV = 205,
 } OniPixelFormat;
 
 typedef enum
@@ -74,8 +75,10 @@ typedef enum
 	ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR	= 1,
 } OniImageRegistrationMode;
 
-static const int ONI_TIMEOUT_NONE = 0;
-static const int ONI_TIMEOUT_FOREVER = -1;
-
+enum
+{
+	ONI_TIMEOUT_NONE = 0,
+	ONI_TIMEOUT_FOREVER = -1,
+};
 
 #endif // _ONI_C_ENUMS_H_

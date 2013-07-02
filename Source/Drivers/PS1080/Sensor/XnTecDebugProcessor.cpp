@@ -18,3 +18,43 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
+#include "XnTecDebugProcessor.h"
+#include "XnSensor.h"
+
+//---------------------------------------------------------------------------
+// Defines
+//---------------------------------------------------------------------------
+#define XN_SENSOR_TEC_DEBUG_MAX_PACKET_SIZE		256
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+XnTecDebugProcessor::XnTecDebugProcessor(XnDevicePrivateData* pDevicePrivateData) :
+	XnWholePacketProcessor(pDevicePrivateData, "TecDebug", XN_SENSOR_TEC_DEBUG_MAX_PACKET_SIZE),
+	m_Dump(NULL)
+{
+}
+
+XnTecDebugProcessor::~XnTecDebugProcessor()
+{
+	xnDumpFileClose(m_Dump);
+}
+
+void XnTecDebugProcessor::ProcessWholePacket(const XnSensorProtocolResponseHeader* /*pHeader*/, const XnUChar* pData)
+{
+	if (m_Dump == NULL)
+	{
+		m_Dump = xnDumpFileOpenEx("TecDebug", TRUE, TRUE, "TecDebug.csv");
+	}
+
+	xnDumpFileWriteString(m_Dump, "%S\n", (XnChar*)pData);
+
+	if (m_pDevicePrivateData->pSensor->IsTecDebugPring())
+	{
+		printf("%S\n", (XnWChar*)pData);
+	}
+}
+

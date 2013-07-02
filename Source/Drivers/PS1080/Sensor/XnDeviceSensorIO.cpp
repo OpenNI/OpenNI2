@@ -27,15 +27,6 @@
 #include "XnDeviceEnumeration.h"
 
 //---------------------------------------------------------------------------
-// Enums
-//---------------------------------------------------------------------------
-typedef enum
-{
-	XN_FW_USB_INTERFACE_ISO = 0,
-	XN_FW_USB_INTERFACE_BULK = 1,
-} XnFWUsbInterface;
-
-//---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
 XnSensorIO::XnSensorIO(XN_SENSOR_HANDLE* pSensorHandle) :
@@ -49,10 +40,9 @@ XnSensorIO::~XnSensorIO()
 {
 }
 
-XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, XnBool bLeanInit)
+XnStatus XnSensorIO::OpenDevice(const XnChar* strPath)
 {
 	XnStatus nRetVal;
-	XnUSBDeviceSpeed DevSpeed;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Connecting to USB device...");
 
@@ -60,17 +50,6 @@ XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, XnBool bLeanInit)
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Trying to open sensor '%s'...", strPath);
 	nRetVal = xnUSBOpenDeviceByPath(strPath, &m_pSensorHandle->USBDevice);
 	XN_IS_STATUS_OK(nRetVal);
-
-	if (!bLeanInit)
-	{
-		nRetVal = xnUSBGetDeviceSpeed(m_pSensorHandle->USBDevice, &DevSpeed);
-		XN_IS_STATUS_OK(nRetVal);
-
-		if (DevSpeed != XN_USB_DEVICE_HIGH_SPEED)
-		{
-			XN_LOG_WARNING_RETURN(XN_STATUS_USB_UNKNOWN_DEVICE_SPEED, XN_MASK_DEVICE_IO, "Device is not high speed!");
-		}
-	}
 
 	// on older firmwares, control was sent over BULK endpoints. Check if this is the case
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Trying to open endpoint 0x4 for control out (for old firmwares)...");
@@ -96,19 +75,6 @@ XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, XnBool bLeanInit)
 
 	xnLogInfo(XN_MASK_DEVICE_IO, "Connected to USB device%s", m_bIsLowBandwidth ? " (LowBand)" : "");
 
-	// check if we're currently on BULK interfaces or ISO ones
-	XN_USB_EP_HANDLE hEP;
-	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x82, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &hEP);
-	if (nRetVal == XN_STATUS_USB_WRONG_ENDPOINT_TYPE)
-	{
-		m_interface = XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS;
-	}
-	else
-	{
-		m_interface = XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS;
-		xnUSBCloseEndPoint(hEP);
-	}
-
 	strcpy(m_strDeviceName, strPath);
 
 	return XN_STATUS_OK;
@@ -117,12 +83,11 @@ XnStatus XnSensorIO::OpenDevice(const XnChar* strPath, XnBool bLeanInit)
 XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const XnFirmwareInfo& fwInfo)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
+	XnUInt8 nAlternativeInterface = 0;
 
 	// try to set requested interface
 	if (nInterface != XN_SENSOR_USB_INTERFACE_DEFAULT)
 	{
-		XnUInt8 nAlternativeInterface = 0;
-
 		switch (nInterface)
 		{
 		case XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS:
@@ -131,9 +96,18 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 		case XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS:
 			nAlternativeInterface = fwInfo.nBulkAlternativeInterface;
 			break;
+		case XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH:
+			nAlternativeInterface = fwInfo.nISOLowDepthAlternativeInterface;
+			break;
 		default:
 			XN_ASSERT(FALSE);
 			XN_LOG_WARNING_RETURN(XN_STATUS_USB_INTERFACE_NOT_SUPPORTED, XN_MASK_DEVICE_IO, "Unknown interface type: %d", nInterface);
+		}
+
+		if (nAlternativeInterface == (XnUInt8)-1)
+		{
+			XN_ASSERT(FALSE);
+			XN_LOG_WARNING_RETURN(XN_STATUS_USB_INTERFACE_NOT_SUPPORTED, XN_MASK_DEVICE_IO, "Interface %d is not supported by firmware", nInterface);
 		}
 
 		xnLogVerbose(XN_MASK_DEVICE_IO, "Setting USB alternative interface to %d...", nAlternativeInterface);
@@ -149,7 +123,7 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	XnBool bNewUSB = TRUE;
 
 	// Depth
-	m_pSensorHandle->DepthConnection.bIsISO = FALSE;
+	XnBool bIsISO = FALSE;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Opening endpoint 0x81 for depth...");
 	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
@@ -166,14 +140,14 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 		{
 			nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_ISOCHRONOUS, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
 
-			m_pSensorHandle->DepthConnection.bIsISO = TRUE;
+			bIsISO = TRUE;
 		}
 
 		bNewUSB = TRUE;
 
 		XN_IS_STATUS_OK(nRetVal);
 
-		if (m_pSensorHandle->DepthConnection.bIsISO  == TRUE)
+		if (bIsISO)
 		{
 			xnLogVerbose(XN_MASK_DEVICE_IO, "Depth endpoint is isochronous.");
 		}
@@ -187,19 +161,10 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	nRetVal = xnUSBGetEndPointMaxPacketSize(m_pSensorHandle->DepthConnection.UsbEp, &m_pSensorHandle->DepthConnection.nMaxPacketSize);
 	XN_IS_STATUS_OK(nRetVal);
 
-	// check this matches requested interface (unless DEFAULT was requested)
-	if ((nInterface == XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS && m_pSensorHandle->DepthConnection.bIsISO) ||
-	    (nInterface == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS && !m_pSensorHandle->DepthConnection.bIsISO))
-	{
-		return (XN_STATUS_USB_INTERFACE_NOT_SUPPORTED);
-	}
-
-	m_interface = m_pSensorHandle->DepthConnection.bIsISO ? XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS : XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS;
-
 	// Image
 	XnUInt16 nImageEP = bNewUSB ? 0x82 : 0x83;
 
-	m_pSensorHandle->ImageConnection.bIsISO = FALSE;
+	bIsISO = FALSE;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Opening endpoint 0x%hx for image...", nImageEP);
 	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, nImageEP, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &m_pSensorHandle->ImageConnection.UsbEp);
@@ -207,12 +172,12 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	{
 		nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, nImageEP, XN_USB_EP_ISOCHRONOUS, XN_USB_DIRECTION_IN, &m_pSensorHandle->ImageConnection.UsbEp);
 
-		m_pSensorHandle->ImageConnection.bIsISO = TRUE;
+		bIsISO = TRUE;
 	}
 
 	XN_IS_STATUS_OK(nRetVal);
 
-	if (m_pSensorHandle->ImageConnection.bIsISO  == TRUE)
+	if (bIsISO)
 	{
 		xnLogVerbose(XN_MASK_DEVICE_IO, "Image endpoint is isochronous.");
 	}
@@ -229,7 +194,7 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	// Misc
 	XnUInt16 nMiscEP = bNewUSB ? 0x83 : 0x86;
 
-	m_pSensorHandle->MiscConnection.bIsISO = FALSE;
+	bIsISO = FALSE;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Opening endpoint 0x%hx for misc...", nMiscEP);
 	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, nMiscEP, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &m_pSensorHandle->MiscConnection.UsbEp);
@@ -237,7 +202,7 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	{
 		nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, nMiscEP, XN_USB_EP_ISOCHRONOUS, XN_USB_DIRECTION_IN, &m_pSensorHandle->MiscConnection.UsbEp);
 
-		m_pSensorHandle->MiscConnection.bIsISO = TRUE;
+		bIsISO = TRUE;
 	}
 	if (nRetVal == XN_STATUS_USB_ENDPOINT_NOT_FOUND)
 	{
@@ -252,7 +217,7 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 		m_pSensorHandle->MiscConnection.bIsOpen = TRUE;
 		m_bMiscSupported = TRUE;
 
-		if (m_pSensorHandle->MiscConnection.bIsISO  == TRUE)
+		if (bIsISO)
 		{ 
 			xnLogVerbose(XN_MASK_DEVICE_IO, "Misc endpoint is isochronous.");
 		}
@@ -348,4 +313,35 @@ XnStatus XnSensorIO::CloseDevice()
 const XnChar* XnSensorIO::GetDevicePath()
 {
 	return m_strDeviceName;
+}
+
+XnSensorUsbInterface XnSensorIO::GetCurrentInterface(const XnFirmwareInfo& fwInfo) const
+{
+	XnUInt8 nActualInterface = 0;
+	XnUInt8 nAlternativeInterface = 0;
+	XnStatus nRetVal = xnUSBGetInterface(m_pSensorHandle->USBDevice, &nActualInterface, &nAlternativeInterface);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		XN_ASSERT(FALSE);
+		return (XnSensorUsbInterface)-1;
+	}
+
+	if (nAlternativeInterface == fwInfo.nISOAlternativeInterface)
+	{
+		return XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS;
+	}
+	else if (nAlternativeInterface == fwInfo.nBulkAlternativeInterface)
+	{
+		return XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS;
+	}
+	else if (nAlternativeInterface == fwInfo.nISOLowDepthAlternativeInterface)
+	{
+		return XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH;
+	}
+	else
+	{
+		XN_ASSERT(FALSE);
+		xnLogError(XN_MASK_DEVICE_IO, "Unexpected alternative interface: %d", nAlternativeInterface);
+		return (XnSensorUsbInterface)-1;
+	}
 }

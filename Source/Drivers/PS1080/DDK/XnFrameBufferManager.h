@@ -26,8 +26,8 @@
 //---------------------------------------------------------------------------
 #include <XnPlatform.h>
 #include <XnEvent.h>
-#include "XnOniFramePool.h"
 #include <Core/XnBuffer.h>
+#include <Driver/OniDriverAPI.h>
 
 //---------------------------------------------------------------------------
 // Types
@@ -36,12 +36,18 @@
 class XnFrameBufferManager
 {
 public:
+	typedef void (XN_CALLBACK_TYPE* NewFrameCallback)(OniFrame* pFrame, void* pCookie);
+
 	XnFrameBufferManager();
 	~XnFrameBufferManager();
 
-	XnStatus Init(XnUInt32 nBufferSize);
-	XnStatus Reallocate(XnUInt32 nBufferSize);
+	void SetNewFrameCallback(NewFrameCallback func, void* pCookie);
+
+	XnStatus Init();
 	void Free();
+
+	XnStatus Start(oni::driver::StreamServices& services);
+	void Stop();
 
 	inline XnBuffer* GetWriteBuffer() 
 	{ 
@@ -55,26 +61,18 @@ public:
 		return m_pWorkingBuffer;
 	}
 
-	void AddRefToFrame(OniFrame* pFrame);
-	void ReleaseFrame(OniFrame* pFrame);
-
 	void MarkWriteBufferAsStable(XnUInt32* pnFrameID);
 
 	inline XnUInt32 GetLastFrameID() const { return m_nStableFrameID; }
 
-	typedef struct NewFrameEventArgs
-	{
-		OniFrame* pFrame;
-	} NewFrameEventArgs;
-
-	typedef xnl::Event<NewFrameEventArgs> NewFrameEvent;
-	NewFrameEvent::EventInterface& OnNewFrameEvent() { return m_NewFrameEvent; }
-
 private:
-	XnOniFramePool* m_pBufferPool;
+	XN_DISABLE_COPY_AND_ASSIGN(XnFrameBufferManager);
+
+	oni::driver::StreamServices* m_pServices;
 	OniFrame* m_pWorkingBuffer;
 	XnUInt32 m_nStableFrameID;
-	NewFrameEvent m_NewFrameEvent;
+	NewFrameCallback m_newFrameCallback;
+	void* m_newFrameCallbackCookie;
 	XN_CRITICAL_SECTION_HANDLE m_hLock;
 	XnBuffer m_writeBuffer;
 };

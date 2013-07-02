@@ -29,9 +29,11 @@
 // Code
 //---------------------------------------------------------------------------
 XnFrameBufferManager::XnFrameBufferManager() :
-	m_pBufferPool(NULL),
+	m_pServices(NULL),
 	m_pWorkingBuffer(NULL),
 	m_nStableFrameID(0),
+	m_newFrameCallback(NULL),
+	m_newFrameCallbackCookie(NULL),
 	m_hLock(NULL)
 {
 }
@@ -41,22 +43,17 @@ XnFrameBufferManager::~XnFrameBufferManager()
 	Free();
 }
 
-XnStatus XnFrameBufferManager::Init(XnUInt32 nBufferSize)
+void XnFrameBufferManager::SetNewFrameCallback(NewFrameCallback func, void* pCookie)
+{
+	m_newFrameCallback = func;
+	m_newFrameCallbackCookie = pCookie;
+}
+
+XnStatus XnFrameBufferManager::Init()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	XN_VALIDATE_NEW(m_pBufferPool, XnOniFramePool);
-	m_pBufferPool->SetFrameSize(nBufferSize);
-	int numFrames = 6; // user, synced frame holder (last+synced), XnSensor frame-sync(last+incoming), working
-	if (!m_pBufferPool->Initialize(numFrames))
-	{
-		return XN_STATUS_ALLOC_FAILED;
-	}
-	
 	nRetVal = xnOSCreateCriticalSection(&m_hLock);
-	XN_IS_STATUS_OK(nRetVal);
-
-	nRetVal = Reallocate(nBufferSize);
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
@@ -64,68 +61,41 @@ XnStatus XnFrameBufferManager::Init(XnUInt32 nBufferSize)
 
 void XnFrameBufferManager::Free()
 {
+	Stop();
+
 	if (m_hLock != NULL)
 	{
 		xnOSCloseCriticalSection(&m_hLock);
 		m_hLock = NULL;
 	}
-
-	// Release the working buffer.
-	if (m_pWorkingBuffer != NULL)
-	{
-		m_pBufferPool->DecRef(m_pWorkingBuffer);
-		m_pWorkingBuffer = NULL;
-	}
-
-	// Delete the buffer pool.
-	if (m_pBufferPool != NULL)
-	{
-		XN_DELETE(m_pBufferPool);
-		m_pBufferPool = NULL;
-	}
 }
 
-XnStatus XnFrameBufferManager::Reallocate(XnUInt32 nBufferSize)
+XnStatus XnFrameBufferManager::Start(oni::driver::StreamServices& services)
 {
-	xnOSEnterCriticalSection(&m_hLock);
+	m_pServices = &services;
 
-	// release current ones
-	if (m_pWorkingBuffer != NULL)
+	// take working buffer
+	m_pWorkingBuffer = m_pServices->acquireFrame();
+	if (m_pWorkingBuffer == NULL)
 	{
-		m_pBufferPool->DecRef(m_pWorkingBuffer);
-		m_pWorkingBuffer = NULL;
+		XN_ASSERT(FALSE);
+		return XN_STATUS_ERROR;
 	}
 
-	// Change the buffer size.
-	m_pBufferPool->SetFrameSize(nBufferSize);
-
-	// TODO: validate all is OK
-	/*if (nRetVal != XN_STATUS_OK)
-	{
-		xnOSLeaveCriticalSection(&m_hLock);
-		return (nRetVal);
-	}*/
-
-	// and take one
-	if (nBufferSize == 0)
-	{
-		m_pWorkingBuffer = NULL;
-	}
-	else
-	{
-		// take working buffer
-		m_pWorkingBuffer = m_pBufferPool->Acquire();
-		if (m_pWorkingBuffer == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return XN_STATUS_ERROR;
-		}
-		m_writeBuffer.SetExternalBuffer((XnUChar*)m_pWorkingBuffer->data, nBufferSize);
-	}
-
-	xnOSLeaveCriticalSection(&m_hLock);
+	m_writeBuffer.SetExternalBuffer((XnUChar*)m_pWorkingBuffer->data, m_pWorkingBuffer->dataSize);
 
 	return (XN_STATUS_OK);
+}
+
+void XnFrameBufferManager::Stop()
+{
+	if (m_pWorkingBuffer != NULL)
+	{
+		m_pServices->releaseFrame(m_pWorkingBuffer);
+		m_pWorkingBuffer = NULL;
+	}
+
+	m_pServices = NULL;
 }
 
 void XnFrameBufferManager::MarkWriteBufferAsStable(XnUInt32* pnFrameID)
@@ -135,16 +105,13 @@ void XnFrameBufferManager::MarkWriteBufferAsStable(XnUInt32* pnFrameID)
 	OniFrame* pStableBuffer = m_pWorkingBuffer;
 	pStableBuffer->dataSize = m_writeBuffer.GetSize();
 
-	// lock buffer pool (for rollback option)
-	m_pBufferPool->Lock();
-
 	// mark working as stable
 	m_nStableFrameID++;
 	*pnFrameID = m_nStableFrameID;
 	pStableBuffer->frameIndex = m_nStableFrameID;
 
 	// take a new working buffer
-	m_pWorkingBuffer = m_pBufferPool->Acquire();
+	m_pWorkingBuffer = m_pServices->acquireFrame();
 	if (m_pWorkingBuffer == NULL)
 	{
 		xnLogError(XN_MASK_DDK, "Failed to get new working buffer!");
@@ -153,33 +120,24 @@ void XnFrameBufferManager::MarkWriteBufferAsStable(XnUInt32* pnFrameID)
 		m_pWorkingBuffer = pStableBuffer;
 		m_pWorkingBuffer->dataSize = 0;
 
-		m_pBufferPool->Unlock();
-
 		XN_ASSERT(FALSE);
 		return;
 	}
 
-	m_writeBuffer.SetExternalBuffer((XnUChar*)m_pWorkingBuffer->data, m_pBufferPool->GetFrameSize());
+	m_writeBuffer.SetExternalBuffer((XnUChar*)m_pWorkingBuffer->data, m_pWorkingBuffer->dataSize);
 	
-	m_pBufferPool->Unlock();
 	xnOSLeaveCriticalSection(&m_hLock);
 
 	// reset new working
 	m_pWorkingBuffer->dataSize = 0;
 
 	// notify stream that new data is available
-	NewFrameEventArgs args;
-	args.pFrame = pStableBuffer;
-	m_NewFrameEvent.Raise(args);
-}
+	if (m_newFrameCallback != NULL)
+	{
+		m_newFrameCallback(pStableBuffer, m_newFrameCallbackCookie);
+	}
 
-void XnFrameBufferManager::AddRefToFrame(OniFrame* pFrame)
-{
-	m_pBufferPool->AddRef(pFrame);
-}
-
-void XnFrameBufferManager::ReleaseFrame(OniFrame* pFrame)
-{
-	m_pBufferPool->Release(pFrame);
+	// and release our reference
+	m_pServices->releaseFrame(pStableBuffer);
 }
 

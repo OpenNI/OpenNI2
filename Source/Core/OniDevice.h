@@ -22,6 +22,8 @@
 #define _ONI_IMPL_DEVICE_H_
 
 #include "OniDriverHandler.h"
+#include "OniFrameManager.h"
+#include "OniSensor.h"
 #include "OniCommon.h"
 #include "XnList.h"
 
@@ -29,16 +31,16 @@ ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 class Context;
 class VideoStream;
-
+class Sensor;
 class DeviceDriver;
 
 class Device
 {
 public:
-	Device(DeviceDriver* pDeviceDriver, const DriverHandler& libraryHandler, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger);
+	Device(DeviceDriver* pDeviceDriver, const DriverHandler& libraryHandler, FrameManager& frameManager, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger);
 	~Device();
 
-	OniStatus open();
+	OniStatus open(const char* mode);
 	OniStatus close();
 
 	OniStatus getSensorInfoList(OniSensorInfo** pSensors, int& numSensors);
@@ -51,7 +53,7 @@ public:
 	OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	OniBool isPropertySupported(int propertId);
 	void notifyAllProperties();
-	OniStatus invoke(int commandId, const void* data, int dataSize);
+	OniStatus invoke(int commandId, void* data, int dataSize);
 	OniBool isCommandSupported(int commandId);
 
 	void* getHandle() const {return m_deviceHandle;}
@@ -64,6 +66,7 @@ public:
 
 	OniStatus enableDepthColorSync(Context* pContext);
 	void disableDepthColorSync();
+	OniBool isDepthColorSyncEnabled();
 
 	void refreshDepthColorSyncState();
 private:
@@ -80,6 +83,7 @@ private:
 	static void ONI_CALLBACK_TYPE stream_PropertyChanged(void* deviceHandle, int propertyId, const void* data, int dataSize, void* pCookie);
 
 	const DriverHandler& m_driverHandler;
+	FrameManager& m_frameManager;
 	xnl::ErrorLogger& m_errorLogger;
 	OniDeviceInfo* m_pInfo;
 	bool m_active;
@@ -90,9 +94,12 @@ private:
 	DeviceDriver* m_pDeviceDriver;
 
 	xnl::List<VideoStream*> m_streams;
+	xnl::CriticalSection m_cs;
 	OniFrameSyncHandle m_depthColorSyncHandle;
 	Context* m_pContext;
 	OniBool m_syncEnabled;
+	enum { MAX_SENSORS_PER_DEVICE = 10 };
+	Sensor* m_sensors[MAX_SENSORS_PER_DEVICE];
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

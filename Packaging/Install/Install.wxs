@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <!-- OpenNI2 installation script
+
+       Prerequisites:
+         WiX - http://wix.sourceforge.net/
+         Python 2.7 - http://www.python.org/getit/releases/2.7/
+         PyWin32 - http://sourceforge.net/projects/pywin32/
+         Doxygen - http://www.doxygen.org/
+         Microsoft HTML Help - http://msdn.microsoft.com/en-us/library/windows/desktop/ms669985%28v=vs.85%29.aspx
+
+       The Install project performs the following:
+       1) Run the redist script (use existing-no rebuild, as this is done by Visual Studio's references).
+       2) Use heat.exe harvester to build RedistFragments.wxs containing all the files to be installed.
+       3) Compile the install to .msi file (* see notes).
+       4) Convert the installer .msi to an executable using setupbld.exe.
+  
+       * Please note that the following warnings/errors were suppressed:
+       1) Heat.exe warnings (called in pre-build):
+            5150 - String too long warnings, ignored.
+       2) ICE errors:
+            ICE38 - The compiler thinks the installer is writing to the user's applications menu when
+                    in fact it is writing to the 'all-users' menu.
+                    This causes an error as it is required to write registry key to HKCU when doing so.
+                    If we write a registry key, it does not help, as we are not writing to the user at all, so it was suppressed.
+            ICE43 - Similar to ICE38, same root cause, so was suppressed as well.
+       3) Compiler warnings:
+            1076 - Warning when compiler tries to process the driver files (it mismatches the file type).
+    -->
+
+  <?include $(sys.CURRENTDIR)Includes\Variables.wxi ?>
+
+  <Product Id="*" Name="$(var.ProductFullName)" Language="!(loc.LANG)" Version="$(var.VersionNumber)" 
+           Manufacturer="!(loc.ManufacturerName)" UpgradeCode="$(var.UpgradeCode)">
+    <Package InstallerVersion="300" Compressed="yes" InstallScope="perMachine" 
+             Platform="$(var.Platform)" InstallPrivileges="elevated" />
+
+    <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" CompressionLevel="low"/>
+
+    <MajorUpgrade Schedule="afterInstallInitialize" AllowSameVersionUpgrades="yes" IgnoreRemoveFailure="yes"
+      DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
+
+    <!--     
+    Startup conditions that checks if we're running the OS higher than Windows XP SP2.
+    If not the installation is aborted.
+    By doing the (Installed OR ...) property means that this condition will only 
+    be evaluated if the app is being installed and not on uninstall or changing
+    -->
+    <Condition Message="!(loc.AppNotSupported)">
+      <![CDATA[Installed OR ((VersionNT >= 501 AND ServicePackLevel >= 2) OR (VersionNT >= 502))]]>
+    </Condition>
+
+    <UIRef Id="CostumeInstallUI" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
+
+    <!-- Set the icon to show next to the program name in Add/Remove programs -->
+    <Icon Id="MainIcon.ico" SourceFile="$(var.ResourcesDir)\mainicon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="MainIcon.ico" />
+
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ResourcesDir)\OpenNIBackground.bmp"/>
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ResourcesDir)\OpenNIHeader.bmp" />
+
+    <!-- Directory structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+
+      <!-- Program Files -->
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
+				<Directory Id="INSTALLLOCATION" Name="OpenNI2">
+          <Directory Id="Redist" Name="Redist"/>
+          <Directory Id="Include" Name="Include"/>
+          <Directory Id="Lib" Name="Lib"/>
+          <Directory Id="Driver" Name="Driver"/>
+          <Directory Id="Tools" Name="Tools"/>
+          <Directory Id="Samples" Name="Samples">
+            <Directory Id="SamplesBin" Name="Bin"/>
+          </Directory>
+          <Directory Id="Documentation" Name="Documentation"/>
+        </Directory>
+			</Directory>
+
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductShortName) $(var.MajorVersion)" >
+          <Directory Id="DocumentationMenu" Name="Documentation" />
+          <Directory Id="SamplesMenu" Name="Samples" />
+          <Directory Id="ToolsMenu" Name="Tools" />
+        </Directory>
+      </Directory>
+
+    </Directory>
+
+    <!-- Cleanup -->
+    <DirectoryRef Id="INSTALLLOCATION">
+      <Component Id="RemoveINSTALLLOCATIONComponent" Guid="53E5601C-6AB5-40EA-9FB3-DF88B029D25B">
+        <RemoveFolder Id="RemoveINSTALLLOCATION" On="uninstall"/>
+      </Component>
+    </DirectoryRef>
+
+    <!-- Start Menu -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="Shortcuts" Guid="$(var.ShortcutsGuid)" >
+
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveSamples" Directory="SamplesMenu" On="uninstall" />
+        <RemoveFolder Id="RemoveDocumentation" Directory="DocumentationMenu" On="uninstall" />
+        <RemoveFolder Id="RemoveTools" Directory="ToolsMenu" On="uninstall" />
+
+        <Shortcut Id="SimpleViewer" Name="SimpleViewer" Target="[SamplesBin]SimpleViewer.exe" 
+                  WorkingDirectory="SamplesBin" Directory="SamplesMenu" />
+        <Shortcut Id="SimpleRead" Name="SimpleRead" Target="[SamplesBin]SimpleRead.exe" 
+                  WorkingDirectory="SamplesBin" Directory="SamplesMenu" />
+        <Shortcut Id="SamplesDir" Name="Samples Directory" Target="[Samples]"
+                  WorkingDirectory="Samples" Directory="SamplesMenu" />
+
+        <Shortcut Id="OpenNIHelp" Name="OpenNI $(var.MajorVersion).$(var.MinorVersion) Documentation" Target="[Documentation]OpenNI.chm" 
+                  WorkingDirectory="DocumentationMenu" Directory="DocumentationMenu" />
+
+        <Shortcut Id="OpenNIJavaHelp" Name="OpenNI $(var.MajorVersion).$(var.MinorVersion) Java Documentation" Target="[Documentation]java/index.html"
+                  WorkingDirectory="DocumentationMenu" Directory="DocumentationMenu" />
+
+        <Shortcut Id="NiViewer" Name="NiViewer" Target="[Tools]NiViewer.exe" 
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
+
+        <Shortcut Id="PS1080Console" Name="PS1080Console" Target="[Tools]PS1080Console.exe"
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
+
+        <Shortcut Id="PSLinkConsole" Name="PSLinkConsole" Target="[Tools]PSLinkConsole.exe"
+                  WorkingDirectory="Tools" Directory="ToolsMenu" />
+
+        <Shortcut Id="UninstallProduct" Name="Uninstall OpenNI" Target="[SystemFolder]msiexec.exe"
+              Arguments="/x [ProductCode]" Directory="ApplicationProgramsFolder"/>
+
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="RemoveShortcuts" Guid="8BE20F1A-E91E-4BC5-8ABF-83D819C55CFE" >
+        <RemoveFolder Id="RemoveShortcutFolder" On="uninstall" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries"  Guid="*" >
+
+        <RegistryKey Root="HKLM" Key="Software\OpenNI2" Action="none" >
+          <RegistryValue Type="string" Name="InstallDir" Value="[INSTALLLOCATION]"  />
+          <RegistryValue Type="string" Name="Version" Value="$(var.VersionNumber)"/>
+        </RegistryKey>
+
+        <RegistryKey Root="HKCR" Key=".oni" Action="createAndRemoveOnUninstall" >
+          <RegistryValue Type="string" Value="NIRecording"/>
+        </RegistryKey>
+
+        <RegistryKey Root="HKCR" Key="NIRecording" Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string"  Value="OpenNI Recording File"/>
+        </RegistryKey>
+
+        <RegistryKey Root="HKCR" Key="NIRecording\DefaultIcon" Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string"  Value="[Tools]NiViewer$(var.PlatformSuffix).exe,0"/>
+        </RegistryKey>
+
+        <RegistryKey Root="HKCR" Key="NIRecording\shell\open\command" Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string" Value="[Tools]NiViewer.exe %1"/>
+        </RegistryKey>
+
+      </Component>
+    </DirectoryRef>
+
+    <!-- Environment Variables -->
+    <DirectoryRef Id="TARGETDIR" >
+      <Component Id="EnvironmentVars" Guid="$(var.EnvironmentVarsGuid)" DiskId="1" >
+        <Environment Id="OPENNIREDIST"
+                           Action="set"
+                           Part="all"
+                           Name="OPENNI2_REDIST$(var.PlatformSuffix)"
+                           Permanent="no"
+                           System="yes"
+                           Value="[Redist]" />
+        <Environment Id="OPENNIINCLUDE"
+                            Action="set"
+                            Part="all"
+                            Name="OPENNI2_INCLUDE$(var.PlatformSuffix)"
+                            Permanent="no"
+                            System="yes"
+                            Value="[Include]"/>
+        <Environment Id="OPENNILIB"
+                            Action="set"
+                            Part="all"
+                            Name="OPENNI2_LIB$(var.PlatformSuffix)"
+                            Permanent="no"
+                            System="yes"
+                            Value="[Lib]"/>
+      </Component>
+    </DirectoryRef>
+
+    <!--  Install the visual studio 2008 DLLs-->
+    <DirectoryRef Id="TARGETDIR">
+      <?if $(var.Platform)="x86"?>
+      <Merge Id="VCRedist2008" SourceFile="$(var.ResourcesDir)\\Microsoft_VC90_CRT_x86.msm" DiskId="1" Language="0" />
+      <Merge Id="VCRedist2010" SourceFile="$(var.ResourcesDir)\\Microsoft_VC100_CRT_x86.msm" DiskId="1" Language="0" />
+      <?else?>
+      <Merge Id="VCRedist2008" SourceFile="$(var.ResourcesDir)\\Microsoft_VC90_CRT_x86_x64.msm" DiskId="1" Language="0"/>
+      <Merge Id="VCRedist2010" SourceFile="$(var.ResourcesDir)\\Microsoft_VC100_CRT_x64.msm" DiskId="1" Language="0"/>
+      <?endif?>
+    </DirectoryRef>
+
+    <!-- Install the USB Driver -->
+    <CustomAction Id='drivex86Install' Directory="Driver" Return="ignore" Impersonate="no" Execute="deferred"
+                  ExeCommand="&quot;[Driver]dpinst-x86.exe&quot; /sw /el" />
+    <CustomAction Id='driveamd64Install' Directory="Driver" Return="ignore" Impersonate="no" Execute="deferred"
+                  ExeCommand="&quot;[Driver]dpinst-amd64.exe&quot; /sw /el"/>
+
+    <!-- Install features -->
+    <Feature Id="ProductFeature" Title="OpenNI2" Level="1">
+
+      <!-- Uninstall components (cleanup) -->
+      <ComponentRef Id="RemoveINSTALLLOCATIONComponent" />
+      <ComponentRef Id="RemoveShortcuts" />
+
+      <!-- Install components -->
+      <ComponentGroupRef Id="RedistComponentGroup" />
+      <!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
+      <ComponentGroupRef Id="Product.Generated" />
+      <ComponentRef Id="RegistryEntries" />
+      <ComponentRef Id="EnvironmentVars" />
+      <ComponentRef Id="Shortcuts" />
+
+      <!-- Uninstall components (cleanup #2) -->
+      <ComponentRef Id="RemoveShortcuts" />
+      <ComponentRef Id="RemoveINSTALLLOCATIONComponent" />
+
+    </Feature>
+
+    <Feature Id="VCRedist" Title="Visual C++ 9.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1" >
+      <MergeRef Id="VCRedist2008" />
+      <MergeRef Id="VCRedist2010" />
+    </Feature>
+
+    <WixVariable Id="WixUICostingPopupOptOut" Value="0" />
+
+    <InstallExecuteSequence>
+      <Custom Action='driveamd64Install' After='PublishProduct'><![CDATA[NOT Installed AND VersionNT64]]></Custom>
+      <Custom Action='drivex86Install' After='PublishProduct'><![CDATA[NOT Installed AND NOT VersionNT64]]></Custom>
+    </InstallExecuteSequence>
+
+  </Product>
+</Wix>

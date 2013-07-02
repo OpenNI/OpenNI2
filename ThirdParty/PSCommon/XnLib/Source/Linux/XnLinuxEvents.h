@@ -39,6 +39,7 @@ class XnLinuxEvent : public _XnEvent
 {
 public:
 	XnLinuxEvent(XnBool bManualReset) : m_bSignaled(FALSE), m_bManualReset(bManualReset) {}
+	virtual ~XnLinuxEvent() {}
 	virtual XnStatus Init() = 0;
 	virtual XnStatus Destroy() = 0;
 	virtual XnStatus Set() = 0;

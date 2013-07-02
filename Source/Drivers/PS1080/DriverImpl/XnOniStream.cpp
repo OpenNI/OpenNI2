@@ -64,6 +64,12 @@ void XnOniStream::destroy()
 	m_pSensor->DestroyStream(m_strType);
 }
 
+void XnOniStream::setServices(oni::driver::StreamServices* pStreamServices)
+{
+	oni::driver::StreamBase::setServices(pStreamServices);
+	m_pDeviceStream->SetServices(*pStreamServices);
+}
+
 OniStatus XnOniStream::start()
 {
 	XnStatus nRetVal = ONI_STATUS_OK;
@@ -161,18 +167,12 @@ void XN_CALLBACK_TYPE XnOniStream::OnNewStreamDataEventHandler(const XnNewStream
 	XnOniStream* pThis = (XnOniStream*)pCookie;
 	if (pThis->m_started && strcmp(args.strStreamName, pThis->m_strType) == 0)
 	{
-		OniDriverFrame* pDriverFrame = (OniDriverFrame*)args.pFrame;
-		pThis->addRefToFrame(pDriverFrame);
-		pThis->raiseNewFrame(pDriverFrame);
+		pThis->raiseNewFrame(args.pFrame);
 	}
 }
 
-void XnOniStream::addRefToFrame(OniDriverFrame* pFrame)
+int XnOniStream::getRequiredFrameSize()
 {
-	m_pDeviceStream->AddRefToFrame((OniFrame*)pFrame);
+	return m_pDeviceStream->GetRequiredDataSize();
 }
 
-void XnOniStream::releaseFrame(OniDriverFrame* pFrame)
-{
-	m_pDeviceStream->ReleaseFrame((OniFrame*)pFrame);
-}

@@ -19,6 +19,7 @@
 # LDFLAGS - [Optional] additional flags for the linker
 # SSE_GENERATION - [Optional] The SSE generation to use (default is 3)
 # TARGET_SYS_ROOT - [Optional] The path to the root of the target
+# ALLOW_WARNINGS - [Optional] Allow warnings during compilation
 #############################################################################
 
 # take this file's dir
@@ -70,6 +71,11 @@ endif
 
 CFLAGS += $(INC_DIRS_OPTION) $(DEFINES_OPTION)
 CFLAGS += -fPIC -fvisibility=hidden
+
+ifneq "$(ALLOW_WARNINGS)" "1"
+	CFLAGS += -Werror
+endif
+
 LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
 
 # some lib / exe specifics
@@ -109,7 +115,7 @@ $(call SRC_TO_OBJ,$1) : $1 | $(INT_DIR)
 	$(CXX) -MD -MP -MT "$(call SRC_TO_DEP,$1) $$@" -c $(CFLAGS) -o $$@ $$<
 else
 $(call SRC_TO_OBJ,$1) : $1 | $(INT_DIR)
-	$(CXX) -c $(CFLAGS) -o $$@ $$<
+	$(CXX) -x c++ -c $(CFLAGS) -o $$@ $$<
 endif
 endef
 

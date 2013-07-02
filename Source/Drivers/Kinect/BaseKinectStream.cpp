@@ -157,7 +157,7 @@ OniStatus BaseKinectStream::SetVideoMode(OniVideoMode* videoMode)
 		return ONI_STATUS_OK;
 	}
 	
-	return ONI_STATUS_NOT_SUPPORTED;
+	return ONI_STATUS_OUT_OF_FLOW;
 }
 
 OniStatus BaseKinectStream::GetVideoMode(OniVideoMode* pVideoMode)
@@ -176,19 +176,4 @@ OniStatus BaseKinectStream::GetCropping(OniCropping* cropping)
 {
 	*cropping = m_cropping;
 	return ONI_STATUS_OK;
-}
-
-void BaseKinectStream::addRefToFrame(OniDriverFrame* pFrame)
-{
-	++((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-}
-
-void BaseKinectStream::releaseFrame(OniDriverFrame* pFrame)
-{
-	if (0 == --((KinectStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-	{
-		xnOSFree(pFrame->pDriverCookie);
-		xnOSFreeAligned(pFrame->frame.data);
-		xnOSFree(pFrame);
-	}
 }

@@ -21,12 +21,17 @@
 #include "OniDevice.h"
 #include "OniStream.h"
 #include "OniContext.h"
+#include "OniSensor.h"
 #include <OniProperties.h>
+#include <XnLog.h>
+
+#define XN_MASK_ONI_DEVICE "OniDevice"
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
-Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger) : 
+Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, FrameManager& frameManager, const OniDeviceInfo* pDeviceInfo, xnl::ErrorLogger& errorLogger) : 
 	m_driverHandler(driverHandler),
+	m_frameManager(frameManager),
 	m_errorLogger(errorLogger),
 	m_active(false),
 	m_openCount(0),
@@ -38,6 +43,7 @@ Device::Device(DeviceDriver* pDeviceDriver, const DriverHandler& driverHandler, 
 {
 	m_pInfo = XN_NEW(OniDeviceInfo);
 	xnOSMemCopy(m_pInfo, pDeviceInfo, sizeof(OniDeviceInfo));
+	xnOSMemSet(&m_sensors, 0, sizeof(m_sensors));
 }
 Device::~Device()
 {
@@ -45,15 +51,16 @@ Device::~Device()
 	{
 		close();
 	}
+
 	XN_DELETE(m_pInfo);
 	m_pInfo = NULL;
 }
 
-OniStatus Device::open()
+OniStatus Device::open(const char* mode)
 {
 	if (m_openCount == 0)
 	{
-		m_deviceHandle = m_driverHandler.deviceOpen(m_pInfo->uri);
+		m_deviceHandle = m_driverHandler.deviceOpen(m_pInfo->uri, mode);
 		if (m_deviceHandle == NULL)
 		{
 			return ONI_STATUS_ERROR;
@@ -70,6 +77,15 @@ OniStatus Device::close()
 
 	if (m_openCount == 0)
 	{
+		for (int i = 0; i < MAX_SENSORS_PER_DEVICE; ++i)
+		{
+			if (m_sensors[i] != NULL)
+			{
+				XN_DELETE(m_sensors[i]);
+				m_sensors[i] = NULL;
+			}
+		}
+
 		if (m_deviceHandle != NULL)
 		{
 			m_driverHandler.deviceClose(m_deviceHandle);
@@ -90,32 +106,64 @@ OniStatus Device::getSensorInfoList(OniSensorInfo** pSensorInfos, int& numSensor
 VideoStream* Device::createStream(OniSensorType sensorType)
 {
 	OniSensorInfo* pSensorInfos;
-	OniSensorInfo* pSensor = NULL;
+	OniSensorInfo* pSensorInfo = NULL;
+
 	int numSensors = 0;
 	getSensorInfoList(&pSensorInfos, numSensors);
 	for (int i = 0; i < numSensors; ++i)
 	{
 		if (pSensorInfos[i].sensorType == sensorType)
 		{
-			pSensor = &pSensorInfos[i];
+			pSensorInfo = &pSensorInfos[i];
 			break;
 		}
 	}
 
-	if (pSensor == NULL)
+	if (pSensorInfo == NULL)
 	{
 		m_errorLogger.Append("Device: Can't find this source %d", sensorType);
 		return NULL;
 	}
 
-	void* streamHandle = m_driverHandler.deviceCreateStream(m_deviceHandle, sensorType);
-	if (streamHandle == NULL)
+	// make sure our sensor array is big enough
+	if ((int)sensorType >= MAX_SENSORS_PER_DEVICE)
 	{
-		m_errorLogger.Append("Stream: couldn't create using source %d", sensorType);
+		xnLogError(XN_MASK_ONI_DEVICE, "Internal error!");
+		m_errorLogger.Append("Device: Can't find this source %d", sensorType);
+		XN_ASSERT(FALSE);
 		return NULL;
 	}
 
-	VideoStream* pStream = XN_NEW(VideoStream, streamHandle, pSensor, *this, m_driverHandler, m_errorLogger);
+	xnl::AutoCSLocker lock(m_cs);
+	if (m_sensors[sensorType] == NULL)
+	{
+		m_sensors[sensorType] = XN_NEW(Sensor, m_errorLogger, m_frameManager, m_driverHandler);
+		if (m_sensors[sensorType] == NULL)
+		{
+			XN_ASSERT(FALSE);
+			return NULL;
+		}
+	}
+
+	{
+		// check if stream already exists. Do this in a lock to make it thread-safe
+		xnl::AutoCSLocker lock(m_sensors[sensorType]->m_refCountCS);
+		if (m_sensors[sensorType]->m_streamCount == 0)
+		{
+			void* streamHandle = m_driverHandler.deviceCreateStream(m_deviceHandle, sensorType);
+			if (streamHandle == NULL)
+			{
+				m_errorLogger.Append("Stream: couldn't create using source %d", sensorType);
+				return NULL;
+			}
+
+			m_sensors[sensorType]->setDriverStream(streamHandle);
+		}
+
+		++m_sensors[sensorType]->m_streamCount;
+	}
+
+	VideoStream* pStream = XN_NEW(VideoStream, m_sensors[sensorType], pSensorInfo, *this, m_driverHandler, m_frameManager, m_errorLogger);
 	m_streams.AddLast(pStream);
 
 	if ((sensorType == ONI_SENSOR_DEPTH || sensorType == ONI_SENSOR_COLOR) &&
@@ -131,7 +179,7 @@ OniStatus oni::implementation::Device::setProperty(int propertyId, const void* d
 	OniStatus rc = m_driverHandler.deviceSetProperty(m_deviceHandle, propertyId, data, dataSize);
 	if (rc != ONI_STATUS_OK)
 	{
-		m_errorLogger.Append("Device setProperty(%d) failed\n", propertyId);
+		m_errorLogger.Append("Device.setProperty(%x) failed\n", propertyId);
 	}
 	return rc;
 }
@@ -140,7 +188,7 @@ OniStatus oni::implementation::Device::getProperty(int propertyId, void* data, i
 	OniStatus rc = m_driverHandler.deviceGetProperty(m_deviceHandle, propertyId, data, pDataSize);
 	if (rc != ONI_STATUS_OK)
 	{
-		m_errorLogger.Append("Device getProperty(%d) failed\n", propertyId);
+		m_errorLogger.Append("Device.getProperty(%x) failed\n", propertyId);
 	}
 	return rc;
 }
@@ -152,7 +200,7 @@ void Device::notifyAllProperties()
 {
 	m_driverHandler.deviceNotifyAllProperties(m_deviceHandle);
 }
-OniStatus Device::invoke(int commandId, const void* data, int dataSize)
+OniStatus Device::invoke(int commandId, void* data, int dataSize)
 {
 	if (commandId == ONI_DEVICE_COMMAND_SEEK)
 	{
@@ -194,6 +242,7 @@ void Device::refreshDepthColorSyncState()
 
 void Device::clearStream(VideoStream* pStream)
 {
+	xnl::AutoCSLocker lock(m_cs);
 	m_streams.Remove(pStream);
 
 	if ((pStream->getSensorInfo()->sensorType == ONI_SENSOR_DEPTH ||
@@ -235,6 +284,11 @@ void Device::disableDepthColorSync()
 	m_depthColorSyncHandle = NULL;
 	m_pContext = NULL;
 	m_syncEnabled = FALSE;
+}
+
+OniBool Device::isDepthColorSyncEnabled()
+{
+	return m_syncEnabled;
 }
 
 void ONI_CALLBACK_TYPE Device::stream_PropertyChanged(void* /*deviceHandle*/, int /*propertyId*/, const void* /*data*/, int /*dataSize*/, void* pCookie)

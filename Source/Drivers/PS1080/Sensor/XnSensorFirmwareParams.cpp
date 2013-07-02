@@ -82,6 +82,11 @@ XnSensorFirmwareParams::XnSensorFirmwareParams(XnFirmwareInfo* pInfo, XnFirmware
 	m_ImageLowLightCompensation(0, "ImageLowLightCompensation"),
 	m_ImageGain(0, "ImageGain"),
 	m_DepthCloseRange(0, "CloseRange"),
+	m_LogFilter(0, "LogFilter"),
+	m_GMCDebug(0, "GMCDebug"),
+	m_APCEnabled(0, "APCEnabled"),
+	m_WavelengthCorrection(0, "WavelengthCorrection"),
+	m_WavelengthCorrectionDebug(0, "WavelengthCorrectionDebug"),
 	m_AllFirmwareParams(),
 	m_pInfo(pInfo),
 	m_pCommands(pCommands),
@@ -203,6 +208,16 @@ XnStatus XnSensorFirmwareParams::Init()
 	nRetVal = AddFirmwareParam(		m_ImageGain,				PARAM_IMAGE_AGC,							XN_SENSOR_FW_VER_5_4,	XN_SENSOR_FW_VER_UNKNOWN,	0);
 	XN_IS_STATUS_OK(nRetVal);
 	nRetVal = AddFirmwareParam(		m_DepthCloseRange,			PARAM_DEPTH_CLOSE_RANGE,					XN_SENSOR_FW_VER_5_6,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_LogFilter,				PARAM_MISC_LOG_FILTER);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_GMCDebug,					PARAM_GMC_DEBUG,							XN_SENSOR_FW_VER_5_0,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_APCEnabled,				PARAM_APC_ENABLE,							XN_SENSOR_FW_VER_5_0,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_WavelengthCorrection,		PARAM_WAVELENGTH_CORRECTION_ENABLED,		XN_SENSOR_FW_VER_5_2,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_WavelengthCorrectionDebug,PARAM_WAVELENGTH_CORRECTION_DEBUG_ENABLED,	XN_SENSOR_FW_VER_5_2,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 
 	// override some props
@@ -600,7 +615,7 @@ XnStatus XnSensorFirmwareParams::RecalculateReferenceResolution()
 		nRes = XN_RESOLUTION_VGA;
 	}
 
-	if (nRes != m_ReferenceResolution.GetValue())
+	if (nRes != (XnResolutions)m_ReferenceResolution.GetValue())
 	{
 		nRetVal = m_ReferenceResolution.UnsafeUpdateValue(nRes);
 		XN_IS_STATUS_OK(nRetVal);

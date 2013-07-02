@@ -26,11 +26,6 @@
 #define TEST_RESOLUTION_X 320
 #define TEST_RESOLUTION_Y 240
 
-typedef struct  
-{
-	int refCount;
-} TestStreamFrameCookie;
-
 class TestStream : public oni::driver::StreamBase
 {
 public:
@@ -108,45 +103,6 @@ public:
 
 	virtual int GetBytesPerPixel() = 0;
 
-	OniDriverFrame* AcquireFrame()
-	{
-		OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-		if (pFrame == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		int dataSize = TEST_RESOLUTION_X * TEST_RESOLUTION_Y * GetBytesPerPixel();
-		pFrame->frame.data = xnOSMallocAligned(dataSize, XN_DEFAULT_MEM_ALIGN);
-		if (pFrame->frame.data == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		pFrame->pDriverCookie = xnOSMalloc(sizeof(TestStreamFrameCookie));
-		((TestStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
-
-		pFrame->frame.dataSize = dataSize;
-		return pFrame;
-	}
-
-	void addRefToFrame(OniDriverFrame* pFrame)
-	{
-		++((TestStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-	}
-
-	void releaseFrame(OniDriverFrame* pFrame)
-	{
-		if (0 == --((TestStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-		{
-			xnOSFree(pFrame->pDriverCookie);
-			xnOSFreeAligned(pFrame->frame.data);
-			xnOSFree(pFrame);
-		}
-	}
-
 protected:
 
 	// Thread
@@ -173,9 +129,10 @@ protected:
 				// Send the frame.
 				if (count > 0)
 				{
-					OniDriverFrame* pFrame = pStream->AcquireFrame();
-					pStream->BuildFrame(&pFrame->frame);
+					OniFrame* pFrame = pStream->getServices().acquireFrame();
+					pStream->BuildFrame(pFrame);
 					pStream->raiseNewFrame(pFrame);
+					pStream->getServices().releaseFrame(pFrame);
 				}
 
 			} while (count > 0);
@@ -394,7 +351,7 @@ public:
 	TestDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
 	{}
 
-	virtual oni::driver::DeviceBase* deviceOpen(const char* uri)
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* /*mode*/)
 	{
 		for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
 		{

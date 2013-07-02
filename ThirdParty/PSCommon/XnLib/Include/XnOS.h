@@ -42,7 +42,7 @@
 // OS Identifier 
 //---------------------------------------------------------------------------
 #if (XN_PLATFORM == XN_PLATFORM_WIN32)
-	#include "Win32/XnLibWin32.h"
+	#include "Win32/XnOSWin32.h"
 #elif (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
 	#include "Linux-x86/XnOSLinux-x86.h"
 #elif (XN_PLATFORM == XN_PLATFORM_MACOSX)
@@ -463,6 +463,33 @@ XN_C_API XnStatus XN_C_DECL xnOSGetFileName(const XnChar* cpFilePath, XnChar* cp
 XN_C_API XnStatus XN_C_DECL xnOSGetFullPathName(const XnChar* strFilePath, XnChar* strFullPath, XnUInt32 nBufferSize);
 XN_C_API XnStatus XN_C_DECL xnOSGetCurrentDir(XnChar* cpDirName, const XnUInt32 nBufferSize);
 XN_C_API XnStatus XN_C_DECL xnOSSetCurrentDir(const XnChar* cpDirName);
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+XN_C_API XnStatus XN_C_DECL xnOSGetApplicationFilesDir(XnChar* cpDirName, const XnUInt32 nBufferSize);
+XN_C_API XnStatus XN_C_DECL xnOSGetApplicationLibDir(XnChar* cpDirName, const XnUInt32 nBufferSize);
+#endif
+/**
+ * Strips the directory separator at the end of the specified path by directly modifying the given string.
+ * Always returns XN_STATUS_OK.
+ */
+XN_C_API XnStatus XN_C_DECL xnOSStripDirSep(XnChar* strDirName);
+/**
+ * Checks if the specified character works as a directory separator.
+ */
+XN_C_API XnBool XN_C_DECL xnOSIsDirSep(XnChar c);
+/**
+ * Appends the specified path component(s) to the specified path buffer.
+ * Directory separator is applied if necessary.
+ * If the path component to append is an absolute path, the resulted path is completely altered with it.
+ *
+ * @param	strDestPath					[in]	Buffer that stores the original path to be operated.
+ * @param	strPathComponentToAppend	[in]	Path component(s) to append. Can be absolute or relative.
+ * @param	nBufferSize					[in]	Size of strDestPath.
+ */
+XN_C_API XnStatus XN_C_DECL xnOSAppendFilePath(XnChar* strDestPath, const XnChar* strPathComponentToAppend, const XnUInt32 nBufferSize);
+/**
+ * Returns true if the specified path is absolute.
+ */
+XN_C_API XnBool XN_C_DECL xnOSIsAbsoluteFilePath(const XnChar* strFilePath);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteFile(const XnChar* cpFileName);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteEmptyDirectory(const XnChar* strDirName);
 XN_C_API XnStatus XN_C_DECL xnOSDeleteDirectoryTree(const XnChar* strDirName);
@@ -481,6 +508,14 @@ XN_C_API XnStatus XN_C_DECL xnOSWriteIntToINI(const XnChar* cpINIFile, const XnC
 XN_C_API XnStatus XN_C_DECL xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibHandle);
 XN_C_API XnStatus XN_C_DECL xnOSFreeLibrary(const XN_LIB_HANDLE LibHandle);
 XN_C_API XnStatus XN_C_DECL xnOSGetProcAddress(const XN_LIB_HANDLE LibHandle, const XnChar* cpProcName, XnFarProc* pProcAddr);
+
+/**
+ * Returns the absolute path of the module that includes the specified proc address.
+ *
+ * @param	procAddr		[in]	Proc address contained by the target module.
+ * @param	strModulePath	[in]	Buffer to receive the absolute path of the module. Must have the size of XN_FILE_MAX_PATH at least.
+ */
+XN_C_API XnStatus XN_C_DECL xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strModulePath);
 
 struct timespec;
 	

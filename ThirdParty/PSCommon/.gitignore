@@ -6,3 +6,13 @@ ipch
 *.suo
 *.user
 *.bak
+*.log
+*.wrn
+*.ncb
+objfre_win7_amd64
+objfre_win7_x86
+XnLib/Driver/Win32/Build/buildfre_win7_amd64.wrn
+XnLib/Driver/Win32/Build/buildfre_win7_x86.wrn
+XnLib/Driver/Win32/Build/sys/amd64
+XnLib/Driver/Win32/Build/sys/x86
+XnLib/Driver/Win32/BinVSRls

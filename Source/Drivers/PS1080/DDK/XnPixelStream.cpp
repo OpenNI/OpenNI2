@@ -266,6 +266,7 @@ XnStatus XnPixelStream::OnOutputFormatChanged()
 		nBytesPerPixel = sizeof(XnUInt16);
 		break;
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 		// YUV422 is actually 4 bytes for every 2 pixels
 		nBytesPerPixel = sizeof(XnUChar) * 2;
 		break;
@@ -334,8 +335,7 @@ void XnPixelStream::NewDataAvailable(OniFrame* pFrame)
 
 XnStatus XnPixelStream::Mirror(OniFrame* pFrame) const
 {
-	XnUInt32 nXRes = GetCropping()->enabled ? GetCropping()->width : GetXRes();
-	return XnFormatsMirrorPixelData(GetOutputFormat(), (XnUChar*)pFrame->data, pFrame->dataSize, nXRes);
+	return XnFormatsMirrorPixelData(GetOutputFormat(), (XnUChar*)pFrame->data, pFrame->dataSize, pFrame->width);
 }
 
 XnStatus XnPixelStream::CropImpl(OniFrame* pFrame, const OniCropping* pCropping)

@@ -57,6 +57,8 @@ XN_C_API XnStatus xnUSBShutdown()
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
+	XN_ASSERT(g_nRefCount != 0);
+
 	if (--g_nRefCount == 0)
 	{
 		nRetVal = xnUSBPlatformSpecificShutdown();

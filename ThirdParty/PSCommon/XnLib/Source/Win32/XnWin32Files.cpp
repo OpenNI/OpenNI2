@@ -704,6 +704,7 @@ XN_C_API XnStatus xnOSGetDirName(const XnChar* cpFilePath, XnChar* cpDirName, co
 	}
 
 	pFileName[0] = '\0';
+	xnOSStripDirSep(strFullPath);
 	strcpy(cpDirName, strFullPath);
 
 	return XN_STATUS_OK;
@@ -745,4 +746,10 @@ XN_C_API XnStatus xnOSGetFullPathName(const XnChar* strFilePath, XnChar* strFull
 	}
 
 	return XN_STATUS_OK;
+}
+
+XN_C_API XnBool xnOSIsAbsoluteFilePath(const XnChar* strFilePath)
+{
+	// If the path starts with <letter><colon><path separator>, it is absolute.
+	return xnOSStrLen(strFilePath) >= 3 && isalpha(strFilePath[0]) && strFilePath[1] == ':' && xnOSIsDirSep(strFilePath[2]);
 }

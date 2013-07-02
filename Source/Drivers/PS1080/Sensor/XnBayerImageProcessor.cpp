@@ -108,6 +108,7 @@ void XnBayerImageProcessor::ProcessFramePacketChunk(const XnSensorProtocolRespon
 	{
 		xnLogWarning(XN_MASK_SENSOR_PROTOCOL_IMAGE, "Image decompression failed: %s (%d of %d, requested %d, last %d)", xnGetStatusString(nRetVal), nWrittenOutput, nBufSize, nOutputSize, bLastPart);
 		FrameIsCorrupted();
+		return;
 	}
 
 	pWriteBuffer->UnsafeUpdateSize(nWrittenOutput);
@@ -129,6 +130,7 @@ void XnBayerImageProcessor::OnStartOfFrame(const XnSensorProtocolResponseHeader*
 {
 	XnImageProcessor::OnStartOfFrame(pHeader);
 	m_ContinuousBuffer.Reset();
+	m_UncompressedBayerBuffer.Reset();
 }
 
 void XnBayerImageProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)

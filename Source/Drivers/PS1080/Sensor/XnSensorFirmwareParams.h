@@ -108,6 +108,11 @@ public:
 	XnActualIntProperty m_ImageLowLightCompensation;
 	XnActualIntProperty m_ImageGain;
 	XnActualIntProperty m_DepthCloseRange;
+	XnActualIntProperty m_LogFilter;
+	XnActualIntProperty m_GMCDebug;
+	XnActualIntProperty m_APCEnabled;
+	XnActualIntProperty m_WavelengthCorrection;
+	XnActualIntProperty m_WavelengthCorrectionDebug;
 
 private:
 	typedef struct XnFirmwareParam

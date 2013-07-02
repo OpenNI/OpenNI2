@@ -22,6 +22,7 @@
 #define _ONI_IMPL_FRAME_HOLDER_H_
 
 #include "OniCommon.h"
+#include "OniFrameManager.h"
 #include "OniCTypes.h"
 #include "XnOSCpp.h"
 
@@ -34,7 +35,7 @@ class FrameHolder
 public:
 
 	// Constructor.
-	FrameHolder() : m_enabled(TRUE) {}
+	FrameHolder(FrameManager& frameManager) : m_frameManager(frameManager), m_enabled(TRUE) {}
 
 	// Destructor.
 	virtual ~FrameHolder() {}
@@ -71,7 +72,7 @@ public:
 
 // Data members:
 protected:
-
+	FrameManager& m_frameManager;
 	OniBool m_enabled;
 
 private:

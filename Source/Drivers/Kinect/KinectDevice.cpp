@@ -130,17 +130,45 @@ void kinect_device::KinectDevice::destroyStream(oni::driver::StreamBase* pStream
 
 OniStatus KinectDevice::setProperty(int propertyId, const void* data, int dataSize)
 {
+	switch (propertyId) {
+	case ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION:
+		{
+			// FIXME data size validation
+			if (m_pDepthStream) {
+				OniImageRegistrationMode* pMode = (OniImageRegistrationMode*)data;
+				m_pDepthStream->setImageRegistrationMode(*pMode);
+				return ONI_STATUS_OK;
+			} else {
+				return ONI_STATUS_ERROR;
+			}
+		}
+	}
+
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
 OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 {
+	switch (propertyId) {
+	case ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION:
+		{
+			// FIXME data size validation
+			if (m_pDepthStream) {
+				OniImageRegistrationMode* pMode = (OniImageRegistrationMode*)data;
+				*pMode = m_pDepthStream->getImageRegistrationMode();
+				return ONI_STATUS_OK;
+			} else {
+				return ONI_STATUS_ERROR;
+			}
+		}
+	}
+
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
 OniBool KinectDevice::isPropertySupported(int propertyId)
 {
-	return ONI_STATUS_NOT_IMPLEMENTED;
+	return (propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION);
 }
 
 OniBool KinectDevice::isCommandSupported(int commandId)
@@ -153,3 +181,7 @@ OniStatus KinectDevice::tryManualTrigger()
 	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
+OniBool KinectDevice::isImageRegistrationModeSupported(OniImageRegistrationMode mode)
+{
+	return (mode == ONI_IMAGE_REGISTRATION_DEPTH_TO_COLOR || mode == ONI_IMAGE_REGISTRATION_OFF);
+}

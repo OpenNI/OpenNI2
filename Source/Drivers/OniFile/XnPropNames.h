@@ -60,5 +60,6 @@
 
 // New OpenNI 2.0 properties
 #define XN_PROP_ONI_PIXEL_FORMAT "oniPixelFormat"
+#define XN_PROP_ONI_REQUIRED_FRAME_SIZE "oniRequiredFrameSize"
 
 #endif //__XN_PROP_NAMES_H__

@@ -55,6 +55,8 @@ enum
 	// Camera
 	ONI_STREAM_PROPERTY_AUTO_WHITE_BALANCE		= 100, // OniBool
 	ONI_STREAM_PROPERTY_AUTO_EXPOSURE			= 101, // OniBool
+	ONI_STREAM_PROPERTY_EXPOSURE				= 102, // int
+	ONI_STREAM_PROPERTY_GAIN					= 103, // int
 };
 
 // Device commands (for Invoke)

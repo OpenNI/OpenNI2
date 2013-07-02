@@ -19,10 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Include\Win32\usb100.h" />
+    <ClInclude Include="..\Include\Win32\XnOSWin32.h" />
     <ClInclude Include="..\Include\XnCallStackLogger.h" />
     <ClInclude Include="..\Include\XnErrorLogger.h" />
     <ClInclude Include="..\Include\XnLib.h" />
-    <ClInclude Include="..\Include\Win32\XnLibWin32.h" />
     <ClInclude Include="..\Include\Win32\XnPlatformWin32.h" />
     <ClInclude Include="..\Include\XnArray.h" />
     <ClInclude Include="..\Include\XnBox3D.h" />
@@ -177,6 +178,9 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -184,6 +188,8 @@
     <ProjectReference />
     <Lib>
       <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006,4221</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -194,6 +200,8 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -201,6 +209,8 @@
     <ProjectReference />
     <Lib>
       <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006,4221</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -227,6 +237,8 @@
     </Link>
     <Lib>
       <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006,4221</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -253,6 +265,8 @@
     </Link>
     <Lib>
       <AdditionalDependencies>Ws2_32.lib;setupapi.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006,4221</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -21,9 +21,9 @@
 #include "OniPlatform.h"
 
 #define ONI_VERSION_MAJOR	2
-#define ONI_VERSION_MINOR	1
+#define ONI_VERSION_MINOR	2
 #define ONI_VERSION_MAINTENANCE	0
-#define ONI_VERSION_BUILD	4
+#define ONI_VERSION_BUILD	30
 
 /** OpenNI version (in brief string format): "Major.Minor.Maintenance (Build)" */ 
 #define ONI_BRIEF_VERSION_STRING \
@@ -34,7 +34,8 @@
 
 /** OpenNI version (in numeric format): (OpenNI major version * 100000000 + OpenNI minor version * 1000000 + OpenNI maintenance version * 10000 + OpenNI build version). */
 #define ONI_VERSION (ONI_VERSION_MAJOR*100000000 + ONI_VERSION_MINOR*1000000 + ONI_VERSION_MAINTENANCE*10000 + ONI_VERSION_BUILD)
-#define ONI_API_VERSION (ONI_VERSION_MAJOR*1000 + ONI_VERSION_MINOR)
+#define ONI_CREATE_API_VERSION(major, minor) ((major)*1000 + (minor))
+#define ONI_API_VERSION ONI_CREATE_API_VERSION(ONI_VERSION_MAJOR, ONI_VERSION_MINOR)
 
 /** OpenNI version (in string format): "Major.Minor.Maintenance.Build-Platform (MMM DD YYYY HH:MM:SS)". */ 
 #define ONI_VERSION_STRING \

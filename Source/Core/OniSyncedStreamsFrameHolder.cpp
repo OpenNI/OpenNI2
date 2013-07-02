@@ -24,8 +24,8 @@
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 	
 // Constructor.
-SyncedStreamsFrameHolder::SyncedStreamsFrameHolder(VideoStream** ppStreams, int numStreams) : 
-	FrameHolder(), m_FrameSyncedStreams(numStreams)
+SyncedStreamsFrameHolder::SyncedStreamsFrameHolder(FrameManager& frameManager, VideoStream** ppStreams, int numStreams) : 
+	FrameHolder(frameManager), m_FrameSyncedStreams(numStreams)
 {
 	m_FrameSyncedStreams.SetSize(numStreams);
 	m_FrameSyncedStreams.Zero();
@@ -128,7 +128,7 @@ OniStatus SyncedStreamsFrameHolder::readFrame(VideoStream* pStream, OniFrame** p
 			// Release the stored synced frame.
 			if (m_FrameSyncedStreams[i].pSyncedFrame != NULL)
 			{
-				m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pSyncedFrame);
+				m_frameManager.release(m_FrameSyncedStreams[i].pSyncedFrame);
 			}
 			m_FrameSyncedStreams[i].pSyncedFrame = NULL;
 		}
@@ -165,7 +165,6 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 	// Make sure frame holder is enabled.
 	if (!m_enabled)
 	{
-		pStream->frameRelease(pFrame);
 		return ONI_STATUS_OK;
 	}
 
@@ -184,7 +183,7 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 			// Release any old frame and store the new one.
 			if (m_FrameSyncedStreams[i].pLastFrame != NULL)
 			{
-				m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pLastFrame);
+				m_frameManager.release(m_FrameSyncedStreams[i].pLastFrame);
 				m_FrameSyncedStreams[i].pLastFrame = NULL;
 			}
 
@@ -192,10 +191,10 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 			if (m_FrameSyncedStreams[i].enabled)
 			{
 				m_FrameSyncedStreams[i].pLastFrame = pFrame;
+				m_frameManager.addRef(pFrame);
 			}
 			else
 			{
-				m_FrameSyncedStreams[i].pStream->frameRelease(pFrame);
 				--validFrameCount;
 			}
 		}
@@ -223,7 +222,7 @@ OniStatus SyncedStreamsFrameHolder::processNewFrame(VideoStream* pStream, OniFra
 			// Release the stored synced frame.
 			if (m_FrameSyncedStreams[i].pSyncedFrame != NULL)
 			{
-				m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pSyncedFrame);
+				m_frameManager.release(m_FrameSyncedStreams[i].pSyncedFrame);
 			}
 
 			// Replace synced frame with last frame.
@@ -283,12 +282,12 @@ void SyncedStreamsFrameHolder::clear()
 	{
 		if (m_FrameSyncedStreams[i].pLastFrame != NULL)
 		{
-			m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pLastFrame);
+			m_frameManager.release(m_FrameSyncedStreams[i].pLastFrame);
 			m_FrameSyncedStreams[i].pLastFrame = NULL;
 		}
 		if (m_FrameSyncedStreams[i].pSyncedFrame != NULL)
 		{
-			m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pSyncedFrame);
+			m_frameManager.release(m_FrameSyncedStreams[i].pSyncedFrame);
 			m_FrameSyncedStreams[i].pSyncedFrame = NULL;
 		}
 	}
@@ -317,12 +316,12 @@ void SyncedStreamsFrameHolder::setStreamEnabled(VideoStream* pStream, OniBool en
 			{
 				if (m_FrameSyncedStreams[i].pLastFrame != NULL)
 				{
-					m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pLastFrame);
+					m_frameManager.release(m_FrameSyncedStreams[i].pLastFrame);
 					m_FrameSyncedStreams[i].pLastFrame = NULL;
 				}
 				if (m_FrameSyncedStreams[i].pSyncedFrame != NULL)
 				{
-					m_FrameSyncedStreams[i].pStream->frameRelease(m_FrameSyncedStreams[i].pSyncedFrame);
+					m_frameManager.release(m_FrameSyncedStreams[i].pSyncedFrame);
 					m_FrameSyncedStreams[i].pSyncedFrame = NULL;
 				}
 			}

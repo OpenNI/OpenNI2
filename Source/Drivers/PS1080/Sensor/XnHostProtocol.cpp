@@ -35,6 +35,25 @@
 #define XN_USB_HOST_PROTOCOL_TIMEOUT_GETVERSION 5000
 #define XN_USB_HOST_PROTOCOL_TIMEOUT_SETPARAM 5000
 
+#define XN_USB_HOST_PROTOCOL_TIMEOUT_UPLOAD 180000
+#define XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS 180000
+#define XN_USB_HOST_PROTOCOL_TIMEOUT_BIST 300000
+#define XN_USB_HOST_PROTOCOL_TIMEOUT_EMITTER_DATA 60000
+
+#define XN_USB_HOST_PROTOCOL_FILE_UPLOAD_PRE_DELAY 250
+#define XN_USB_HOST_PROTOCOL_FILE_UPLOAD_POST_DELAY 0
+
+#define XN_LOG_TEXT_MESSAGE_V1_2	0x1000 
+#define XN_LOG_OVERFLOW_V1_2		0x1001
+
+#define XN_LOG_TEXT_MESSAGE_V3_0	0x1200
+#define XN_LOG_OVERFLOW_V3_0		0x1201
+
+#define XN_LOG_TEXT_MESSAGE_V4_0	0x1200
+#define XN_LOG_OVERFLOW_V4_0		0x1201
+
+#define XN_LOG_TEXT_MESSAGE_V5_0	0x5400
+#define XN_LOG_OVERFLOW_V5_0		0x5401
 
 #define XN_USB_HOST_PROTOCOL_SEND_RETRIES	5
 #define XN_HOST_PROTOCOL_NOT_READY_RETRIES	3
@@ -149,18 +168,19 @@ XnStatus XnHostProtocolUpdateSupportedImageModes(XnDevicePrivateData* pDevicePri
 	}
 	else
 	{
-		if (pDevicePrivateData->pSensor->GetCurrentUsbInterface() == XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS)
+		// old firmware. Just use what we know
+		switch (pDevicePrivateData->pSensor->GetCurrentUsbInterface())
 		{
+		case XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS:
 			nRetVal = pDevicePrivateData->FWInfo.imageModes.SetData(pDevicePrivateData->FWInfo._imageBulkModes.GetData(), pDevicePrivateData->FWInfo._imageBulkModes.GetSize());
 			XN_IS_STATUS_OK(nRetVal);
-		}
-		else if (pDevicePrivateData->pSensor->GetCurrentUsbInterface() == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS)
-		{
+			break;
+		case XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS:
 			nRetVal = pDevicePrivateData->FWInfo.imageModes.SetData(pDevicePrivateData->FWInfo._imageIsoModes.GetData(), pDevicePrivateData->FWInfo._imageIsoModes.GetSize());
 			XN_IS_STATUS_OK(nRetVal);
-		}
-		else
-		{
+			break;
+		default:
+			xnLogError(XN_MASK_DEVICE_SENSOR, "Unknown interface in old firmware (%d)", pDevicePrivateData->pSensor->GetCurrentUsbInterface());
 			XN_ASSERT(FALSE);
 			return XN_STATUS_ERROR;
 		}
@@ -169,7 +189,7 @@ XnStatus XnHostProtocolUpdateSupportedImageModes(XnDevicePrivateData* pDevicePri
 	return (XN_STATUS_OK);
 }
 
-XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb)
+XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb, XnBool bGuessed)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -182,7 +202,7 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.bMirrorSupported = FALSE;
 	pDevicePrivateData->FWInfo.bGetPresetsSupported = FALSE;
 	pDevicePrivateData->FWInfo.bDeviceInfoSupported = FALSE;
-	pDevicePrivateData->FWInfo.bAutoImageAdjustmentsSupported = FALSE;
+	pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = FALSE;
 
 	pDevicePrivateData->FWInfo.nOpcodeGetVersion = OPCODE_V017_GET_VERSION;
 	pDevicePrivateData->FWInfo.nOpcodeKeepAlive = OPCODE_V017_KEEP_ALIVE;
@@ -207,7 +227,30 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.nOpcodeGetPlatformString = OPCODE_INVALID;
 	pDevicePrivateData->FWInfo.nOpcodeGetUsbCore = OPCODE_GET_USB_CORE_TYPE;
 	pDevicePrivateData->FWInfo.nOpcodeSetLedState = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeEnableEmitter = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeGetLog = OPCODE_V017_GET_LOG;
+	pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot = OPCODE_V017_TAKE_SNAPSHOT;
+	pDevicePrivateData->FWInfo.nOpcodeInitFileUpload = OPCODE_V017_INIT_FILE_UPLOAD;
+	pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload = OPCODE_V017_WRITE_FILE_UPLOAD;
+	pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload = OPCODE_V017_FINISH_FILE_UPLOAD;
+	pDevicePrivateData->FWInfo.nOpcodeDownloadFile = OPCODE_V017_DOWNLOAD_FILE;
+	pDevicePrivateData->FWInfo.nOpcodeDeleteFile = OPCODE_V017_DELETE_FILE;
+	pDevicePrivateData->FWInfo.nOpcodeGetFlashMap = OPCODE_V017_GET_FLASH_MAP;
+	pDevicePrivateData->FWInfo.nOpcodeGetFileList = OPCODE_V017_GET_FILE_LIST;
+	pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeExecuteFile = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeReadFlash = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeBIST = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeSetGMCParams = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeGetCPUStats = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeCalibrateTec = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeGetTecData = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeGetEmitterData = OPCODE_INVALID;
+	pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault = OPCODE_INVALID;
 
+	pDevicePrivateData->FWInfo.nLogStringType = XN_LOG_TEXT_MESSAGE_V1_2;
+	pDevicePrivateData->FWInfo.nLogOverflowType = XN_LOG_OVERFLOW_V1_2;
 
 	pDevicePrivateData->FWInfo.nUSBDelayReceive = 100;
 	pDevicePrivateData->FWInfo.nUSBDelayExecutePreSend = 1;
@@ -222,6 +265,8 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 	pDevicePrivateData->FWInfo.bImageSupported = TRUE;
 	pDevicePrivateData->FWInfo.bIncreasedFpsCropSupported = FALSE;
 	pDevicePrivateData->FWInfo.bHasFilesystemLock = FALSE;
+
+	pDevicePrivateData->FWInfo.nISOLowDepthAlternativeInterface = (XnUInt8)(-1);
 
 	// depth cmos modes
 	pDevicePrivateData->FWInfo.depthModes.Clear();
@@ -301,7 +346,30 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.nOpcodeReadI2C = OPCODE_INVALID;
 		pDevicePrivateData->FWInfo.nOpcodeReadAHB = OPCODE_V110_READ_AHB;
 		pDevicePrivateData->FWInfo.nOpcodeWriteAHB = OPCODE_V110_WRITE_AHB;
+		pDevicePrivateData->FWInfo.nOpcodeGetLog = OPCODE_V110_GET_LOG;
+		pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot = OPCODE_V110_TAKE_SNAPSHOT;
+		pDevicePrivateData->FWInfo.nOpcodeInitFileUpload = OPCODE_V110_INIT_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload = OPCODE_V110_WRITE_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload = OPCODE_V110_FINISH_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeDownloadFile = OPCODE_V110_DOWNLOAD_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeDeleteFile = OPCODE_V110_DELETE_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeGetFlashMap = OPCODE_V110_GET_FLASH_MAP;
+		pDevicePrivateData->FWInfo.nOpcodeGetFileList = OPCODE_V110_GET_FILE_LIST;
+		pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute = OPCODE_V110_SET_FILE_ATTRIBUTES;
+		pDevicePrivateData->FWInfo.nOpcodeExecuteFile = OPCODE_V110_EXECUTE_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeReadFlash = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeBIST = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeSetGMCParams = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetCPUStats = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateTec = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetTecData = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetEmitterData = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault = OPCODE_INVALID;
 
+		// log system changed
+		pDevicePrivateData->FWInfo.nLogStringType = XN_LOG_TEXT_MESSAGE_V1_2;
+		pDevicePrivateData->FWInfo.nLogOverflowType = XN_LOG_OVERFLOW_V1_2;
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 1, 2, 0) >= 0)
@@ -338,7 +406,30 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.nOpcodeReadI2C = OPCODE_I2C_READ;
 		pDevicePrivateData->FWInfo.nOpcodeReadAHB = OPCODE_READ_AHB;
 		pDevicePrivateData->FWInfo.nOpcodeWriteAHB = OPCODE_WRITE_AHB;
+		pDevicePrivateData->FWInfo.nOpcodeGetLog = OPCODE_GET_LOG;
+		pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot = OPCODE_TAKE_SNAPSHOT;
+		pDevicePrivateData->FWInfo.nOpcodeInitFileUpload = OPCODE_INIT_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload = OPCODE_WRITE_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload = OPCODE_FINISH_FILE_UPLOAD;
+		pDevicePrivateData->FWInfo.nOpcodeDownloadFile = OPCODE_DOWNLOAD_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeDeleteFile = OPCODE_DELETE_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeGetFlashMap = OPCODE_GET_FLASH_MAP;
+		pDevicePrivateData->FWInfo.nOpcodeGetFileList = OPCODE_GET_FILE_LIST;
+		pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute = OPCODE_SET_FILE_ATTRIBUTES;
+		pDevicePrivateData->FWInfo.nOpcodeExecuteFile = OPCODE_EXECUTE_FILE;
+		pDevicePrivateData->FWInfo.nOpcodeReadFlash = OPCODE_READ_FLASH;
+		pDevicePrivateData->FWInfo.nOpcodeBIST = OPCODE_V300_BIST;
+		pDevicePrivateData->FWInfo.nOpcodeSetGMCParams = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetCPUStats = OPCODE_GET_CPU_STATS;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateTec = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetTecData = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeGetEmitterData = OPCODE_INVALID;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault = OPCODE_INVALID;
 
+		// log system changed
+		pDevicePrivateData->FWInfo.nLogStringType = XN_LOG_TEXT_MESSAGE_V3_0;
+		pDevicePrivateData->FWInfo.nLogOverflowType = XN_LOG_OVERFLOW_V3_0;
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 4, 0, 0) >= 0)
@@ -346,6 +437,13 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		// audio removed...
 		pDevicePrivateData->FWInfo.bAudioSupported = FALSE;
 
+		// opcodes added
+		pDevicePrivateData->FWInfo.nOpcodeBIST = OPCODE_BIST;
+		pDevicePrivateData->FWInfo.nOpcodeSetGMCParams = OPCODE_SET_GMC_PARAMS;
+
+		// log system changed
+		pDevicePrivateData->FWInfo.nLogStringType = XN_LOG_TEXT_MESSAGE_V4_0;
+		pDevicePrivateData->FWInfo.nLogOverflowType = XN_LOG_OVERFLOW_V4_0;
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 0, 0) >= 0)
@@ -359,6 +457,15 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 
 		// opcodes changes
 		pDevicePrivateData->FWInfo.nOpcodeSetCmosBlanking = OPCODE_SET_CMOS_BLANKING;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateTec = OPCODE_CALIBRATE_TEC;
+		pDevicePrivateData->FWInfo.nOpcodeGetTecData = OPCODE_GET_TEC_DATA;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter = OPCODE_CALIBRATE_EMITTER;
+		pDevicePrivateData->FWInfo.nOpcodeGetEmitterData = OPCODE_GET_EMITTER_DATA;
+		pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault = OPCODE_CALIBRATE_PROJECTOR_FAULT;
+
+		// log system changed
+		pDevicePrivateData->FWInfo.nLogStringType = XN_LOG_TEXT_MESSAGE_V5_0;
+		pDevicePrivateData->FWInfo.nLogOverflowType = XN_LOG_OVERFLOW_V5_0;
 
 		// ISO endpoints interface was added
 		pDevicePrivateData->FWInfo.nISOAlternativeInterface = 0;
@@ -481,6 +588,12 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.bGetPresetsSupported = TRUE;
 	}
 
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 3, 31) >= 0 && CompareVersion(nMajor, nMinor, nBuild, 5, 4, 0) < 0)
+	{
+		// file system lock was also added in 5.3.31 (a maintenance release), but it's not in newer versions (5.4 and above)
+		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
+	}
+
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 4, 0) >= 0)
 	{
 		pDevicePrivateData->FWInfo.nOpcodeGetSerialNumber = OPCODE_GET_SERIAL_NUMBER;
@@ -529,15 +642,29 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.bIncreasedFpsCropSupported = TRUE;
 	}
 
-	if (CompareVersion(nMajor, nMinor, nBuild, 5, 7, 10) >= 0)
-	{
-		pDevicePrivateData->FWInfo.bAutoImageAdjustmentsSupported = TRUE;
-	}
-
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 0) >= 0)
 	{
 		pDevicePrivateData->FWInfo.nOpcodeSetLedState = OPCODE_SET_LED_STATE;
-		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 2) >= 0)
+	{
+		pDevicePrivateData->FWInfo.bHasFilesystemLock = TRUE;		
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 9) >= 0)
+	{
+		pDevicePrivateData->FWInfo.bImageAdjustmentsSupported = TRUE;
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 15) >= 0)
+	{
+		pDevicePrivateData->FWInfo.nOpcodeEnableEmitter = OPCODE_ENABLE_EMITTER;	
+	}
+
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 16) >= 0)
+	{
+		pDevicePrivateData->FWInfo.nISOLowDepthAlternativeInterface = 2;
 	}
 
 	if (CompareVersion(nMajor, nMinor, nBuild, 5, 9, 0) >= 0)
@@ -545,8 +672,12 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Sensor version %d.%d.%x is newer than latest known. Trying to use 5.8 protocol...", nMajor, nMinor, nBuild);
 	}
 
-	nRetVal = XnHostProtocolUpdateSupportedImageModes(pDevicePrivateData);
-	XN_IS_STATUS_OK(nRetVal);
+	// If FW is already known, update image modes
+	if (!bGuessed)
+	{
+		nRetVal = XnHostProtocolUpdateSupportedImageModes(pDevicePrivateData);
+		XN_IS_STATUS_OK(nRetVal);
+	}
 
 	pDevicePrivateData->FWInfo.nCurrMode = XN_MODE_PS;
 	pDevicePrivateData->FWInfo.nFWVer = GetFWVersion(nMajor, nMinor, nBuild);
@@ -709,10 +840,28 @@ XnStatus ValidateReplyV26(const XnDevicePrivateData* pDevicePrivateData, XnUChar
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_PACKET_SIZE;
 		case NACK_BAD_PARAMS:
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS;
+		case NACK_I2C_TRANSACTION_FAILED:
+			return XN_STATUS_DEVICE_PROTOCOL_I2C_TRANSACTION_FAILED;
+		case NACK_FILE_NOT_FOUND:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_NOT_FOUND;
+		case NACK_FILE_CREATE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_CREATE_FAILURE;
+		case NACK_FILE_WRITE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_WRITE_FAILURE;
+		case NACK_FILE_DELETE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_DELETE_FAILURE;
+		case NACK_FILE_READ_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_READ_FAILURE;
 		case NACK_BAD_COMMAND_SIZE:
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_COMMAND_SIZE;
 		case NACK_NOT_READY:
 			return XN_STATUS_DEVICE_PROTOCOL_NOT_READY;
+		case NACK_OVERFLOW:
+			return XN_STATUS_DEVICE_PROTOCOL_OVERFLOW;
+		case NACK_OVERLAY_NOT_LOADED:
+			return XN_STATUS_DEVICE_PROTOCOL_OVERLAY_NOT_LOADED;
+		case NACK_FILE_SYSTEM_LOCKED:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_SYSTEM_LOCKED;
 		case NACK_UNKNOWN_ERROR:
 		default:
 			return XN_STATUS_DEVICE_PROTOCOL_UNKNOWN_ERROR;
@@ -783,6 +932,18 @@ XnStatus ValidateReplyV25(const XnDevicePrivateData* pDevicePrivateData, XnUChar
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_PACKET_SIZE;
 		case NACK_BAD_PARAMS:
 			return XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS;
+		case NACK_I2C_TRANSACTION_FAILED:
+			return XN_STATUS_DEVICE_PROTOCOL_I2C_TRANSACTION_FAILED;
+		case NACK_FILE_NOT_FOUND:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_NOT_FOUND;
+		case NACK_FILE_CREATE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_CREATE_FAILURE;
+		case NACK_FILE_WRITE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_WRITE_FAILURE;
+		case NACK_FILE_DELETE_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_DELETE_FAILURE;
+		case NACK_FILE_READ_FAILURE:
+			return XN_STATUS_DEVICE_PROTOCOL_FILE_READ_FAILURE;
 		case NACK_UNKNOWN_ERROR:
 		default:
 			return XN_STATUS_DEVICE_PROTOCOL_UNKNOWN_ERROR;
@@ -805,6 +966,22 @@ XnUInt32 XnHostProtocolGetTimeOut(const XnDevicePrivateData* pDevicePrivateData,
 		return XN_USB_HOST_PROTOCOL_TIMEOUT_GETVERSION;
 	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeSetParam)
 		return XN_USB_HOST_PROTOCOL_TIMEOUT_SETPARAM;
+	else if (nOpcode == pDevicePrivateData->FWInfo.nOpcodeInitFileUpload)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_UPLOAD;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeDeleteFile)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeDownloadFile)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_FILE_OPS;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeBIST)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_BIST;
+	else if  (nOpcode == pDevicePrivateData->FWInfo.nOpcodeGetEmitterData)
+		return XN_USB_HOST_PROTOCOL_TIMEOUT_EMITTER_DATA;
 	else
 		return XN_USB_HOST_PROTOCOL_TIMEOUT;
 }
@@ -913,6 +1090,12 @@ XnStatus XnHostProtocolExecute(const XnDevicePrivateData* pDevicePrivateData,
 		return (XN_STATUS_DEVICE_PROTOCOL_UNSUPPORTED_OPCODE);
 	}
 
+	// don't bother trying to communicate with the device if it was disconnected
+	if (pDevicePrivateData->pSensor->GetErrorState() == XN_STATUS_DEVICE_NOT_CONNECTED)
+	{
+		return (XN_STATUS_DEVICE_NOT_CONNECTED);
+	}
+
 	XnUInt32 nTimeOut = XnHostProtocolGetTimeOut(pDevicePrivateData, nOpcode);
 
 	// store request (in case we need to retry it)
@@ -930,7 +1113,21 @@ XnStatus XnHostProtocolExecute(const XnDevicePrivateData* pDevicePrivateData,
 		XN_IS_STATUS_OK(rc);
 
 		// Sleep before sending the control
-		xnOSSleep(pDevicePrivateData->FWInfo.nUSBDelayExecutePreSend);
+		if (nOpcode == pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload)
+		{
+			XnUInt64 nNow;
+			XnUInt64 nNow2;
+			xnOSGetHighResTimeStamp(&nNow);
+			xnOSGetHighResTimeStamp(&nNow2);
+			while (nNow2 - nNow < XN_USB_HOST_PROTOCOL_FILE_UPLOAD_PRE_DELAY)
+			{
+				xnOSGetHighResTimeStamp(&nNow2);
+			}
+		}
+		else
+		{
+			xnOSSleep(pDevicePrivateData->FWInfo.nUSBDelayExecutePreSend);
+		}
 
 		// Send request
 		rc = XnHostProtocolUSBSend(pDevicePrivateData, request, nSize, nTimeOut, bForceBulk);
@@ -941,7 +1138,14 @@ XnStatus XnHostProtocolExecute(const XnDevicePrivateData* pDevicePrivateData,
 		}
 
 		// Sleep before trying to read the reply
-		xnOSSleep(pDevicePrivateData->FWInfo.nUSBDelayExecutePostSend);
+		if (nOpcode == pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload)
+		{
+			nFailTimeout = XN_USB_HOST_PROTOCOL_FILE_UPLOAD_PRE_DELAY;
+		}
+		else
+		{
+			xnOSSleep(pDevicePrivateData->FWInfo.nUSBDelayExecutePostSend);
+		}
 
 		// receive reply
 		rc = XnHostProtocolReceiveReply(pDevicePrivateData, pBuffer, nTimeOut, nOpcode, nRequestId, &nRead, &nDataSize, ppRelevantBuffer, bForceBulk, nRecvTimeout, nFailTimeout);
@@ -991,6 +1195,141 @@ XnStatus XnHostProtocolExecute(const XnDevicePrivateData* pDevicePrivateData,
 	return XN_STATUS_OK;
 }
 
+#pragma pack (push, 1)
+typedef struct 
+{
+	XnUInt16 nEntrySize;
+	XnUInt32 nTimeStamp;
+	XnUInt16 nLogType;
+} XnLogEntryHeader;
+
+typedef struct
+{
+	XnUInt16 nLine;
+	XnUInt32 nParam;
+} XnLogDefaultData;
+#pragma pack(pop)
+
+XnStatus XnHostProtocolGetLog(XnDevicePrivateData* pDevicePrivateData, XnChar* csBuffer, XnUInt32 nBufferSize)
+{
+	XnStatus rc = XN_STATUS_OK;
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+
+	XnUChar allLogBuffer[XN_MAX_LOG_SIZE];
+
+	XnUInt nAllLogBytes = 0;
+
+	// loop until no more log is available
+	for (;;)
+	{
+		XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetLog);
+
+		XnUChar* pRelevantBuffer;
+		XnUInt16 nDataSize;
+
+		rc = XnHostProtocolExecute(pDevicePrivateData,
+			buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetLog,
+			&pRelevantBuffer, nDataSize);
+
+		XN_IS_STATUS_OK(rc);
+
+		if (nDataSize == 0) // no more log
+			break;
+
+		// translate to bytes
+		nDataSize *= sizeof(XnUInt16);
+
+		if (nAllLogBytes + nDataSize > XN_MAX_LOG_SIZE)
+		{
+			xnLogError(XN_MASK_SENSOR_PROTOCOL, "Log Buffer is too small. received %d bytes, but buffer is %d long", nAllLogBytes + nDataSize, XN_MAX_LOG_SIZE);
+			return XN_STATUS_INTERNAL_BUFFER_TOO_SMALL;
+		}
+
+		xnOSMemCopy(allLogBuffer + nAllLogBytes, pRelevantBuffer, nDataSize);
+		nAllLogBytes += nDataSize;
+	}
+
+	XnUChar* pCurrData = allLogBuffer;
+	XnUChar* pEndData = allLogBuffer + nAllLogBytes;
+
+	XnUInt32 nBufferUsed = 0;
+
+	// now parse it
+	while (pCurrData < pEndData)
+	{
+		XnLogEntryHeader* pLogEntryHeader = (XnLogEntryHeader*)pCurrData;
+		pCurrData += sizeof(XnLogEntryHeader);
+
+		pLogEntryHeader->nEntrySize = XN_PREPARE_VAR16_IN_BUFFER(pLogEntryHeader->nEntrySize);
+		pLogEntryHeader->nLogType = XN_PREPARE_VAR16_IN_BUFFER(pLogEntryHeader->nLogType);
+		pLogEntryHeader->nTimeStamp = XN_PREPARE_VAR32_IN_BUFFER(pLogEntryHeader->nTimeStamp);
+
+		// lower byte contains error type and higher contains module ID
+		XnUInt32 nCharsWritten = 0;
+
+		if (pLogEntryHeader->nLogType == pDevicePrivateData->FWInfo.nLogStringType)
+		{
+			// text messages are in wide characters
+			//XnWChar wcsMessage[600] = {0};
+
+			if (pLogEntryHeader->nEntrySize*sizeof(XnUInt16) > 600)
+			{
+				xnLogError(XN_MASK_SENSOR_PROTOCOL, "Got a log entry with %d bytes!", pLogEntryHeader->nEntrySize*sizeof(XnUInt16));
+				return XN_STATUS_INTERNAL_BUFFER_TOO_SMALL;
+			}
+
+			rc = xnOSStrFormat((XnChar*)csBuffer + nBufferUsed, nBufferSize - nBufferUsed, &nCharsWritten, "%u:\t", pLogEntryHeader->nTimeStamp);
+			XN_IS_STATUS_OK(rc);
+			nBufferUsed += nCharsWritten;
+
+			if (nBufferSize - nBufferUsed < pLogEntryHeader->nEntrySize)
+			{
+				xnLogError(XN_MASK_SENSOR_PROTOCOL, "Not enough space in user buffer!");
+				return XN_STATUS_OUTPUT_BUFFER_OVERFLOW;
+			}
+
+			for (XnUInt32 i = 0; i < pLogEntryHeader->nEntrySize; ++i)
+			{
+				csBuffer[nBufferUsed++] = pCurrData[i*2];
+			}
+
+			csBuffer[nBufferUsed++] = '\n';
+		}
+		else if (pLogEntryHeader->nLogType == pDevicePrivateData->FWInfo.nLogOverflowType)
+		{
+			rc = xnOSStrFormat((XnChar*)csBuffer + nBufferUsed, nBufferSize - nBufferUsed, &nCharsWritten, "%u:\tLog Overflow\n", pLogEntryHeader->nTimeStamp);
+			XN_IS_STATUS_OK(rc);
+
+			nBufferUsed += nCharsWritten;
+		}
+		else
+		{
+			XnLogDefaultData* pData = (XnLogDefaultData*)pCurrData;
+			
+			pData->nLine = XN_PREPARE_VAR16_IN_BUFFER(pData->nLine);
+			pData->nParam = XN_PREPARE_VAR16_IN_BUFFER(pData->nParam);
+
+			rc = xnOSStrFormat((XnChar*)csBuffer + nBufferUsed, nBufferSize - nBufferUsed, &nCharsWritten, 
+				"%u:\tModule: [0x%X], Error: [0x%X], Param: 0x%X, (Line: %d)\n", 
+				pLogEntryHeader->nTimeStamp, XnChar(pLogEntryHeader->nLogType >> 8), 
+				XnChar(pLogEntryHeader->nLogType), pData->nParam, pData->nLine);
+			XN_IS_STATUS_OK(rc);
+
+			nBufferUsed += nCharsWritten;
+		}
+
+		pCurrData += pLogEntryHeader->nEntrySize*sizeof(XnUInt16);
+	}
+
+	if (nBufferUsed > 0)
+	{
+		// add null termination
+		csBuffer[nBufferUsed] = '\0';
+		nBufferUsed++;
+	}
+
+	return XN_STATUS_OK;	
+}
 
 XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData, XnVersions& Version)
 {
@@ -1032,7 +1371,7 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	Version.SDK.nMaintenance = XN_PS_MAINTENANCE_VERSION;
 	Version.SDK.nBuild = XN_PS_BUILD_VERSION;
 
-	// find out hardware version (for pre-RD boards)
+	// find out hardware version
 	if (Version.nFPGA == XN_FPGA_VER_FPDB_26)
 	{
 		Version.HWVer = XN_SENSOR_HW_VER_FPDB_10;
@@ -1095,8 +1434,8 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	// find out sensor version
 	Version.SensorVer = XN_SENSOR_VER_UNKNOWN;
 
+	// in some firmwares, the HWVer was incorrect. Override according to firmware number
 	Version.FWVer = GetFWVersion(Version.nMajor, Version.nMinor, Version.nBuild);
-
 	if (Version.FWVer == XN_SENSOR_FW_VER_5_0)
 	{
 		Version.HWVer = XN_SENSOR_HW_VER_RD_5;
@@ -1111,7 +1450,15 @@ XnStatus XnHostProtocolGetVersion(const XnDevicePrivateData* pDevicePrivateData,
 	}
 	else if (Version.FWVer == XN_SENSOR_FW_VER_5_3)
 	{
-		Version.HWVer = XN_SENSOR_HW_VER_RD1081;
+		if (Version.nBuild < 28)
+		{
+			Version.HWVer = XN_SENSOR_HW_VER_RD1081;
+		}
+		else if (Version.nBuild == 28)
+		{
+			Version.HWVer = XN_SENSOR_HW_VER_RD1082;
+		}
+		// 5.3.29 and up returns valid HW versions, so no need to override anything
 	}
 	else if (Version.FWVer == XN_SENSOR_FW_VER_5_4)
 	{
@@ -1263,18 +1610,22 @@ XnStatus XnHostProtocolSetParam(XnDevicePrivateData* pDevicePrivateData, XnUInt1
 
 	XnInt32 nTimesLeft = 5;
 	XnStatus rc = XN_STATUS_ERROR;
-	while (rc != XN_STATUS_OK && rc != XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS && 
-		rc != XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND && nTimesLeft > 0)
+	while (nTimesLeft > 0)
 	{
 		rc = XnHostProtocolExecute(pDevicePrivateData, 
 										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16)*2, pDevicePrivateData->FWInfo.nOpcodeSetParam,
 										NULL, nDataSize, XnHostProtocolGetSetParamRecvTimeOut(pDevicePrivateData, nParam));
 		nTimesLeft--;
 
-		if (rc != XN_STATUS_OK)
+		if (rc == XN_STATUS_OK ||
+			rc == XN_STATUS_DEVICE_PROTOCOL_BAD_PARAMS || 
+			rc == XN_STATUS_DEVICE_NOT_CONNECTED ||
+			rc == XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND)
 		{
-			xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Retrying to set the param... rc=%d", rc);
+			break;
 		}
+
+		xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Retrying to set the param... rc=%d", rc);
 	}
 
 	if (rc != XN_STATUS_OK)
@@ -1675,6 +2026,319 @@ XnStatus XnHostProtocolSetCMOSRegisterI2C(XnDevicePrivateData* pDevicePrivateDat
 	return (XN_STATUS_OK);
 }
 
+XnStatus XnHostProtocolInitUpload(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset, XnUInt16 nAttributes,
+								  XnUInt32 nSizeInWords, XN_FILE_HANDLE &FileToUpload, XnUInt32& nNextOffset)
+{
+	XnStatus rc = XN_STATUS_OK;
+
+	if (pDevicePrivateData->FWInfo.bHasFilesystemLock)
+	{
+		rc = XnHostProtocolSetParam(pDevicePrivateData, PARAM_FILE_SYSTEM_LOCK, 0);
+		if (rc != XN_STATUS_OK)
+		{
+			xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Failed to unlock file system: %s", xnGetStatusString(rc));
+			return rc;
+		}
+	}
+
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	*(XnUInt32*)pDataBuf = XN_PREPARE_VAR32_IN_BUFFER(nOffset);
+	XnUInt32 *Size = (XnUInt32*)pDataBuf + 1;
+	*Size = XN_PREPARE_VAR32_IN_BUFFER(nSizeInWords);
+	XnUInt16 nHeaderSize;
+
+	if (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_1_1)
+	{
+		*((XnUInt16*)((XnUInt32*)pDataBuf+2)) = XN_PREPARE_VAR16_IN_BUFFER(nAttributes);
+		nHeaderSize = sizeof(XnUInt32)+sizeof(XnUInt32)+sizeof(XnUInt16);
+	}
+	else
+	{
+		nHeaderSize = sizeof(XnUInt32)+sizeof(XnUInt32);
+	}
+
+	XnUInt32 nReadFromFile = pDevicePrivateData->FWInfo.nProtocolMaxPacketSize - pDevicePrivateData->FWInfo.nProtocolHeaderSize - nHeaderSize;
+	xnOSSeekFile64(FileToUpload, XN_OS_SEEK_SET, 0);
+	xnOSReadFile(FileToUpload, pDataBuf + nHeaderSize, &nReadFromFile);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, nHeaderSize+nReadFromFile, pDevicePrivateData->FWInfo.nOpcodeInitFileUpload);
+
+	XnUInt16 nDataSize;
+	XnUInt32* pValue;
+	
+	XnHostProtocolExecute(pDevicePrivateData, 
+						  buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + nHeaderSize + (XnUInt16)nReadFromFile,
+						  pDevicePrivateData->FWInfo.nOpcodeInitFileUpload, (XnUChar**)(&pValue), nDataSize);
+
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	nNextOffset = XN_PREPARE_VAR32_IN_BUFFER(*pValue);
+
+	return XN_STATUS_OK;
+}
+
+XnStatus XnHostProtocolWriteUpload(XnDevicePrivateData* pDevicePrivateData, XN_FILE_HANDLE &FileToUpload, 
+								   XnUInt32 nOffset, XnUInt32 nFileSize, XnUInt32& nNextOffset)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	XnUInt32 nChunkSize = pDevicePrivateData->FWInfo.nProtocolMaxPacketSize - pDevicePrivateData->FWInfo.nProtocolHeaderSize - sizeof(XnUInt32);
+
+	if (nFileSize-nNextOffset*sizeof(XnUInt16) < nChunkSize)
+	{
+		nChunkSize = nFileSize-nNextOffset*sizeof(XnUInt16);
+	}
+
+	*(XnUInt32*)pDataBuf = XN_PREPARE_VAR32_IN_BUFFER(nOffset);
+	pDataBuf += sizeof(XnUInt32);
+
+	XnStatus rc = xnOSSeekFile64(FileToUpload, XN_OS_SEEK_SET, nNextOffset*sizeof(XnUInt16));
+	XN_IS_STATUS_OK(rc);
+
+	rc = xnOSReadFile(FileToUpload, pDataBuf, &nChunkSize);
+	XN_IS_STATUS_OK(rc);
+
+	if (nChunkSize == 1)
+	{
+		pDataBuf[nChunkSize] = 0;
+		nChunkSize++;
+	}
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt32)+nChunkSize, pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload);
+
+	XnUInt16 nDataSize;
+	XnUInt32* pValue;
+
+	rc = XnHostProtocolExecute(pDevicePrivateData, 
+								buffer, (XnUInt16)(pDevicePrivateData->FWInfo.nProtocolHeaderSize + sizeof(XnUInt32) + nChunkSize),
+								pDevicePrivateData->FWInfo.nOpcodeWriteFileUpload, (XnUChar**)(&pValue), nDataSize);
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	nNextOffset = XN_PREPARE_VAR32_IN_BUFFER(*pValue);
+
+	return XN_STATUS_OK;
+}
+
+XnStatus XnHostProtocolFinishUpload	(XnDevicePrivateData* pDevicePrivateData)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload);
+
+	XnUInt16 nDataSize;
+	
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize,
+		pDevicePrivateData->FWInfo.nOpcodeFinishFileUpload, NULL, nDataSize);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolFileUpload(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset,
+								  const XnChar* strFileName, XnUInt16 nAttributes)
+{
+	XnStatus rc;
+	XnUInt64 nFileSize;
+	XN_FILE_HANDLE UploadFile;
+
+	rc = xnOSGetFileSize64(strFileName, &nFileSize);
+	XN_IS_STATUS_OK(rc);
+
+	rc = xnOSOpenFile(strFileName, XN_OS_FILE_READ, &UploadFile);
+	XN_IS_STATUS_OK(rc);
+
+	if (nFileSize % 2 == 1)
+		nFileSize++;
+
+	XnUInt32 nNextOffset;
+
+	XnUInt64 nBefore;
+	xnOSGetTimeStamp(&nBefore);
+
+	rc = XnHostProtocolInitUpload(pDevicePrivateData, nOffset, nAttributes, (XnUInt32)nFileSize/sizeof(XnUInt16), UploadFile, nNextOffset);
+	if (rc != XN_STATUS_OK)
+	{
+		xnOSCloseFile(&UploadFile);
+		return (rc);
+	}
+
+	XnUInt64 nNow;
+	xnOSGetTimeStamp(&nNow);
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Initialized upload of %llu bytes in %llu ms", nFileSize, nNow - nBefore);
+
+	xnOSGetTimeStamp(&nBefore);
+
+	XnUInt32 nLastPrintBytes = 0;
+	while (nNextOffset*sizeof(XnUInt16) < nFileSize)
+	{
+		while ((nNextOffset*sizeof(XnUInt16) - nLastPrintBytes) > 5000)
+		{
+			printf(".");
+			nLastPrintBytes += 5000;
+		}
+
+		rc = XnHostProtocolWriteUpload(pDevicePrivateData, UploadFile, nNextOffset, (XnUInt32)nFileSize, nNextOffset);
+		if (rc != XN_STATUS_OK)
+		{
+			xnOSCloseFile(&UploadFile);
+			return (rc);
+		}
+	}
+	printf("\n");
+
+	xnOSGetTimeStamp(&nNow);
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Uploaded %llu bytes in %llu ms", nFileSize, nNow - nBefore);
+
+	rc = XnHostProtocolFinishUpload(pDevicePrivateData);
+	if (rc != XN_STATUS_OK)
+	{
+		xnOSCloseFile(&UploadFile);
+		return (rc);
+	}
+
+	xnOSCloseFile(&UploadFile);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolDeleteFile(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId)
+{
+	XnStatus rc = XN_STATUS_OK;
+
+	if (pDevicePrivateData->FWInfo.bHasFilesystemLock)
+	{
+		rc = XnHostProtocolSetParam(pDevicePrivateData, PARAM_FILE_SYSTEM_LOCK, 0);
+		if (rc != XN_STATUS_OK)
+		{
+			xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Failed to unlock file system: %s", xnGetStatusString(rc));
+			return rc;
+		}
+	}
+
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER(nFileId);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeDeleteFile);
+
+	XnUInt16 nDataSize;
+
+	rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeDeleteFile,
+										NULL, nDataSize);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolSetFileAttributes(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId, XnUInt16 nAttributes)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER(nFileId);
+	*(((XnUInt16*)pDataBuf)+1) = XN_PREPARE_VAR16_IN_BUFFER(nAttributes);
+
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 2*sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+2*sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeSetFileAttribute,
+										NULL, nDataSize);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolExecuteFile(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER(nFileId);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeExecuteFile);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeExecuteFile,
+										NULL, nDataSize);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolGetFlashMap(XnDevicePrivateData* pDevicePrivateData)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetFlashMap);
+
+	XnUInt nRead;
+	XnUChar* pRelevantBuffer;
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetFlashMap,
+										&pRelevantBuffer, nDataSize);
+	if (rc != XN_STATUS_OK)
+	{
+//		printf("Get Flash MapExecution failed\n");
+		return rc;
+	}
+
+	// Deal with specific log reply
+#pragma pack(push, 1)
+	typedef struct
+	{
+		XnUInt16 nFileType;
+		XnUInt32 nOffsetInFlash;
+		XnUInt32 nSizeInWords;
+		struct
+		{
+			XnUInt8 nMajor;
+			XnUInt8 nMinor;
+			XnUInt16 nBuild;
+		} Version;
+	} XnFlashEntry;
+#pragma pack (pop)
+
+	nRead = pDevicePrivateData->FWInfo.nProtocolHeaderSize+nDataSize*2;
+	XnFlashEntry* pFlashEntry;
+
+	// Go over log and print it out
+	while (pRelevantBuffer < buffer + nRead)
+	{
+		pFlashEntry = (XnFlashEntry*)pRelevantBuffer;
+
+		pFlashEntry->nFileType = XN_PREPARE_VAR16_IN_BUFFER(pFlashEntry->nFileType);
+		pFlashEntry->nOffsetInFlash = XN_PREPARE_VAR32_IN_BUFFER(pFlashEntry->nOffsetInFlash);
+		pFlashEntry->nSizeInWords = XN_PREPARE_VAR32_IN_BUFFER(pFlashEntry->nSizeInWords);
+		pFlashEntry->Version.nBuild = XN_PREPARE_VAR16_IN_BUFFER(pFlashEntry->Version.nBuild);
+
+		printf("File Type: %d\n", pFlashEntry->nFileType);
+		printf("Offset: %u\n", pFlashEntry->nOffsetInFlash);
+		printf("Size in Words: %u\n", pFlashEntry->nSizeInWords);
+		printf("Version: %d.%d.%d\n", pFlashEntry->Version.nMajor, pFlashEntry->Version.nMinor,
+			pFlashEntry->Version.nBuild);
+
+		pRelevantBuffer += sizeof(XnFlashEntry);
+	}
+
+	return XN_STATUS_OK;
+}
 
 #pragma pack (push, 1)
 typedef struct XnAlgorithmParamRequest
@@ -1773,6 +2437,311 @@ XnStatus XnHostProtocolAlgorithmParams(XnDevicePrivateData* pDevicePrivateData,
 	return XN_STATUS_OK;
 }
 
+XnStatus XnHostProtocolTakeSnapshot(XnDevicePrivateData* pDevicePrivateData, XnCMOSType nCMOS)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)nCMOS);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeTakeSnapshot,
+										NULL, nDataSize);
+
+	return rc;
+}
+
+XnStatus XnHostProtocolGetFileList(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFirstFileId, XnFlashFile* pFileList, XnUInt16& nNumOfEntries)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUChar* pRelevantBuffer;
+	XnUInt32 nBytesRead = 0;
+	XnBool bDone = false;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Getting file list");
+
+	for (;;)
+	{
+		*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER(nFirstFileId);
+
+		XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeGetFileList);
+
+		XnUInt16 nDataSize;
+
+		XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+			buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeGetFileList,
+			&pRelevantBuffer, nDataSize);
+		if (rc != XN_STATUS_OK)
+		{
+			return rc;
+		}
+
+		XnUInt32 DataSizeInBytes = nDataSize*sizeof(XnUInt16);
+
+		if (DataSizeInBytes == 0)
+		{
+			// Done
+			break;
+		}
+		if (nBytesRead + DataSizeInBytes > nNumOfEntries*sizeof(XnFlashFile))
+		{
+			DataSizeInBytes = nNumOfEntries*sizeof(XnFlashFile) - nBytesRead;
+			bDone = true;
+		}
+
+		xnOSMemCopy(((XnChar*)pFileList) + nBytesRead, pRelevantBuffer, DataSizeInBytes);
+
+		nBytesRead += DataSizeInBytes;
+		nFirstFileId = XN_PREPARE_VAR16_IN_BUFFER(pFileList[nBytesRead/sizeof(XnFlashFile)-1].nId)+1;
+
+		if (bDone)
+			break;
+	}
+
+	nNumOfEntries = (XnUInt16)(nBytesRead/sizeof(XnFlashFile));
+
+	return XN_STATUS_OK;
+}
+
+XnStatus XnHostProtocolFileDownloadChunk(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileType,
+										 XnUInt32 nOffset, XnChar* pData, XnUInt16& nChunkSize)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUChar* pRelevantBuffer;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER(nFileType);
+	*(XnUInt32*)((((XnUInt16*)pDataBuf)+1)) = XN_PREPARE_VAR32_IN_BUFFER(XnUInt32(nOffset/sizeof(XnUInt16)));
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16)+sizeof(XnUInt32), pDevicePrivateData->FWInfo.nOpcodeDownloadFile);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+										buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnUInt16)+sizeof(XnUInt32), pDevicePrivateData->FWInfo.nOpcodeDownloadFile,
+										&pRelevantBuffer, nDataSize);
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	if (nChunkSize < nDataSize*sizeof(XnUInt16))
+	{
+		// received too much.
+		return XN_STATUS_INTERNAL_BUFFER_TOO_SMALL;
+	}
+	
+	nChunkSize = nDataSize*sizeof(XnUInt16);
+
+	xnOSMemCopy(pData, pRelevantBuffer, nChunkSize);
+
+	return XN_STATUS_OK;
+	
+}
+
+XnStatus XnHostProtocolFileDownload(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileType,
+									const XnChar* strFileName)
+{
+	XN_FILE_HANDLE File;
+	XnStatus rc = XN_STATUS_OK;
+
+	rc = xnOSOpenFile(strFileName, XN_OS_FILE_WRITE|XN_OS_FILE_TRUNCATE, &File);
+	XN_IS_STATUS_OK(rc);
+
+	XnChar Buffer[MAX_PACKET_SIZE];
+	XnUInt16 nChunkSize = 0;
+	XnUInt32 nOffset = 0;
+	
+	XnUInt32 nLastPrintBytes = 0;
+
+	for (;;)
+	{
+		while ((nOffset - nLastPrintBytes) > 5000)
+		{
+			printf(".");
+			nLastPrintBytes += 5000;
+		}
+
+		nChunkSize = MAX_PACKET_SIZE;
+
+		rc = XnHostProtocolFileDownloadChunk(pDevicePrivateData, nFileType, nOffset, Buffer, nChunkSize);
+
+		if (rc != XN_STATUS_OK || nChunkSize == 0)
+		{
+			break;
+		}
+
+		rc = xnOSWriteFile(File, Buffer, nChunkSize);
+		if (rc != XN_STATUS_OK)
+			break;
+		nOffset += nChunkSize;
+	}
+
+	printf("\n");
+
+	xnOSCloseFile(&File);
+
+	return rc;
+}
+
+#define XN_HOST_PROTOCOL_INIT_BUFFER(pBuffer)	\
+	XnUChar* __pBuffer = (XnUChar*)pBuffer;	\
+	XnUInt16 __nBufferSize = 0;
+
+#define XN_HOST_PROTOCOL_APPEND_PARAM(type, param)	\
+	*(type*)__pBuffer = (type)param;				\
+	__pBuffer += sizeof(type);						\
+	__nBufferSize += sizeof(type);
+
+#define XN_HOST_PROTOCOL_SIZE	__nBufferSize
+
+XnStatus XnHostProtocolReadFlashChunk(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset, XnUChar* pData, XnUInt16* nChunkSize)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUChar* pRelevantBuffer;
+
+	XN_HOST_PROTOCOL_INIT_BUFFER(pDataBuf);
+	XN_HOST_PROTOCOL_APPEND_PARAM(XnUInt32, XN_PREPARE_VAR32_IN_BUFFER(nOffset));
+	XN_HOST_PROTOCOL_APPEND_PARAM(XnUInt16, XN_PREPARE_VAR16_IN_BUFFER(*nChunkSize));
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, XN_HOST_PROTOCOL_SIZE, pDevicePrivateData->FWInfo.nOpcodeReadFlash);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+XN_HOST_PROTOCOL_SIZE, pDevicePrivateData->FWInfo.nOpcodeReadFlash,
+		&pRelevantBuffer, nDataSize);
+
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	// words to bytes
+	if (*nChunkSize < nDataSize)
+	{
+		// received too much.
+		return XN_STATUS_INTERNAL_BUFFER_TOO_SMALL;
+	}
+
+	*nChunkSize = nDataSize;
+
+	// size is in words
+	xnOSMemCopy(pData, pRelevantBuffer, nDataSize*sizeof(XnUInt16));
+
+	return XN_STATUS_OK;
+
+}
+
+XnStatus XnHostProtocolReadFlash(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset, XnUInt32 nSize, XnUChar* pBuffer)
+{
+	XnStatus rc = XN_STATUS_OK;
+
+	XnUInt32 nLoopOffset = nOffset;
+	XnUInt16 nLoopChunkSize;
+	XnUInt32 nReadSize = 0;
+
+	XnUInt32 counter = 0;
+	while (nReadSize < nSize)
+	{
+		if (counter % 100 == 0)
+		{
+			printf(".");
+		}
+		counter++;
+
+		// don't ask for more than MAX UINT16
+		nLoopChunkSize = (XnUInt16)XN_MIN(nSize - nReadSize, 0xFFFF);
+
+		rc = XnHostProtocolReadFlashChunk(pDevicePrivateData, nLoopOffset, pBuffer + nReadSize*sizeof(XnUInt16), &nLoopChunkSize);
+
+		if (rc != XN_STATUS_OK)
+			return rc;
+
+		if (nLoopChunkSize == 0)
+			return XN_STATUS_ERROR;
+
+		nLoopOffset += nLoopChunkSize;
+		nReadSize += nLoopChunkSize;
+	}
+
+	printf("\n");
+
+	return rc;
+}
+
+XnStatus XnHostProtocolRunBIST(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nTestsMask, XnUInt32* pnFailures)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUInt32* pRelevantBuffer;
+
+	*(XnUInt16*)pDataBuf = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)nTestsMask);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeBIST);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + sizeof(XnUInt16), pDevicePrivateData->FWInfo.nOpcodeBIST,
+		(XnUChar**)&pRelevantBuffer, nDataSize);
+
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	// the UINT32 received has a bit turned on for each failed module, so if all are off, everything is OK.
+	*pnFailures = (*pRelevantBuffer);
+
+	return XN_STATUS_OK;
+}
+
+XnStatus XnHostProtocolGetCPUStats(XnDevicePrivateData* pDevicePrivateData, XnTaskCPUInfo* pTasks, XnUInt32 *pnTimesCount)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUInt32* pRelevantBuffer;
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetCPUStats);
+
+	XnUInt16 nDataSize;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetCPUStats,
+		(XnUChar**)&pRelevantBuffer, nDataSize);
+
+	if (rc != XN_STATUS_OK)
+	{
+		return rc;
+	}
+
+	// check how many numbers we got
+	XnUInt32 nCount = nDataSize * sizeof(XnUInt16) / sizeof(XnTaskCPUInfo);
+
+	// check if we have enough space in buffer
+	if (nCount > *pnTimesCount)
+	{
+		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "CPUStats: no space in buffer for all tasks. Dropping last %d", nCount - *pnTimesCount);
+		nCount = *pnTimesCount;
+	}
+
+	xnOSMemCopy(pTasks, pRelevantBuffer, nCount * sizeof(XnTaskCPUInfo));
+	for (XnUInt32 i = 0; i < nCount; i++)
+	{
+		pTasks[i].nTimesExecuted = XN_PREPARE_VAR32_IN_BUFFER(pTasks[i].nTimesExecuted);
+		pTasks[i].nTimeInMicroSeconds = XN_PREPARE_VAR32_IN_BUFFER(pTasks[i].nTimeInMicroSeconds);
+	}
+
+	*pnTimesCount = nCount;
+
+	return XN_STATUS_OK;
+}
 
 XnStatus XnHostProtocolSetAudioSampleRate(XnDevicePrivateData* pDevicePrivateData, XnSampleRate nSampleRate)
 {
@@ -1858,7 +2827,6 @@ XnStatus XnHostProtocolGetAudioSampleRate(XnDevicePrivateData* pDevicePrivateDat
 	return (XN_STATUS_OK);
 }
 
-
 XnStatus XnHostProtocolSetMultipleParams(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nNumOfParams, XnInnerParamData* anParams)
 {
 	XnUChar buffer[MAX_PACKET_SIZE] = {0};
@@ -1892,7 +2860,239 @@ XnStatus XnHostProtocolSetMultipleParams(XnDevicePrivateData* pDevicePrivateData
 	return rc;
 }
 
+#pragma pack (push, 1)
+typedef struct
+{
+	XnUInt16 nSetPoint;
+} XnCalibrateTecRequest;
+#pragma pack (pop)
 
+XnStatus XnHostProtocolCalibrateTec(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nSetPoint)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Calibrating TEC. Set Point: %d", nSetPoint);
+
+	XnCalibrateTecRequest* pRequest = (XnCalibrateTecRequest*)pDataBuf;
+	pRequest->nSetPoint = XN_PREPARE_VAR16_IN_BUFFER(nSetPoint);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnCalibrateTecRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateTec);
+
+	XnUInt16 nDataSize;
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+			buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnCalibrateTecRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateTec,
+			NULL, nDataSize);
+
+	if (rc != XN_STATUS_OK)
+		xnLogError(XN_MASK_SENSOR_PROTOCOL, "Failed Calibrating TEC: %s", xnGetStatusString(rc));
+	else
+		xnLogInfo(XN_MASK_SENSOR_PROTOCOL, "Calibrating TEC succeeded.");
+
+	return rc;
+}
+
+XnStatus XnHostProtocolGetTecData(XnDevicePrivateData* pDevicePrivateData, XnTecData* pTecData)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUInt16 nDataSize;
+	XnStatus rc;
+
+	if (pDevicePrivateData->FWInfo.nFWVer < XN_SENSOR_FW_VER_5_4)
+	{
+		xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Getting TEC data...");
+
+		XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetTecData);
+
+		XnTecData* pResult;
+
+		rc = XnHostProtocolExecute(pDevicePrivateData,
+			buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetTecData,
+			(XnUChar**)(&pResult), nDataSize);
+
+		XN_IS_STATUS_OK(rc);
+
+		pTecData->m_SetPointVoltage = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_SetPointVoltage);
+		pTecData->m_CompensationVoltage = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_CompensationVoltage);
+		pTecData->m_TecDutyCycle = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_TecDutyCycle);
+		pTecData->m_HeatMode = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_HeatMode);
+		pTecData->m_ProportionalError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_ProportionalError);
+		pTecData->m_IntegralError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_IntegralError);
+		pTecData->m_DerivativeError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_DerivativeError);
+		pTecData->m_ScanMode = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_ScanMode);
+	}
+	else
+	{
+		XnTecFastConvergenceData TecFastConvergenceData;
+
+		rc = XnHostProtocolGetTecFastConvergenceData(pDevicePrivateData, &TecFastConvergenceData);
+		XN_IS_STATUS_OK(rc);
+
+		pTecData->m_SetPointVoltage = 0;
+		pTecData->m_CompensationVoltage = 0;
+		pTecData->m_TecDutyCycle = TecFastConvergenceData.m_TecDutyCycle;
+		pTecData->m_HeatMode = TecFastConvergenceData.m_HeatMode;
+		pTecData->m_ProportionalError = TecFastConvergenceData.m_ProportionalError;
+		pTecData->m_IntegralError = TecFastConvergenceData.m_IntegralError;
+		pTecData->m_DerivativeError = TecFastConvergenceData.m_DerivativeError;
+
+		// Convert the new modes (post FW 5.4) into the old modes (pre 5.4). 
+		pTecData->m_ScanMode = (TecFastConvergenceData.m_ScanMode)-1;
+	}
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus XnHostProtocolGetTecFastConvergenceData (XnDevicePrivateData* pDevicePrivateData, XnTecFastConvergenceData* pTecData)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUInt16 nDataSize;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Getting TEC Fast Convergence data...");
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetFastConvergenceTEC);
+
+	XnTecFastConvergenceData* pResult;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetFastConvergenceTEC,
+		(XnUChar**)(&pResult), nDataSize);
+
+	XN_IS_STATUS_OK(rc);
+
+	pTecData->m_SetPointTemperature = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_SetPointTemperature);
+	pTecData->m_MeasuredTemperature = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_MeasuredTemperature);
+	pTecData->m_ProportionalError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_ProportionalError);
+	pTecData->m_IntegralError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_IntegralError);
+	pTecData->m_DerivativeError = XN_PREPARE_VAR32_IN_BUFFER(pResult->m_DerivativeError);
+	pTecData->m_ScanMode = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_ScanMode);
+	pTecData->m_HeatMode = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_HeatMode);
+	pTecData->m_TecDutyCycle = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_TecDutyCycle);
+	pTecData->m_TemperatureRange = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_TemperatureRange);
+
+	return (XN_STATUS_OK);
+}
+
+#pragma pack (push, 1)
+typedef struct
+{
+	XnUInt16 nSetPoint;
+} XnCalibrateEmitterRequest;
+#pragma pack (pop)
+
+XnStatus XnHostProtocolCalibrateEmitter(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nSetPoint)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Calibrating Emitter. Set Point: %d", nSetPoint);
+
+	XnCalibrateEmitterRequest* pRequest = (XnCalibrateEmitterRequest*)pDataBuf;
+	pRequest->nSetPoint = XN_PREPARE_VAR16_IN_BUFFER(nSetPoint);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnCalibrateEmitterRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter);
+
+	XnUInt16 nDataSize;
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData, 
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize+sizeof(XnCalibrateEmitterRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateEmitter,
+		NULL, nDataSize);
+
+	if (rc != XN_STATUS_OK)
+		xnLogError(XN_MASK_SENSOR_PROTOCOL, "Failed Calibrating Emitter: %s", xnGetStatusString(rc));
+	else
+		xnLogInfo(XN_MASK_SENSOR_PROTOCOL, "Calibrating Emitter succeeded.");
+
+	return rc;
+}
+
+XnStatus XnHostProtocolGetEmitterData(XnDevicePrivateData* pDevicePrivateData, XnEmitterData* pEmitterData)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUInt16 nDataSize;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Getting Emitter data...");
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, 0, pDevicePrivateData->FWInfo.nOpcodeGetEmitterData);
+
+	XnEmitterData* pResult;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize, pDevicePrivateData->FWInfo.nOpcodeGetEmitterData,
+		(XnUChar**)(&pResult), nDataSize);
+
+	XN_IS_STATUS_OK(rc);
+
+	pEmitterData->m_State = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_State);
+	pEmitterData->m_SetPointVoltage = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_SetPointVoltage);
+	pEmitterData->m_SetPointClocks = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_SetPointClocks);
+	pEmitterData->m_PD_Reading = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_PD_Reading);
+	pEmitterData->m_EmitterSet = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_EmitterSet);
+	pEmitterData->m_EmitterSettingLogic = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_EmitterSettingLogic);
+	pEmitterData->m_LightMeasureLogic = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_LightMeasureLogic);
+	pEmitterData->m_IsAPCEnabled = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_IsAPCEnabled);
+
+	// set some version specific fields
+	if (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_1)
+	{
+		pEmitterData->m_EmitterSetStepSize = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_EmitterSetStepSize);
+		pEmitterData->m_ApcTolerance = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_ApcTolerance);
+	}
+	else
+	{
+		pEmitterData->m_EmitterSetStepSize = 0;
+		pEmitterData->m_ApcTolerance = 0;
+	}
+
+	if (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_3)
+	{
+		pEmitterData->m_SubClocking = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_SubClocking);
+		pEmitterData->m_Precision = XN_PREPARE_VAR16_IN_BUFFER(pResult->m_Precision);
+	}
+	else
+	{
+		pEmitterData->m_SubClocking = 0;
+		pEmitterData->m_Precision = 0;
+	}
+
+	return (XN_STATUS_OK);
+}
+
+#pragma pack (push, 1)
+typedef struct
+{
+	XnUInt16 nMinThreshold;
+	XnUInt16 nMaxThreshold;
+} XnProjectorFaultRequest;
+#pragma pack (pop)
+
+XnStatus XnHostProtocolCalibrateProjectorFault(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nMinThreshold, XnUInt16 nMaxThreshold, XnBool* pbProjectorFaultEvent)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUInt16 nDataSize;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Testing Projector Fault. Min Threshold: %u, Max Threshold: %u...", nMinThreshold, nMaxThreshold);
+
+	XnProjectorFaultRequest* pRequest = (XnProjectorFaultRequest*)pDataBuf;
+	pRequest->nMinThreshold = XN_PREPARE_VAR16_IN_BUFFER(nMinThreshold);
+	pRequest->nMaxThreshold = XN_PREPARE_VAR16_IN_BUFFER(nMaxThreshold);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, sizeof(XnProjectorFaultRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault);
+
+	XnBool* pResult;
+
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + sizeof(XnProjectorFaultRequest), pDevicePrivateData->FWInfo.nOpcodeCalibrateProjectorFault,
+		(XnUChar**)(&pResult), nDataSize);
+
+	XN_IS_STATUS_OK(rc);
+
+	*pbProjectorFaultEvent = *pResult;
+
+	xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "Projector fault event: %d", *pResult);
+
+	return (XN_STATUS_OK);
+}
 
 XnStatus XnDeviceSensorGetDepthAGCParams(XnUInt16 nBin, XnUInt16* pnMinParam, XnUInt16* pnMaxParam)
 {
@@ -2211,6 +3411,36 @@ XnStatus XnHostProtocolSetLedState(XnDevicePrivateData* pDevicePrivateData, XnUI
 	XnUInt16 nDataSize;
 	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
 		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + (XnUInt16)nRequestSize, pDevicePrivateData->FWInfo.nOpcodeSetLedState,
+		NULL, nDataSize);
+	XN_IS_STATUS_OK(rc);
+
+	return (XN_STATUS_OK);
+}
+
+#pragma pack (push, 1)
+
+typedef struct XnVSetEmitterStateRequest
+{
+	XnUInt16 nActive;
+} XnVSetEmitterStateRequest;
+
+#pragma pack (pop)
+
+XnStatus XnHostProtocolSetEmitterState(XnDevicePrivateData* pDevicePrivateData, XnBool bActive)
+{
+	XnUChar buffer[MAX_PACKET_SIZE] = {0};
+	XnUChar* pDataBuf = buffer + pDevicePrivateData->FWInfo.nProtocolHeaderSize;
+	XnUInt32 nRequestSize;
+
+	XnVSetEmitterStateRequest* pRequest = (XnVSetEmitterStateRequest*)pDataBuf;
+	pRequest->nActive = XN_PREPARE_VAR16_IN_BUFFER((XnUInt16)bActive);
+	nRequestSize = sizeof(XnVSetEmitterStateRequest);
+
+	XnHostProtocolInitHeader(pDevicePrivateData, buffer, nRequestSize, pDevicePrivateData->FWInfo.nOpcodeEnableEmitter);
+
+	XnUInt16 nDataSize;
+	XnStatus rc = XnHostProtocolExecute(pDevicePrivateData,
+		buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + (XnUInt16)nRequestSize, pDevicePrivateData->FWInfo.nOpcodeEnableEmitter,
 		NULL, nDataSize);
 	XN_IS_STATUS_OK(rc);
 

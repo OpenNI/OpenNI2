@@ -33,7 +33,7 @@ class StreamFrameHolder : public FrameHolder
 public:
 
 	// Constructor.
-	StreamFrameHolder(VideoStream* pStream);
+	StreamFrameHolder(FrameManager& frameManager, VideoStream* pStream);
 
 	// Destructor.
 	virtual ~StreamFrameHolder();

@@ -26,7 +26,7 @@
         #include <GL/glut.h>
 #endif
 
-#include "../Common/OniSampleUtilities.h"
+#include "OniSampleUtilities.h"
 
 #define GL_WIN_SIZE_X	1280
 #define GL_WIN_SIZE_Y	1024

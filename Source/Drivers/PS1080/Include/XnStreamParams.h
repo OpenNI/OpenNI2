@@ -115,15 +115,10 @@ enum
 	XN_STREAM_PROPERTY_REGISTRATION							= 0x1080FF42, // "Registration"
 	/** Integer */
 	XN_STREAM_PROPERTY_DEVICE_MAX_DEPTH						= 0x1080FF43, // "DeviceMaxDepth"
-	/** Boolean */
-	XN_STREAM_PROPERTY_GMC_MODE								= 0x1080FF44, // "GmcMode"
-
 
 	//---------------------------------------------------------------------------
 	// Image Specific Properties
 	//---------------------------------------------------------------------------
-	/** Integer */ 
-	XN_STREAM_PROPERTY_FLICKER								= 0x1080FF50, // "Flicker"
 	/** Integer */ 
 	XN_STREAM_PROPERTY_QUALITY								= 0x1080FF51, // "Quality"
 
@@ -158,37 +153,19 @@ enum
 	XN_MODULE_PROPERTY_READ_WRITE_MODE						= 0x1080FF72, // "ReadWriteMode"
 	/** Boolean */
 	XN_MODULE_PROPERTY_FRAME_SYNC							= 0x1080FF73, // "FrameSync"
-	/** XnCmosBlankingUnits */
-	XN_MODULE_PROPERTY_CMOS_BLANKING_UNITS					= 0x1080FF74, // "CmosBlankingUnits"
-	/** XnCmosBlankingTime */
-	XN_MODULE_PROPERTY_CMOS_BLANKING_TIME					= 0x1080FF75, // "CmosBlankingTime"
 	/* XnDynamicSizeBuffer */
 	XN_MODULE_PROPERTY_FIXED_PARAMS							= 0x1080FF76, // "FixedParams"
-	/** Boolean */
-	XN_MODULE_PROPERTY_HOST_TIMESTAMPS						= 0x1080FF77, // "HostTimestamps"
-	/** Boolean */
-	XN_MODULE_PROPERTY_CLOSE_STREAMS_ON_SHUTDOWN			= 0x1080FF78, // "CloseStreamsOnShutdown"
 	/** Integer */
 	XN_MODULE_PROPERTY_ERROR_STATE							= 0x1080FF79, // "ErrorState"
-	/** String */
-	XN_MODULE_PROPERTY_PHYSICAL_DEVICE_NAME					= 0x1080FF7A, // "PhysicalDeviceName"
-	/** String */
-	XN_MODULE_PROPERTY_VENDOR_SPECIFIC_DATA					= 0x1080FF7B, // "VendorSpecificData"
-	/** String */
-	XN_MODULE_PROPERTY_SENSOR_PLATFORM_STRING				= 0x1080FF7C, // "SensorPlatformString"
 	/** Boolean */
 	XN_MODULE_PROPERTY_AUDIO_SUPPORTED						= 0x1080FF7D, // "AudioSupported"
 	/** Boolean */
 	XN_MODULE_PROPERTY_IMAGE_SUPPORTED						= 0x1080FF7E, // "ImageSupported"
-
-
 };
 
 //---------------------------------------------------------------------------
 // Defines
 //---------------------------------------------------------------------------
-#define XN_MAX_LOG_SIZE	(6*1024)
-
 #define XN_GAIN_AUTO	0U
 
 #define XN_QVGA_X_RES	320
@@ -199,8 +176,6 @@ enum
 #define XN_SXGA_Y_RES	1024
 #define XN_UXGA_X_RES	1600
 #define XN_UXGA_Y_RES	1200
-
-#define XN_IO_MAX_I2C_BUFFER_SIZE 10
 
 //---------------------------------------------------------------------------
 // Enums - values of various properties
@@ -228,15 +203,15 @@ typedef enum XnResolutions
 
 typedef enum XnSampleRate
 {
-        XN_SAMPLE_RATE_8K = 8000,
-        XN_SAMPLE_RATE_11K = 11025,
-        XN_SAMPLE_RATE_12K = 12000,
-        XN_SAMPLE_RATE_16K = 16000,
-        XN_SAMPLE_RATE_22K = 22050,
-        XN_SAMPLE_RATE_24K = 24000,
-        XN_SAMPLE_RATE_32K = 32000,
-        XN_SAMPLE_RATE_44K = 44100,
-        XN_SAMPLE_RATE_48K = 48000,
+    XN_SAMPLE_RATE_8K = 8000,
+    XN_SAMPLE_RATE_11K = 11025,
+    XN_SAMPLE_RATE_12K = 12000,
+    XN_SAMPLE_RATE_16K = 16000,
+    XN_SAMPLE_RATE_22K = 22050,
+    XN_SAMPLE_RATE_24K = 24000,
+    XN_SAMPLE_RATE_32K = 32000,
+    XN_SAMPLE_RATE_44K = 44100,
+    XN_SAMPLE_RATE_48K = 48000,
 } XnSampleRate;
 
 typedef enum
@@ -260,33 +235,11 @@ typedef enum
 	XN_AUDIO_STREAM_ON = 1,
 } XnAudioStreamMode;
 
-typedef enum XnFirmwareCroppingMode
-{
-	XN_FIRMWARE_CROPPING_MODE_DISABLED = 0,
-	XN_FIRMWARE_CROPPING_MODE_NORMAL = 1,
-	XN_FIRMWARE_CROPPING_MODE_INCREASED_FPS = 2,
-} XnFirmwareCroppingMode;
-
-
 //---------------------------------------------------------------------------
 // Data Structures - structures that are arguments to properties
 //---------------------------------------------------------------------------
 
 #pragma pack (push, 1)
-
-typedef struct XnCmosBlankingTime
-{
-	XnCMOSType nCmosID;
-	XnFloat nTimeInMilliseconds;
-	XnUInt16 nNumberOfFrames;
-} XnCmosBlankingTime;
-
-typedef struct XnCmosBlankingUnits
-{
-	XnCMOSType nCmosID;
-	XnUInt16 nUnits;
-	XnUInt16 nNumberOfFrames;
-} XnCmosBlankingUnits;
 
 typedef struct XnDynamicSizeBuffer
 {
@@ -301,25 +254,6 @@ typedef struct XnCmosPreset
 	XnUInt16 nResolution;
 	XnUInt16 nFPS;
 } XnCmosPreset;
-
-typedef struct XnI2CWriteData
-{
-	XnUInt16 nBus;
-	XnUInt16 nSlaveAddress;
-	XnUInt16 cpWriteBuffer[XN_IO_MAX_I2C_BUFFER_SIZE];
-	XnUInt16 nWriteSize;
-} XnI2CWriteData;
-
-typedef struct XnI2CReadData
-{
-	XnUInt16 nBus;
-	XnUInt16 nSlaveAddress;
-	XnUInt16 cpReadBuffer[XN_IO_MAX_I2C_BUFFER_SIZE];
-	XnUInt16 cpWriteBuffer[XN_IO_MAX_I2C_BUFFER_SIZE];
-	XnUInt16 nReadSize;
-	XnUInt16 nWriteSize;
-} XnI2CReadData;
-
 
 #pragma pack (pop)
 

@@ -37,7 +37,8 @@ XnSensorFixedParams::XnSensorFixedParams(XnDevicePrivateData* pDevicePrivateData
 	m_dZeroPlanePixelSize(0),
 	m_dEmitterDCmosDistance(0),
 	m_dDCmosRCmosDistance(0),
-	m_nImageCmosType(0)
+	m_nImageCmosType(0),
+	m_nDepthCmosType(0)
 {
 	m_strSensorSerial[0] = '\0';
 	m_deviceInfo.strDeviceName[0] = '\0';
@@ -54,6 +55,12 @@ XnStatus XnSensorFixedParams::Init()
 	nRetVal = XnHostProtocolGetFixedParams(m_pDevicePrivateData, FixedParams);
 	if (nRetVal != XN_STATUS_OK)
 	{
+		// Ugly patch since get param is not supported in maintenance mode!
+		if (nRetVal != XN_STATUS_DEVICE_PROTOCOL_INVALID_COMMAND)
+		{
+			return nRetVal;
+		}
+		return nRetVal;
 	}
 
 	if (m_pDevicePrivateData->FWInfo.nFWVer < XN_SENSOR_FW_VER_5_4)
@@ -84,6 +91,7 @@ XnStatus XnSensorFixedParams::Init()
 	m_nSensorImageCMOSI2CSlaveAddress = (XnUInt16)FixedParams.nImageCmosI2CAddress;
 	
 	m_nImageCmosType = (XnUInt32)FixedParams.nImageCmosType;
+	m_nDepthCmosType = (XnUInt32)FixedParams.nDepthCmosType;
 
 	nRetVal = XnHostProtocolAlgorithmParams(m_pDevicePrivateData, XN_HOST_PROTOCOL_ALGORITHM_DEVICE_INFO, 
 		&m_deviceInfo, sizeof(m_deviceInfo), (XnResolutions)0, 0);

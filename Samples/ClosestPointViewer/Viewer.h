@@ -30,6 +30,7 @@ class MyMwListener : public closest_point::ClosestPoint::Listener
 {
 public:
 	MyMwListener() : m_ready(false) {}
+	virtual ~MyMwListener() {}
 	void readyForNextData(closest_point::ClosestPoint* pClosestPoint)
 	{
 		openni::Status rc = pClosestPoint->getNextData(m_closest, m_frame);

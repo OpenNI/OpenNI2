@@ -48,7 +48,7 @@ class XnDeviceBase
 {
 public:
 	XnDeviceBase();
-	~XnDeviceBase();
+	virtual ~XnDeviceBase();
 
 	//---------------------------------------------------------------------------
 	// Properties Getters

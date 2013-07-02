@@ -114,6 +114,7 @@ typedef struct XnSpecificUsbDevice
 	XnUsbConnection* pUsbConnection;
 	XnUInt32 nIgnoreBytes;
 	XnUInt32 nChunkReadBytes;
+	XnUInt32 nNumberOfBuffers;
 	XnSpecificUsbDeviceState CurrState;
 	XnUInt32 nTimeout;
 } XnSpecificUsbDevice;
@@ -128,6 +129,6 @@ XnStatus XnCalculateExpectedImageSize(XnDevicePrivateData* pDevicePrivateData, X
 void XnProcessUncompressedDepthPacket(XnSensorProtocolResponseHeader* pCurrHeader, XnUChar* pData, XnUInt32 nDataSize, XnBool bEOP, XnSpecificUsbDevice* pSpecificDevice);
 XnStatus XnDeviceSensorProtocolUpdateImageProcessor(XnDevicePrivateData* pDevicePrivateData);
 
-
+XN_THREAD_PROC XnDeviceSensorProtocolScriptThread(XN_THREAD_PARAM pThreadParam);
 
 #endif //_XN_DEVICESENSORPROTOCOL_H_

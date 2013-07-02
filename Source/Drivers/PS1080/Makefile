@@ -6,7 +6,9 @@ INC_DIRS = \
 	. \
 	Include \
 	../../../Include \
-	../../../ThirdParty/PSCommon/XnLib/Include
+	../../../ThirdParty/PSCommon/XnLib/Include \
+	../../../ThirdParty/LibJPEG \
+	../../DepthUtils
 
 SRC_FILES = \
 	Core/*.cpp	\
@@ -27,9 +29,10 @@ endif
 LIB_NAME = PS1080
 
 LIB_DIRS += ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = XnLib dl pthread
+LIB_DIRS += $(BIN_DIR)/$(PLATFORM)-$(CFG)
+USED_LIBS = XnLib dl pthread DepthUtils
 ifneq ("$(OSTYPE)","Darwin")
-        USED_LIBS += rt usb-1.0
+        USED_LIBS += rt usb-1.0 udev
 else
 	USED_LIBS += usb-1.0.0
 endif

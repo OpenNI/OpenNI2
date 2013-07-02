@@ -21,5 +21,32 @@
 #ifndef __XN_NESA_DEBUG_PROCESSOR_H__
 #define __XN_NESA_DEBUG_PROCESSOR_H__
 
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
+#include "XnWholePacketProcessor.h"
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+
+class XnNesaDebugProcessor : public XnWholePacketProcessor
+{
+public:
+	XnNesaDebugProcessor(XnDevicePrivateData* pDevicePrivateData);
+	~XnNesaDebugProcessor();
+
+protected:
+	//---------------------------------------------------------------------------
+	// Overridden Functions
+	//---------------------------------------------------------------------------
+	virtual void ProcessWholePacket(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData);
+
+	//---------------------------------------------------------------------------
+	// Class Members
+	//---------------------------------------------------------------------------
+private:
+	XnDumpFile* m_Dump;
+};
 
 #endif //__XN_NESA_DEBUG_PROCESSOR_H__

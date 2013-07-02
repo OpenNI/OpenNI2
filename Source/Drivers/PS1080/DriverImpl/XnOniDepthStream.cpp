@@ -56,6 +56,8 @@ OniStatus XnOniDepthStream::getProperty(int propertyId, void* data, int* pDataSi
 
 		*(int*)data = 0;
 		return ONI_STATUS_OK;
+	case XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO:
+		return ((XnSensorDepthStream*)m_pDeviceStream)->GetSensorCalibrationInfo(data, pDataSize);
 	default:
 		return XnOniMapStream::getProperty(propertyId, data, pDataSize);
 	}
@@ -66,6 +68,7 @@ OniBool XnOniDepthStream::isPropertySupported(int propertyId)
 	return (
 		propertyId == ONI_STREAM_PROPERTY_MAX_VALUE ||
 		propertyId == ONI_STREAM_PROPERTY_MIN_VALUE ||
+		propertyId == XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO ||
 		XnOniMapStream::isPropertySupported(propertyId));
 }
 
@@ -138,6 +141,11 @@ void XnOniDepthStream::notifyAllProperties()
 
 	// depth-to-shift table
 	raisePropertyChanged(XN_STREAM_PROPERTY_D2S_TABLE, pDepthStream->GetDepthToShiftTable(), sizeof(XnUInt16)*(pDepthStream->GetDeviceMaxDepth()+1));
+
+	DepthUtilsSensorCalibrationInfo calibrationInfo;
+	size = sizeof(DepthUtilsSensorCalibrationInfo);
+	((XnSensorDepthStream*)m_pDeviceStream)->GetSensorCalibrationInfo(&calibrationInfo, &size);
+	raisePropertyChanged(XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO, &calibrationInfo, size);
 }
 
 OniStatus XnOniDepthStream::convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)

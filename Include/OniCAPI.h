@@ -75,6 +75,7 @@ ONI_C_API OniStatus oniDeviceCreateStream(OniDeviceHandle device, OniSensorType 
 
 ONI_C_API OniStatus oniDeviceEnableDepthColorSync(OniDeviceHandle device);
 ONI_C_API void oniDeviceDisableDepthColorSync(OniDeviceHandle device);
+ONI_C_API OniBool oniDeviceGetDepthColorSyncEnabled(OniDeviceHandle device);
 
 /** Set property in the device. Use the properties listed in OniTypes.h: ONI_DEVICE_PROPERTY_..., or specific ones supplied by the device. */
 ONI_C_API OniStatus oniDeviceSetProperty(OniDeviceHandle device, int propertyId, const void* data, int dataSize);
@@ -83,18 +84,21 @@ ONI_C_API OniStatus oniDeviceGetProperty(OniDeviceHandle device, int propertyId,
 /** Check if the property is supported by the device. Use the properties listed in OniTypes.h: ONI_DEVICE_PROPERTY_..., or specific ones supplied by the device. */
 ONI_C_API OniBool oniDeviceIsPropertySupported(OniDeviceHandle device, int propertyId);
 /** Invoke an internal functionality of the device. */
-ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, const void* data, int dataSize);
+ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, void* data, int dataSize);
 /** Check if a command is supported, for invoke */
 ONI_C_API OniBool oniDeviceIsCommandSupported(OniDeviceHandle device, int commandId);
 
 ONI_C_API OniBool oniDeviceIsImageRegistrationModeSupported(OniDeviceHandle device, OniImageRegistrationMode mode);
+
+/** @internal */
+ONI_C_API OniStatus oniDeviceOpenEx(const char* uri, const char* mode, OniDeviceHandle* pDevice);
 
 /******************************************** Stream APIs */
 
 /** Destroy an existing stream */
 ONI_C_API void oniStreamDestroy(OniStreamHandle stream);
 
-/** Get the OniSourceInfo of the certain stream. */
+/** Get the OniSensorInfo of the certain stream. */
 ONI_C_API const OniSensorInfo* oniStreamGetSensorInfo(OniStreamHandle stream);
 
 /** Start generating data from the stream. */
@@ -117,10 +121,11 @@ ONI_C_API OniStatus oniStreamGetProperty(OniStreamHandle stream, int propertyId,
 /** Check if the property is supported the stream. Use the properties listed in OniTypes.h: ONI_STREAM_PROPERTY_..., or specific ones supplied by the device for its streams. */
 ONI_C_API OniBool oniStreamIsPropertySupported(OniStreamHandle stream, int propertyId);
 /** Invoke an internal functionality of the stream. */
-ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, const void* data, int dataSize);
+ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, void* data, int dataSize);
 /** Check if a command is supported, for invoke */
 ONI_C_API OniBool oniStreamIsCommandSupported(OniStreamHandle stream, int commandId);
-// handle registration of pixel
+/** Sets the stream buffer allocation functions. Note that this function may only be called while stream is not started. */
+ONI_C_API OniStatus oniStreamSetFrameBuffersAllocator(OniStreamHandle stream, OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie);
 
 ////
 /** Mark another user of the frame. */
@@ -187,4 +192,68 @@ ONI_C_API OniStatus oniCoordinateConverterWorldToDepth(OniStreamHandle depthStre
 
 ONI_C_API OniStatus oniCoordinateConverterDepthToColor(OniStreamHandle depthStream, OniStreamHandle colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
+/******************************************** Log APIs */
+
+/** 
+ * Change the log output folder
+
+ * @param const char * strOutputFolder	[in]	path to the desirebale folder
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogOutputFolder(const char* strOutputFolder);
+
+/** 
+ * Get the current log file name
+
+ * @param	char * strFileName	[out]	hold the returned file name
+ * @param	int nBufferSize	[in]	size of strFileName
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniGetLogFileName(char* strFileName, int nBufferSize);
+
+/** 
+ * Set the Minimum severity for log produce 
+
+ * @param	const char * strMask	[in]	Name of the logger
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogMinSeverity(int nMinSeverity);
+
+/** 
+ * Configures if log entries will be printed to console.
+
+ * @param	OniBool bConsoleOutput	[in]	TRUE to print log entries to console, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogConsoleOutput(OniBool bConsoleOutput);
+
+/** 
+ * Configures if log entries will be printed to a log file.
+
+ * @param	OniBool bFileOutput	[in]	TRUE to print log entries to the file, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogFileOutput(OniBool bFileOutput);
+
+#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+/** 
+ * Configures if log entries will be printed to the Android log.
+
+ * @param	OniBool bAndroidOutput	[in]	TRUE to print log entries to the Android log, FALSE otherwise.
+ *
+ * @retval ONI_STATUS_OK Upon successful completion.
+ * @retval ONI_STATUS_ERROR Upon any kind of failure.
+ */
+ONI_C_API OniStatus oniSetLogAndroidOutput(OniBool bAndroidOutput);
+#endif
 #endif // _ONI_C_API_H_

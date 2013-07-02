@@ -412,6 +412,14 @@ XN_C_API XnLogger* XN_LOGGER_RETVAL_CHECKS;
 		XN_ASSERT(FALSE);																				\
 		return (nRetVal);																				\
 	}
+/** The same, but returns a different value **/
+#define XN_IS_STATUS_OK_LOG_ERROR_RET(what, xnStatus, retVal)														\
+	if (xnStatus != XN_STATUS_OK)																		\
+{																									\
+	xnLoggerError(XN_LOGGER_RETVAL_CHECKS, "Failed to " what ": %s", xnGetStatusString(xnStatus));	\
+	XN_ASSERT(FALSE);																				\
+	return (retVal);																				\
+}
 
 
 #ifndef __XN_NO_BC__

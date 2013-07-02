@@ -123,7 +123,6 @@ void KinectStreamImpl::mainLoop()
 		{
 			HRESULT hr;
 			NUI_IMAGE_FRAME imageFrame;
-			OniDriverFrame* pFrame = NULL;
 			hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_hStreamHandle, 0, &imageFrame);
 			if (FAILED(hr))
 			{
@@ -244,22 +243,22 @@ void KinectStreamImpl::setDefaultVideoMode()
 	case ONI_SENSOR_COLOR:
 		m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_RGB888;
 		m_videoMode.fps         = DEFAULT_FPS;
-		m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-		m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+		m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+		m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 		break;
 
 	case ONI_SENSOR_DEPTH:
 		m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
 		m_videoMode.fps         = DEFAULT_FPS;
-		m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-		m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+		m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+		m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 		break;
 
 	case ONI_SENSOR_IR:
 		m_videoMode.pixelFormat = ONI_PIXEL_FORMAT_GRAY8;
 		m_videoMode.fps         = DEFAULT_FPS;
-		m_videoMode.resolutionX = KINNECT_RESOLUTION_X_640;
-		m_videoMode.resolutionY = KINNECT_RESOLUTION_Y_480;
+		m_videoMode.resolutionX = KINECT_RESOLUTION_X_640;
+		m_videoMode.resolutionY = KINECT_RESOLUTION_Y_480;
 		break;
 	default:
 		;
@@ -269,19 +268,19 @@ void KinectStreamImpl::setDefaultVideoMode()
 NUI_IMAGE_RESOLUTION KinectStreamImpl::getNuiImagResolution(int resolutionX, int resolutionY)
 {
 	NUI_IMAGE_RESOLUTION imgResolution = NUI_IMAGE_RESOLUTION_320x240;
-	if (resolutionX == KINNECT_RESOLUTION_X_80 && resolutionY == KINNECT_RESOLUTION_Y_60 )
+	if (resolutionX == KINECT_RESOLUTION_X_80 && resolutionY == KINECT_RESOLUTION_Y_60 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_80x60;
 	} 
-	else if (resolutionX == KINNECT_RESOLUTION_X_320 && resolutionY == KINNECT_RESOLUTION_Y_240 )
+	else if (resolutionX == KINECT_RESOLUTION_X_320 && resolutionY == KINECT_RESOLUTION_Y_240 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_320x240;
 	}
-	else if (resolutionX == KINNECT_RESOLUTION_X_640 && resolutionY == KINNECT_RESOLUTION_Y_480 )
+	else if (resolutionX == KINECT_RESOLUTION_X_640 && resolutionY == KINECT_RESOLUTION_Y_480 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_640x480;
 	}
-	else if (resolutionX == KINNECT_RESOLUTION_X_1280 && resolutionY == KINNECT_RESOLUTION_Y_960 )
+	else if (resolutionX == KINECT_RESOLUTION_X_1280 && resolutionY == KINECT_RESOLUTION_Y_960 )
 	{
 		imgResolution = NUI_IMAGE_RESOLUTION_1280x960;
 	}

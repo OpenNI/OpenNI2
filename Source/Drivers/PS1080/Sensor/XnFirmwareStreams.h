@@ -75,7 +75,12 @@ private:
 	XnDataProcessorHolder m_DepthProcessor;
 	XnDataProcessorHolder m_ImageProcessor;
 	XnDataProcessorHolder m_AudioProcessor;
-
+	XnDataProcessorHolder m_GMCDebugProcessor;
+	XnDataProcessorHolder m_WavelengthCorrectionDebugProcessor;
+	XnDataProcessorHolder m_TecDebugProcessor;
+	XnDataProcessorHolder m_NesaDebugProcessor;
+	XnDataProcessorHolder m_GeneralDebugProcessor1;
+	XnDataProcessorHolder m_GeneralDebugProcessor2;
 };
 
 #endif //__XN_FIRMWARE_STREAMS_H__

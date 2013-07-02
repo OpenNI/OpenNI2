@@ -35,7 +35,7 @@ typedef void (ONI_CALLBACK_TYPE* OniDriverDeviceConnected)(const OniDeviceInfo*,
 typedef void (ONI_CALLBACK_TYPE* OniDriverDeviceDisconnected)(const OniDeviceInfo*, void* pCookie);
 typedef void (ONI_CALLBACK_TYPE* OniDriverDeviceStateChanged)(const OniDeviceInfo*, OniDeviceState, void* pCookie);
 
-typedef void (ONI_CALLBACK_TYPE* OniDriverNewFrame)(void* streamHandle, OniDriverFrame*, void* pCookie);
+typedef void (ONI_CALLBACK_TYPE* OniDriverNewFrame)(void* streamHandle, OniFrame*, void* pCookie);
 typedef void (ONI_CALLBACK_TYPE* OniDriverPropertyChanged)(void* sender, int propertyId, const void* data, int dataSize, void* pCookie);
 
 struct Funcs
@@ -50,12 +50,12 @@ struct Funcs
 	OniStatus (ONI_C_DECL* oniDriverTryDevice)(const char* uri);
 
 	// As Device
-	void* (ONI_C_DECL* oniDriverDeviceOpen)(const char* uri);
+	void* (ONI_C_DECL* oniDriverDeviceOpen)(const char* uri, const char* mode);
 	void (ONI_C_DECL* oniDriverDeviceClose)(void* deviceHandle);
 
 	OniStatus (ONI_C_DECL* oniDriverDeviceGetSensorInfoList)(void* deviceHandle, OniSensorInfo** pSensors, int* numSensors);
 
-	void* (ONI_C_DECL* oniDriverDeviceCreateStream)(void* deviceHandle, OniSensorType sensorType); // return streamId
+	void* (ONI_C_DECL* oniDriverDeviceCreateStream)(void* deviceHandle, OniSensorType sensorType);
 	void (ONI_C_DECL* oniDriverDeviceDestroyStream)(void* deviceHandle, void* streamHandle);
 
 	OniStatus (ONI_C_DECL* oniDriverDeviceSetProperty)(void* deviceHandle, int propertyId, const void* data, int dataSize);
@@ -69,6 +69,7 @@ struct Funcs
 	OniBool (ONI_C_DECL* oniDriverDeviceIsImageRegistrationModeSupported)(void* deviceHandle, OniImageRegistrationMode mode);
 
 	// As Stream
+	void (ONI_C_DECL* oniDriverStreamSetServices)(void* streamHandle, OniStreamServices* pServices);
 	OniStatus (ONI_C_DECL* oniDriverStreamSetProperty)(void* streamHandle, int propertyId, const void* data, int dataSize);
 	OniStatus (ONI_C_DECL* oniDriverStreamGetProperty)(void* streamHandle, int propertyId, void* data, int* pDataSize);
 	OniBool (ONI_C_DECL* oniDriverStreamIsPropertySupported)(void* streamHandle, int propertyId);
@@ -80,9 +81,9 @@ struct Funcs
 	OniStatus (ONI_C_DECL* oniDriverStreamStart)(void* streamHandle);
 	void (ONI_C_DECL* oniDriverStreamStop)(void* streamHandle);
 
+	int (ONI_C_DECL* oniDriverStreamGetRequiredFrameSize)(void* streamHandle);
+
 	void (ONI_C_DECL* oniDriverStreamSetNewFrameCallback)(void* streamHandle, OniDriverNewFrame handler, void* pCookie);
-	void (ONI_C_DECL* oniDriverStreamAddRefToFrame)(void* streamHandle, OniDriverFrame* pFrame);
-	void (ONI_C_DECL* oniDriverStreamReleaseFrame)(void* streamHandle, OniDriverFrame* pFrame);
 	OniStatus (ONI_C_DECL* oniDriverStreamConvertDepthToColorCoordinates)(void* depthStreamHandle, void* colorStreamHandle, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
 	void* (ONI_C_DECL* oniDriverEnableFrameSync)(void** pStreamHandles, int streamCount);
@@ -117,9 +118,9 @@ public:
 		return (*funcs.oniDriverTryDevice)(uri);
 	}
 
-	void* deviceOpen(const char* uri) const 
+	void* deviceOpen(const char* uri, const char* mode) const 
 	{
-		return (*funcs.oniDriverDeviceOpen)(uri);
+		return (*funcs.oniDriverDeviceOpen)(uri, mode);
 	}
 	void deviceClose(void* deviceHandle) const 
 	{
@@ -179,6 +180,10 @@ public:
 	}
 	////////////////////////////
 
+	void streamSetServices(void* streamHandle, OniStreamServices* pServices) const
+	{
+		(*funcs.oniDriverStreamSetServices)(streamHandle, pServices);
+	}
 	OniStatus streamSetProperty(void* streamHandle, int propertyId, const void* data, int dataSize) const
 	{
 		return (*funcs.oniDriverStreamSetProperty)(streamHandle, propertyId, data, dataSize);
@@ -217,19 +222,14 @@ public:
 		(*funcs.oniDriverStreamStop)(streamHandle);
 	}
 
+	int streamGetRequiredFrameSize(void* streamHandle) const
+	{
+		return (*funcs.oniDriverStreamGetRequiredFrameSize)(streamHandle);
+	}
+
 	void streamSetNewFrameCallback(void* streamHandle, OniDriverNewFrame handler, void* pCookie) const 
 	{
 		(*funcs.oniDriverStreamSetNewFrameCallback)(streamHandle, handler, pCookie);
-	}
-
-	void streamAddRefToFrame(void* streamHandle, OniDriverFrame* pFrame) const 
-	{ 
-		(*funcs.oniDriverStreamAddRefToFrame)(streamHandle, pFrame);
-	}
-
-	void streamReleaseFrame(void* streamHandle, OniDriverFrame* pFrame) const 
-	{ 
-		(*funcs.oniDriverStreamReleaseFrame)(streamHandle, pFrame);
 	}
 
 	OniStatus convertDepthPointToColor(void* depthStreamHandle, void* colorStreamHandle, int depthX, int depthY, OniDepthPixel DepthZ, int* pColorX, int* pColorY) const

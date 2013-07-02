@@ -15,16 +15,16 @@
 #############################################################################
 
 # take this file's dir
-COMMON_CS_MAKE_FILE_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
+COMMON_JAVA_MAKE_FILE_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
 
-include $(COMMON_CS_MAKE_FILE_DIR)CommonDefs.mak
+include $(COMMON_JAVA_MAKE_FILE_DIR)CommonDefs.mak
 
 nullstring :=
 space := $(nullstring) # end of the line
 
 USED_JARS_OPTION =
 ifneq "$(USED_JARS)" ""
-	USED_JARS_PATH = $(foreach jar, $(USED_JARS), $(OUT_DIR)/$(jar).jar /usr/share/java/$(jar).jar)
+	USED_JARS_PATH = $(foreach jar, $(USED_JARS), $(OUT_DIR)/$(jar).jar)
 	USED_JARS_OPTION = -cp $(subst $(space),:,$(strip $(USED_JARS_PATH)))
 endif
 
@@ -37,13 +37,13 @@ JAR_OPTIONS = -cf
 
 ifneq (, $(if $(or $(MAIN_CLASS), $(USED_JARS)),1))
 	JAR_OPTIONS = -cfm
-	MANIFEST_FILE = Manifest.txt
+	MANIFEST_FILE = $(INT_DIR)/Manifest.txt
 	JAR_MANIFEST_CREATE_COMMAND = (
 	ifneq (,$(MAIN_CLASS))
 		JAR_MANIFEST_CREATE_COMMAND += echo "Main-Class: $(MAIN_CLASS)";
 	endif
 	ifneq (,$(USED_JARS))
-		JAR_MANIFEST_CREATE_COMMAND += echo "Class-Path: $(USED_JARS_PATH)";
+		JAR_MANIFEST_CREATE_COMMAND += echo "Class-Path: $(foreach jar, $(USED_JARS), $(jar).jar)";
 	endif
 	JAR_MANIFEST_CREATE_COMMAND += ) > $(MANIFEST_FILE)
 endif
@@ -51,29 +51,26 @@ endif
 CREATE_SHORTCUT = 
 ifneq (, $(MAIN_CLASS))
 	SHORTCUT = $(OUT_DIR)/$(JAR_NAME)
-	CREATE_SHORTCUT = echo java -jar $(OUTPUT_NAME) > $(SHORTCUT); chmod +x $(SHORTCUT)
+	CREATE_SHORTCUT = echo LD_LIBRARY_PATH=. java -jar $(OUTPUT_NAME) > $(SHORTCUT); chmod +x $(SHORTCUT)
 endif
 
 #############################################################################
 # Targets
 #############################################################################
-include $(COMMON_CS_MAKE_FILE_DIR)CommonTargets.mak
+include $(COMMON_JAVA_MAKE_FILE_DIR)CommonTargets.mak
 
 .PHONY: clean-manifest clean-int
 
 # Final output file
-$(OUTPUT_FILE): | $(INT_DIR)
+$(OUTPUT_FILE): $(SRC_FILES_LIST) | $(OUT_DIR) $(INT_DIR)
 	javac $(USED_JARS_OPTION) -d $(INT_DIR) $(SRC_FILES)
 	$(JAR_MANIFEST_CREATE_COMMAND)
 	jar $(JAR_OPTIONS) $@ $(MANIFEST_FILE) -C $(INT_DIR) .
 	$(CREATE_SHORTCUT)
 
-clean-manifest:
-	rm -rf $(MANIFEST_FILE)
-	
 clean-int:
 	rm -rf $(INT_DIR)
 	
-clean: clean-manifest clean-int
+clean: clean-int
 
 

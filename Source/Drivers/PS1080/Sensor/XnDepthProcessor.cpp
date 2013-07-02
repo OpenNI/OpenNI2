@@ -142,7 +142,7 @@ void XnDepthProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeade
 	{
 		if (m_applyRegistrationOnEnd)
 		{
-			GetStream()->GetRegistration().Apply((OniDepthPixel*)GetWriteBuffer()->GetData());
+			GetStream()->ApplyRegistration((OniDepthPixel*)GetWriteBuffer()->GetData());
 		}
 	}
 
@@ -182,19 +182,17 @@ void XnDepthProcessor::PadPixels(XnUInt32 nPixels)
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
 
 	// check for overflow
-	if (!CheckDepthBufferForOverflow(nPixels * sizeof(OniDepthPixel)))
+	if (!CheckWriteBufferForOverflow(nPixels * sizeof(OniDepthPixel)))
 	{
 		return;
 	}
 
-	OniDepthPixel* pDepth = GetDepthOutputBuffer();
-	OniDepthPixel* pShift = GetShiftsOutputBuffer();
+	OniDepthPixel* pDepth = (OniDepthPixel*)GetWriteBuffer()->GetUnsafeWritePointer();
 
 	// place the no-depth value
-	for (XnUInt32 i = 0; i < nPixels; ++i, ++pDepth, ++pShift)
+	for (XnUInt32 i = 0; i < nPixels; ++i, ++pDepth)
     {
 		*pDepth = m_noDepthValue;
-		*pShift = 0;
     }
 	pWriteBuffer->UnsafeUpdateSize(nPixels * sizeof(OniDepthPixel));
 }

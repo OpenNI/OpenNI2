@@ -178,8 +178,9 @@ private:
     XnBool    m_needRollback;
 };
 
-Recorder::Recorder(xnl::ErrorLogger& errorLogger, OniRecorderHandle handle)
-        : m_errorLogger(errorLogger), 
+Recorder::Recorder(FrameManager& frameManager, xnl::ErrorLogger& errorLogger, OniRecorderHandle handle)
+        : m_frameManager(frameManager),
+          m_errorLogger(errorLogger), 
           m_handle(handle),
           m_maxId(0),
           m_configurationId(0),
@@ -311,7 +312,7 @@ OniStatus Recorder::record(VideoStream& stream, OniFrame& aFrame)
         return ONI_STATUS_BAD_PARAMETER;
     }
     OniFrame* pFrame = &aFrame;
-    pStream->frameAddRef(pFrame);
+    m_frameManager.addRef(pFrame);
     send(Message::MESSAGE_RECORD, pStream, pFrame);
     return ONI_STATUS_OK;
 }
@@ -426,7 +427,7 @@ void Recorder::messagePump()
                         m_streams[msg.pStream].lastInputTimestamp = msg.pFrame->timestamp;
                         m_streams[msg.pStream].lastOutputTimestamp = timestamp;
                         onRecord(i->Value().nodeId, pCodec, msg.pFrame, frameId, timestamp);
-                        msg.pStream->frameRelease(msg.pFrame);
+                        m_frameManager.release(msg.pFrame);
                     }
                 }
                 break;
@@ -611,7 +612,8 @@ XnPixelFormat toXnPixelFormat(OniPixelFormat oniFormat)
     case ONI_PIXEL_FORMAT_GRAY16:		return XN_PIXEL_FORMAT_GRAYSCALE_16_BIT;
     case ONI_PIXEL_FORMAT_JPEG:		return XN_PIXEL_FORMAT_MJPEG;
     
-    default: //should not happen
+    default: 
+		//not supported by OpenNI 1.x
         return XnPixelFormat(0);
     }
 }
@@ -714,6 +716,15 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
         ))
     undoPoint.Reuse();
 
+	// required data size (for cases where data is larger than video mode)
+	EMIT(RECORD_INT_PROPERTY(
+		nodeId,
+		getLastPropertyRecordPos(nodeId, "oniRequiredFrameSize", undoPoint.GetPosition()),
+		"oniRequiredFrameSize",
+		pStream->getRequiredFrameSize()
+		));
+	undoPoint.Reuse();
+
 	// isGenerating (needed for OpenNI 1.x playback)
 	EMIT(RECORD_INT_PROPERTY(
 		nodeId,
@@ -765,18 +776,6 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
         ))
     undoPoint.Reuse();
 
-    // xnSupportedPixelFormats
-    XnSupportedPixelFormats supportedPixelFormats;
-    fillXnSupportedPixelFormats(supportedPixelFormats, curVideoMode.pixelFormat);
-    EMIT(RECORD_GENERAL_PROPERTY(
-            nodeId,
-            getLastPropertyRecordPos(nodeId, "xnSupportedPixelFormats", undoPoint.GetPosition()),
-            "xnSupportedPixelFormats",
-            &supportedPixelFormats,
-            sizeof(supportedPixelFormats)
-        ))
-    undoPoint.Reuse();
-
     // xnMapOutputMode
     VideoModeData curVMD;
     curVMD.width  = curVideoMode.resolutionX;
@@ -791,14 +790,30 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
         ))
     undoPoint.Reuse();
 
-    // xnPixelFormat
-    EMIT(RECORD_INT_PROPERTY(
-            nodeId,
-            getLastPropertyRecordPos(nodeId, "xnPixelFormat", undoPoint.GetPosition()),
-            "xnPixelFormat",
-            toXnPixelFormat(curVideoMode.pixelFormat)
-        ))
-    undoPoint.Reuse();
+	XnPixelFormat pixelFormat = toXnPixelFormat(curVideoMode.pixelFormat);
+	if (pixelFormat != 0)
+	{
+		// xnSupportedPixelFormats
+		XnSupportedPixelFormats supportedPixelFormats;
+		fillXnSupportedPixelFormats(supportedPixelFormats, curVideoMode.pixelFormat);
+		EMIT(RECORD_GENERAL_PROPERTY(
+			nodeId,
+			getLastPropertyRecordPos(nodeId, "xnSupportedPixelFormats", undoPoint.GetPosition()),
+			"xnSupportedPixelFormats",
+			&supportedPixelFormats,
+			sizeof(supportedPixelFormats)
+			))
+			undoPoint.Reuse();
+
+		// xnPixelFormat
+		EMIT(RECORD_INT_PROPERTY(
+			nodeId,
+			getLastPropertyRecordPos(nodeId, "xnPixelFormat", undoPoint.GetPosition()),
+			"xnPixelFormat",
+			pixelFormat
+			))
+			undoPoint.Reuse();
+	}
 
 	EMIT(RECORD_INT_PROPERTY(
 		nodeId,

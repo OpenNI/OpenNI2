@@ -94,6 +94,8 @@ const char* getFormatName(openni::PixelFormat format)
 		return "RGB 888";
 	case openni::PIXEL_FORMAT_YUV422:
 		return "YUV 422";
+	case openni::PIXEL_FORMAT_YUYV:
+		return "YUYV";
 	case openni::PIXEL_FORMAT_GRAY8:
 		return "Grayscale 8-bit";
 	case openni::PIXEL_FORMAT_GRAY16:
@@ -105,87 +107,93 @@ const char* getFormatName(openni::PixelFormat format)
 	}
 }
 
-void openCommon(openni::Device& device, bool defaultRightColor)
+int openStream(openni::Device& device, const char* name, openni::SensorType sensorType, SensorOpenType openType, openni::VideoStream& stream, const openni::SensorInfo** ppSensorInfo, bool* pbIsStreamOn)
 {
-	XnStatus nRetVal = XN_STATUS_OK;
+	*ppSensorInfo = device.getSensorInfo(sensorType);
+	*pbIsStreamOn = false;
 
-	g_bIsDepthOn = false;
-	g_bIsColorOn = false;
-	g_bIsIROn    = false;
-
-	g_depthSensorInfo = device.getSensorInfo(openni::SENSOR_DEPTH);
-	g_colorSensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
-	g_irSensorInfo = device.getSensorInfo(openni::SENSOR_IR);
-
-	if (g_depthSensorInfo != NULL)
+	if (openType == SENSOR_OFF)
 	{
-		nRetVal = g_depthStream.create(device, openni::SENSOR_DEPTH);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return 0;
+	}
 
-		nRetVal = g_depthStream.start();
-		if (nRetVal != openni::STATUS_OK)
+	if (*ppSensorInfo == NULL)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("No %s sensor available\n", name);
+			return -1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	openni::Status nRetVal = stream.create(device, sensorType);
+	if (nRetVal != openni::STATUS_OK)
+	{
+		if (openType == SENSOR_ON)
+		{
+			printf("Failed to create %s stream:\n%s\n", openni::OpenNI::getExtendedError(), name);
+			return -2;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	nRetVal = stream.start();
+	if (nRetVal != openni::STATUS_OK)
+	{
+		stream.destroy();
+
+		if (openType == SENSOR_ON)
 		{
 			printf("Failed to start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
-			g_depthStream.destroy();
-			return;
+			return -3;
 		}
-
-		g_bIsDepthOn = true;
-	}
-
-	if (g_colorSensorInfo != NULL)
-	{
-		nRetVal = g_colorStream.create(device, openni::SENSOR_COLOR);
-		if (nRetVal != openni::STATUS_OK)
+		else
 		{
-			printf("Failed to create color stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
-
-		if (defaultRightColor)
-		{
-			nRetVal = g_colorStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				printf("Failed to start color stream:\n%s\n", openni::OpenNI::getExtendedError());
-				g_colorStream.destroy();
-				return;
-			}
-
-			g_bIsColorOn = true;
+			return 0;
 		}
 	}
 
-	if (g_irSensorInfo != NULL)
+	*pbIsStreamOn = true;
+
+	return 0;
+}
+
+int openCommon(openni::Device& device, DeviceConfig config)
+{
+	g_pPlaybackControl = g_device.getPlaybackControl();
+
+	int ret;
+
+	ret = openStream(device, "depth", openni::SENSOR_DEPTH, config.openDepth, g_depthStream, &g_depthSensorInfo, &g_bIsDepthOn);
+	if (ret != 0)
 	{
-		nRetVal = g_irStream.create(device, openni::SENSOR_IR);
-		if (nRetVal != openni::STATUS_OK)
-		{
-			printf("Failed to create IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-			return;
-		}
+		return ret;
+	}
 
-		if (!g_bIsColorOn)
-		{
-			nRetVal = g_irStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				printf("Failed to start IR stream:\n%s\n", openni::OpenNI::getExtendedError());
-				g_irStream.destroy();
-				return;
-			}
+	ret = openStream(device, "color", openni::SENSOR_COLOR, config.openColor, g_colorStream, &g_colorSensorInfo, &g_bIsColorOn);
+	if (ret != 0)
+	{
+		return ret;
+	}
 
-			g_bIsIROn = true;
-		}
+	ret = openStream(device, "IR", openni::SENSOR_IR, config.openIR, g_irStream, &g_irSensorInfo, &g_bIsIROn);
+	if (ret != 0)
+	{
+		return ret;
 	}
 
 	initConstants();
 
 	readFrame();
+
+	return 0;
 }
 
 class OpenNIDeviceListener : public openni::OpenNI::DeviceStateChangedListener,
@@ -215,7 +223,7 @@ public:
 	}
 };
 
-openni::Status openDevice(const char* uri, bool defaultRightColor)
+openni::Status openDevice(const char* uri, DeviceConfig config)
 {
 	openni::Status nRetVal = openni::OpenNI::initialize();
 	if (nRetVal != openni::STATUS_OK)
@@ -236,14 +244,15 @@ openni::Status openDevice(const char* uri, bool defaultRightColor)
 		return nRetVal;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, defaultRightColor);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
 
-openni::Status openDeviceFromList(bool defaultRightColor)
+openni::Status openDeviceFromList(DeviceConfig config)
 {
 	openni::Status rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
@@ -282,9 +291,10 @@ openni::Status openDeviceFromList(bool defaultRightColor)
 		return rc;
 	}
 
-	g_pPlaybackControl = g_device.getPlaybackControl();
-
-	openCommon(g_device, defaultRightColor);
+	if (0 != openCommon(g_device, config))
+	{
+		return openni::STATUS_ERROR;
+	}
 
 	return openni::STATUS_OK;
 }
@@ -351,18 +361,6 @@ void toggleMirror(int )
 	displayMessage ("Mirror: %s", g_depthStream.getMirroringEnabled()?"On":"Off");	
 }
 
-void toggleCMOSAutoLoops(int )
-{
-	if (g_colorStream.getCameraSettings() == NULL)
-	{
-		displayMessage("Color stream doesn't support camera settings");
-		return;
-	}
-	toggleImageAutoExposure(0);
-	toggleImageAutoWhiteBalance(0);
-
-	displayMessage ("CMOS Auto Loops: %s", g_colorStream.getCameraSettings()->getAutoExposureEnabled()?"On":"Off");	
-}
 
 void toggleCloseRange(int )
 {
@@ -397,48 +395,42 @@ void toggleImageRegistration(int)
 
 }
 
-void seekFrame(int nDiff)
+openni::VideoStream* getSeekingStream(openni::VideoFrameRef*& pCurFrame)
 {
-	// Make sure seek is required.
-	if (nDiff == 0)
-	{
-		return;
-	}
-
 	if (g_pPlaybackControl == NULL)
 	{
-		return;
+		return NULL;
 	}
 
-	int frameId = 0, numberOfFrames = 0;
-	openni::VideoStream* pStream = NULL;
-	openni::VideoFrameRef* pCurFrame;
 	if (g_bIsDepthOn)
 	{
 		pCurFrame = &g_depthFrame;
-		pStream = &g_depthStream;
+		return &g_depthStream;
 	}
 	else if (g_bIsColorOn)
 	{
 		pCurFrame = &g_colorFrame;
-		pStream = &g_colorStream;
+		return &g_colorStream;
 	}
 	else if (g_bIsIROn)
 	{
 		pCurFrame = &g_irFrame;
-		pStream = &g_irStream;
+		return &g_irStream;
 	}
 	else
 	{
-		return;
+		return NULL;
 	}
-	frameId = pCurFrame->getFrameIndex();
+}
+
+void seekStream(openni::VideoStream* pStream, openni::VideoFrameRef* pCurFrame, int frameId)
+{
+	int numberOfFrames = 0;
 
 	// Get number of frames
 	numberOfFrames = g_pPlaybackControl->getNumberOfFrames(*pStream);
 
-	// Calculate the new frame ID and seek stream.
-	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+	// Seek
 	openni::Status rc = g_pPlaybackControl->seek(*pStream, frameId);
 	if (rc == openni::STATUS_OK)
 	{
@@ -455,10 +447,11 @@ void seekFrame(int nDiff)
 		{
 			g_irStream.readFrame(&g_irFrame);
 		}
+
 		// the new frameId might be different than expected (due to clipping to edges)
 		frameId = pCurFrame->getFrameIndex();
 
-		displayMessage("Seeked to frame %u/%u", frameId, numberOfFrames);
+		displayMessage("Current frame: %u/%u", frameId, numberOfFrames);
 	}
 	else if ((rc == openni::STATUS_NOT_IMPLEMENTED) || (rc == openni::STATUS_NOT_SUPPORTED) || (rc == openni::STATUS_BAD_PARAMETER) || (rc == openni::STATUS_NO_DEVICE))
 	{
@@ -470,73 +463,85 @@ void seekFrame(int nDiff)
 	}
 }
 
-void toggleDepthState(int )
+void seekFrame(int nDiff)
 {
-	if (g_depthStream.isValid()) 
+	// Make sure seek is required.
+	if (nDiff == 0)
 	{
-		if(g_bIsDepthOn)
-		{
-			g_depthStream.stop();
-			g_depthFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_depthStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start depth stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
-
-		g_bIsDepthOn = !g_bIsDepthOn;
+		return;
 	}
+
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
+
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	int frameId = pCurFrame->getFrameIndex();
+	// Calculate the new frame ID
+	frameId = (frameId + nDiff < 1) ? 1 : frameId + nDiff;
+
+	seekStream(pStream, pCurFrame, frameId);
 }
 
-void toggleColorState(int )
+void seekFrameAbs(int frameId)
 {
-	if (g_colorStream.isValid()) 
-	{
-		if(g_bIsColorOn)
-		{
-			g_colorStream.stop();
-			g_colorFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_colorStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start color stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
+	openni::VideoStream* pStream = NULL;
+	openni::VideoFrameRef* pCurFrame = NULL;
 
-		g_bIsColorOn = !g_bIsColorOn;
-	}
+	pStream = getSeekingStream(pCurFrame);
+	if (pStream == NULL)
+		return;
+
+	seekStream(pStream, pCurFrame, frameId);
 }
 
-void toggleIRState(int )
+void toggleStreamState(openni::VideoStream& stream, openni::VideoFrameRef& frame, bool& isOn, openni::SensorType type, const char* name)
 {
-	if (g_irStream.isValid()) 
-	{
-		if(g_bIsIROn)
-		{
-			g_irStream.stop();
-			g_irFrame.release();
-		}
-		else
-		{
-			openni::Status nRetVal = g_irStream.start();
-			if (nRetVal != openni::STATUS_OK)
-			{
-				displayError("Failed to start IR stream:\n%s", openni::OpenNI::getExtendedError());
-				return;
-			}
-		}
+	openni::Status nRetVal = openni::STATUS_OK;
 
-		g_bIsIROn = !g_bIsIROn;
+	if (!stream.isValid())
+	{
+		nRetVal = stream.create(g_device, type);
+		if (nRetVal != openni::STATUS_OK)
+		{
+			displayError("Failed to create %s stream:\n%s", name, openni::OpenNI::getExtendedError());
+			return;
+		}
 	}
+
+	if (isOn)
+	{
+		stream.stop();
+		frame.release();
+	}
+	else
+	{
+		nRetVal = stream.start();
+		if (nRetVal != openni::STATUS_OK)
+		{
+			displayError("Failed to start %s stream:\n%s", name, openni::OpenNI::getExtendedError());
+			return;
+		}
+	}
+
+	isOn = !isOn;
+}
+
+void toggleDepthState(int)
+{
+	toggleStreamState(g_depthStream, g_depthFrame, g_bIsDepthOn, openni::SENSOR_DEPTH, "depth");
+}
+
+void toggleColorState(int)
+{
+	toggleStreamState(g_colorStream, g_colorFrame, g_bIsColorOn, openni::SENSOR_COLOR, "color");
+}
+
+void toggleIRState(int)
+{
+	toggleStreamState(g_irStream, g_irFrame, g_bIsIROn, openni::SENSOR_IR, "IR");
 }
 
 bool isDepthOn()
@@ -639,12 +644,57 @@ void toggleIRMirror(int)
 
 void toggleImageAutoExposure(int)
 {
+	if (g_colorStream.getCameraSettings() == NULL)
+	{
+		displayError("Color stream doesn't support camera settings");
+		return;
+	}
 	g_colorStream.getCameraSettings()->setAutoExposureEnabled(!g_colorStream.getCameraSettings()->getAutoExposureEnabled());
+	displayMessage("Auto Exposure: %s", g_colorStream.getCameraSettings()->getAutoExposureEnabled() ? "ON" : "OFF");
 }
 
 void toggleImageAutoWhiteBalance(int)
 {
+	if (g_colorStream.getCameraSettings() == NULL)
+	{
+		displayError("Color stream doesn't support camera settings");
+		return;
+	}
 	g_colorStream.getCameraSettings()->setAutoWhiteBalanceEnabled(!g_colorStream.getCameraSettings()->getAutoWhiteBalanceEnabled());
+	displayMessage("Auto White balance: %s", g_colorStream.getCameraSettings()->getAutoWhiteBalanceEnabled() ? "ON" : "OFF");
+}
+
+void changeImageExposure(int delta)
+{
+	if (g_colorStream.getCameraSettings() == NULL)
+	{
+		displayError("Color stream doesn't support camera settings");
+		return;
+	}
+	int exposure = g_colorStream.getCameraSettings()->getExposure();
+	openni::Status rc = g_colorStream.getCameraSettings()->setExposure(exposure + delta);
+	if (rc != openni::STATUS_OK)
+	{
+		displayMessage("Can't change exposure");
+		return;
+	}
+	displayMessage("Changed exposure to: %d", g_colorStream.getCameraSettings()->getExposure());
+}
+void changeImageGain(int delta)
+{
+	if (g_colorStream.getCameraSettings() == NULL)
+	{
+		displayError("Color stream doesn't support camera settings");
+		return;
+	}
+	int gain = g_colorStream.getCameraSettings()->getGain();
+	openni::Status rc = g_colorStream.getCameraSettings()->setGain(gain + delta);
+	if (rc != openni::STATUS_OK)
+	{
+		displayMessage("Can't change gain");
+		return;
+	}
+	displayMessage("Changed gain to: %d", g_colorStream.getCameraSettings()->getGain());
 }
 
 void setStreamCropping(openni::VideoStream& stream, int originX, int originY, int width, int height)

@@ -34,9 +34,26 @@ XN_C_API XnStatus xnOSLoadLibrary(const XnChar* cpFileName, XN_LIB_HANDLE* pLibH
 	XN_VALIDATE_INPUT_PTR(cpFileName);
 	XN_VALIDATE_OUTPUT_PTR(pLibHandle);
 
+#ifndef XN_PLATFORM_ANDROID_OS
+	// Resolve the file name to the absolute path. This is necessary because
+	// we need to get the absolute path of this library by dladdr() later.
+	// Note dladdr() seems to return the path specified to dlopen() "as it is".
+	XnChar* strAbsoluteFileName = realpath(cpFileName, NULL);
+	if (strAbsoluteFileName == NULL)
+	{
+		// error
+		xnLogWarning(XN_MASK_OS, "Failed to get absolute path for lib: %s\n", cpFileName);
+		return XN_STATUS_OS_CANT_LOAD_LIB;
+	}
+
 	// Load the requested shared library via the OS
+	*pLibHandle = dlopen(strAbsoluteFileName, RTLD_NOW);
+
+	free(strAbsoluteFileName); // Don't forget to free the memory allocated by realpath().
+#else
 	*pLibHandle = dlopen(cpFileName, RTLD_NOW);
-	
+#endif
+
 	// Make sure it succeeded (return value is not NULL). If not return an error....
 	if (*pLibHandle == NULL)
 	{
@@ -80,4 +97,16 @@ XN_C_API XnStatus xnOSGetProcAddress(const XN_LIB_HANDLE LibHandle, const XnChar
 
 	// All is good...
 	return (XN_STATUS_OK);
+}
+
+XN_C_API XnStatus xnOSGetModulePathForProcAddress(void* procAddr, XnChar *strModulePath)
+{
+	Dl_info info;
+	if (!dladdr(procAddr, &info))
+	{
+		xnLogWarning(XN_MASK_OS, "Failed to get the dl info: %s\n", dlerror());
+		return XN_STATUS_ERROR;
+	}
+
+	return xnOSStrCopy(strModulePath, info.dli_fname, XN_FILE_MAX_PATH);
 }

@@ -44,10 +44,16 @@ public:
 
 	OniStatus getAutoExposure(BOOL *val);
 	
+	OniImageRegistrationMode getImageRegistrationMode() const { return m_imageRegistrationMode; }
+
+	void setImageRegistrationMode(OniImageRegistrationMode mode) { m_imageRegistrationMode = mode; }
+
 	OniStatus convertDepthToColorCoordinates(oni::driver::StreamBase* colorStream, 
 								int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
 	static NUI_IMAGE_RESOLUTION getNuiImagResolution(int resolutionX, int resolutionY);
+
+	INuiSensor* getNuiSensor() { return m_pNuiSensor; } // Need review: not sure if it is a good idea to expose this.
 	
 private:
 		
@@ -58,6 +64,9 @@ private:
 	static XN_THREAD_PROC threadFunc(XN_THREAD_PARAM pThreadParam);
 
 	xnl::List<BaseKinectStream*> m_streamList;
+
+	OniImageRegistrationMode m_imageRegistrationMode;
+
 	// Thread
 	INuiSensor* m_pNuiSensor;
 	OniSensorType m_sensorType;

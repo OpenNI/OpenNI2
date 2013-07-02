@@ -61,6 +61,7 @@ typedef enum
 	PIXEL_FORMAT_GRAY8 = 202,
 	PIXEL_FORMAT_GRAY16 = 203,
 	PIXEL_FORMAT_JPEG = 204,
+	PIXEL_FORMAT_YUYV = 205,
 } PixelFormat;
 
 typedef enum

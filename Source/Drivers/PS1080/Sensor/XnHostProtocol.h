@@ -24,7 +24,7 @@
 #include <XnStreamParams.h>
 #include "XnParams.h"
 #include "XnDeviceSensor.h"
-
+#include "XnFirmwareTypes.h"
 
 #define XN_HOST_MAGIC_25	0x5053	//PS
 #define XN_FW_MAGIC_25		0x5350	//SP
@@ -53,11 +53,33 @@ enum EPsProtocolOpCodes
 	OPCODE_GET_FIXED_PARAMS = 4,
 	OPCODE_GET_MODE = 5,
 	OPCODE_SET_MODE = 6,
+	OPCODE_GET_LOG = 7,
+	OPCODE_RESERVED_0 = 8,
+	OPCODE_RESERVED_1 = 9,
 	OPCODE_I2C_WRITE = 10,
 	OPCODE_I2C_READ = 11,
+	OPCODE_TAKE_SNAPSHOT = 12,
+	OPCODE_INIT_FILE_UPLOAD = 13,
+	OPCODE_WRITE_FILE_UPLOAD = 14,
+	OPCODE_FINISH_FILE_UPLOAD = 15,
+	OPCODE_DOWNLOAD_FILE = 16,
+	OPCODE_DELETE_FILE = 17,
+	OPCODE_GET_FLASH_MAP = 18,
+	OPCODE_GET_FILE_LIST = 19,
 	OPCODE_READ_AHB = 20,
 	OPCODE_WRITE_AHB = 21,
 	OPCODE_ALGORITM_PARAMS = 22,
+	OPCODE_SET_FILE_ATTRIBUTES = 23,
+	OPCODE_EXECUTE_FILE = 24,
+	OPCODE_READ_FLASH = 25,
+	OPCODE_SET_GMC_PARAMS = 26,
+	OPCODE_GET_CPU_STATS = 27,
+	OPCODE_BIST = 28,
+	OPCODE_CALIBRATE_TEC = 29,
+	OPCODE_GET_TEC_DATA = 30,
+	OPCODE_CALIBRATE_EMITTER = 31,
+	OPCODE_GET_EMITTER_DATA = 32,
+	OPCODE_CALIBRATE_PROJECTOR_FAULT = 33,
 	OPCODE_SET_CMOS_BLANKING = 34,
 	OPCODE_GET_CMOS_BLANKING = 35,
 	OPCODE_GET_CMOS_PRESETS = 36,
@@ -66,9 +88,14 @@ enum EPsProtocolOpCodes
 	OPCODE_GET_PLATFORM_STRING = 39,
 	OPCODE_GET_USB_CORE_TYPE = 40,
 	OPCODE_SET_LED_STATE = 41,
+	OPCODE_ENABLE_EMITTER = 42,
 	OPCODE_KILL = 999,
 };
 
+enum EPsProtocolOpCodes_V300
+{
+	OPCODE_V300_BIST = 26,
+};
 
 enum XnHostProtocolOpcodes_V110
 {
@@ -79,11 +106,24 @@ enum XnHostProtocolOpcodes_V110
 	OPCODE_V110_GET_FIXED_PARAMS = 4,
 	OPCODE_V110_GET_MODE = 5,
 	OPCODE_V110_SET_MODE = 6,
+	OPCODE_V110_GET_LOG = 7,
 	OPCODE_V110_GET_CMOS_REGISTER = 8,
 	OPCODE_V110_SET_CMOS_REGISTER = 9,
+	OPCODE_V110_GET_CODEC_REGISTER = 10,
+	OPCODE_V110_SET_CODEC_REGISTER = 11,
+	OPCODE_V110_TAKE_SNAPSHOT = 12,
+	OPCODE_V110_INIT_FILE_UPLOAD = 13,
+	OPCODE_V110_WRITE_FILE_UPLOAD = 14,
+	OPCODE_V110_FINISH_FILE_UPLOAD = 15,
+	OPCODE_V110_DOWNLOAD_FILE = 16,
+	OPCODE_V110_DELETE_FILE = 17,
+	OPCODE_V110_GET_FLASH_MAP = 18,
+	OPCODE_V110_GET_FILE_LIST = 19,
 	OPCODE_V110_READ_AHB = 20,
 	OPCODE_V110_WRITE_AHB = 21,
 	OPCODE_V110_ALGORITHM_PARAMS = 22,
+	OPCODE_V110_SET_FILE_ATTRIBUTES = 23,
+	OPCODE_V110_EXECUTE_FILE = 24,
 };
 
 enum EPsProtocolOpCodes_V017
@@ -94,8 +134,19 @@ enum EPsProtocolOpCodes_V017
 	OPCODE_V017_SET_PARAM = 3,
 	OPCODE_V017_GET_FIXED_PARAMS = 4,
 	OPCODE_V017_RESET = 5,
+	OPCODE_V017_GET_LOG = 6,
 	OPCODE_V017_GET_CMOS_REGISTER = 7,
 	OPCODE_V017_SET_CMOS_REGISTER = 8,
+	OPCODE_V017_GET_CODEC_REGISTER = 9,
+	OPCODE_V017_SET_CODEC_REGISTER = 10,
+	OPCODE_V017_TAKE_SNAPSHOT = 11,
+	OPCODE_V017_INIT_FILE_UPLOAD = 12,
+	OPCODE_V017_WRITE_FILE_UPLOAD = 13,
+	OPCODE_V017_FINISH_FILE_UPLOAD = 14,
+	OPCODE_V017_DOWNLOAD_FILE = 15,
+	OPCODE_V017_DELETE_FILE = 16,
+	OPCODE_V017_GET_FLASH_MAP = 17,
+	OPCODE_V017_GET_FILE_LIST = 18,
 	OPCODE_V017_READ_AHB = 19,
 	OPCODE_V017_WRITE_AHB = 20,
 	OPCODE_V017_ALGORITM_PARAMS = 21,
@@ -136,9 +187,17 @@ enum XnHostProtocolNacks
 	NACK_BAD_PACKET_CRC = 3,
 	NACK_BAD_PACKET_SIZE = 4,
 	NACK_BAD_PARAMS = 5,
+	NACK_I2C_TRANSACTION_FAILED = 6,
+	NACK_FILE_NOT_FOUND = 7,
+	NACK_FILE_CREATE_FAILURE = 8,
+	NACK_FILE_WRITE_FAILURE = 9,
+	NACK_FILE_DELETE_FAILURE = 10,
+	NACK_FILE_READ_FAILURE = 11,
 	NACK_BAD_COMMAND_SIZE = 12,
 	NACK_NOT_READY = 13,
-	NACK_OVERFLOW = 14
+	NACK_OVERFLOW = 14,
+	NACK_OVERLAY_NOT_LOADED = 15,
+	NACK_FILE_SYSTEM_LOCKED = 16,
 };
 
 typedef enum
@@ -184,6 +243,64 @@ typedef struct
 	XnUInt16 nErrorCode;
 } XnHostProtocolReplyHeader;
 
+typedef XnDeviceSensorGMCPoint XnHostProtocolGMCPoint_1080;
+
+typedef struct XnHostProtocolGMCPoint_1000
+{
+	XnDeviceSensorGMCPoint m_GMCPoint;
+	XnUInt16 m_Dummy;
+} XnHostProtocolGMCPoint_1000;
+
+typedef struct XnHostProtocolGMCLastConfData
+{
+	XnInt16 nLast;
+	XnUInt16 nRICCLast;
+	XnFloat fRICC_IIR;
+} XnHostProtocolGMCLastConfData;
+
+typedef enum XnHostProtocolGMCMode
+{
+	GMC_NORMAL_MODE = 0,
+	GMC_SCAN_MODE
+} XnHostProtocolGMCMode;
+
+typedef struct XnHostProtocolGMCLastPacketData
+{
+	XnUInt16 m_GMCMode;
+	XnUInt16 m_CoveragePass;
+	XnHostProtocolGMCLastConfData m_LastConfData;
+	XnFloat m_A;
+	XnFloat m_B;
+	XnFloat m_C;
+	XnInt16 m_N;
+	XnUInt16 m_RICC;
+	XnUInt32 m_StartB;
+	XnUInt32 m_DeltaB;
+	XnInt16 m_FlashStoredRefOffset;
+} XnHostProtocolGMCLastPacketData;
+
+typedef struct XnBestTecConf
+{
+	XnUInt16 nBestHopsCount; // Lowest hops count among all unstable points
+	XnUInt32 nBestSetPoint;  // The TEC set point that gave m_BestHopsCount
+	XnInt32  nBestStep;      // The TEC scan step that gave m_BestHopsCount
+} XnBestTecConf;
+
+typedef struct XnWavelengthCorrectionDebugPacket
+{
+	XnFloat fBLast;
+	XnFloat fBCurrent;
+	XnUInt16 nIsHop;
+	XnUInt32 nCurrentSlidingWindow;
+	XnUInt16 nCurrentHopsCount;
+	XnUInt16 nIsTecCalibrated;
+	XnUInt32 nWaitPeriod;
+	XnUInt16 nIsWavelengthUnstable;
+	XnBestTecConf BestConf;
+	XnUInt16 nIsTotallyUnstable; //whole scan no stable point    
+	XnUInt32 nConfiguredTecSetPoint; // 0 if not configured
+	XnInt32 nCurrentStep;
+} XnWavelengthCorrectionDebugPacket;
 
 #pragma pack(pop)
 
@@ -192,7 +309,7 @@ typedef struct
 
 // All implemented protocol commands
 // Init
-XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb);
+XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild, XnHostProtocolUsbCore usb, XnBool bGuessed);
 
 XnStatus XnHostProtocolKeepAlive		(XnDevicePrivateData* pDevicePrivateData);
 XnStatus XnHostProtocolGetVersion		(const XnDevicePrivateData* pDevicePrivateData, XnVersions& Version);
@@ -234,7 +351,26 @@ XnStatus XnHostProtocolReadAHB			(XnDevicePrivateData* pDevicePrivateData, XnUIn
 XnStatus XnHostProtocolWriteAHB			(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nAddress, XnUInt32 nValue, XnUInt32 nMask);
 XnStatus XnHostProtocolGetUsbCoreType	(XnDevicePrivateData* pDevicePrivateData, XnHostProtocolUsbCore& nValue);
 XnStatus XnHostProtocolSetLedState	(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nLedId, XnUInt16 nState);
+XnStatus XnHostProtocolSetEmitterState	(XnDevicePrivateData* pDevicePrivateData, XnBool bActive);
 XnStatus XnHostProtocolUpdateSupportedImageModes(XnDevicePrivateData* pDevicePrivateData);
 
+// Commands.txt
+XnStatus XnHostProtocolGetLog			(XnDevicePrivateData* pDevicePrivateData, XnChar* csBuffer, XnUInt32 nBufferSize);
+XnStatus XnHostProtocolFileUpload		(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset, const XnChar* strFileName, XnUInt16 nAttributes);
+XnStatus XnHostProtocolFileDownload		(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileType, const XnChar* strFileName);
+XnStatus XnHostProtocolReadFlash		(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nOffset, XnUInt32 nSize, XnUChar* pBuffer);
+XnStatus XnHostProtocolRunBIST			(XnDevicePrivateData* pDevicePrivateData, XnUInt32 nTestsMask, XnUInt32* pnFailures);
+XnStatus XnHostProtocolGetCPUStats		(XnDevicePrivateData* pDevicePrivateData, XnTaskCPUInfo* pTasks, XnUInt32 *pnTimesCount);
+XnStatus XnHostProtocolCalibrateTec		(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nSetPoint);
+XnStatus XnHostProtocolGetTecData		(XnDevicePrivateData* pDevicePrivateData, XnTecData* pTecData);
+XnStatus XnHostProtocolGetTecFastConvergenceData (XnDevicePrivateData* pDevicePrivateData, XnTecFastConvergenceData* pTecData);
+XnStatus XnHostProtocolCalibrateEmitter	(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nSetPoint);
+XnStatus XnHostProtocolGetEmitterData	(XnDevicePrivateData* pDevicePrivateData, XnEmitterData* pEmitterData);
+XnStatus XnHostProtocolCalibrateProjectorFault	(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nMinThreshold, XnUInt16 nMaxThreshold, XnBool* pbProjectorFaultEvent);
+XnStatus XnHostProtocolGetFileList(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFirstFileId, XnFlashFile* pFileList, XnUInt16& nNumOfEntries);
+XnStatus XnHostProtocolDeleteFile(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId);
+XnStatus XnHostProtocolWriteI2C(XnDevicePrivateData* pDevicePrivateData, const XnI2CWriteData* pI2CWriteData);
+XnStatus XnHostProtocolReadI2C(XnDevicePrivateData* pDevicePrivateData, XnI2CReadData* pI2CReadData);
+XnStatus XnHostProtocolSetFileAttributes(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId, XnUInt16 nAttributes);
 
 #endif

@@ -270,7 +270,7 @@ XnStatus XnStreamUncompressImageNew(const XnUInt8* pInput, const XnUInt32 nInput
 		}
 
 		// write output
-		if (pOutput > pOutputEnd)
+		if (pOutput >= pOutputEnd)
 		{
 			return (XN_STATUS_OUTPUT_BUFFER_OVERFLOW);
 		}

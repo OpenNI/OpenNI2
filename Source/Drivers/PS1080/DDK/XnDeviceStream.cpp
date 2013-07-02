@@ -29,6 +29,7 @@
 //---------------------------------------------------------------------------
 XnDeviceStream::XnDeviceStream(const XnChar* csType, const XnChar* csName) :
 	XnDeviceModule(csName),
+	m_pServices(NULL),
 	m_IsStream(XN_STREAM_PROPERTY_IS_STREAM, "IsStream", TRUE),
 	m_Type(XN_STREAM_PROPERTY_TYPE, "Type", csType),
 	m_IsOpen(XN_STREAM_PROPERTY_STATE, "State", FALSE),
@@ -133,8 +134,6 @@ void XnDeviceStream::NewDataAvailable(OniFrame* pFrame)
 	// make sure someone is listening (otherwise, no one will ever free this frame!)
 	XN_ASSERT(m_pNewDataCallback != NULL);
 	m_pNewDataCallback(this, pFrame, m_pNewDataCallbackCookie);
-
-	ReleaseFrame(pFrame);
 }
 
 void XnDeviceStream::SetNewDataCallback(NewDataCallbackPtr pFunc, void* pCookie)

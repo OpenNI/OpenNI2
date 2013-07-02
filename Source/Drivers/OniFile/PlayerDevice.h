@@ -68,8 +68,8 @@ public:
 
 	virtual OniBool isPropertySupported(int propertyId);
 
-	/// @copydoc OniDeviceBase::Invoke(int, const void*, int)
-	virtual OniStatus invoke(int commandId, const void* data, int dataSize);
+	/// @copydoc OniDeviceBase::Invoke(int, void*, int)
+	virtual OniStatus invoke(int commandId, void* data, int dataSize);
 	virtual OniBool isCommandSupported(int commandId);
 
 	OniBool isPlayerEOF() { return m_player.IsEOF(); };

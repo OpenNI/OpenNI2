@@ -27,7 +27,7 @@
 	rc = xnOSGetProcAddress(m_libHandle, XN_STRINGIFY(function), (XnFarProc*)&funcs.function);	\
 	if (rc != ONI_STATUS_OK)																	\
 	{																							\
-		xnLogWarning("OpenNI", "LibraryHandler: Couldn't find function %s in %s. Stopping", XN_STRINGIFY(function), library);	\
+		xnLogWarning("DriverHandler", "LibraryHandler: Couldn't find function %s in %s. Stopping", XN_STRINGIFY(function), library);	\
 		errorLogger.Append("LibraryHandler: Couldn't find function %s in %s. Stopping", XN_STRINGIFY(function), library);		\
 		return;																					\
 	}																							\
@@ -69,6 +69,7 @@ DriverHandler::DriverHandler(const char* library, xnl::ErrorLogger& errorLogger)
 	OniGetProcAddress(oniDriverDeviceIsImageRegistrationModeSupported);
 	OniGetProcAddress(oniDriverDeviceTryManualTrigger);
 
+	OniGetProcAddress(oniDriverStreamSetServices);
 	OniGetProcAddress(oniDriverStreamSetProperty);
 	OniGetProcAddress(oniDriverStreamGetProperty);
 	OniGetProcAddress(oniDriverStreamIsPropertySupported);
@@ -78,9 +79,8 @@ DriverHandler::DriverHandler(const char* library, xnl::ErrorLogger& errorLogger)
 	OniGetProcAddress(oniDriverStreamIsCommandSupported);
 	OniGetProcAddress(oniDriverStreamStart);
 	OniGetProcAddress(oniDriverStreamStop);
+	OniGetProcAddress(oniDriverStreamGetRequiredFrameSize);
 	OniGetProcAddress(oniDriverStreamSetNewFrameCallback);
-	OniGetProcAddress(oniDriverStreamAddRefToFrame);
-	OniGetProcAddress(oniDriverStreamReleaseFrame);
 	OniGetProcAddress(oniDriverStreamConvertDepthToColorCoordinates);
 
 	OniGetProcAddress(oniDriverEnableFrameSync);

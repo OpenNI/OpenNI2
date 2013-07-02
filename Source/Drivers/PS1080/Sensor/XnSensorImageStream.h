@@ -48,10 +48,10 @@
 #define XN_IMAGE_STREAM_DEFAULT_AWB			TRUE
 #define XN_IMAGE_STREAM_DEFAULT_COLOR_TEMP		5000
 #define XN_IMAGE_STREAM_DEFAULT_BACKLIGHT_COMP		1
-#define XN_IMAGE_STREAM_DEFAULT_GAIN			128
+#define XN_IMAGE_STREAM_DEFAULT_GAIN			100
 #define XN_IMAGE_STREAM_DEFAULT_ZOOM			100
 #define XN_IMAGE_STREAM_DEFAULT_AUTO_EXPOSURE		TRUE
-#define XN_IMAGE_STREAM_DEFAULT_EXPOSURE_BAR		100
+#define XN_IMAGE_STREAM_DEFAULT_EXPOSURE_BAR		0
 #define XN_IMAGE_STREAM_DEFAULT_PAN			0
 #define XN_IMAGE_STREAM_DEFAULT_TILT			0
 #define XN_IMAGE_STREAM_DEFAULT_LOW_LIGHT_COMP		TRUE
@@ -86,7 +86,6 @@ protected:
 	//---------------------------------------------------------------------------
 	XnStatus Open() { return m_Helper.Open(); }
 	XnStatus Close() { return m_Helper.Close(); }
-	XnStatus ReallocTripleFrameBuffer();
 	XnStatus CropImpl(OniFrame* pFrame, const OniCropping* pCropping);
 	XnStatus Mirror(OniFrame* pFrame) const;
 	XnStatus ConfigureStreamImpl();
@@ -111,7 +110,8 @@ protected:
 	XnStatus SetActualRead(XnBool bRead);
 	virtual XnStatus SetAutoExposure(XnBool bAutoExposure);
 	virtual XnStatus SetAutoWhiteBalance(XnBool bAutoWhiteBalance);
-
+	virtual XnStatus SetExposure(XnUInt64 nValue);
+	virtual XnStatus SetGain(XnUInt64 nValue);
 private:
 	XnStatus ValidateMode();
 	XnStatus SetCroppingImpl(const OniCropping* pCropping, XnCroppingMode mode);
@@ -125,6 +125,8 @@ private:
 	static XnStatus XN_CALLBACK_TYPE SetCroppingModeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetAutoExposureCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetAutoWhiteBalanceCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetExposureCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetGainCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
@@ -145,6 +147,8 @@ private:
 
 	XnActualIntProperty m_AutoExposure;
 	XnActualIntProperty m_AutoWhiteBalance;
+	XnActualIntProperty m_Exposure;
+	XnActualIntProperty m_Gain;
 
 	XnActualIntProperty m_ActualRead;
 

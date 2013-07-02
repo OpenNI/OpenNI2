@@ -24,6 +24,8 @@
 #include "OniDriverHandler.h"
 #include "OniCommon.h"
 #include "OniFrameHolder.h"
+#include "OniFrameManager.h"
+#include "OniSensor.h"
 #include "XnEvent.h"
 #include "XnErrorLogger.h"
 #include "XnHash.h"
@@ -38,8 +40,12 @@ class Recorder;
 class VideoStream
 {
 public:
-	VideoStream(void* streamHandle, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& driverHandler, xnl::ErrorLogger& errorLogger);
+	VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Device& device, const DriverHandler& driverHandler, FrameManager& frameManager, xnl::ErrorLogger& errorLogger);
 	virtual ~VideoStream();
+
+	typedef void (XN_CALLBACK_TYPE* NewFrameFuncPtr)(void* pCookie);
+
+	void setNewFrameCallback(NewFrameFuncPtr callback, void* pCookie) { m_newFrameCallback = callback; m_newFrameCookie = pCookie; }
 
 	OniStatus start();
 	void stop();
@@ -54,15 +60,9 @@ public:
 	OniStatus setProperty(int propertyId, const void* data, int dataSize);
 	OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	OniBool isPropertySupported(int propertyId);
-	OniStatus invoke(int commandId, const void* data, int dataSize);
+	OniStatus invoke(int commandId, void* data, int dataSize);
 	OniBool isCommandSupported(int commandId);
 	void notifyAllProperties();
-
-	void frameRelease(OniFrame* pFrame);
-	void frameAddRef(OniFrame* pFrame);
-
-	void initializeFramePool(int dataSize, int poolSize);
-	void initializeFramePool(OniGeneralBuffer* buffers, int numBuffers, int dataSize);
 
 	OniStatus registerNewFrameCallback(OniGeneralCallback handler, void* pCookie, XnCallbackHandle* pHandle);
 	void unregisterNewFrameCallback(XnCallbackHandle handle);
@@ -79,15 +79,16 @@ public:
 	void raiseNewFrameEvent();
 	XnStatus waitForNewFrameEvent();
 
-	void setContextNewFrameEvent(xnl::OSEvent* pContextNewFrameEvent);
-
-	static VideoStream* getFrameStream(OniFrame* pFrame);
     OniStatus addRecorder(Recorder& aRecorder);
     OniStatus removeRecorder(Recorder& aRecorder);
+
+	OniStatus setFrameBufferAllocator(OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie);
 
 	OniStatus convertDepthToWorldCoordinates(float depthX, float depthY, float depthZ, float* pWorldX, float* pWorldY, float* pWorldZ);
 	OniStatus convertWorldToDepthCoordinates(float worldX, float worldY, float worldZ, float* pDepthX, float* pDepthY, float* pDepthZ);
 	OniStatus convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
+
+	int getRequiredFrameSize();
 
 protected:
 	XN_EVENT_HANDLE m_newFrameInternalEvent;
@@ -96,10 +97,9 @@ protected:
 	xnl::ErrorLogger& m_errorLogger;
 
 private:
-	FrameHolder* m_pFrameHolder;
+	XN_DISABLE_COPY_AND_ASSIGN(VideoStream)
 
-	VideoStream(const VideoStream& other);
-	VideoStream& operator=(const VideoStream& other);
+	FrameHolder* m_pFrameHolder;
 
 	xnl::EventNoArgs m_newFrameEvent;
 	XN_THREAD_HANDLE m_newFrameThread;
@@ -110,18 +110,20 @@ private:
 	void newFrameThreadMainloop();
 	bool m_running;
 
-	static void ONI_CALLBACK_TYPE stream_NewFrame(void* streamHandle, OniDriverFrame* pFrame, void* pCookie);
+	static void ONI_CALLBACK_TYPE stream_NewFrame(OniFrame* pFrame, void* pCookie);
 	static void ONI_CALLBACK_TYPE stream_PropertyChanged(void* streamHandle, int propertyId, const void* data, int dataSize, void* pCookie);
 
 	void refreshWorldConversionCache();
 
+	NewFrameFuncPtr m_newFrameCallback;
+	void* m_newFrameCookie;
+
 	Device& m_device;
 	const DriverHandler& m_driverHandler;
-	void* m_streamHandle;
+	FrameManager& m_frameManager;
+	Sensor* m_pSensor;
 
-	xnl::OSEvent* m_pContextNewFrameEvent;
-
-	xnl::CriticalSection m_cs;
+	XnCallbackHandle m_hNewFrameEvent;
 
 	OniBool m_started;
 

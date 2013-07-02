@@ -26,7 +26,11 @@
 #include "XnLogAndroidWriter.h"
 #include <XnLog.h> 
 
-#include <android/log.h>
+#ifdef XN_PLATFORM_ANDROID_OS
+	#include <cutils/log.h>
+#else
+	#include <android/log.h>
+#endif
 	
 android_LogPriority OpenNISeverityToAndroid(XnLogSeverity nSeverity)
 {
@@ -51,7 +55,11 @@ android_LogPriority OpenNISeverityToAndroid(XnLogSeverity nSeverity)
 //---------------------------------------------------------------------------
 void XnLogAndroidWriter::WriteEntry(const XnLogEntry* pEntry)
 {
+#ifdef XN_PLATFORM_ANDROID_OS
+	ALOGE("OpenNI2: %s\n", pEntry->strMessage);
+#else
 	__android_log_print(OpenNISeverityToAndroid(pEntry->nSeverity), "OpenNI", pEntry->strMessage);
+#endif
 }
 
 void XnLogAndroidWriter::WriteUnformatted(const XnChar* strMessage)

@@ -213,6 +213,27 @@ void seek(int nDiff)
 	}
 }
 
+void seekToUserInputEnd(bool ok, const char* userInput)
+{
+	if (ok)
+	{
+		long seekFrame = atoi(userInput);
+		seekFrameAbs(seekFrame);
+
+		// now step the last one (that way, if seek is not supported, as in sensor, at least one frame
+		// will be read).
+		if (g_bPause)
+		{
+			step(0);
+		}
+	}
+}
+
+void seekToUserInputBegin(int)
+{
+	startKeyboardInputMode("Seek to frame: ", true, seekToUserInputEnd);
+}
+
 void init_opengl()
 {
 	glClearStencil(128);
@@ -283,7 +304,14 @@ void createKeyboardMap()
 			registerKey('y', "Frame sync on/off", toggleFrameSync, 0);
  			registerKey('m', "Mirror on/off", toggleMirror, 0);
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
-			registerKey('a', "CMOS Auto Loops", toggleCMOSAutoLoops, 0);
+
+			registerKey('a', "toggle Auto Exposure", toggleImageAutoExposure, 0);
+			registerKey('q', "toggle AWB", toggleImageAutoWhiteBalance, 0);
+			registerKey('e', "Increase Exposure", changeImageExposure, 1);
+			registerKey('E', "Decrease Exposure", changeImageExposure, -1);
+			registerKey('g', "Increase Gain", changeImageGain, 10);
+			registerKey('G', "Decrease Gain", changeImageGain, -10);
+
 			registerKey('x', "Close Range", toggleCloseRange, 0);
 			registerKey('i', "Toggle Image Registration", toggleImageRegistration, 0);
  		}
@@ -318,9 +346,9 @@ void createKeyboardMap()
 				registerSpecialKey(GLUT_KEY_UP,    "Jump 10 frames forward",   seek, 10);
 				registerSpecialKey(GLUT_KEY_LEFT,  "Jump 1 frame backwards",   seek, -1);
 				registerSpecialKey(GLUT_KEY_DOWN,  "Jump 10 frames backwards", seek, -10);
+				registerKey(':', "Jump to frame", seekToUserInputBegin, 0);
 
 				registerKey('r', "Toggle playback repeat", togglePlaybackRepeat, 0);
-
 				registerKey('[', "Decrease playback speed", changePlaybackSpeed, -1);
 				registerKey(']', "Increase playback speed", changePlaybackSpeed, 1);
 			}
@@ -565,54 +593,94 @@ int changeDirectory(char* arg0)
 int main(int argc, char **argv)
 {
 	XnBool bChooseDevice = FALSE;
-	const char* csRecordingName = NULL;
-	bool bDefaultRightColor = true;
+	const char* uri = NULL;
+
+	DeviceConfig config;
+	config.openDepth = SENSOR_TRY;
+	config.openColor = SENSOR_TRY;
+	config.openIR = SENSOR_TRY;
 
 	for (int i = 1; i < argc; ++i)
 	{
-		if (strcmp(argv[i], "-devices") == 0)
+		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+		{
+			printf("Usage: %s [OPTIONS] [URI]\n\n", argv[0]);
+			printf("When URI is provided, OpenNI will attempt to open the device with said URI. When not provided, \n");
+			printf("any device might be opened.\n\n");
+			printf("Options:\n");
+			printf("-h, --help\n");
+			printf("	Shows this help screen and exits\n");
+			printf("-devices\n");
+			printf("	Allows to choose the device to open from the list of connected devices\n");
+			printf("-depth=<on|off|try>\n");
+			printf("-color=<on|off|try>\n");
+			printf("-ir=<on|off|try>\n");
+			printf("	Toggles each stream state. <off> means the stream will not be opened. <on> means it will be opened, and NiViewer will\n");
+			printf("	exit if it fails. <try> means that NiViewer will try to open that stream, but continue if it fails.\n");
+			printf("	The default value is <try> for all 3 sensors.\n");
+			return 0;
+		}
+		else if (strcmp(argv[i], "-devices") == 0)
 		{
 			bChooseDevice = TRUE;
 		}
-		else if (strcmp(argv[i], "-right=ir") == 0)
+		else if (strcmp(argv[i], "-depth=on") == 0)
 		{
-			bDefaultRightColor = false;
+			config.openDepth = SENSOR_ON;
 		}
-		else if (strcmp(argv[i], "-right=color") == 0)
+		else if (strcmp(argv[i], "-depth=off") == 0)
 		{
-			bDefaultRightColor = true;
+			config.openDepth = SENSOR_OFF;
 		}
-		else if (csRecordingName == NULL)
+		else if (strcmp(argv[i], "-depth=try") == 0)
 		{
-			csRecordingName = argv[i];
+			config.openDepth = SENSOR_TRY;
 		}
-	}
-
-
-	if (csRecordingName != NULL)
-	{	
-		// check if running from a different directory. If so, we need to change directory
-		// to the real one, so that path to INI file will be OK (for log initialization, for example)
-		if (0 != changeDirectory(argv[0]))
+		else if (strcmp(argv[i], "-color=on") == 0)
 		{
-			return(ERR_DEVICE);
+			config.openColor = SENSOR_ON;
+		}
+		else if (strcmp(argv[i], "-color=off") == 0)
+		{
+			config.openColor = SENSOR_OFF;
+		}
+		else if (strcmp(argv[i], "-color=try") == 0)
+		{
+			config.openColor = SENSOR_TRY;
+		}
+		else if (strcmp(argv[i], "-ir=on") == 0)
+		{
+			config.openIR = SENSOR_ON;
+		}
+		else if (strcmp(argv[i], "-ir=off") == 0)
+		{
+			config.openIR = SENSOR_OFF;
+		}
+		else if (strcmp(argv[i], "-ir=try") == 0)
+		{
+			config.openIR = SENSOR_TRY;
+		}
+		else if (uri == NULL)
+		{
+			uri = argv[i];
+		}
+		else
+		{
+			printf("unknown argument: %s\n", argv[i]);
+			return -1;
 		}
 	}
 
 	// Xiron Init
 	XnStatus rc = XN_STATUS_OK;
 
-	if (csRecordingName != NULL)
-	{	
-		rc = openDevice(argv[1], bDefaultRightColor);
-	}
-	else if (bChooseDevice)
+	if (bChooseDevice)
 	{
-		rc = openDeviceFromList(bDefaultRightColor);
+		rc = openDeviceFromList(config);
 	}
 	else
 	{
-		rc = openDevice(NULL, bDefaultRightColor);
+		rc = openDevice(uri, config);
 	}
 
 	if (rc != openni::STATUS_OK)

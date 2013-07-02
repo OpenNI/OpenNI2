@@ -25,6 +25,7 @@
 #include "XnOniStream.h"
 #include "XnOniDriver.h"
 #include "../Sensor/XnDeviceEnumeration.h"
+#include "../DDK/XnPropertySetInternal.h"
 
 //---------------------------------------------------------------------------
 // XnOniDevice class
@@ -163,38 +164,42 @@ XnStatus XnOniDevice::FillSupportedVideoModes()
 	pSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.irModes.GetData();
 
 	m_sensors[s].sensorType             = ONI_SENSOR_IR;
-	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes);
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes*2);
 	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
 	
+	OniPixelFormat irFormats[] = {ONI_PIXEL_FORMAT_GRAY16, ONI_PIXEL_FORMAT_RGB888};
 	writeIndex = 0;
 	for(XnUInt32 i=0; i < nSupportedModes; ++i)
 	{
-		m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_GRAY16;
-		m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[i].nFPS;
-		XnBool bOK = XnDDKGetXYFromResolution(
-			(XnResolutions)pSupportedModes[i].nResolution,
-			(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
-			(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
-			);
-		XN_ASSERT(bOK);
-		XN_REFERENCE_VARIABLE(bOK);
+		for (int fmt = 0; fmt <= 1; ++fmt)
+		{
+			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = irFormats[fmt];
+			m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[i].nFPS;
+			XnBool bOK = XnDDKGetXYFromResolution(
+				(XnResolutions)pSupportedModes[i].nResolution,
+				(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
+				(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
+				);
+			XN_ASSERT(bOK);
+			XN_REFERENCE_VARIABLE(bOK);
 
-		bool foundMatch = false;
-		for (int j = 0; j < writeIndex; ++j)
-		{
-			if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[j].fps &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-				m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
+			bool foundMatch = false;
+			for (int j = 0; j < writeIndex; ++j)
 			{
-				// Already know this configuration
-				foundMatch = true;
-				break;
+				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[j].fps &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
+					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
+				{
+					// Already know this configuration
+					foundMatch = true;
+					break;
+				}
 			}
-		}
-		if (!foundMatch)
-		{
-			++writeIndex;
+			if (!foundMatch)
+			{
+				++writeIndex;
+			}
 		}
 	}
 	m_sensors[s].numSupportedVideoModes = writeIndex;
@@ -203,15 +208,43 @@ XnStatus XnOniDevice::FillSupportedVideoModes()
 	return XN_STATUS_OK;
 }
 
-XnStatus XnOniDevice::Init()
+XnStatus XnOniDevice::Init(const char* mode)
 {
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	XN_PROPERTY_SET_CREATE_ON_STACK(initialValues);
+
+	if (mode != NULL)
+	{
+		nRetVal = XnPropertySetAddModule(&initialValues, XN_MODULE_NAME_DEVICE);
+		XN_IS_STATUS_OK(nRetVal);
+
+		for (int i = 0; mode[i] != '\0'; ++i)
+		{
+			switch (mode[i])
+			{
+			case 'L':
+				nRetVal = XnPropertySetAddIntProperty(&initialValues, XN_MODULE_NAME_DEVICE, XN_MODULE_PROPERTY_LEAN_INIT, TRUE);
+				XN_IS_STATUS_OK(nRetVal);
+				break;
+			case 'R':
+				nRetVal = XnPropertySetAddIntProperty(&initialValues, XN_MODULE_NAME_DEVICE, XN_MODULE_PROPERTY_RESET_SENSOR_ON_STARTUP, FALSE);
+				XN_IS_STATUS_OK(nRetVal);
+				break;
+			}
+		}
+	}
+
 	XnDeviceConfig config;
 	config.cpConnectionString = m_info.uri;
-	config.pInitialValues = NULL;
+	config.pInitialValues = &initialValues;
 	XnStatus retVal = m_sensor.Init(&config);
 	XN_IS_STATUS_OK(retVal);
 
-	return FillSupportedVideoModes();
+	nRetVal = FillSupportedVideoModes();
+	XN_IS_STATUS_OK(nRetVal);
+
+	return XN_STATUS_OK;
 }
 
 OniStatus XnOniDevice::getSensorInfoList(OniSensorInfo** pSensors, int* numSensors)
@@ -365,6 +398,7 @@ OniStatus XnOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 		XnStatus nRetVal = m_sensor.DeviceModule()->GetProperty(propertyId, data, pDataSize);
 		if (nRetVal != XN_STATUS_OK)
 		{
+			m_driverServices.errorLoggerAppend("Failed to set property %x: %s", propertyId, xnGetStatusString(nRetVal));
 			return ONI_STATUS_BAD_PARAMETER;
 		}
 	}
@@ -409,6 +443,7 @@ OniStatus XnOniDevice::setProperty(int propertyId, const void* data, int dataSiz
 		XnStatus nRetVal = m_sensor.DeviceModule()->SetProperty(propertyId, data, dataSize);
 		if (nRetVal != XN_STATUS_OK)
 		{
+			m_driverServices.errorLoggerAppend("Failed to set property %x: %s", propertyId, xnGetStatusString(nRetVal));
 			return ONI_STATUS_BAD_PARAMETER;
 		}
 	}
@@ -416,13 +451,20 @@ OniStatus XnOniDevice::setProperty(int propertyId, const void* data, int dataSiz
 }
 OniBool XnOniDevice::isPropertySupported(int propertyId)
 {
-	XnBool propertyExists = FALSE;
-	m_sensor.DeviceModule()->DoesPropertyExist(propertyId, &propertyExists);
-
-	return (propertyId == ONI_DEVICE_PROPERTY_DRIVER_VERSION ||
+	if (propertyId == ONI_DEVICE_PROPERTY_DRIVER_VERSION ||
 		propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION ||
-		propertyExists);
-		
+		propertyId == ONI_DEVICE_PROPERTY_FIRMWARE_VERSION ||
+		propertyId == ONI_DEVICE_PROPERTY_HARDWARE_VERSION ||
+		propertyId == ONI_DEVICE_PROPERTY_SERIAL_NUMBER)
+	{
+		return TRUE;
+	}
+	else
+	{
+		XnBool propertyExists = FALSE;
+		m_sensor.DeviceModule()->DoesPropertyExist(propertyId, &propertyExists);
+		return propertyExists;
+	}
 }
 
 void XnOniDevice::notifyAllProperties()

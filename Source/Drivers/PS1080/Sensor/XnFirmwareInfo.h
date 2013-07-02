@@ -44,7 +44,7 @@ public:
 	XnBool bAudioSupported;
 	XnBool bGetPresetsSupported;
 	XnBool bDeviceInfoSupported;
-	XnBool bAutoImageAdjustmentsSupported;
+	XnBool bImageAdjustmentsSupported;
 
 	XnUInt16 nOpcodeGetVersion;
 	XnUInt16 nOpcodeKeepAlive;
@@ -69,7 +69,31 @@ public:
 	XnUInt16 nOpcodeGetPlatformString;
 	XnUInt16 nOpcodeGetUsbCore;
 	XnUInt16 nOpcodeSetLedState;
+	XnUInt16 nOpcodeEnableEmitter;
 
+	XnUInt16 nOpcodeGetLog;
+	XnUInt16 nOpcodeTakeSnapshot;
+	XnUInt16 nOpcodeInitFileUpload;
+	XnUInt16 nOpcodeWriteFileUpload;
+	XnUInt16 nOpcodeFinishFileUpload;
+	XnUInt16 nOpcodeDownloadFile;
+	XnUInt16 nOpcodeDeleteFile;
+	XnUInt16 nOpcodeGetFlashMap;
+	XnUInt16 nOpcodeGetFileList;
+	XnUInt16 nOpcodeSetFileAttribute;
+	XnUInt16 nOpcodeExecuteFile;
+	XnUInt16 nOpcodeReadFlash;
+	XnUInt16 nOpcodeBIST;
+	XnUInt16 nOpcodeSetGMCParams;
+	XnUInt16 nOpcodeGetCPUStats;
+	XnUInt16 nOpcodeCalibrateTec;
+	XnUInt16 nOpcodeGetTecData;
+	XnUInt16 nOpcodeCalibrateEmitter;
+	XnUInt16 nOpcodeGetEmitterData;
+	XnUInt16 nOpcodeCalibrateProjectorFault;
+
+	XnUInt16 nLogStringType;
+	XnUInt16 nLogOverflowType;
 
 	XnBool bMirrorSupported;
 
@@ -84,6 +108,7 @@ public:
 
 	XnUInt8 nISOAlternativeInterface;
 	XnUInt8 nBulkAlternativeInterface;
+	XnUInt8 nISOLowDepthAlternativeInterface;
 
 	XnBool bGetImageCmosTypeSupported;
 	XnBool bImageSupported;

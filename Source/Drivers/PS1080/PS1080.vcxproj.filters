@@ -345,9 +345,6 @@
     <ClCompile Include="Sensor\XnGMCDebugProcessor.cpp">
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
-    <ClCompile Include="Sensor\XnGMCProcessor.cpp">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClCompile>
     <ClCompile Include="Sensor\XnImageProcessor.cpp">
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
@@ -384,12 +381,6 @@
     <ClCompile Include="Sensor\XnUncompressedDepthProcessor.cpp">
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
-    <ClCompile Include="Sensor\XnUncompressedYUVImageProcessor.cpp">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sensor\XnUncompressedYUVtoRGBImageProcessor.cpp">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClCompile>
     <ClCompile Include="Sensor\XnWavelengthCorrectionDebugProcessor.cpp">
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
@@ -397,15 +388,6 @@
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
     <ClCompile Include="Sensor\Bayer.cpp">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Sensor\GMC.cpp">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Sensor\LinAlg.cpp">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Sensor\Registration.cpp">
       <Filter>Sensor\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Sensor\Uncomp.cpp">
@@ -466,6 +448,15 @@
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
     <ClCompile Include="Sensor\XnNesaDebugProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedYUV422toRGBImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnUncompressedYUYVtoRGBImageProcessor.cpp">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sensor\XnPassThroughImageProcessor.cpp">
       <Filter>Sensor\Data Processors</Filter>
     </ClCompile>
   </ItemGroup>
@@ -671,9 +662,6 @@
     <ClInclude Include="Include\XnStreamParams.h">
       <Filter>DDK</Filter>
     </ClInclude>
-    <ClInclude Include="DDK\XnOniFramePool.h">
-      <Filter>DDK</Filter>
-    </ClInclude>
     <ClInclude Include="Sensor\XnAudioProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
@@ -687,9 +675,6 @@
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\XnGMCDebugProcessor.h">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sensor\XnGMCProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\XnImageProcessor.h">
@@ -728,28 +713,13 @@
     <ClInclude Include="Sensor\XnUncompressedDepthProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
-    <ClInclude Include="Sensor\XnUncompressedYUVImageProcessor.h">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sensor\XnUncompressedYUVtoRGBImageProcessor.h">
-      <Filter>Sensor\Data Processors</Filter>
-    </ClInclude>
     <ClInclude Include="Sensor\XnWavelengthCorrectionDebugProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\XnWholePacketProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
-    <ClInclude Include="Sensor\GMC.h">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClInclude>
     <ClInclude Include="Sensor\Bayer.h">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Sensor\LinAlg.h">
-      <Filter>Sensor\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Sensor\Registration.h">
       <Filter>Sensor\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\Uncomp.h">
@@ -819,6 +789,15 @@
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
     <ClInclude Include="Sensor\XnNesaDebugProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedYUV422toRGBImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnUncompressedYUYVtoRGBImageProcessor.h">
+      <Filter>Sensor\Data Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sensor\XnPassThroughImageProcessor.h">
       <Filter>Sensor\Data Processors</Filter>
     </ClInclude>
   </ItemGroup>

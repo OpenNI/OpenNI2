@@ -16,6 +16,10 @@ Windows
 - PyWin32
     From: http://sourceforge.net/projects/pywin32/files/pywin32/
     Please make sure you download the version that matches your exact python version.
+- JDK 6.0
+    From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
+    You must also define an environment variable called "JAVA_HOME" that points to the JDK installation directory.
+    For example: set JAVA_HOME=c:\Program Files (x86)\Java\jdk1.6.0_32
 - WIX 3.5
     From: http://wix.codeplex.com/releases/view/60102
 - Doxygen
@@ -37,6 +41,17 @@ Linux
     From: http://sourceforge.net/projects/libusb/files/libusb-1.0/
     Or via apt:
     sudo apt-get install libusb-1.0-0-dev
+- LibUDEV
+    sudo apt-get install libudev-dev
+- JDK 6.0
+    From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
+    Or via apt:
+    Ubuntu 10.x:
+        sudo add-apt-repository "deb http://archive.canonical.com/ lucid partner"
+        sudo apt-get update
+        sudo apt-get install sun-java6-jdk
+    Ubuntu 12.x:
+        sudo apt-get install openjdk-6-jdk
 - FreeGLUT3
     From: http://freeglut.sourceforge.net/index.php#download
     Or via apt:
@@ -64,7 +79,7 @@ Building on Linux:
   Run:
   $ make
   
-Cross-Compiling for arm on Linux:
+Cross-Compiling for ARM on Linux:
   The following environment variables should be defined:
   - ARM_CXX=<path to cross-compilation g++>
   - ARM_STAGING=<path to cross-compilation staging dir>
@@ -72,7 +87,7 @@ Cross-Compiling for arm on Linux:
   $ PLATFORM=Arm make
 
 Creating OpenNI2 package:
-  - Go into the directory 'Redist'
+  - Go into the directory 'Packaging'
   - Run ReleaseVersion.py [x86|x64|arm|android]
     NOTE: for android, NDK_ROOT must be defined, pointing to the NDK installation dir.
   - Installer will be placed in the 'Final' directory

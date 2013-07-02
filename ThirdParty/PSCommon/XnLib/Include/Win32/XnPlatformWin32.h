@@ -197,30 +197,7 @@ typedef	HMODULE	XN_LIB_HANDLE;
 #define XN_STRINGIFY_HELPER(n) #n
 
 
-/////// Threads
-/** A Xiron thread type. */ 
-typedef	HANDLE XN_THREAD_HANDLE;
 
-/** A Xiron thread ID. */ 
-typedef	DWORD XN_THREAD_ID;
-
-/** A Xiron process ID. */
-typedef DWORD XN_PROCESS_ID;
-
-/** The thread entry point function prototype. */
-typedef	LPTHREAD_START_ROUTINE XN_THREAD_PROC_PROTO;
-
-/** The thread entry point function definition. */
-#define	XN_THREAD_PROC DWORD WINAPI
-
-/** The thread return function. */
-#define	XN_THREAD_PROC_RETURN(ret) return(ret)
-
-/** The thread passable data pointer type. */ 
-typedef	LPVOID XN_THREAD_PARAM;
-
-
-typedef	HANDLE XN_EVENT_HANDLE;
 
 //---------------------------------------------------------------------------
 // API Export/Import Macros

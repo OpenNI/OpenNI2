@@ -36,13 +36,51 @@ namespace openni
 
 /** Pixel type used to store depth images. */
 typedef uint16_t				DepthPixel;
+
 /** Pixel type used to store IR images. */
 typedef uint16_t				Grayscale16Pixel;
 
 // structs
-_ONI_DECLARE_VERSION(Version);
-_ONI_DECLARE_RGB888_PIXEL(RGB888Pixel);
-_ONI_DECLARE_YUV422_PIXEL(YUV422DoublePixel);
+/** Holds an OpenNI version number, which consists of four separate numbers in the format: @c major.minor.maintenance.build. For example: 2.0.0.20. */
+typedef struct
+{
+	/** Major version number, incremented for major API restructuring. */
+	int major;
+	/** Minor version number, incremented when significant new features added. */
+	int minor;
+	/** Maintenance build number, incremented for new releases that primarily provide minor bug fixes. */
+	int maintenance;
+	/** Build number. Incremented for each new API build. Generally not shown on the installer and download site. */
+	int build;
+} Version;
+
+/** Holds the value of a single color image pixel in 24-bit RGB format. */
+typedef struct
+{
+	/* Red value of this pixel. */
+	uint8_t r;
+	/* Green value of this pixel. */
+	uint8_t g;
+	/* Blue value of this pixel. */
+	uint8_t b;
+} RGB888Pixel;
+
+/**
+ Holds the value of two pixels in YUV422 format (Luminance/Chrominance,16-bits/pixel).
+ The first pixel has the values y1, u, v.
+ The second pixel has the values y2, u, v.
+*/
+typedef struct
+{
+	/** First chrominance value for two pixels, stored as blue luminance difference signal. */
+	uint8_t u;
+	/** Overall luminance value of first pixel. */
+	uint8_t y1;
+	/** Second chrominance value for two pixels, stored as red luminance difference signal. */
+	uint8_t v;
+	/** Overall luminance value of second pixel. */
+	uint8_t y2;
+} YUV422DoublePixel;
 
 /** This special URI can be passed to @ref Device::open() when the application has no concern for a specific device. */
 #if ONI_PLATFORM != ONI_PLATFORM_WIN32
@@ -624,6 +662,10 @@ public:
 		{
 		}
 
+		virtual ~NewFrameListener()
+		{
+		}
+
 		/**
 		Derived classes should implement this function to handle new frames.
 		*/
@@ -643,12 +685,44 @@ public:
 		OniCallbackHandle m_callbackHandle;
 	};
 
+	class FrameAllocator
+	{
+	public:
+		virtual ~FrameAllocator() {}
+		virtual void* allocateFrameBuffer(int size) = 0;
+		virtual void freeFrameBuffer(void* data) = 0;
+
+	private:
+		friend class VideoStream;
+
+		static void* ONI_CALLBACK_TYPE allocateFrameBufferCallback(int size, void* pCookie)
+		{
+			FrameAllocator* pThis = (FrameAllocator*)pCookie;
+			return pThis->allocateFrameBuffer(size);
+		}
+
+		static void ONI_CALLBACK_TYPE freeFrameBufferCallback(void* data, void* pCookie)
+		{
+			FrameAllocator* pThis = (FrameAllocator*)pCookie;
+			pThis->freeFrameBuffer(data);
+		}
+	};
+
 	/**
 	Default constructor.  Creates a new, non-valid @ref VideoStream object.  The object created will be invalid until its create() function
 	is called with a valid Device.
 	*/
-	VideoStream() : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL)
+	VideoStream() : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL), m_isOwner(true)
 	{}
+
+	/**
+	Handle constructor. Creates a VideoStream object based on the given initialized handle.
+	This object will not destroy the underlying handle when  @ref destroy() or destructor is called
+	*/
+	explicit VideoStream(OniStreamHandle handle) : m_stream(NULL), m_sensorInfo(), m_pCameraSettings(NULL), m_isOwner(false)
+	{
+		_setHandle(handle);
+	}
 
 	/**
 	Destructor.  The destructor calls the destroy() function, but it is considered a best practice for applications to
@@ -779,6 +853,28 @@ public:
 
 		oniStreamUnregisterNewFrameCallback(m_stream, pListener->m_callbackHandle);
 		pListener->m_callbackHandle = NULL;
+	}
+
+	/**
+	Sets the frame buffers allocator for this video stream.
+	@param [in] pAllocator Pointer to the frame buffers allocator object. Pass NULL to return to default frame allocator.
+	@returns ONI_STATUS_OUT_OF_FLOW The frame buffers allocator cannot be set while stream is streaming.
+	*/
+	Status setFrameBuffersAllocator(FrameAllocator* pAllocator)
+	{
+		if (!isValid())
+		{
+			return STATUS_ERROR;
+		}
+
+		if (pAllocator == NULL)
+		{
+			return (Status)oniStreamSetFrameBuffersAllocator(m_stream, NULL, NULL, NULL);
+		}
+		else
+		{
+			return (Status)oniStreamSetFrameBuffersAllocator(m_stream, pAllocator->allocateFrameBufferCallback, pAllocator->freeFrameBufferCallback, pAllocator);
+		}
 	}
 
 	/**
@@ -1083,7 +1179,7 @@ public:
 	@returns Status code indicating success or failure of this operation.
 	*/
 	template <class T>
-	Status invoke(int commandId, const T& value)
+	Status invoke(int commandId, T& value)
 	{
 		return invoke(commandId, &value, sizeof(T));
 	}
@@ -1124,6 +1220,7 @@ private:
 	OniStreamHandle m_stream;
 	SensorInfo m_sensorInfo;
 	CameraSettings* m_pCameraSettings;
+	bool m_isOwner;
 };
 
 /**
@@ -1149,9 +1246,18 @@ public:
 	Default constructor. Creates a new empty Device object. This object will be invalid until it is initialized by
 	calling its open() function.
 	*/
-	Device() : m_pPlaybackControl(NULL), m_device(NULL)
+	Device() : m_pPlaybackControl(NULL), m_device(NULL), m_isOwner(true)
 	{
 		clearSensors();
+	}
+
+	/**
+	Handle constructor. Creates a Device object based on the given initialized handle.
+	This object will not destroy the underlying handle when  @ref close() or destructor is called
+	*/
+	explicit Device(OniDeviceHandle handle) : m_pPlaybackControl(NULL), m_device(NULL), m_isOwner(false)
+	{
+		_setHandle(handle);
 	}
 
 	/**
@@ -1426,6 +1532,11 @@ public:
 		return rc;
 	}
 
+	bool getDepthColorSyncEnabled()
+	{
+		return oniDeviceGetDepthColorSyncEnabled(m_device) == TRUE;
+	}
+
 	/**
 	Sets a property that takes an arbitrary data type as its input.  It is not expected that
 	application code will need this function frequently, as all commonly used properties have
@@ -1477,7 +1588,7 @@ public:
 	@param [in] dataSize size of the buffer passed in @c data.
 	@returns Status code indicating success or failure of this operation.
 	*/
-	Status invoke(int commandId, const void* data, int dataSize)
+	Status invoke(int commandId, void* data, int dataSize)
 	{
 		return (Status)oniDeviceInvoke(m_device, commandId, data, dataSize);
 	}
@@ -1492,7 +1603,7 @@ public:
 	@returns Status code indicating success or failure of this operation.
 	*/
 	template <class T>
-	Status invoke(int propertyId, const T& value)
+	Status invoke(int propertyId, T& value)
 	{
 		return invoke(propertyId, &value, sizeof(T));
 	}
@@ -1507,6 +1618,9 @@ public:
 		return oniDeviceIsCommandSupported(m_device, commandId) == TRUE;
 	}
 
+	/** @internal **/
+	inline Status _openEx(const char* uri, const char* mode);
+
 private:
 	Device(const Device&);
 	Device& operator=(const Device&);
@@ -1519,21 +1633,7 @@ private:
 		}
 	}
 
-	Status _setHandle(OniDeviceHandle deviceHandle)
-	{
-		if (m_device == NULL)
-		{
-			m_device = deviceHandle;
-
-			clearSensors();
-
-			oniDeviceGetInfo(m_device, &m_deviceInfo);
-			// Read deviceInfo
-			return STATUS_OK;
-		}
-
-		return STATUS_OUT_OF_FLOW;
-	}
+	inline Status _setHandle(OniDeviceHandle deviceHandle);
 
 private:
 	PlaybackControl* m_pPlaybackControl;
@@ -1541,6 +1641,8 @@ private:
 	OniDeviceHandle m_device;
 	DeviceInfo m_deviceInfo;
 	SensorInfo m_aSensorInfo[ONI_MAX_SENSORS];
+
+	bool m_isOwner;
 };
 
 /**
@@ -1763,6 +1865,35 @@ public:
 		return rc == STATUS_OK && enabled == TRUE;
 	}
 
+	Status setGain(int gain)
+	{
+		return setProperty(STREAM_PROPERTY_GAIN, gain);
+	}
+	Status setExposure(int exposure)
+	{
+		return setProperty(STREAM_PROPERTY_EXPOSURE, exposure);
+	}
+	int getGain()
+	{
+		int gain;
+		Status rc = getProperty(STREAM_PROPERTY_GAIN, &gain);
+		if (rc != STATUS_OK)
+		{
+			return 100;
+		}
+		return gain;
+	}
+	int getExposure()
+	{
+		int exposure;
+		Status rc = getProperty(STREAM_PROPERTY_EXPOSURE, &exposure);
+		if (rc != STATUS_OK)
+		{
+			return 0;
+		}
+		return exposure;
+	}
+
 	bool isValid() const {return m_pStream != NULL;}
 private:
 	template <class T>
@@ -1831,6 +1962,11 @@ public:
 			m_deviceConnectedCallbacks.deviceStateChanged = NULL;
 			m_deviceConnectedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceConnectedListener()
+		{
+		}
+		
 		/**
 		* Callback function for the onDeviceConnected event.  This function will be 
 		* called whenever this event occurs.  When this happens, a pointer to the @ref DeviceInfo
@@ -1881,6 +2017,11 @@ public:
 			m_deviceDisconnectedCallbacks.deviceStateChanged = NULL;
 			m_deviceDisconnectedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceDisconnectedListener()
+		{
+		}
+		
 		/**
 		 * Callback function for the onDeviceDisconnected event. This function will be
 		 * called whenever this event occurs.  When this happens, a pointer to the DeviceInfo
@@ -1924,6 +2065,11 @@ public:
 			m_deviceStateChangedCallbacks.deviceStateChanged = deviceStateChangedCallback;
 			m_deviceStateChangedCallbacksHandle = NULL;
 		}
+		
+		virtual ~DeviceStateChangedListener()
+		{
+		}
+		
 		/**
 		* Callback function for the onDeviceStateChanged event.  This function will be 
 		* called whenever this event occurs.  When this happens, a pointer to a DeviceInfo
@@ -1967,14 +2113,13 @@ public:
 	*/
 	static Version getVersion()
 	{
-		OniVersion version = oniGetVersion();
-		union
-		{
-			OniVersion* pC;
-			Version* pCpp;
-		} a;
-		a.pC = &version;
-		return *a.pCpp;
+		OniVersion oniVersion = oniGetVersion();
+		Version version;
+		version.major = oniVersion.major;
+		version.minor = oniVersion.minor;
+		version.maintenance = oniVersion.maintenance;
+		version.build = oniVersion.build;
+		return version;
 	}
 
 	/**
@@ -2119,6 +2264,90 @@ public:
 		oniUnregisterDeviceCallbacks(pListener->m_deviceStateChangedCallbacksHandle);
 		pListener->m_deviceStateChangedCallbacksHandle = NULL;
 	}
+
+	/** 
+	 * Change the log output folder
+	
+	 * @param	const char * strLogOutputFolder	[in]	log required folder
+	 *
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	static Status setLogOutputFolder(const char *strLogOutputFolder)
+	{
+		return (Status)oniSetLogOutputFolder(strLogOutputFolder);
+	}
+
+	/** 
+	 * Get current log file name
+	
+	 * @param	char * strFileName	[out]	returned file name buffer
+	 * @param	int	nBufferSize	[in]	Buffer size
+	 *
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	static Status getLogFileName(char *strFileName, int nBufferSize)
+	{
+		return (Status)oniGetLogFileName(strFileName, nBufferSize);
+	}
+
+	/** 
+	 * Set minimum severity for log produce
+	
+	 * @param	const char * strMask	[in]	Logger name
+	 * @param	int nMinSeverity	[in]	Logger severity
+	 *
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	static Status setLogMinSeverity(int nMinSeverity)
+	{
+		return(Status) oniSetLogMinSeverity(nMinSeverity);
+	}
+	
+	/** 
+	* Configures if log entries will be printed to console.
+
+	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to console, FALSE otherwise.
+	*
+	* @retval STATUS_OK Upon successful completion.
+	* @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	static Status setLogConsoleOutput(bool bConsoleOutput)
+	{
+		return (Status)oniSetLogConsoleOutput(bConsoleOutput);
+	}
+
+	/** 
+	* Configures if log entries will be printed to file.
+
+	* @param	const OniBool bConsoleOutput	[in]	TRUE to print log entries to file, FALSE otherwise.
+	*
+	* @retval STATUS_OK Upon successful completion.
+	* @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	static Status setLogFileOutput(bool bFileOutput)
+	{
+		return (Status)oniSetLogFileOutput(bFileOutput);
+	}
+
+	#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+	/** 
+	 * Configures if log entries will be printed to the Android log.
+
+	 * @param	OniBool bAndroidOutput bAndroidOutput	[in]	TRUE to print log entries to the Android log, FALSE otherwise.
+	 *
+	 * @retval STATUS_OK Upon successful completion.
+	 * @retval STATUS_ERROR Upon any kind of failure.
+	 */
+	
+	static Status setLogAndroidOutput(bool bAndroidOutput)
+	{
+		return (Status)oniSetLogAndroidOutput(bAndroidOutput);
+	}
+	#endif
+	
 private:
 	OpenNI()
 	{
@@ -2394,6 +2623,7 @@ Status VideoStream::create(const Device& device, SensorType sensorType)
 		return rc;
 	}
 
+	m_isOwner = true;
 	_setHandle(streamHandle);
 
 	if (isPropertySupported(STREAM_PROPERTY_AUTO_WHITE_BALANCE) && isPropertySupported(STREAM_PROPERTY_AUTO_EXPOSURE))
@@ -2419,13 +2649,24 @@ void VideoStream::destroy()
 
 	if (m_stream != NULL)
 	{
-		oniStreamDestroy(m_stream);
+		if(m_isOwner)
+			oniStreamDestroy(m_stream);
 		m_stream = NULL;
 	}
 }
 
 Status Device::open(const char* uri)
 {
+	//If we are not the owners, we stick with our own device
+	if(!m_isOwner)
+	{
+		if(isValid()){
+			return STATUS_OK;
+		}else{
+			return STATUS_OUT_OF_FLOW;
+		}
+	}
+
 	OniDeviceHandle deviceHandle;
 	Status rc = (Status)oniDeviceOpen(uri, &deviceHandle);
 	if (rc != STATUS_OK)
@@ -2435,12 +2676,53 @@ Status Device::open(const char* uri)
 
 	_setHandle(deviceHandle);
 
-	if (isFile())
+	return STATUS_OK;
+}
+
+Status Device::_openEx(const char* uri, const char* mode)
+{
+	//If we are not the owners, we stick with our own device
+	if(!m_isOwner)
 	{
-		m_pPlaybackControl = new PlaybackControl(this);
+		if(isValid()){
+			return STATUS_OK;
+		}else{
+			return STATUS_OUT_OF_FLOW;
+		}
 	}
 
+	OniDeviceHandle deviceHandle;
+	Status rc = (Status)oniDeviceOpenEx(uri, mode, &deviceHandle);
+	if (rc != STATUS_OK)
+	{
+		return rc;
+	}
+
+	_setHandle(deviceHandle);
+
 	return STATUS_OK;
+}
+
+Status Device::_setHandle(OniDeviceHandle deviceHandle)
+{
+	if (m_device == NULL)
+	{
+		m_device = deviceHandle;
+
+		clearSensors();
+
+		oniDeviceGetInfo(m_device, &m_deviceInfo);
+
+		if (isFile())
+		{
+			m_pPlaybackControl = new PlaybackControl(this);
+		}
+
+		// Read deviceInfo
+		return STATUS_OK;
+	}
+
+	return STATUS_OUT_OF_FLOW;
 }
 
 void Device::close()
@@ -2453,7 +2735,11 @@ void Device::close()
 
 	if (m_device != NULL)
 	{
-		oniDeviceClose(m_device);
+		if(m_isOwner)
+		{
+			oniDeviceClose(m_device);
+		}
+
 		m_device = NULL;
 	}
 }

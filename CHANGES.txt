@@ -1,0 +1,89 @@
+Change Log:
+-----------
+
+OpenNI 2.2.0:
+  - Added getDepthColorSyncEnabled() API
+  - Added log settings API
+  - Add a typedef: OniGrayscale8Pixel
+  - invoke() method signature was updated - data is no longer const
+  - New Java Wrappers
+  - New Java sample: SimpleViewer.java
+  - Add support for Capri devkits
+  - Added tools: PS1080Console and PSLinkConsole (for debugging purposes)
+  - Drivers and INI files path resolution based on the shared library location (merge pull request #7. See https://github.com/OpenNI/OpenNI2/pull/7 for details. Thanks to Tomoto)
+  - NiViewer: Allow choosing which streams to open (run "NiViewer --help" for details).
+  - NiViewer: add support for seeking to a specific frame in a recording. Use the ':' key.
+  - Image registration support for Kinect driver (merge pull request #4. See https://github.com/OpenNI/OpenNI2/pull/4 for details. Thanks to Tomoto)
+  - Completely re-wrote frame buffers management. 
+  - Added API for replacing frame buffer allocator.
+  - Linux: implement connect/disconnect events
+  - All samples are now self-contained and can be copied anywhere. In addition, compiling a sample does *not* overwrite the original precompiled binary.
+  - PS1080: IR stream now also supports RGB888
+  - PS1080: improved hardware name detection
+  - PS1080: Add NESA unlimited to BIST
+  - PrimeSense: move common properties (PS1080 and Capri) to PrimeSense.h
+  - PS1080: add new property for turning on hardware frame sync, with no OpenNI checks
+  - New pixel format: YUYV. PS1080 now supports it (on newer firmwares), and so does NiViewer and recordings.
+  - PS1080: add lots of debug commands
+  - PS1080: add new file type (vendor data)
+  - PS1080: added support for the second alternative interface (low-bandwidth)
+  - PS1080: added support for IR stream from the AR130 CMOS
+  - PS1080: added support for turning on/off emitter
+  - Bug Fixes:
+    - Bug Fix: reading frames / waiting on streams did not work well from multiple threads
+    - Bug Fix: Failed to use after OpenCL was initialized
+    - Bug Fix: Visual Sutdio 2008 wasn't supported
+    - PS1080 Linux did not support the RD1.09 device
+    - PS1080 Bug Fix: Physical device name property could not be read
+    - Make sure device is still open when closing a stream that uses it.
+    - PS1080 Bug Fix: handle file system lock when uploading only in supporting firmwares
+    - PS1080 Bug Fix: LED API wasn't working
+    - PS1080 Bug Fix: debug dumps were not closed properly
+    - Kinect Bug Fix: wrong error code returned when trying to change video mode while streaming
+    - PS1080 Bug Fix: isPropertySupported() didn't return true for ONI_DEVICE_PROPERTY_FIRMWARE_VERSION, ONI_DEVICE_PROPERTY_HARDWARE_VERSION and ONI_DEVICE_PROPERTY_SERIAL_NUMBER.
+    - PS1080 Bug Fix: potential crash when corrupt data arrives on BAYER stream
+  - Build:
+    - Rename Redist dir to Packaging
+    - Remove all warnings during build. Treat all warnings as errors.
+    - Rewrote the android make files to proper standards
+    - Fix Linux identification (apparently -std=c1x defines only __linux and not linux)
+    - Support WIX 3.6 and up
+    - ReleaseVersion script won't fail if output file exists (overwrite it)
+
+OpenNI 2.1.0:
+  - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.
+  - Support for Mac OSX
+  - Support for Linux on Arm
+  - Support for Android (native only)
+  - Kinect: implementing convertDepthToColorCoordinates()
+  - Kinect: implementing CameraSettings
+  - Kinect Bug Fix: can now switch between color and IR streams
+  - Kinect Bug Fix: wrong mirror value was returned
+  - PS1080 Bug Fix: trying to open more than 8 devices will crash
+  - PS1080 Bug Fix: on Linux 64-bit, color frames are sometimes corrupt
+  - PS1080 Bug Fix: a potential crash with older firmwares
+  - NiViewer now browses whenever a recording is started
+  - NiViewer: added 'i' key for toggling image-registration (also added current status in the status bar)
+  - Minor memory leak fixes
+  - EventBasedRead Sample Bug Fix: will not get device events
+  - EventBasedRead Sample now prints the list of connected devices and every change that occurs
+  - Recordings are now also compatible with OpenNI 1.x and NiTE 1.x
+  - Potential starvation bug fix when application takes much time handling events
+  - Log file now closes on shutdown(), and a new one is created on initialize()
+  - SimpleRead is now the default project in the VS solution (thanks eranws)
+  - Bug Fix: did not support Visual Studio 2008 and older
+  - Bug Fix: did not support Visual Studio 2012 and newer
+  - Bug Fix: did not support Visual Studio Express (thanks rh-galaxy)
+  - NiViewer Bug Fix: Mirror did not change IR state
+  - Kinect: providing Kinect for Windows PID and VID in the device info struct
+  - ONI files: providing driver name in the device info struct
+  - Bug Fix: ReleaseVersion script did not work on 32-bit machines
+  - Linux Bug Fix: log timestamps did not start from 0.
+  
+OpenNI 2.0.0:
+  - Brand new API (see documentation)
+  - Algorithms API were removed, and are now part of middleware libraries (such as NiTE)
+  - New deployment model - private copy to each application (see documentation)
+  - Added support for turning off Auto Exposure and Auto White Balance of the color CMOS in PS1080 devices
+  - Built-in support for Kinect devices via the Kinect SDK (Windows only)
+  - Added support for translating a depth pixel to color map coordinates

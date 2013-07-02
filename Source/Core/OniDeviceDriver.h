@@ -22,6 +22,7 @@
 #define _ONI_IMPL_DEVICE_DRIVER_H_
 
 #include "OniDriverHandler.h"
+#include "OniFrameManager.h"
 #include "XnLib.h"
 #include "XnHash.h"
 #include "XnEvent.h"
@@ -39,7 +40,7 @@ class VideoStream;
 class DeviceDriver
 {
 public:
-	DeviceDriver(const char* strDriverFileName, xnl::ErrorLogger& errorLogger);
+	DeviceDriver(const char* strDriverFileName, FrameManager& frameManager, xnl::ErrorLogger& errorLogger);
 	bool initialize();
 	~DeviceDriver();
 
@@ -66,6 +67,7 @@ protected:
 	OniDriverServices* m_pDriverServicesForDriver;
 	xnl::ErrorLogger& m_errorLogger;
 	DriverHandler m_driverHandler;
+	FrameManager& m_frameManager;
 
 	bool m_valid;
 	xnl::StringsHash<Device*> m_devices;
@@ -73,10 +75,10 @@ protected:
 	xnl::Event1Arg<Device*> m_deviceConnectedEvent;
 	xnl::Event1Arg<Device*> m_deviceDisconnectedEvent;
 	xnl::Event2Args<Device*, OniDeviceState> m_deviceStateChangedEvent;
+
 private:
 	DeviceDriver(const DeviceDriver& other);
 	DeviceDriver& operator=(const DeviceDriver& other);
-		
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

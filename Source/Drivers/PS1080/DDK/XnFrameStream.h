@@ -49,8 +49,8 @@ public:
 	//---------------------------------------------------------------------------
 	XnStatus Init();
 	XnStatus Free();
-	virtual void AddRefToFrame(OniFrame* pFrame);
-	virtual void ReleaseFrame(OniFrame* pFrame);
+
+	virtual XnStatus Close();
 
 protected:
 	//---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ protected:
 	//---------------------------------------------------------------------------
 	// Getters
 	//---------------------------------------------------------------------------
-	XnStatus GetTripleBuffer(XnFrameBufferManager** pBufferManager);
+	XnStatus StartBufferManager(XnFrameBufferManager** pBufferManager);
 
 	//---------------------------------------------------------------------------
 	// Setters
@@ -72,19 +72,17 @@ protected:
 	// Virtual Methods
 	//---------------------------------------------------------------------------
 	virtual XnStatus PostProcessFrame(OniFrame* /*pFrame*/) { return XN_STATUS_OK; }
-	virtual XnStatus ReallocTripleFrameBuffer();
 
 private:
-	XnStatus OnRequiredSizeChanging();
+	XN_DISABLE_COPY_AND_ASSIGN(XnFrameStream);
 
 	static XnStatus XN_CALLBACK_TYPE SetFPSCallback(XnActualIntProperty* pSenser, XnUInt64 nValue, void* pCookie);
-	static XnStatus XN_CALLBACK_TYPE RequiredSizeChangedCallback(const XnProperty* pSenser, void* pCookie);
-	static void XN_CALLBACK_TYPE OnTripleBufferNewData(const XnFrameBufferManager::NewFrameEventArgs& args, void* pCookie);
+	static void XN_CALLBACK_TYPE OnTripleBufferNewData(OniFrame* pFrame, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
 	//---------------------------------------------------------------------------
-	XnFrameBufferManager* m_pBufferManager;
+	XnFrameBufferManager m_bufferManager;
 
 	XnUInt32 m_nLastReadFrame; // the ID that was given
 

@@ -44,8 +44,6 @@ typedef struct XnUsbConnection
 	XnUInt8* pUSBBuffer;
 	XnUInt32 nUSBBufferReadOffset;
 	XnUInt32 nUSBBufferWriteOffset;
-
-	XnUInt32 bIsISO;
 	XnUInt32 nMaxPacketSize;
 } XnUsbConnection;
 
@@ -77,11 +75,11 @@ public:
 	XnSensorIO(XN_SENSOR_HANDLE* pSensorHandle);
 	~XnSensorIO();
 
-	XnStatus OpenDevice(const XnChar* strPath, XnBool bLeanInit);
+	XnStatus OpenDevice(const XnChar* strPath);
 
 	XnStatus OpenDataEndPoints(XnSensorUsbInterface nInterface, const XnFirmwareInfo& fwInfo);
 
-	XnSensorUsbInterface GetCurrentInterface() const { return m_interface; }
+	XnSensorUsbInterface GetCurrentInterface(const XnFirmwareInfo& fwInfo) const;
 
 	XnStatus CloseDevice();
 
@@ -93,7 +91,6 @@ public:
 private:
 	XN_SENSOR_HANDLE* m_pSensorHandle;
 	XnBool m_bMiscSupported;
-	XnSensorUsbInterface m_interface;
 	XnChar m_strDeviceName[XN_DEVICE_MAX_STRING_LENGTH];
 	XnBool m_bIsLowBandwidth;
 	XnUSBEventCallbackFunctionPtr m_pCallbackPtr; 

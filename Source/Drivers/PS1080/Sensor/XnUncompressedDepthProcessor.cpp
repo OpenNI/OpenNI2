@@ -45,7 +45,7 @@ void XnUncompressedDepthProcessor::ProcessFramePacketChunk(const XnSensorProtoco
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
 
 	// Check there is enough room for the depth pixels
-	if (CheckDepthBufferForOverflow(nDataSize))
+	if (CheckWriteBufferForOverflow(nDataSize))
 	{
 		// sometimes, when packets are lost, we get uneven number of bytes, so we need to complete
 		// one byte, in order to keep UINT16 alignment
@@ -58,20 +58,16 @@ void XnUncompressedDepthProcessor::ProcessFramePacketChunk(const XnSensorProtoco
 		// copy values. Make sure we do not get corrupted shifts
 		XnUInt16* pRaw = (XnUInt16*)(pData);
 		XnUInt16* pRawEnd = (XnUInt16*)(pData + nDataSize);
-		OniDepthPixel* pDepthBuf = GetDepthOutputBuffer();
-		OniDepthPixel* pShiftBuf = GetShiftsOutputBuffer();
+		OniDepthPixel* pDepthBuf = (OniDepthPixel*)pWriteBuffer->GetUnsafeWritePointer();
 
 		XnUInt16 shift;
 		while (pRaw < pRawEnd)
 		{
 			shift = (((*pRaw) < (XN_DEVICE_SENSOR_MAX_SHIFT_VALUE-1)) ? (*pRaw) : 0);
-			*pShiftBuf = shift;
 			*pDepthBuf = GetOutput(shift);
 
 			++pRaw;
 			++pDepthBuf;
-			++pShiftBuf;
-
 		}
 
  		pWriteBuffer->UnsafeUpdateSize(nDataSize);

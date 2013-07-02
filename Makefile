@@ -15,23 +15,46 @@
 
 include ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
 
+MAJOR_VERSION = $(shell grep "define ONI_VERSION_MAJOR" Include/OniVersion.h | cut -f 2)
+MINOR_VERSION = $(shell grep "define ONI_VERSION_MINOR" Include/OniVersion.h | cut -f 2)
+MAINT_VERSION = $(shell grep "define ONI_VERSION_MAINT" Include/OniVersion.h | cut -f 2)
+
+ifeq ("$(OSTYPE)","Darwin")
+	OS_NAME = MacOSX
+else
+	OS_NAME = Linux
+endif
+PRODUCT_STRING = OpenNI-$(OS_NAME)-$(PLATFORM)-$(shell cd Packaging && python -c "import UpdateVersion; print UpdateVersion.getVersionName()" && cd ..)
+FINAL_DIR = Packaging/Final
+
 OPENNI = Source/Core
 XNLIB  = ThirdParty/PSCommon/XnLib/Source
+DEPTH_UTILS = Source/DepthUtils
 
 # list all drivers
 ALL_DRIVERS = \
 	Source/Drivers/DummyDevice   \
 	Source/Drivers/PS1080 \
+	Source/Drivers/PSLink \
 	Source/Drivers/OniFile
 
-# list all tools
-ALL_TOOLS = 
+# list all wrappers
+ALL_WRAPPERS = \
+	Wrappers/java/OpenNI.jni \
+	Wrappers/java/OpenNI.java 
 
+# list all tools
+ALL_TOOLS = \
+	Source/Drivers/PS1080/PS1080Console \
+	Source/Drivers/PSLink/PSLinkConsole
+	
 # list all core projects
 ALL_CORE_PROJS = \
 	$(XNLIB)  \
 	$(OPENNI) \
+	$(DEPTH_UTILS) \
 	$(ALL_DRIVERS) \
+	$(ALL_WRAPPERS) \
 	$(ALL_TOOLS)
 
 # list all samples
@@ -41,7 +64,11 @@ CORE_SAMPLES = \
 	Samples/MultipleStreamRead \
 	Samples/MWClosestPoint \
 	Samples/MWClosestPointApp 
-	
+
+# list all java samples
+JAVA_SAMPLES = \
+	Samples/SimpleViewer.java	
+
 ifeq "$(GLUT_SUPPORTED)" "1"
 	ALL_TOOLS += \
 		Source/Tools/NiViewer
@@ -57,7 +84,8 @@ else
 endif
 
 ALL_SAMPLES = \
-	$(CORE_SAMPLES)
+	$(CORE_SAMPLES) \
+	$(JAVA_SAMPLES)
 
 # list all projects that are build
 ALL_BUILD_PROJS = \
@@ -80,7 +108,7 @@ endef
 
 ################ TARGETS ##################
 
-.PHONY: all $(ALL_PROJS) $(ALL_PROJS_CLEAN) install uninstall clean 
+.PHONY: all $(ALL_PROJS) $(ALL_PROJS_CLEAN) install uninstall clean release
 
 # make all makefiles
 all: $(ALL_PROJS)
@@ -93,23 +121,40 @@ samples: $(ALL_SAMPLES)
 $(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
 
 # additional dependencies
-$(OPENNI):				  $(XNLIB)
-Source/Drivers/DummyDevice:	$(OPENNI) $(XNLIB)
-Source/Drivers/RawDevice:	$(OPENNI) $(XNLIB)
-Source/Drivers/PS1080:		$(OPENNI) $(XNLIB)
-Source/Drivers/OniFile:		$(OPENNI) $(XNLIB)
+$(OPENNI):                            $(XNLIB)
+Wrappers/java/OpenNI.jni:   $(OPENNI) $(XNLIB)
 
-Source/Tools/NiViewer:		$(OPENNI) $(XNLIB)
+Source/Drivers/DummyDevice: $(OPENNI) $(XNLIB)
+Source/Drivers/RawDevice:   $(OPENNI) $(XNLIB)
+Source/Drivers/PS1080:      $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
+Source/Drivers/PS1080/PS1080Console: $(OPENNI) $(XNLIB)
+Source/Drivers/PSLink:      $(OPENNI) $(XNLIB)
+Source/Drivers/PSLink/PSLinkConsole: $(OPENNI) $(XNLIB)
+Source/Drivers/OniFile:     $(OPENNI) $(XNLIB)
 
-Samples/SimpleRead:		$(OPENNI)
-Samples/EventBasedRead:		$(OPENNI)
-Samples/MultipleStreamRead:	$(OPENNI)
-Samples/MWClosestPoint:		$(OPENNI)
-Samples/MWClosestPointApp: 	$(OPENNI) Samples/MWClosestPoint
+Source/Tools/NiViewer:      $(OPENNI) $(XNLIB)
 
-Samples/SimpleViewer:		$(OPENNI)
-Samples/MultiDepthViewer:	$(OPENNI)
-Samples/ClosestPointViewer:	$(OPENNI) Samples/MWClosestPoint
+Samples/SimpleRead:         $(OPENNI)
+Samples/EventBasedRead:     $(OPENNI)
+Samples/MultipleStreamRead: $(OPENNI)
+Samples/MWClosestPoint:     $(OPENNI)
+Samples/MWClosestPointApp:  $(OPENNI) Samples/MWClosestPoint
+
+Samples/SimpleViewer:       $(OPENNI)
+Samples/MultiDepthViewer:   $(OPENNI)
+Samples/ClosestPointViewer: $(OPENNI) Samples/MWClosestPoint
+Samples/SimpleViewer.java:            Wrappers/java/OpenNI.java
+
+$(FINAL_DIR):
+	mkdir -p $(FINAL_DIR)
+
+doc:
+	Source/Documentation/Runme.py
+	rm -f Source/Documentation/html/*.md5
+	
+release: | all doc $(FINAL_DIR)
+	Packaging/Harvest.py Packaging/$(PRODUCT_STRING) $(PLATFORM)
+	cd Packaging; tar -cjf Final/$(PRODUCT_STRING).tar.bz2 $(PRODUCT_STRING)
 
 # clean is cleaning all projects
 clean: $(ALL_PROJS_CLEAN)

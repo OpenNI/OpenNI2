@@ -22,11 +22,6 @@
 #include <XnUSB.h>
 
 //---------------------------------------------------------------------------
-// Defines
-//---------------------------------------------------------------------------
-#define XN_SENSOR_VENDOR_ID			0x1D27
-
-//---------------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------------
 XnBool XnDeviceEnumeration::ms_initialized = FALSE;
@@ -36,11 +31,12 @@ XnDeviceEnumeration::DevicesHash XnDeviceEnumeration::ms_devices;
 xnl::Array<XnRegistrationHandle> XnDeviceEnumeration::ms_aRegistrationHandles;
 XN_CRITICAL_SECTION_HANDLE XnDeviceEnumeration::ms_lock;
 
-XnUInt16 XnDeviceEnumeration::ms_supportedProducts[] = 
+XnDeviceEnumeration::XnUsbId XnDeviceEnumeration::ms_supportedProducts[] = 
 {
-	0x0500,
-	0x0600,
-	0x0601,
+	{ 0x1D27, 0x0500 },
+	{ 0x1D27, 0x0600 },
+	{ 0x1D27, 0x0601 },
+	{ 0x1D27, 0x0609 },
 };
 
 XnUInt32 XnDeviceEnumeration::ms_supportedProductsCount = sizeof(XnDeviceEnumeration::ms_supportedProducts) / sizeof(XnDeviceEnumeration::ms_supportedProducts[0]);
@@ -71,14 +67,14 @@ XnStatus XnDeviceEnumeration::Initialize()
 	{
 		// register for USB events
 		XnRegistrationHandle hRegistration = NULL;
-		nRetVal = xnUSBRegisterToConnectivityEvents(XN_SENSOR_VENDOR_ID, ms_supportedProducts[i], OnConnectivityEventCallback, &ms_supportedProducts[i], &hRegistration);
+		nRetVal = xnUSBRegisterToConnectivityEvents(ms_supportedProducts[i].vendorID, ms_supportedProducts[i].productID, OnConnectivityEventCallback, &ms_supportedProducts[i], &hRegistration);
 		XN_IS_STATUS_OK(nRetVal);
 
 		nRetVal = ms_aRegistrationHandles.AddLast(hRegistration);
 		XN_IS_STATUS_OK(nRetVal);
 
 		// and enumerate for existing ones
-		nRetVal = xnUSBEnumerateDevices(XN_SENSOR_VENDOR_ID, ms_supportedProducts[i], &astrDevicePaths, &nCount);
+		nRetVal = xnUSBEnumerateDevices(ms_supportedProducts[i].vendorID, ms_supportedProducts[i].productID, &astrDevicePaths, &nCount);
 		XN_IS_STATUS_OK(nRetVal);
 
 		for (XnUInt32 j = 0; j < nCount; ++j)
@@ -102,14 +98,21 @@ void XnDeviceEnumeration::Shutdown()
 		{
 			xnUSBUnregisterFromConnectivityEvents(ms_aRegistrationHandles[i]);
 		}
+		ms_aRegistrationHandles.Clear();
+		ms_connectedEvent.Clear();
+		ms_disconnectedEvent.Clear();
 
 		xnOSCloseCriticalSection(&ms_lock);
 
 		xnUSBShutdown();
+
+		ms_devices.Clear();
+
+		ms_initialized = FALSE;
 	}
 }
 
-void XnDeviceEnumeration::OnConnectivityEvent(const XnChar* uri, XnUSBEventType eventType, XnUInt16 nProductID)
+void XnDeviceEnumeration::OnConnectivityEvent(const XnChar* uri, XnUSBEventType eventType, XnUsbId usbId)
 {
 	xnl::AutoCSLocker lock(ms_lock);
 
@@ -118,8 +121,8 @@ void XnDeviceEnumeration::OnConnectivityEvent(const XnChar* uri, XnUSBEventType 
 		if (ms_devices.Find(uri) == ms_devices.End())
 		{
 			OniDeviceInfo deviceInfo;
-			deviceInfo.usbVendorId = XN_SENSOR_VENDOR_ID;
-			deviceInfo.usbProductId = nProductID;
+			deviceInfo.usbVendorId = usbId.vendorID;
+			deviceInfo.usbProductId = usbId.productID;
 			xnOSStrCopy(deviceInfo.uri, uri, sizeof(deviceInfo.uri));
 			xnOSStrCopy(deviceInfo.vendor, "PrimeSense", sizeof(deviceInfo.vendor));
 			xnOSStrCopy(deviceInfo.name, "PS1080", sizeof(deviceInfo.name));
@@ -147,8 +150,8 @@ void XnDeviceEnumeration::OnConnectivityEvent(const XnChar* uri, XnUSBEventType 
 
 void XN_CALLBACK_TYPE XnDeviceEnumeration::OnConnectivityEventCallback(XnUSBEventArgs* pArgs, void* pCookie)
 {
-	XnUInt16 nProductID = *(XnUInt16*)pCookie;
-	OnConnectivityEvent(pArgs->strDevicePath, pArgs->eventType, nProductID);
+	XnUsbId usbId = *(XnUsbId*)pCookie;
+	OnConnectivityEvent(pArgs->strDevicePath, pArgs->eventType, usbId);
 }
 
 XnStatus XnDeviceEnumeration::IsSensorLowBandwidth(const XnChar* uri, XnBool* pbIsLowBandwidth)

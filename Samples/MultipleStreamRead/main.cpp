@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <OpenNI.h>
 
-#include "../Common/OniSampleUtilities.h"
+#include "OniSampleUtilities.h"
+
+#define SAMPLE_READ_WAIT_TIMEOUT 2000 //2000ms
 
 using namespace openni;
 
@@ -113,11 +115,11 @@ int main()
 	while (!wasKeyboardHit())
 	{
 		int readyStream = -1;
-		rc = OpenNI::waitForAnyStream(streams, 2, &readyStream);
+		rc = OpenNI::waitForAnyStream(streams, 2, &readyStream, SAMPLE_READ_WAIT_TIMEOUT);
 		if (rc != STATUS_OK)
 		{
-			printf("Wait failed\n");
-			continue;
+			printf("Wait failed! (timeout is %d ms)\n%s\n", SAMPLE_READ_WAIT_TIMEOUT, OpenNI::getExtendedError());
+			break;
 		}
 
 		switch (readyStream)

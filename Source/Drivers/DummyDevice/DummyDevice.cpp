@@ -27,11 +27,6 @@
 #define OZ_RESOLUTION_X 320
 #define OZ_RESOLUTION_Y 240
 
-typedef struct  
-{
-	int refCount;
-} OzStreamFrameCookie;
-
 class OzStream : public oni::driver::StreamBase
 {
 public:
@@ -85,43 +80,6 @@ public:
 		return ONI_STATUS_NOT_IMPLEMENTED;
 	}
 
-	OniDriverFrame* AcquireFrame(int dataSize)
-	{
-		OniDriverFrame* pFrame = (OniDriverFrame*)xnOSCalloc(1, sizeof(OniDriverFrame));
-		if (pFrame == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		pFrame->frame.data = xnOSMallocAligned(dataSize, XN_DEFAULT_MEM_ALIGN);
-		if (pFrame->frame.data == NULL)
-		{
-			XN_ASSERT(FALSE);
-			return NULL;
-		}
-
-		pFrame->pDriverCookie = xnOSMalloc(sizeof(OzStreamFrameCookie));
-		((OzStreamFrameCookie*)pFrame->pDriverCookie)->refCount = 1;
-
-		pFrame->frame.dataSize = dataSize;
-		return pFrame;
-	}
-
-	void addRefToFrame(OniDriverFrame* pFrame)
-	{
-		++((OzStreamFrameCookie*)pFrame->pDriverCookie)->refCount;
-	}
-
-	void releaseFrame(OniDriverFrame* pFrame)
-	{
-		if (0 == --((OzStreamFrameCookie*)pFrame->pDriverCookie)->refCount)
-		{
-			xnOSFreeAligned(pFrame->frame.data);
-			xnOSFree(pFrame);
-		}
-	}
-
 	virtual void Mainloop() = 0;
 protected:
 	// Thread
@@ -140,7 +98,6 @@ protected:
 	bool m_running;
 
 	XN_THREAD_HANDLE m_threadHandle;
-
 };
 
 class OzDepthStream : public OzStream
@@ -167,8 +124,7 @@ private:
 		while (m_running)
 		{
 //			printf("Tick");
-			OniDriverFrame* pDriverFrame = AcquireFrame(OZ_RESOLUTION_X * OZ_RESOLUTION_Y * sizeof(OniDepthPixel));
-			OniFrame* pFrame = &pDriverFrame->frame;
+			OniFrame* pFrame = getServices().acquireFrame();
 
 			if (pFrame == NULL) {printf("Didn't get frame...\n"); continue;}
 
@@ -211,7 +167,8 @@ private:
 			pFrame->stride = OZ_RESOLUTION_X*sizeof(OniDepthPixel);
 			pFrame->timestamp = frameId*33000;
 
-			raiseNewFrame(pDriverFrame);
+			raiseNewFrame(pFrame);
+			getServices().releaseFrame(pFrame);
 
 			frameId++;
 
@@ -245,8 +202,7 @@ private:
 		{
 			xnOSSleep(33);
 			//			printf("Tick");
-			OniDriverFrame* pDriverFrame = AcquireFrame(OZ_RESOLUTION_X*OZ_RESOLUTION_Y*sizeof(OniRGB888Pixel));
-			OniFrame* pFrame = &pDriverFrame->frame;
+			OniFrame* pFrame = getServices().acquireFrame();
 
 			if (pFrame == NULL) {printf("Didn't get frame...\n"); continue;}
 
@@ -299,7 +255,8 @@ private:
 			pFrame->stride = OZ_RESOLUTION_X*3;
 			pFrame->timestamp = frameId*33000;
 
-			raiseNewFrame(pDriverFrame);
+			raiseNewFrame(pFrame);
+			getServices().releaseFrame(pFrame);
 
 			frameId++;
 		}
@@ -408,7 +365,7 @@ public:
 	OzDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
 	{}
 
-	virtual oni::driver::DeviceBase* deviceOpen(const char* uri)
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* /*mode*/)
 	{
 		for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
 		{

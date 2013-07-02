@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EnableProjectHarvesting>True</EnableProjectHarvesting>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProductVersion>3.5</ProductVersion>
+    <ProjectGuid>{baeb9c48-562c-4d56-a6cd-18932265480a}</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>OpenNI-Windows-$(Platform)-2.2</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <Name>Install</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>RedistDir=$(SolutionDir)\Packaging\Output_$(Platform)</DefineConstants>
+    <WixVariables>
+    </WixVariables>
+    <SuppressAllWarnings>False</SuppressAllWarnings>
+    <Pedantic>False</Pedantic>
+    <SuppressSpecificWarnings>1076</SuppressSpecificWarnings>
+    <SuppressIces>ICE38;ICE43</SuppressIces>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>RedistDir=$(SolutionDir)\Packaging\Output_$(Platform)</DefineConstants>
+    <WixVariables>
+    </WixVariables>
+    <SuppressAllWarnings>False</SuppressAllWarnings>
+    <Pedantic>False</Pedantic>
+    <SuppressSpecificWarnings>1076</SuppressSpecificWarnings>
+    <SuppressIces>ICE38;ICE43</SuppressIces>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Fragments\RedistFragments.wxs" />
+    <Compile Include="Install.wxs" />
+    <Compile Include="UI\CustomeInstallUI.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Fragments" />
+    <Folder Include="Includes" />
+    <Folder Include="Lang" />
+    <Folder Include="Lang\en-us" />
+    <Folder Include="UI" />
+    <Folder Include="Resources" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Samples\ClosestPointViewer\ClosestPointViewer.vcxproj">
+      <Name>ClosestPointViewer</Name>
+      <Project>{bda3bf24-550a-4bf9-83e5-0006134eed40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\EventBasedRead\EventBasedRead.vcxproj">
+      <Name>EventBasedRead</Name>
+      <Project>{bda3bf24-5555-4bf9-83e5-7b56134edd40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\MultiDepthViewer\MultiDepthViewer.vcxproj">
+      <Name>MultiDepthViewer</Name>
+      <Project>{bda3bf24-550a-fff9-83e5-7b56134eee40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\MultipleStreamRead\MultipleStreamRead.vcxproj">
+      <Name>MultipleStreamRead</Name>
+      <Project>{920d08ac-452c-4326-bc6e-86fe65848587}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\MWClosestPointApp\MWClosestPointApp.vcxproj">
+      <Name>MWClosestPointApp</Name>
+      <Project>{a0db36c9-ce6c-4f61-933c-e53a630d3c7e}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\MWClosestPoint\MWClosestPoint.vcxproj">
+      <Name>MWClosestPoint</Name>
+      <Project>{4b01e59d-cc85-4b2e-b3a2-00f75856cb23}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\SimpleRead\SimpleRead.vcxproj">
+      <Name>SimpleRead</Name>
+      <Project>{bda3bf24-550a-4bf9-83e5-7b56134edd40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Samples\SimpleViewer\SimpleViewer.vcxproj">
+      <Name>SimpleViewer</Name>
+      <Project>{bda3bf24-550a-4bf9-83e5-7b56134eed40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Core\OpenNI.vcxproj">
+      <Name>OpenNI</Name>
+      <Project>{72d595bb-8c52-449b-91db-0e9f6aeaf53a}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\OniFile\OniFile.vcxproj">
+      <Name>OniFile</Name>
+      <Project>{15ecc029-90de-4d1d-b00a-4a8e647d8c24}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\PS1080\PS1080.vcxproj">
+      <Name>PS1080</Name>
+      <Project>{9f6652af-35f2-452e-a2d3-08d05f5c075e}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\PSLink\PSLink.vcxproj">
+      <Name>PSLink</Name>
+      <Project>{5b74f010-8b79-46b5-b906-c2b56cdb3386}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Tools\NiViewer\NiViewer.vcxproj">
+      <Name>NiViewer</Name>
+      <Project>{bda3bf24-550a-4bf9-83e5-0056134eed40}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Drivers\PSLink\PSLinkConsole\PSLinkConsole.vcxproj">
+      <Name>PSLinkConsole</Name>
+      <Project>{d39a4248-3985-41de-afd5-aec58d29291f}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ThirdParty\PSCommon\XnLib\Source\XnLib.vcxproj">
+      <Name>XnLib</Name>
+      <Project>{72d595bb-8c52-449b-91db-0e9f6aeaf5bb}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLLOCATION</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Includes\Variables.wxi" />
+    <Resource Include="Resources\mainicon.ico" />
+    <Content Include="Resources\Microsoft_VC100_CRT_x64.msm" />
+    <Content Include="Resources\Microsoft_VC100_CRT_x86.msm" />
+    <Content Include="Resources\Microsoft_VC90_CRT_x86.msm" />
+    <Content Include="Resources\Microsoft_VC90_CRT_x86_x64.msm" />
+    <Content Include="Resources\OpenNIBackground.bmp" />
+    <Content Include="Resources\OpenNIHeader.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Lang\en-us\Loc_en-us.wxl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+  <PropertyGroup>
+    <PostBuildEvent />
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>echo "Building Java Wrappers..."
+call "$(SolutionDir)\Wrappers\java\OpenNI.java\Build.bat" $(PlatformName)
+if errorlevel 1 exit 1
+echo "Building SimpleViewer.java..."
+call "$(SolutionDir)\Samples\SimpleViewer.java\Build.bat" $(PlatformName)
+if errorlevel 1 exit 1
+echo "Building Documentation..."
+"$(SolutionDir)\Source\Documentation\Runme.py"
+if errorlevel 1 exit 1
+echo "Harvesting Files..."
+"$(ProjectDir)\..\Harvest.py" $(ProjectDir)\..\Output_$(PlatformName) $(PlatformName)
+if errorlevel 1 exit 1
+echo "Creating File List..."
+"$(WIX)\bin\heat" dir "$(ProjectDir)\..\Output_$(PlatformName)" -ag -scom -sfrag -srd -dr INSTALLLOCATION -cg RedistComponentGroup -var var.RedistDir -out "$(ProjectDir)\Fragments\RedistFragments.wxs" -sw5150
+if errorlevel 1 exit 1</PreBuildEvent>
+  </PropertyGroup>
+  <!--
+	To modify your build process, add your task inside one of the targets below and uncomment it.
+	Other similar extension points exist, see Wix.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>

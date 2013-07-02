@@ -4,7 +4,8 @@ BIN_DIR = ../../Bin
 
 INC_DIRS = \
 	../../Include \
-	../../ThirdParty/GL/
+	../../ThirdParty/GL/ \
+	../Common
 
 SRC_FILES = *.cpp
 

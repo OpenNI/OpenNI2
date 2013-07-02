@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5B74F010-8B79-46B5-B906-C2B56CDB3386}</ProjectGuid>
+    <RootNamespace>BestHostEver</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)Bin\$(Platform)-$(Configuration)\OpenNI2\Drivers\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)Bin\$(Platform)-$(Configuration)\OpenNI2\Drivers\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)Bin\$(Platform)-$(Configuration)\OpenNI2\Drivers\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Bin\$(Platform)-$(Configuration)\OpenNI2\Drivers\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Bin\Intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;Protocols\XnLinkProto;LinkProtoLib;..\..\..\ThirdParty\PSCommon\XnLib\Include;..\..\..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PRIMECLIENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4250;4127;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Bin\$(Platform)-$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;Protocols\XnLinkProto;LinkProtoLib;..\..\..\ThirdParty\PSCommon\XnLib\Include;..\..\..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PRIMECLIENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4250;4127;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Bin\$(Platform)-$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>.;Protocols\XnLinkProto;LinkProtoLib;..\..\..\ThirdParty\PSCommon\XnLib\Include;..\..\..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PRIMECLIENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4250;4127;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Bin\$(Platform)-$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>.;Protocols\XnLinkProto;LinkProtoLib;..\..\..\ThirdParty\PSCommon\XnLib\Include;..\..\..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PRIMECLIENT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4250;4127;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Bin\$(Platform)-$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="DriverImpl\LinkOniDepthStream.h" />
+    <ClInclude Include="DriverImpl\LinkOniDevice.h" />
+    <ClInclude Include="DriverImpl\LinkOniDriver.h" />
+    <ClInclude Include="DriverImpl\LinkOniIRStream.h" />
+    <ClInclude Include="DriverImpl\LinkOniMapStream.h" />
+    <ClInclude Include="DriverImpl\LinkOniStream.h" />
+    <ClInclude Include="LinkDeviceEnumeration.h" />
+    <ClInclude Include="LinkProtoLib\IAsyncInputConnection.h" />
+    <ClInclude Include="LinkProtoLib\IConnection.h" />
+    <ClInclude Include="LinkProtoLib\IConnectionFactory.h" />
+    <ClInclude Include="LinkProtoLib\ILinkOutputStream.h" />
+    <ClInclude Include="LinkProtoLib\IOutputConnection.h" />
+    <ClInclude Include="LinkProtoLib\ISyncInputConnection.h" />
+    <ClInclude Include="LinkProtoLib\ISyncIOConnection.h" />
+    <ClInclude Include="LinkProtoLib\LinkProtoLibVersion.h" />
+    <ClInclude Include="LinkProtoLib\XnClientSocketInConnection.h" />
+    <ClInclude Include="LinkProtoLib\XnClientSyncSocketConnection.h" />
+    <ClInclude Include="LinkProtoLib\XnClientUSBConnectionFactory.h" />
+    <ClInclude Include="LinkProtoLib\XnClientUSBControlEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnClientUSBInDataEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnClientUSBOutDataEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnCyclicBuffer.h" />
+    <ClInclude Include="LinkProtoLib\XnLink11BitS2DParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLink12BitS2DParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLink16zParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLink24zYuv422Parser.h" />
+    <ClInclude Include="LinkProtoLib\XnLink6BitParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkContInputStream.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkControlEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkFrameInputStream.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkInputDataEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkInputStream.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkInputStreamsMgr.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkLogParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkMsgEncoder.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkMsgParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkOutputDataEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkOutputStream.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkOutputStreamsMgr.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkPacked10BitParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkProtoLibDefs.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkProtoUtils.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkResponseMsgParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkStatusCodes.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkUnpackedDataReductionParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkUnpackedS2DParser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkYuv422ToRgb888Parser.h" />
+    <ClInclude Include="LinkProtoLib\XnLinkYuvToRgb.h" />
+    <ClInclude Include="LinkProtoLib\XnMapSequenceListConverter.h" />
+    <ClInclude Include="LinkProtoLib\XnServerSocketInConnection.h" />
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxConnectionFactory.h" />
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxControlEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxOutDataEndpoint.h" />
+    <ClInclude Include="LinkProtoLib\XnShiftToDepth.h" />
+    <ClInclude Include="LinkProtoLib\XnSocketConnectionFactory.h" />
+    <ClInclude Include="LinkProtoLib\XnSocketInConnection.h" />
+    <ClInclude Include="LinkProtoLib\XnSyncServerSocketConnection.h" />
+    <ClInclude Include="LinkProtoLib\XnSyncSocketConnection.h" />
+    <ClInclude Include="PrimeClient.h" />
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkDefs.h" />
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkProto.h" />
+    <ClInclude Include="PS1200Device.h" />
+    <ClInclude Include="PrimeClientDefs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LinkProtoLib\XnClientSocketInConnection.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientSyncSocketConnection.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientUSBConnectionFactory.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientUSBControlEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientUSBInDataEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientUSBOutDataEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLink11BitS2DParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLink12BitS2DParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLink16zParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLink24zYuv422Parser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLink6BitParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkContInputStream.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkControlEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkFrameInputStream.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkInputDataEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkInputStream.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkInputStreamsMgr.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkLogParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkMsgEncoder.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkMsgParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkOutputDataEndpoint.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkOutputStream.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkOutputStreamsMgr.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkPacked10BitParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkProtoUtils.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkResponseMsgParser.cpp" />
+    <ClCompile Include="DriverImpl\LinkExportedOniDriver.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniDepthStream.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniDevice.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniDriver.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniIRStream.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniMapStream.cpp" />
+    <ClCompile Include="DriverImpl\LinkOniStream.cpp" />
+    <ClCompile Include="LinkDeviceEnumeration.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkUnpackedDataReductionParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkUnpackedS2DParser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkYuv422ToRgb888Parser.cpp" />
+    <ClCompile Include="LinkProtoLib\XnLinkYuvToRgb.cpp" />
+    <ClCompile Include="LinkProtoLib\XnServerSocketInConnection.cpp" />
+    <ClCompile Include="LinkProtoLib\XnShiftToDepth.cpp" />
+    <ClCompile Include="LinkProtoLib\XnSocketConnectionFactory.cpp" />
+    <ClCompile Include="LinkProtoLib\XnSocketInConnection.cpp" />
+    <ClCompile Include="LinkProtoLib\XnSyncServerSocketConnection.cpp" />
+    <ClCompile Include="LinkProtoLib\XnSyncSocketConnection.cpp" />
+    <ClCompile Include="PrimeClient.cpp" />
+    <ClCompile Include="PS1200Device.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

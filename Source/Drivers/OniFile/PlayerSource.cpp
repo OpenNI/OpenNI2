@@ -28,7 +28,8 @@ namespace oni_file {
 
 /// Constructor.
 PlayerSource::PlayerSource(const XnChar* strNodeName, OniSensorType sensorType) :
-	m_nodeName(strNodeName)
+	m_nodeName(strNodeName),
+	m_requiredFrameSize(0)
 {
 	m_sourceInfo.sensorType = sensorType;
 	m_sourceInfo.numSupportedVideoModes = 0;
@@ -94,6 +95,7 @@ OniStatus PlayerSource::SetProperty(int propertyId, const void* data, int dataSi
 			}
 			case ONI_PIXEL_FORMAT_GRAY16:
 			case ONI_PIXEL_FORMAT_YUV422:
+			case ONI_PIXEL_FORMAT_YUYV:
 			{
 				bytesPerPixel = 2;
 				stride = pVideoMode->resolutionX * bytesPerPixel;

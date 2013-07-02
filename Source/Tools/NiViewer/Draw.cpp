@@ -61,6 +61,15 @@
 #define YUV_BLUE  2
 #define YUV_ALPHA  3
 #define YUV_RGBA_BPP 4
+#define YUYV_Y1 0
+#define YUYV_U  1
+#define YUYV_Y2 2
+#define YUYV_V  3
+#define YUYV_BPP 4
+#define YUV_RED   0
+#define YUV_GREEN 1
+#define YUV_BLUE  2
+#define YUV_RGB_BPP 3
 
 // --------------------------------
 // Types
@@ -762,6 +771,141 @@ void YUV422ToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVS
 
 #endif
 
+#if (XN_PLATFORM == XN_PLATFORM_WIN32)
+
+void YUYVToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBAImage, XnUInt32 nYUVSize, XnUInt32 nRGBSize)
+{
+	const XnUInt8* pYUVLast = pYUVImage + nYUVSize - 8;
+	XnUInt8* pRGBLast = pRGBAImage + nRGBSize - 16;
+
+	const __m128 minus128 = _mm_set_ps1(-128);
+	const __m128 plus113983 = _mm_set_ps1(1.13983F);
+	const __m128 minus039466 = _mm_set_ps1(-0.39466F);
+	const __m128 minus058060 = _mm_set_ps1(-0.58060F);
+	const __m128 plus203211 = _mm_set_ps1(2.03211F);
+	const __m128 zero = _mm_set_ps1(0);
+	const __m128 plus255 = _mm_set_ps1(255);
+
+	// define YUV floats
+	__m128 y;
+	__m128 u;
+	__m128 v;
+
+	__m128 temp;
+
+	// define RGB floats
+	__m128 r;
+	__m128 g;
+	__m128 b;
+
+	// define RGB integers
+	__m128i iR;
+	__m128i iG;
+	__m128i iB;
+
+	XnUInt32* piR = (XnUInt32*)&iR;
+	XnUInt32* piG = (XnUInt32*)&iG;
+	XnUInt32* piB = (XnUInt32*)&iB;
+
+	while (pYUVImage <= pYUVLast && pRGBAImage <= pRGBLast)
+	{
+		// process 4 pixels at once (values should be ordered backwards)
+		y = _mm_set_ps(pYUVImage[YUYV_Y2 + YUYV_BPP], pYUVImage[YUYV_Y1 + YUYV_BPP], pYUVImage[YUYV_Y2], pYUVImage[YUYV_Y1]);
+		u = _mm_set_ps(pYUVImage[YUYV_U + YUYV_BPP],  pYUVImage[YUYV_U + YUYV_BPP],  pYUVImage[YUYV_U],  pYUVImage[YUYV_U]);
+		v = _mm_set_ps(pYUVImage[YUYV_V + YUYV_BPP],  pYUVImage[YUYV_V + YUYV_BPP],  pYUVImage[YUYV_V],  pYUVImage[YUYV_V]);
+
+		u = _mm_add_ps(u, minus128); // u -= 128
+		v = _mm_add_ps(v, minus128); // v -= 128
+
+		/*
+
+		http://en.wikipedia.org/wiki/YUV
+
+		From YUV to RGB:
+		R =     Y + 1.13983 V
+		G =     Y - 0.39466 U - 0.58060 V
+		B =     Y + 2.03211 U
+
+		*/ 
+
+		temp = _mm_mul_ps(plus113983, v);
+		r = _mm_add_ps(y, temp);
+
+		temp = _mm_mul_ps(minus039466, u);
+		g = _mm_add_ps(y, temp);
+		temp = _mm_mul_ps(minus058060, v);
+		g = _mm_add_ps(g, temp);
+
+		temp = _mm_mul_ps(plus203211, u);
+		b = _mm_add_ps(y, temp);
+
+		// make sure no value is smaller than 0
+		r = _mm_max_ps(r, zero);
+		g = _mm_max_ps(g, zero);
+		b = _mm_max_ps(b, zero);
+
+		// make sure no value is bigger than 255
+		r = _mm_min_ps(r, plus255);
+		g = _mm_min_ps(g, plus255);
+		b = _mm_min_ps(b, plus255);
+
+		// convert floats to int16 (there is no conversion to uint8, just to int8).
+		iR = _mm_cvtps_epi32(r);
+		iG = _mm_cvtps_epi32(g);
+		iB = _mm_cvtps_epi32(b);
+
+		// extract the 4 pixels RGB values.
+		// because we made sure values are between 0 and 255, we can just take the lower byte
+		// of each INT16
+		pRGBAImage[0] = piR[0];
+		pRGBAImage[1] = piG[0];
+		pRGBAImage[2] = piB[0];
+		pRGBAImage[3] = 255;
+
+		pRGBAImage[4] = piR[1];
+		pRGBAImage[5] = piG[1];
+		pRGBAImage[6] = piB[1];
+		pRGBAImage[7] = 255;
+
+		pRGBAImage[8] = piR[2];
+		pRGBAImage[9] = piG[2];
+		pRGBAImage[10] = piB[2];
+		pRGBAImage[11] = 255;
+
+		pRGBAImage[12] = piR[3];
+		pRGBAImage[13] = piG[3];
+		pRGBAImage[14] = piB[3];
+		pRGBAImage[15] = 255;
+
+		// advance the streams
+		pYUVImage += 8;
+		pRGBAImage += 16;
+	}
+}
+
+#else // not Win32
+
+void YUYVToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32 nRGBSize)
+{
+	const XnUInt8* pCurrYUV = pYUVImage;
+	XnUInt8* pCurrRGB = pRGBImage;
+	const XnUInt8* pLastYUV = pYUVImage + nYUVSize - YUYV_BPP;
+	XnUInt8* pLastRGB = pRGBImage + nRGBSize - YUV_RGBA_BPP;
+
+	while (pCurrYUV <= pLastYUV && pCurrRGB <= pLastRGB)
+	{
+		YUV444ToRGBA(pCurrYUV[YUYV_Y1], pCurrYUV[YUYV_U], pCurrYUV[YUYV_V],
+			pCurrRGB[YUV_RED], pCurrRGB[YUV_GREEN], pCurrRGB[YUV_BLUE], pCurrRGB[YUV_ALPHA]);
+		pCurrRGB += YUV_RGBA_BPP;
+		YUV444ToRGBA(pCurrYUV[YUYV_Y2], pCurrYUV[YUYV_U], pCurrYUV[YUYV_V],
+			pCurrRGB[YUV_RED], pCurrRGB[YUV_GREEN], pCurrRGB[YUV_BLUE], pCurrRGB[YUV_ALPHA]);
+		pCurrRGB += YUV_RGBA_BPP;
+		pCurrYUV += YUYV_BPP;
+	}
+}
+
+#endif
+
 void drawClosedStream(IntRect* pLocation, const char* csStreamName)
 {
 	char csMessage[512];
@@ -851,6 +995,11 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 			YUV422ToRGB888(pColor, pTexture, width*2, g_texColor.Size.X*g_texColor.nBytesPerPixel);
  			pColor += width*2;
  		}
+		else if (format == openni::PIXEL_FORMAT_YUYV)
+		{
+			YUYVToRGB888(pColor, pTexture, width*2, g_texColor.Size.X*g_texColor.nBytesPerPixel);
+			pColor += width*2;
+		}
  		else
 		{
 			XnDouble dRealY = (nY + originY) / (XnDouble)fullHeight;
@@ -1155,7 +1304,7 @@ void drawPointerMode(IntPair* pPointer)
 			xnOSStrAppend(buf, " | ", sizeof(buf));
 		}
 
-		xnOSStrFormat(buf + strlen(buf), sizeof(buf) - strlen(buf), &chars, "%s - Frame %4u, Timestamp %.3f", "Color", pImageMD->getFrameIndex(), (double)pImageMD->getTimestamp()/dTimestampDivider);
+		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "Color", pImageMD->getFrameIndex(), (double)pImageMD->getTimestamp()/dTimestampDivider);
 	}
 
 	openni::VideoFrameRef* pIRMD = &getIRFrame();
@@ -1166,7 +1315,7 @@ void drawPointerMode(IntPair* pPointer)
 			xnOSStrAppend(buf, " | ", sizeof(buf));
 		}
 
-		xnOSStrFormat(buf + strlen(buf), sizeof(buf) - strlen(buf), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
+		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
 	}
 
 	int nYLocation = WIN_SIZE_Y - 88;
@@ -1282,6 +1431,12 @@ void drawUserMessage()
 		{ 1, 0, 0 }, /*ERROR_MESSAGE*/
 		{ 1, 0, 0 }, /*FATAL_MESSAGE*/
 	};
+
+	if (isInKeyboardInputMode())
+	{
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
+	}
+
 	static XnUInt64 nStartShowMessage = 0;
 
 	if (g_DrawConfig.bShowMessage)

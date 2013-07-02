@@ -18,3 +18,43 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
+#include "XnWavelengthCorrectionDebugProcessor.h"
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+
+XnWavelengthCorrectionDebugProcessor::XnWavelengthCorrectionDebugProcessor(XnDevicePrivateData* pDevicePrivateData) :
+	XnWholePacketProcessor(pDevicePrivateData, "WavelengthCorrectionDebug", sizeof(XnWavelengthCorrectionDebugPacket)),
+	m_DumpTxt(NULL)
+{
+}
+
+XnWavelengthCorrectionDebugProcessor::~XnWavelengthCorrectionDebugProcessor()
+{
+	xnDumpFileClose(m_DumpTxt);
+}
+
+void XnWavelengthCorrectionDebugProcessor::ProcessWholePacket(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData)
+{
+	m_DumpTxt = xnDumpFileOpenEx("WavelengthCorrectionDebug", TRUE, TRUE, "WavelengthCorrection.csv");
+	xnDumpFileWriteString(m_DumpTxt, "HostTimestamp,PacketID,BLast,BCurrent,IsHop,CurrentSlidingWindow,CurrentHopsCount,IsTecCalibrated,WaitPeriod,IsWavelengthUnstable,BestHopsCount,BestSetPoint,BestStep,IsTotallyUnstable,ConfiguredTecSetPoint,CurrentStep\n");
+
+	XnWavelengthCorrectionDebugPacket* pPacket = (XnWavelengthCorrectionDebugPacket*)pData;
+
+	XnUInt64 nTimestamp = 0;
+	xnOSGetHighResTimeStamp(&nTimestamp);
+
+	xnDumpFileWriteString(m_DumpTxt, "%llu,%hu,%f,%f,%hu,%x,%hu,%hu,%u,%hu,%hu,%u,%d,%hu,%u,%d\n",
+		nTimestamp, pHeader->nPacketID, 
+		pPacket->fBLast, pPacket->fBCurrent, pPacket->nIsHop, pPacket->nCurrentSlidingWindow,
+		pPacket->nCurrentHopsCount, pPacket->nIsTecCalibrated, pPacket->nWaitPeriod,
+		pPacket->nIsWavelengthUnstable, pPacket->BestConf.nBestHopsCount, pPacket->BestConf.nBestSetPoint,
+		pPacket->BestConf.nBestStep, pPacket->nIsTotallyUnstable, pPacket->nConfiguredTecSetPoint,
+		pPacket->nCurrentStep);
+}
+

@@ -25,7 +25,6 @@
 #include "XnDeviceSensorInit.h"
 #include "XnDeviceSensorProtocol.h"
 #include "Bayer.h"
-#include "Registration.h"
 #include "XnHostProtocol.h"
 #include <XnLog.h>
 #include "XnSensor.h"
@@ -63,91 +62,71 @@ XnStatus XnDeviceSensorInit(XnDevicePrivateData* pDevicePrivateData)
 
 XnStatus XnDeviceSensorOpenInputThreads(XnDevicePrivateData* pDevicePrivateData)
 {
-	// Depth
+	XnSensorUsbInterface usbInterface = pDevicePrivateData->pSensor->GetCurrentUsbInterface();
+
+	// common stuff
 	pDevicePrivateData->pSpecificDepthUsb = (XnSpecificUsbDevice*)xnOSMallocAligned(sizeof(XnSpecificUsbDevice), XN_DEFAULT_MEM_ALIGN);
 	pDevicePrivateData->pSpecificDepthUsb->pDevicePrivateData = pDevicePrivateData;
 	pDevicePrivateData->pSpecificDepthUsb->pUsbConnection = &pDevicePrivateData->SensorHandle.DepthConnection;
 	pDevicePrivateData->pSpecificDepthUsb->CurrState.State = XN_WAITING_FOR_CONFIGURATION;
-
-	if (pDevicePrivateData->pSpecificDepthUsb->pUsbConnection->bIsISO == TRUE)
-	{
-		if (pDevicePrivateData->pSensor->IsLowBandwidth())
-		{
-			pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
-		}
-		else
-		{
-			pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
-		}
-
-		pDevicePrivateData->pSpecificDepthUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_ISO;
-	}
-	else
-	{
-		pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
-
-		pDevicePrivateData->pSpecificDepthUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_BULK;
-	}
-
 	pDevicePrivateData->pSpecificDepthUsb->nIgnoreBytes = (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_0) ? 0 : pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes;
 
-	// Image
 	pDevicePrivateData->pSpecificImageUsb = (XnSpecificUsbDevice*)xnOSMallocAligned(sizeof(XnSpecificUsbDevice), XN_DEFAULT_MEM_ALIGN);
 	pDevicePrivateData->pSpecificImageUsb->pDevicePrivateData = pDevicePrivateData;
 	pDevicePrivateData->pSpecificImageUsb->pUsbConnection = &pDevicePrivateData->SensorHandle.ImageConnection;
 	pDevicePrivateData->pSpecificImageUsb->CurrState.State = XN_WAITING_FOR_CONFIGURATION;
+	pDevicePrivateData->pSpecificImageUsb->nIgnoreBytes = (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_0) ? 0 : pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes;
 
-	if (pDevicePrivateData->pSpecificImageUsb->pUsbConnection->bIsISO == TRUE)
+	pDevicePrivateData->pSpecificMiscUsb = (XnSpecificUsbDevice*)xnOSMallocAligned(sizeof(XnSpecificUsbDevice), XN_DEFAULT_MEM_ALIGN);
+	pDevicePrivateData->pSpecificMiscUsb->pDevicePrivateData = pDevicePrivateData;
+	pDevicePrivateData->pSpecificMiscUsb->pUsbConnection = &pDevicePrivateData->SensorHandle.MiscConnection;
+	pDevicePrivateData->pSpecificMiscUsb->CurrState.State = XN_WAITING_FOR_CONFIGURATION;
+	pDevicePrivateData->pSpecificMiscUsb->nIgnoreBytes = (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_0) ? 0 : pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes;
+
+	// timeout
+	if (usbInterface == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS || usbInterface == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH)
 	{
-		if (pDevicePrivateData->pSensor->IsLowBandwidth())
-		{
-			pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
-		}
-		else
-		{
-			pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
-		}
-
+		pDevicePrivateData->pSpecificDepthUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_ISO;
 		pDevicePrivateData->pSpecificImageUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_ISO;
+		pDevicePrivateData->pSpecificMiscUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_ISO;
 	}
 	else
 	{
-		pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
-
+		pDevicePrivateData->pSpecificDepthUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_BULK;
 		pDevicePrivateData->pSpecificImageUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_BULK;
+		pDevicePrivateData->pSpecificMiscUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_BULK;
 	}
 
-	pDevicePrivateData->pSpecificImageUsb->nIgnoreBytes = (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_0) ? 0 : pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes;
-
-	// Misc
-	if (pDevicePrivateData->pSensor->IsMiscSupported())
+	// buffer size
+	if (usbInterface == XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS)
 	{
-		pDevicePrivateData->pSpecificMiscUsb = (XnSpecificUsbDevice*)xnOSMallocAligned(sizeof(XnSpecificUsbDevice), XN_DEFAULT_MEM_ALIGN);
-		pDevicePrivateData->pSpecificMiscUsb->pDevicePrivateData = pDevicePrivateData;
-		pDevicePrivateData->pSpecificMiscUsb->pUsbConnection = &pDevicePrivateData->SensorHandle.MiscConnection;
-		pDevicePrivateData->pSpecificMiscUsb->CurrState.State = XN_WAITING_FOR_CONFIGURATION;
+		pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
+	}
+	else if (pDevicePrivateData->pSensor->IsLowBandwidth())
+	{
+		pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
+	}
+	else
+	{
+		pDevicePrivateData->pSpecificDepthUsb->nChunkReadBytes = XN_SENSOR_USB_DEPTH_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.DepthConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificImageUsb->nChunkReadBytes = XN_SENSOR_USB_IMAGE_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.ImageConnection.nMaxPacketSize;
+		pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
+	}
 
-		if (pDevicePrivateData->pSpecificMiscUsb->pUsbConnection->bIsISO == TRUE)
-		{
-			if (pDevicePrivateData->pSensor->IsLowBandwidth())
-			{
-				pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_LOWBAND_ISO * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
-			}
-			else
-			{
-				pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_ISO * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
-			}
-
-			pDevicePrivateData->pSpecificMiscUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_ISO;
-		}
-		else
-		{
-			pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes = XN_SENSOR_USB_MISC_BUFFER_SIZE_MULTIPLIER_BULK * pDevicePrivateData->SensorHandle.MiscConnection.nMaxPacketSize;
-
-			pDevicePrivateData->pSpecificMiscUsb->nTimeout = XN_SENSOR_READ_THREAD_TIMEOUT_BULK;
-		}
-
-		pDevicePrivateData->pSpecificMiscUsb->nIgnoreBytes = (pDevicePrivateData->FWInfo.nFWVer >= XN_SENSOR_FW_VER_5_0) ? 0 : pDevicePrivateData->pSpecificMiscUsb->nChunkReadBytes;
+	// number of buffers
+	pDevicePrivateData->pSpecificImageUsb->nNumberOfBuffers = XN_SENSOR_USB_IMAGE_BUFFERS;
+	pDevicePrivateData->pSpecificMiscUsb->nNumberOfBuffers = XN_SENSOR_USB_MISC_BUFFERS;
+	if (usbInterface == XN_SENSOR_USB_INTERFACE_ISO_ENDPOINTS_LOW_DEPTH)
+	{
+		pDevicePrivateData->pSpecificDepthUsb->nNumberOfBuffers = XN_SENSOR_USB_DEPTH_BUFFERS_LOW_ISO;
+	}
+	else
+	{
+		pDevicePrivateData->pSpecificDepthUsb->nNumberOfBuffers = XN_SENSOR_USB_DEPTH_BUFFERS;
 	}
 
 	// Switch depth & image EPs for older FWs
@@ -227,7 +206,7 @@ XnStatus XnDeviceSensorConfigureVersion(XnDevicePrivateData* pDevicePrivateData)
 	// GetVersion is exactly the same in all versions, except a change that was made in version 5.1.
 	// so, we'll start with that, and if doesn't work we'll try previous protocols
 	XnHostProtocolUsbCore usb = XN_USB_CORE_JANGO;
-	nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, 5, 1, 0, usb);
+	nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, 5, 1, 0, usb, TRUE);
 	XN_IS_STATUS_OK(nRetVal);
 
 	nRetVal = XnHostProtocolGetVersion(pDevicePrivateData, pDevicePrivateData->Version);
@@ -242,7 +221,7 @@ XnStatus XnDeviceSensorConfigureVersion(XnDevicePrivateData* pDevicePrivateData)
 	// if command failed for any reason, try again with older protocol
 	if (nRetVal != XN_STATUS_OK)
 	{
-		nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, 5, 0, 0, usb);
+		nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, 5, 0, 0, usb, TRUE);
 		XN_IS_STATUS_OK(nRetVal);
 
 		nRetVal = XnHostProtocolGetVersion(pDevicePrivateData, pDevicePrivateData->Version);
@@ -258,7 +237,7 @@ XnStatus XnDeviceSensorConfigureVersion(XnDevicePrivateData* pDevicePrivateData)
 	}
 
 	// Now that we have the actual version, configure protocol accordingly
-	nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, pDevicePrivateData->Version.nMajor, pDevicePrivateData->Version.nMinor, pDevicePrivateData->Version.nBuild, usb);
+	nRetVal = XnHostProtocolInitFWParams(pDevicePrivateData, pDevicePrivateData->Version.nMajor, pDevicePrivateData->Version.nMinor, pDevicePrivateData->Version.nBuild, usb, FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 
 	pDevicePrivateData->HWInfo.nHWVer = pDevicePrivateData->Version.HWVer;

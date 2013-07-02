@@ -164,7 +164,7 @@ XnStatus XnSensorIRStream::SetActualRead(XnBool bRead)
 		{
 			xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB IR read thread...");
 			XnSpecificUsbDevice* pUSB = GetHelper()->GetPrivateData()->pSpecificImageUsb;
-			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, XN_SENSOR_USB_DEPTH_BUFFERS, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+			nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
 			XN_IS_STATUS_OK(nRetVal);
 		}
 		else
@@ -202,6 +202,8 @@ XnStatus XnSensorIRStream::OpenStreamImpl()
 	nRetVal = m_Helper.ConfigureFirmware(m_FirmwareCropMode);
 	XN_IS_STATUS_OK(nRetVal);;
 
+	nRetVal = FixFirmwareBug();
+	XN_IS_STATUS_OK(nRetVal);
 
 	nRetVal = XnIRStream::Open();
 	XN_IS_STATUS_OK(nRetVal);
@@ -209,6 +211,22 @@ XnStatus XnSensorIRStream::OpenStreamImpl()
 	return (XN_STATUS_OK);
 }
 
+XnStatus XnSensorIRStream::FixFirmwareBug()
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	
+	// Firmware bug ugly workaround: in v5.1, IR 1.3 would not turn off decimation, so image is
+	// corrupted. we need to turn it off ourselves. The problem is that the firmware does not 
+	// even provide a way to do so, so we need to directly change the register...
+	// the bug only happens when cropping is off
+	if (m_Helper.GetFirmware()->GetInfo()->nFWVer == XN_SENSOR_FW_VER_5_1 && GetResolution() == XN_RESOLUTION_SXGA && !GetCropping()->enabled)
+	{
+		nRetVal = XnHostProtocolWriteAHB(m_Helper.GetPrivateData(), 0x2a003c00, 0x3ff0000, 0xffffffff);
+		XN_IS_STATUS_OK(nRetVal);
+	}
+
+	return (XN_STATUS_OK);
+}
 
 XnStatus XnSensorIRStream::CloseStreamImpl()
 {
@@ -217,10 +235,10 @@ XnStatus XnSensorIRStream::CloseStreamImpl()
 	nRetVal = GetFirmwareParams()->m_Stream0Mode.SetValue(XN_VIDEO_STREAM_OFF);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = XnIRStream::Close();
+	nRetVal = SetActualRead(FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 
-	nRetVal = SetActualRead(FALSE);
+	nRetVal = XnIRStream::Close();
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
@@ -359,7 +377,10 @@ XnStatus XnSensorIRStream::SetCroppingImpl(const OniCropping* pCropping, XnCropp
 	XN_ASSERT(nRetVal == XN_STATUS_OK);
 
 	nRetVal = XnIRStream::SetCropping(pCropping);
-
+	if (nRetVal == XN_STATUS_OK)
+	{
+		nRetVal = FixFirmwareBug();
+	}
 
 	xnOSLeaveCriticalSection(GetLock());
 	XN_IS_STATUS_OK(nRetVal);
@@ -400,34 +421,6 @@ XnStatus XnSensorIRStream::CalcRequiredSize(XnUInt32* pnRequiredSize) const
 	return XN_STATUS_OK;
 }
 
-XnStatus XnSensorIRStream::ReallocTripleFrameBuffer()
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	if (IsOpen())
-	{
-		// before actually replacing buffer, lock the processor (so it will not continue to 
-		// use old buffer)
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->LockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	nRetVal = XnIRStream::ReallocTripleFrameBuffer();
-	if (nRetVal != XN_STATUS_OK)
-	{
-		m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		return (nRetVal);
-	}
-
-	if (IsOpen())
-	{
-		nRetVal = m_Helper.GetFirmware()->GetStreams()->UnlockStreamProcessor(GetType(), this);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	return (XN_STATUS_OK);
-}
-
 XnStatus XnSensorIRStream::CropImpl(OniFrame* pFrame, const OniCropping* pCropping)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
@@ -438,6 +431,11 @@ XnStatus XnSensorIRStream::CropImpl(OniFrame* pFrame, const OniCropping* pCroppi
 		nRetVal = XnIRStream::CropImpl(pFrame, pCropping);
 		XN_IS_STATUS_OK(nRetVal);
 	}
+	else if (IsMirrored())
+	{
+		// mirror is done in software and cropping in chip, so we crop the other side (see SetCroppingImpl()).
+		pFrame->cropOriginX = GetXRes() - pFrame->cropOriginX - pFrame->width;
+	}
 	
 	return (XN_STATUS_OK);
 }
@@ -447,7 +445,7 @@ XnStatus XnSensorIRStream::CreateDataProcessor(XnDataProcessor** ppProcessor)
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	XnFrameBufferManager* pBufferManager;
-	nRetVal = GetTripleBuffer(&pBufferManager);
+	nRetVal = StartBufferManager(&pBufferManager);
 	XN_IS_STATUS_OK(nRetVal);
 
 	XnDataProcessor* pNew;

@@ -23,7 +23,9 @@
 //---------------------------------------------------------------------------
 #include "XnStreamCompression.h"
 #include <XnStatus.h>
-#include <../../../../ThirdParty/LibJPEG/jerror.h>
+extern "C" {
+#include <jerror.h>
+}
 #include <XnLog.h>
 
 //---------------------------------------------------------------------------

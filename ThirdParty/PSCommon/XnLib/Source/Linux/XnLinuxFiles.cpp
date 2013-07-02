@@ -86,7 +86,7 @@ XN_C_API XnStatus xnOSGetFileList(const XnChar* cpSearchPattern, const XnChar* c
 	glob_t tGlob;
 	glob(cpSearchPattern, 0, NULL, &tGlob);
 	
-	XnUInt32 nFoundFiles = XN_MIN(tGlob.gl_pathc, nMaxFiles);
+	XnUInt32 nFoundFiles = XN_MIN((XnInt32)tGlob.gl_pathc, nMaxFiles);
 	for (XnUInt32 i = 0; i < nFoundFiles; ++i)
 	{
 		// Copy the basename(file string) into its place in the file list
@@ -681,3 +681,7 @@ XN_C_API XnStatus xnOSDoesDirectoryExist(const XnChar* cpDirName, XnBool* pbResu
 	return (XN_STATUS_OK);
 }
 
+XN_C_API XnBool xnOSIsAbsoluteFilePath(const XnChar* strFilePath)
+{
+	return xnOSIsDirSep(strFilePath[0]);
+}

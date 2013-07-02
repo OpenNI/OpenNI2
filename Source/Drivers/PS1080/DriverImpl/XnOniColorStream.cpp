@@ -29,10 +29,11 @@
 //---------------------------------------------------------------------------
 static const XnUInt32 INVALID_INPUT_FORMAT = 9999;
 // the order in the allowed input formats is the preferred one
-static XnIOImageFormats g_anAllowedRGBFormats[]   = { XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422, XN_IO_IMAGE_FORMAT_YUV422, XN_IO_IMAGE_FORMAT_BAYER, XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER };
+static XnIOImageFormats g_anAllowedRGBFormats[]   = { XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422, XN_IO_IMAGE_FORMAT_YUV422, XN_IO_IMAGE_FORMAT_BAYER, XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER, XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV };
 static XnIOImageFormats g_anAllowedYUVFormats[]   = { XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUV422, XN_IO_IMAGE_FORMAT_YUV422 };
+static XnIOImageFormats g_anAllowedYUYVFormats[]   = { XN_IO_IMAGE_FORMAT_UNCOMPRESSED_YUYV };
 static XnIOImageFormats g_anAllowedJPEGFormats[]  = { XN_IO_IMAGE_FORMAT_JPEG };
-static XnIOImageFormats g_anAllowedGray8Formats[] = { XN_IO_IMAGE_FORMAT_UNCOMPRESSED_GRAY8, XN_IO_IMAGE_FORMAT_BAYER, XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER };
+static XnIOImageFormats g_anAllowedGray8Formats[] = { XN_IO_IMAGE_FORMAT_BAYER, XN_IO_IMAGE_FORMAT_UNCOMPRESSED_BAYER };
 
 void XnOniColorStream::GetAllowedOniOutputFormatForInputFormat(XnIOImageFormats inputFormat, OniPixelFormat *aOniFormats, int *nOniFormats)
 {
@@ -51,6 +52,15 @@ void XnOniColorStream::GetAllowedOniOutputFormatForInputFormat(XnIOImageFormats 
 		if(g_anAllowedYUVFormats[i] == inputFormat)
 		{
 			aOniFormats[*nOniFormats] = ONI_PIXEL_FORMAT_YUV422;
+			++(*nOniFormats);
+			break;
+		}
+	}
+	for(XnUInt32 i=0; i<(sizeof(g_anAllowedYUYVFormats)/sizeof(XnIOImageFormats)); ++i)
+	{
+		if(g_anAllowedYUYVFormats[i] == inputFormat)
+		{
+			aOniFormats[*nOniFormats] = ONI_PIXEL_FORMAT_YUYV;
 			++(*nOniFormats);
 			break;
 		}
@@ -94,6 +104,10 @@ XnBool XnOniColorStream::IsPreferredInputFormat(XnIOImageFormats inputFormat, Xn
 	case ONI_PIXEL_FORMAT_YUV422:
 		aAllowedFormats = g_anAllowedYUVFormats;
 		nAllowedFormats = sizeof(g_anAllowedYUVFormats)/sizeof(g_anAllowedYUVFormats[0]);
+		break;
+	case ONI_PIXEL_FORMAT_YUYV:
+		aAllowedFormats = g_anAllowedYUYVFormats;
+		nAllowedFormats = sizeof(g_anAllowedYUYVFormats)/sizeof(g_anAllowedYUYVFormats[0]);
 		break;
 	case ONI_PIXEL_FORMAT_JPEG:
 		aAllowedFormats = g_anAllowedJPEGFormats;

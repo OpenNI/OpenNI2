@@ -44,6 +44,8 @@ public:
 
 	virtual XnStatus Init();
 
+	virtual void setServices(oni::driver::StreamServices* pStreamServices);
+
 	OniStatus start();
 	void stop();
 
@@ -51,8 +53,7 @@ public:
 	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
 	virtual OniBool isPropertySupported(int propertyId);
 
-	virtual void addRefToFrame(OniDriverFrame* pFrame);
-	virtual void releaseFrame(OniDriverFrame* pFrame);
+	virtual int getRequiredFrameSize();
 
 	XnOniDevice* GetDevice() { return m_pDevice; }
 	XnDeviceStream* GetDeviceStream() { return m_pDeviceStream; }

@@ -22,172 +22,110 @@
 #define _XN_POOL_H_
 
 #include "XnList.h"
-#include "XnHash.h"
+#include <XnOSCpp.h>
 
 namespace xnl
 {
 
-template <class T>
+template <class T, bool TThreadSafe = true>
 class Pool
 {
 public:
-	Pool(bool protect = false) : m_criticalSection(NULL)
+	Pool() : m_pFirstAvailable(NULL)
 	{
-		if (protect)
-		{
-			XnStatus rc = xnOSCreateCriticalSection(&m_criticalSection);
-			if (rc != XN_STATUS_OK)
-			{
-				m_criticalSection = NULL;
-			}
-		}
-	}
-	virtual ~Pool()
-	{
-		Clear();
-
-		// Remove the used buffers (when pool is destroyed, there is no way to to 
-		// reclaim the memory, so they have to be destroyed).
-		Lock();
-		while (m_used.Begin() != m_used.End())
-		{
-			T* data = (*m_used.Begin()).Key();
-			m_used.Remove(data);
-			Destroy(data);
-		}
-		Unlock();
 	}
 
-	virtual bool Initialize(int count)
+	~Pool()
 	{
-		Clear();
-		Lock();
-
-		for (int i = 0; i < count; ++i)
-		{
-			m_available.AddLast(Create());
-		}
-
-		Unlock();
-		return true;
 	}
+
+	void Lock() { m_lock.Lock(); }
+	void Unlock() { m_lock.Unlock(); }
 
 	T* Acquire()
 	{
 		Lock();
 
-		if (m_available.Size() == 0)
+		TInPool* pResult;
+		if (m_pFirstAvailable == NULL)
 		{
-			Unlock();
-			return NULL;
+			// we need to allocate new object
+			pResult = XN_NEW(TInPool);
+			pResult->refCount = 1;
+			pResult->pNextAvailable = NULL;
+			m_all.AddLast(pResult);
 		}
-
-		T* data = *m_available.Begin();
-		m_available.Remove(data);
-		m_used[data] = 1;
+		else
+		{
+			// take the first available
+			pResult = m_pFirstAvailable;
+			// remove it from the available list
+			m_pFirstAvailable = pResult->pNextAvailable;
+			// and initialize it
+			pResult->refCount = 1;
+			pResult->pNextAvailable = NULL;
+		}
 
 		Unlock();
 
-		return data;
-	}
-
-	virtual XnStatus Release(T* data)
-	{
-		return DecRef(data);
+		return pResult;
 	}
 
 	void AddRef(T* data)
 	{
+		TInPool* pObject = (TInPool*)data;
 		Lock();
-
-		if (m_used.Find(data) != m_used.End())
-			m_used[data]++;
-
+		++pObject->refCount;
 		Unlock();
 	}
 
-	XnStatus DecRef(T* data)
+	void Release(T* data)
 	{
+		TInPool* pObject = (TInPool*)data;
 		Lock();
-
-		if (m_used.Find(data) == m_used.End())
+		if (--pObject->refCount == 0)
 		{
-			// Check if already released.
-			if (m_available.Find(data) != m_available.End())
-			{
-				Unlock();
-				return XN_STATUS_OK;
-			}
-			Unlock();
-			return XN_STATUS_NO_MATCH;
+			// add it to the available list
+			pObject->pNextAvailable = m_pFirstAvailable;
+			m_pFirstAvailable = pObject;
 		}
-
-		m_used[data]--;
-		if (m_used[data] == 0)
-		{
-			m_used.Remove(data);
-			if (Valid(data))
-			{
-				m_available.AddLast(data);
-			}
-			else
-			{
-				Destroy(data);
-			}
-
-			Unlock();
-			return XN_STATUS_OK;
-		}
-
 		Unlock();
-		return XN_STAUTS_NOT_LAST_REFERENCE;
 	}
 
-	virtual void Clear()
+	void Clear()
 	{
 		Lock();
-		while (m_available.Begin() != m_available.End())
+		while (m_all.Begin() != m_all.End())
 		{
-			T* data = *m_available.Begin();
-			m_available.Remove(data);
-			Destroy(data);
+			TInPool* pObject = *m_all.Begin();
+			m_all.Remove(m_all.Begin());
+			XN_DELETE(pObject);
 		}
 		Unlock();
 	}
 
 	int Count()
 	{
+		int count = 0;
+
 		Lock();
-		int count = m_available.Size() + m_used.Size();
+		count = m_all.Size();
 		Unlock();
 
 		return count;
 	}
 
-	void Lock() 
-	{
-		if (m_criticalSection != NULL)
-		{
-			xnOSEnterCriticalSection(&m_criticalSection);
-		}
-	}
-
-	void Unlock() 
-	{
-		if (m_criticalSection != NULL)
-		{
-			xnOSLeaveCriticalSection(&m_criticalSection);
-		}
-	}
 protected:
-	virtual T* Create() {return XN_NEW(T);}
-	virtual void Destroy(T* data) {XN_DELETE(data);}
-	virtual bool Valid(T* /*data*/) {return true;}
+	class TInPool : public T
+	{
+	public:
+		int refCount;
+		TInPool* pNextAvailable;
+	};
 
-	xnl::Hash<T*, int> m_used;
-	xnl::List<T*> m_available;
-
-	XN_CRITICAL_SECTION_HANDLE m_criticalSection;
+	VirtualLock<TThreadSafe> m_lock;
+	List<TInPool*> m_all;
+	TInPool* m_pFirstAvailable;
 };
 
 } // xnl

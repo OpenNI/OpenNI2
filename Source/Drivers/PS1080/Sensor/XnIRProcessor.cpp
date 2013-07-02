@@ -40,7 +40,8 @@
 
 XnIRProcessor::XnIRProcessor(XnSensorIRStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager) :
 	XnFrameStreamProcessor(pStream, pHelper, pBufferManager, XN_SENSOR_PROTOCOL_RESPONSE_IMAGE_START, XN_SENSOR_PROTOCOL_RESPONSE_IMAGE_END),
-	m_nRefTimestamp(0)
+	m_nRefTimestamp(0),
+	m_DepthCMOSType(pHelper->GetFixedParams()->GetDepthCmosType())
 {
 }
 
@@ -241,24 +242,35 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 	}
 
 	// calculate expected size
-	XnUInt32 nXRes = GetStream()->GetXRes();
-	XnUInt32 nYRes = GetStream()->GetYRes();
+	XnUInt32 width = GetStream()->GetXRes();
+	XnUInt32 height = GetStream()->GetYRes();
+	XnUInt32 actualHeight = height;
 
 	// when cropping is turned on, actual depth size is smaller
 	if (GetStream()->m_FirmwareCropMode.GetValue() != XN_FIRMWARE_CROPPING_MODE_DISABLED)
 	{
-		nXRes = (XnUInt32)GetStream()->m_FirmwareCropSizeX.GetValue();
-		nYRes = (XnUInt32)GetStream()->m_FirmwareCropSizeY.GetValue();
+		width = (XnUInt32)GetStream()->m_FirmwareCropSizeX.GetValue();
+		height = (XnUInt32)GetStream()->m_FirmwareCropSizeY.GetValue();
+		actualHeight = height;
 	}
-
-	XnUInt32 nFrameSize = nXRes * nYRes * GetStream()->GetBytesPerPixel();
-	XnUInt32 nExpectedBufferSize = nFrameSize;
-
-	if (GetStream()->m_FirmwareCropMode.GetValue() == XN_FIRMWARE_CROPPING_MODE_DISABLED && GetStream()->GetResolution() != XN_RESOLUTION_SXGA)
+	else if (GetStream()->GetResolution() != XN_RESOLUTION_SXGA)
 	{
-		// there are additional 8 rows (this is how the CMOS is configured)
-		nExpectedBufferSize += (8 * nXRes * GetStream()->GetBytesPerPixel());
+		if (m_DepthCMOSType == XN_DEPTH_CMOS_MT9M001)
+		{
+			// there are additional 8 rows (this is how the CMOS is configured)
+			actualHeight += 8;
+		}	
 	}
+	else
+	{
+		if (m_DepthCMOSType == XN_DEPTH_CMOS_AR130)
+		{
+			// there missing 64 rows (this is how the CMOS is configured)
+			actualHeight -= 64;
+		}
+	}
+
+	XnUInt32 nExpectedBufferSize = width * actualHeight * GetStream()->GetBytesPerPixel();
 
 	if (GetWriteBuffer()->GetSize() != nExpectedBufferSize)
 	{
@@ -266,8 +278,8 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 		FrameIsCorrupted();
 	}
 
-	// don't report additional rows out
-	GetWriteBuffer()->UnsafeSetSize(nFrameSize);
+	// don't report additional rows out (so we're not using the expected buffer size)
+	GetWriteBuffer()->UnsafeSetSize(width * height * GetStream()->GetBytesPerPixel());
 
 	OniFrame* pFrame = GetWriteFrame();
 	pFrame->sensorType = ONI_SENSOR_IR;
@@ -276,19 +288,17 @@ void XnIRProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 	pFrame->videoMode.resolutionX = GetStream()->GetXRes();
 	pFrame->videoMode.resolutionY = GetStream()->GetYRes();
 	pFrame->videoMode.fps = GetStream()->GetFPS();
+	pFrame->width = (int)width;
+	pFrame->height = (int)height;
 
 	if (GetStream()->m_FirmwareCropMode.GetValue() != XN_FIRMWARE_CROPPING_MODE_DISABLED)
 	{
-		pFrame->width = (int)GetStream()->m_FirmwareCropSizeX.GetValue();
-		pFrame->height = (int)GetStream()->m_FirmwareCropSizeY.GetValue();
 		pFrame->cropOriginX = (int)GetStream()->m_FirmwareCropOffsetX.GetValue();
 		pFrame->cropOriginY = (int)GetStream()->m_FirmwareCropOffsetY.GetValue();
 		pFrame->croppingEnabled = TRUE;
 	}
 	else
 	{
-		pFrame->width = pFrame->videoMode.resolutionX;
-		pFrame->height = pFrame->videoMode.resolutionY;
 		pFrame->cropOriginX = 0;
 		pFrame->cropOriginY = 0;
 		pFrame->croppingEnabled = FALSE;

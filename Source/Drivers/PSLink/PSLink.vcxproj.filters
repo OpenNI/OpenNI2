@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DriverImpl">
+      <UniqueIdentifier>{3450fb6e-076f-4eda-b236-03d7c9f3fc75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LinkProtoLib">
+      <UniqueIdentifier>{4a61ff45-f315-4a09-b7b2-c23af7a34d4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Protocol">
+      <UniqueIdentifier>{9ad7f4c4-30f7-4229-a39e-869596ebeb88}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PrimeClientDefs.h" />
+    <ClInclude Include="DriverImpl\LinkOniDriver.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniDevice.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniMapStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniIRStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverImpl\LinkOniDepthStream.h">
+      <Filter>DriverImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkDeviceEnumeration.h" />
+    <ClInclude Include="LinkProtoLib\IAsyncInputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\IConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\IConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\ILinkOutputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\IOutputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\ISyncInputConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\ISyncIOConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\LinkProtoLibVersion.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientSyncSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientUSBConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientUSBControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientUSBInDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnClientUSBOutDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnCyclicBuffer.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLink6BitParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLink11BitS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLink12BitS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLink16zParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLink24zYuv422Parser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkContInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkFrameInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkInputDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkInputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkInputStreamsMgr.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkLogParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkMsgEncoder.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkMsgParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkOutputDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkOutputStream.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkOutputStreamsMgr.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkPacked10BitParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkProtoLibDefs.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkProtoUtils.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkResponseMsgParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkStatusCodes.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkUnpackedDataReductionParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkUnpackedS2DParser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkYuv422ToRgb888Parser.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnLinkYuvToRgb.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnMapSequenceListConverter.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnServerSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxControlEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnServerUSBLinuxOutDataEndpoint.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnShiftToDepth.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnSocketConnectionFactory.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnSocketInConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnSyncServerSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkProtoLib\XnSyncSocketConnection.h">
+      <Filter>LinkProtoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="PS1200Device.h" />
+    <ClInclude Include="PrimeClient.h" />
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkDefs.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocols\XnLinkProto\XnLinkProto.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DriverImpl\LinkExportedOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDriver.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDevice.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniMapStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniIRStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverImpl\LinkOniDepthStream.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkDeviceEnumeration.cpp" />
+    <ClCompile Include="LinkProtoLib\XnClientSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnClientSyncSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnClientUSBConnectionFactory.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnClientUSBControlEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnClientUSBInDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnClientUSBOutDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLink6BitParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLink11BitS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLink12BitS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLink16zParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLink24zYuv422Parser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkContInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkControlEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkFrameInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkInputDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkInputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkInputStreamsMgr.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkLogParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkMsgEncoder.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkMsgParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkOutputDataEndpoint.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkOutputStream.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkOutputStreamsMgr.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkPacked10BitParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkProtoUtils.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkResponseMsgParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkUnpackedDataReductionParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkUnpackedS2DParser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkYuv422ToRgb888Parser.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnLinkYuvToRgb.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnServerSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnShiftToDepth.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnSocketConnectionFactory.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnSocketInConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnSyncServerSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkProtoLib\XnSyncSocketConnection.cpp">
+      <Filter>LinkProtoLib</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeClient.cpp" />
+    <ClCompile Include="PS1200Device.cpp" />
+  </ItemGroup>
+</Project>

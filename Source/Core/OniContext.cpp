@@ -21,14 +21,12 @@
 #include "OniContext.h"
 #include "OniStreamFrameHolder.h"
 #include <XnLog.h>
+#include <XnOSCpp.h>
 
-static const char* ONI_CONFIGURATION_FILE = XN_FILE_LOCAL_DIR "OpenNI.ini";
-#if (XN_PLATFORM == XN_PLATFORM_WIN32) && (_M_X64)
-static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH64";
-#else
-static const char* ONI_ENV_VAR_DRIVERS_REPOSITORY = "OPENNI2_DRIVERS_PATH";
-#endif
-static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = XN_FILE_LOCAL_DIR "OpenNI2" XN_FILE_DIR_SEP "Drivers";
+static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
+static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
+
+#define XN_MASK_ONI_CONTEXT "OniContext"
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
@@ -44,6 +42,9 @@ Context::~Context()
 	s_valid = FALSE;
 }
 
+// Dummy function used only for taking its address for the sake of xnOSGetModulePathForProcAddress.
+static void dummyFunctionToTakeAddress() {}
+
 OniStatus Context::initialize()
 {
 	XnBool repositoryOverridden = FALSE;
@@ -52,87 +53,136 @@ OniStatus Context::initialize()
 	m_initializationCounter++;
 	if (m_initializationCounter > 1)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Initialize: Already initialized");
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Initialize: Already initialized");
 		return ONI_STATUS_OK;
 	}
 
 	XnStatus rc;
 
-	rc = m_newFrameAvailableEvent.Create(FALSE);
+	XnChar strModulePath[XN_FILE_MAX_PATH];
+	rc = xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&dummyFunctionToTakeAddress), strModulePath);
 	if (rc != XN_STATUS_OK)
 	{
-		m_errorLogger.Append("Couldn't create event for new frames: %s", xnGetStatusString(rc));
-		return ONI_STATUS_ERROR;
+		m_errorLogger.Append("Couldn't get the OpenNI shared library module's path: %s", xnGetStatusString(rc));
+		return OniStatusFromXnStatus(rc);
+	}
+
+	XnChar strBaseDir[XN_FILE_MAX_PATH];
+	rc = xnOSGetDirName(strModulePath, strBaseDir, XN_FILE_MAX_PATH);
+	if (rc != XN_STATUS_OK)
+	{
+		// Very unlikely to happen, but just in case.
+		m_errorLogger.Append("Couldn't get the OpenNI shared library module's directory: %s", xnGetStatusString(rc));
+		return OniStatusFromXnStatus(rc);
 	}
 
 	s_valid = TRUE;
 
 	// Read configuration file
 
+	XnChar strOniConfigurationFile[XN_FILE_MAX_PATH];
 	XnBool configurationFileExists = FALSE;
-	rc = xnOSDoesFileExist(ONI_CONFIGURATION_FILE, &configurationFileExists);
+
+	// Search the module directory for OpenNI.ini.
+	xnOSStrCopy(strOniConfigurationFile, strBaseDir, XN_FILE_MAX_PATH);
+	rc = xnOSAppendFilePath(strOniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+	if (rc == XN_STATUS_OK)
+	{
+		xnOSDoesFileExist(strOniConfigurationFile, &configurationFileExists);
+	}
+
+#ifdef ONI_PLATFORM_ANDROID_OS
+	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)0);
+	xnLogSetAndroidOutput(TRUE);
+#endif
+	
 	if (configurationFileExists)
 	{
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
-		if (rc != XN_STATUS_OK)
-		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "No override device in configuration file");
-		}
+		// First, we should process the log related configuration as early as possible.
 
 		XnInt32 nValue;
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "Verbosity", &nValue);
+		XnChar strLogPath[XN_FILE_MAX_PATH] = {0};
+
+		//Test if log redirection is needed 
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Log", "LogPath", strLogPath, XN_FILE_MAX_PATH);
+		if (rc == XN_STATUS_OK)
+		{
+			rc = xnLogSetOutputFolder(strLogPath);
+			if (rc != XN_STATUS_OK)
+			{
+				xnLogWarning(XN_MASK_ONI_CONTEXT, "Failed to set log output folder: %s", xnGetStatusString(rc));
+			}
+			else
+			{
+				xnLogVerbose(XN_MASK_ONI_CONTEXT, "Log directory redirected to: %s", strLogPath);
+			}
+		}
+
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "Verbosity", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nValue);
 		}
 
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToConsole", &nValue);
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "LogToConsole", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetConsoleOutput(nValue == 1);
 		}
-		rc = xnOSReadIntFromINI(ONI_CONFIGURATION_FILE, "Log", "LogToFile", &nValue);
+		
+		rc = xnOSReadIntFromINI(strOniConfigurationFile, "Log", "LogToFile", &nValue);
 		if (rc == XN_STATUS_OK)
 		{
 			xnLogSetFileOutput(nValue == 1);
 		}
-		rc = xnOSReadStringFromINI(ONI_CONFIGURATION_FILE, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
+
+		// Then, process the other device configurations.
+
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Device", "Override", m_overrideDevice, XN_FILE_MAX_PATH);
+		if (rc != XN_STATUS_OK)
+		{
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "No override device in configuration file");
+		}
+
+		rc = xnOSReadStringFromINI(strOniConfigurationFile, "Drivers", "Repository", repositoryFromINI, XN_FILE_MAX_PATH);
 		if (rc == XN_STATUS_OK)
 		{
 			repositoryOverridden = TRUE;
 		}
+
+
+
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Configuration has been read from '%s'", strOniConfigurationFile);
 	}
 	else
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't find configuration file '%s'", ONI_CONFIGURATION_FILE);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't find configuration file '%s'", strOniConfigurationFile);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "OpenNI %s", ONI_VERSION_STRING);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "OpenNI %s", ONI_VERSION_STRING);
 
-	// Use path specified in ini file
+	// Resolve the drive path based on the module's directory.
+	XnChar strDriverPath[XN_FILE_MAX_PATH];
+	xnOSStrCopy(strDriverPath, strBaseDir, XN_FILE_MAX_PATH);
+
 	if (repositoryOverridden)
 	{
-		xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured in file '%s'", repositoryFromINI, ONI_CONFIGURATION_FILE);
-		rc = loadLibraries(repositoryFromINI);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Extending the driver path by '%s', as configured in file '%s'", repositoryFromINI, strOniConfigurationFile);
+		rc = xnOSAppendFilePath(strDriverPath, repositoryFromINI, XN_FILE_MAX_PATH);
+	}
+	else
+	{
+		rc = xnOSAppendFilePath(strDriverPath, ONI_DEFAULT_DRIVERS_REPOSITORY, XN_FILE_MAX_PATH);
+	}
+
+	if (rc != XN_STATUS_OK)
+	{
+		m_errorLogger.Append("The driver path gets too long");
 		return OniStatusFromXnStatus(rc);
 	}
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", ONI_DEFAULT_DRIVERS_REPOSITORY);
-	// Use default path
-	rc = loadLibraries(ONI_DEFAULT_DRIVERS_REPOSITORY);
-	if (rc != XN_STATUS_OK)
-	{
-		// Can't find through default - try environment variable
-		xnLogVerbose(XN_LOG_MASK_ALL, "Can't load drivers from default directory '%s'.", ONI_DEFAULT_DRIVERS_REPOSITORY);
-
-		char dirName[XN_FILE_MAX_PATH];
-		XnStatus envrc = xnOSGetEnvironmentVariable(ONI_ENV_VAR_DRIVERS_REPOSITORY, dirName, XN_FILE_MAX_PATH);
-		if (envrc == XN_STATUS_OK)
-		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path, as configured by environment variable '%s'", dirName, ONI_ENV_VAR_DRIVERS_REPOSITORY);
-			rc = loadLibraries(dirName);
-		}
-	}
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Using '%s' as driver path", strDriverPath);
+	rc = loadLibraries(strDriverPath);
 
 	if (rc == XN_STATUS_OK)
 	{
@@ -154,7 +204,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 #if (ONI_PLATFORM != ONI_PLATFORM_ANDROID_ARM)
 	XnChar cpSearchString[XN_FILE_MAX_PATH] = "";
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Looking for drivers in drivers repository '%s'", directoryName);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Looking for drivers in drivers repository '%s'", directoryName);
 
 	// Build the search pattern string
 	XN_VALIDATE_STR_APPEND(cpSearchString, directoryName, XN_FILE_MAX_PATH, nRetVal);
@@ -166,7 +216,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	nRetVal = xnOSCountFiles(cpSearchString, &nFileCount);
 	if (nRetVal != XN_STATUS_OK || nFileCount == 0)
 	{
-		xnLogError(XN_LOG_MASK_ALL, "Found no drivers matching '%s'", cpSearchString);
+		xnLogError(XN_MASK_ONI_CONTEXT, "Found no drivers matching '%s'", cpSearchString);
 		m_errorLogger.Append("Found no files matching '%s'", cpSearchString);
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
@@ -175,10 +225,11 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	nRetVal = xnOSGetFileList(cpSearchString, NULL, acsFileList, nFileCount, &nFileCount);
 #else
 	// Android
-	nFileCount = 2;
+	nFileCount = 3;
 	acsFileList = XN_NEW_ARR(FileName, nFileCount);
 	strcpy(acsFileList[0], "libPS1080.so");
 	strcpy(acsFileList[1], "libOniFile.so");
+	strcpy(acsFileList[2], "libPSLink.so");
 #endif
 
 	// Save directory
@@ -189,10 +240,10 @@ XnStatus Context::loadLibraries(const char* directoryName)
 
 	for (int i = 0; i < nFileCount; ++i)
 	{
-		DeviceDriver* pDeviceDriver = XN_NEW(DeviceDriver, acsFileList[i], m_errorLogger);
+		DeviceDriver* pDeviceDriver = XN_NEW(DeviceDriver, acsFileList[i], m_frameManager, m_errorLogger);
 		if (pDeviceDriver == NULL || !pDeviceDriver->isValid())
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't use file '%s' as a device driver", acsFileList[i]);
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't use file '%s' as a device driver", acsFileList[i]);
 			m_errorLogger.Append("Couldn't understand file '%s' as a device driver", acsFileList[i]);
 			XN_DELETE(pDeviceDriver);
 			continue;
@@ -203,7 +254,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 		pDeviceDriver->registerDeviceStateChangedCallback(deviceDriver_DeviceStateChanged, this, dummy);
 		if (!pDeviceDriver->initialize())
 		{
-			xnLogVerbose(XN_LOG_MASK_ALL, "Couldn't use file '%s' as a device driver", acsFileList[i]);
+			xnLogVerbose(XN_MASK_ONI_CONTEXT, "Couldn't use file '%s' as a device driver", acsFileList[i]);
 			m_errorLogger.Append("Couldn't initialize device driver from file '%s'", acsFileList[i]);
 			XN_DELETE(pDeviceDriver);
 			continue;
@@ -218,7 +269,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 
 	if (m_deviceDrivers.Size() == 0)
 	{
-		xnLogError(XN_LOG_MASK_ALL, "Found no valid drivers");
+		xnLogError(XN_MASK_ONI_CONTEXT, "Found no valid drivers");
 		m_errorLogger.Append("Found no valid drivers in '%s'", directoryName);
 		return XN_STATUS_NO_MODULES_FOUND;
 	}
@@ -232,7 +283,7 @@ void Context::shutdown()
 	--m_initializationCounter;
 	if (m_initializationCounter > 0)
 	{
-		xnLogInfo(XN_LOG_MASK_ALL, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
+		xnLogInfo(XN_MASK_ONI_CONTEXT, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
 		return;
 	}
 	if (!s_valid)
@@ -273,8 +324,6 @@ void Context::shutdown()
 		XN_DELETE(pDriver);
 	}
 	m_deviceDrivers.Clear();
-
-	m_newFrameAvailableEvent.Close();
 
 	m_cs.Unlock();
 
@@ -329,7 +378,7 @@ OniStatus Context::releaseDeviceList(OniDeviceInfo* pDevices)
 	return ONI_STATUS_OK;
 }
 
-OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
+OniStatus Context::deviceOpen(const char* uri, const char* mode, OniDeviceHandle* pDevice)
 {
 	oni::implementation::Device* pMyDevice = NULL;
 
@@ -337,7 +386,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 	if (xnOSStrLen(m_overrideDevice) > 0)
 		deviceURI = m_overrideDevice;
 
-	xnLogVerbose(XN_LOG_MASK_ALL, "Trying to open device by URI '%s'", deviceURI == NULL ? "(NULL)" : deviceURI);
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Trying to open device by URI '%s'", deviceURI == NULL ? "(NULL)" : deviceURI);
 
 	m_cs.Lock();
 
@@ -347,7 +396,7 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 		if (m_devices.Size() == 0)
 		{
 			m_errorLogger.Append("DeviceOpen using default: no devices found");
-			xnLogError(XN_LOG_MASK_ALL, "Can't open default device - none found");
+			xnLogError(XN_MASK_ONI_CONTEXT, "Can't open default device - none found");
 			m_cs.Unlock();
 			return ONI_STATUS_ERROR;
 		}
@@ -391,9 +440,9 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 
 	if (pMyDevice == NULL)
 	{
-		xnLogError("Couldn't open device '%s'", uri);
+		xnLogError(XN_MASK_ONI_CONTEXT, "Couldn't open device '%s'", uri);
 		m_errorLogger.Append("DeviceOpen: Couldn't open device '%s'", uri);
-		return ONI_STATUS_ERROR;
+		return ONI_STATUS_NO_DEVICE;
 	}
 
 	_OniDevice* pDeviceHandle = XN_NEW(_OniDevice);
@@ -404,9 +453,8 @@ OniStatus Context::deviceOpen(const char* uri, OniDeviceHandle* pDevice)
 	}
 	*pDevice = pDeviceHandle;
 	pDeviceHandle->pDevice = pMyDevice;
-	m_deviceToHandle[pMyDevice] = pDeviceHandle;
 
-	return pMyDevice->open();
+	return pMyDevice->open(mode);
 }
 
 OniStatus Context::deviceClose(OniDeviceHandle device)
@@ -465,9 +513,10 @@ OniStatus Context::createStream(OniDeviceHandle device, OniSensorType sensorType
 		return ONI_STATUS_ERROR;
 	}
 
-	pMyStream->setContextNewFrameEvent(&m_newFrameAvailableEvent);
+	pMyStream->setNewFrameCallback(newFrameCallback, this);
+
 	// Create stream frame holder and connect it to the stream.
-	StreamFrameHolder* pFrameHolder = XN_NEW(StreamFrameHolder, pMyStream);
+	StreamFrameHolder* pFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pMyStream);
 	if (pFrameHolder == NULL)
 	{
 		m_errorLogger.Append("Context: Couldn't create stream frame holder from device:%08x, source: %d", device, sensorType);
@@ -552,7 +601,7 @@ OniStatus Context::streamDestroy(VideoStream* pStream)
 		if (pStreamList[i] != pStream)
 		{
 			// Allocate new frame holder.
-			StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, pStreamList[i]);
+			StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pStreamList[i]);
 			if (pStreamFrameHolder == NULL)
 			{
 				rc = ONI_STATUS_ERROR;
@@ -592,63 +641,67 @@ OniStatus Context::readFrame(OniStreamHandle stream, OniFrame** pFrame)
 
 void Context::frameRelease(OniFrame* pFrame)
 {
-	oni::implementation::VideoStream* pStream = oni::implementation::VideoStream::getFrameStream(pFrame);
-
-	if (m_streams.Find(pStream) != m_streams.End())
-	{
-		pStream->frameRelease(pFrame);
-	}
+	m_frameManager.release(pFrame);
 }
 
 void Context::frameAddRef(OniFrame* pFrame)
 {
-	oni::implementation::VideoStream* pStream = oni::implementation::VideoStream::getFrameStream(pFrame);
-	pStream->frameAddRef(pFrame);
+	m_frameManager.addRef(pFrame);
 }
 
 OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, int* pStreamIndex, int timeout)
 {
-	static const int MAX_WAITED_DEVICES = 20;
-	Device* deviceList[MAX_WAITED_DEVICES];
+	static const int MAX_WAITED_STREAMS = 50;
+	Device* deviceList[MAX_WAITED_STREAMS];
+	VideoStream* streamsList[MAX_WAITED_STREAMS];
 
 	unsigned long long oldestTimestamp = XN_MAX_UINT64;
 	int oldestIndex = -1;
 
+	if (streamCount > MAX_WAITED_STREAMS)
+	{
+		m_errorLogger.Append("Cannot wait on more than %d streams", MAX_WAITED_STREAMS);
+		return ONI_STATUS_NOT_SUPPORTED;
+	}
+
 	int numDevices = 0;
+
 	for (int i = 0; i < streamCount; ++i)
 	{
-		if (pStreams[i] != NULL)
+		if (pStreams[i] == NULL)
 		{
-			VideoStream* pStream = ((_OniStream*)pStreams[i])->pStream;
-			Device* pDevice = &pStream->getDevice();
+			continue;
+		}
 
-			// Check if device already exists.
-			bool found = false;
-			for (int j = 0; j < numDevices; ++j)
-			{
-				if (deviceList[j] == pDevice)
-				{
-					found = true;
-					break;
-				}
-			}
+		streamsList[i] =  ((_OniStream*)pStreams[i])->pStream;
 
-			// Add new device to list.
-			if (!found)
+		Device* pDevice = &streamsList[i]->getDevice();
+
+		// Check if device already exists.
+		bool found = false;
+		for (int j = 0; j < numDevices; ++j)
+		{
+			if (deviceList[j] == pDevice)
 			{
-				if (numDevices < MAX_WAITED_DEVICES)
-				{
-					deviceList[numDevices] = pDevice;
-					++numDevices;
-				}
-				else
-				{
-					// Cannot wait on streams from more than MAX_WAITED_DEVICES devices.
-					return ONI_STATUS_NOT_SUPPORTED;
-				}
+				found = true;
+				break;
 			}
 		}
+
+		// Add new device to list.
+		if (!found)
+		{
+			deviceList[numDevices] = pDevice;
+			++numDevices;
+		}
 	}
+
+	XN_EVENT_HANDLE hEvent = getThreadEvent();
+
+	XnUInt64 passedTime;
+	XnOSTimer workTimer;
+	XnUInt32 timeToWait = timeout;
+	xnOSStartTimer(&workTimer);
 
 	do
 	{
@@ -671,7 +724,7 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 		if (oldestIndex != -1)
 		{
 			*pStreamIndex = oldestIndex;
-			return ONI_STATUS_OK;
+			break;
 		}
 
 		// 'Poke' the driver to attempt to receive more frames.
@@ -680,7 +733,22 @@ OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, in
 			deviceList[j]->tryManualTrigger();
 		}
 
-	} while (m_newFrameAvailableEvent.Wait(timeout) == XN_STATUS_OK);
+		if(timeout != ONI_TIMEOUT_FOREVER)
+		{
+			xnOSQueryTimer(workTimer, &passedTime);
+			if((int)passedTime < timeout)
+				timeToWait = timeout - (int)passedTime;
+			else
+				timeToWait = 0;
+		}
+	} while (XN_STATUS_OK == xnOSWaitEvent(hEvent, timeToWait));
+	
+	xnOSStopTimer(&workTimer);
+
+	if (oldestIndex != -1)
+	{
+		return ONI_STATUS_OK;
+	}
 
 	m_errorLogger.Append("waitForStreams: timeout reached");
 	return ONI_STATUS_TIME_OUT;
@@ -743,7 +811,7 @@ OniStatus Context::enableFrameSyncEx(VideoStream** pStreams, int numStreams, Dev
 
 	// Create the new frame sync group (it will link all the streams).
 	SyncedStreamsFrameHolder* pSyncedStreamsFrameHolder = XN_NEW(SyncedStreamsFrameHolder, 
-																	pStreams, numStreams);
+																	m_frameManager, pStreams, numStreams);
 	XN_VALIDATE_PTR(pSyncedStreamsFrameHolder, ONI_STATUS_ERROR);
 
 	// Configure frame-sync group in driver.
@@ -804,7 +872,7 @@ void Context::disableFrameSync(OniFrameSyncHandle frameSyncHandle)
 	for (int i = 0; i < numStreams; ++i)
 	{
 		// Allocate new frame holder.
-		StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, pStreamList[i]);
+		StreamFrameHolder* pStreamFrameHolder = XN_NEW(StreamFrameHolder, m_frameManager, pStreamList[i]);
 		if (pStreamFrameHolder == NULL)
 		{
 			// TODO: error!!!
@@ -866,7 +934,7 @@ OniStatus Context::recorderOpen(const char* fileName, OniRecorderHandle* pRecord
         return ONI_STATUS_ERROR;
     }
     // Create the recorder itself.
-    if (NULL == ((*pRecorder)->pRecorder = XN_NEW(Recorder, m_errorLogger, *pRecorder)))
+    if (NULL == ((*pRecorder)->pRecorder = XN_NEW(Recorder, m_frameManager, m_errorLogger, *pRecorder)))
     {
         XN_DELETE(*pRecorder);
         return ONI_STATUS_ERROR;
@@ -955,6 +1023,41 @@ void Context::addToLogger(const XnChar* cpFormat, ...)
 	va_start(args, cpFormat);
 	m_errorLogger.AppendV(cpFormat, args);
 	va_end(args);
+}
+
+void Context::onNewFrame()
+{
+	m_cs.Lock();
+	for (xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE>::Iterator it = m_waitingThreads.Begin(); it != m_waitingThreads.End(); ++it)
+	{
+		xnOSSetEvent(it->Value());
+	}
+	m_cs.Unlock();
+}
+
+void XN_CALLBACK_TYPE Context::newFrameCallback(void* pCookie)
+{
+	Context* pThis = (Context*)pCookie;
+	pThis->onNewFrame();
+}
+
+XN_EVENT_HANDLE Context::getThreadEvent()
+{
+	XN_THREAD_ID tid;
+	XN_EVENT_HANDLE hEvent = NULL;
+	xnOSGetCurrentThreadID(&tid);
+
+	m_cs.Lock();
+	
+	if (XN_STATUS_OK != m_waitingThreads.Get(tid, hEvent))
+	{
+		xnOSCreateEvent(&hEvent, FALSE);
+		m_waitingThreads.Set(tid, hEvent);
+	}
+
+	m_cs.Unlock();
+
+	return hEvent;
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

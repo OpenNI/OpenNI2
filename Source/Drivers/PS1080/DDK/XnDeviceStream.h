@@ -44,6 +44,10 @@ public:
 	XnStatus Init();
 	XnStatus Free();
 
+	void SetServices(oni::driver::StreamServices& services) { m_pServices = &services; }
+	void AddRefToFrame(OniFrame* pFrame) { m_pServices->addFrameRef(pFrame); }
+	void ReleaseFrame(OniFrame* pFrame) { m_pServices->releaseFrame(pFrame); }
+
 	void AddRef();
 	XnUInt32 DecRef();
 
@@ -58,9 +62,6 @@ public:
 
 	/** Notifies new data is available in this stream. */
 	virtual void NewDataAvailable(OniFrame* pFrame);
-
-	virtual void AddRefToFrame(OniFrame* pFrame) = 0;
-	virtual void ReleaseFrame(OniFrame* pFrame) = 0;
 
 	//---------------------------------------------------------------------------
 	// Getters
@@ -92,6 +93,8 @@ protected:
 	inline XnActualIntProperty& IsMirroredProperty() { return m_IsMirrored; }
 
 protected:
+	oni::driver::StreamServices& GetServices() { return *m_pServices; }
+
 	//---------------------------------------------------------------------------
 	// Virtual Functions
 	//---------------------------------------------------------------------------
@@ -118,6 +121,7 @@ private:
 	//---------------------------------------------------------------------------
 	// Members
 	//---------------------------------------------------------------------------
+	oni::driver::StreamServices* m_pServices;
 	XnActualIntProperty m_IsStream;
 	XnActualStringProperty m_Type;
 	XnActualIntProperty m_IsOpen;

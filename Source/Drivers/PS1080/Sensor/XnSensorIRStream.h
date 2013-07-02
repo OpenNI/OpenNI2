@@ -64,7 +64,6 @@ protected:
 	XnStatus Open() { return m_Helper.Open(); }
 	XnStatus Close() { return m_Helper.Close(); }
 	XnStatus CalcRequiredSize(XnUInt32* pnRequiredSize) const;
-	XnStatus ReallocTripleFrameBuffer();
 	XnStatus CropImpl(OniFrame* pFrame, const OniCropping* pCropping);
 	XnStatus ConfigureStreamImpl();
 	XnStatus OpenStreamImpl();
@@ -87,6 +86,7 @@ private:
 	XnStatus OnIsMirroredChanged();
 	XnStatus SetCroppingImpl(const OniCropping* pCropping, XnCroppingMode mode);
 
+	XnStatus FixFirmwareBug();
 
 	static XnStatus XN_CALLBACK_TYPE IsMirroredChangedCallback(const XnProperty* pSender, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetActualReadCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);

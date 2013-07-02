@@ -90,11 +90,14 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
@@ -109,11 +112,14 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
@@ -142,6 +148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
@@ -170,6 +177,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>XnLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
@@ -187,7 +195,9 @@
     <ClInclude Include="..\..\Include\OniCTypes.h" />
     <ClInclude Include="..\..\Include\OniVersion.h" />
     <ClInclude Include="..\..\Include\OniCAPI.h" />
+    <ClInclude Include="..\..\Include\PrimeSense.h" />
     <ClInclude Include="..\..\Include\PS1080.h" />
+    <ClInclude Include="..\..\Include\PSLink.h" />
     <ClInclude Include="..\..\Include\Win32\OniPlatformWin32.h" />
     <ClInclude Include="OniCommon.h" />
     <ClInclude Include="OniContext.h" />
@@ -196,8 +206,10 @@
     <ClInclude Include="OniDeviceDriver.h" />
     <ClInclude Include="OniDriverServices.h" />
     <ClInclude Include="OniFrameHolder.h" />
+    <ClInclude Include="OniFrameManager.h" />
     <ClInclude Include="OniRecorder.h" />
     <ClInclude Include="OniInternal.h" />
+    <ClInclude Include="OniSensor.h" />
     <ClInclude Include="OniSyncedStreamsFrameHolder.h" />
     <ClInclude Include="OniStream.h" />
     <ClInclude Include="OniDriverHandler.h" />
@@ -671,7 +683,9 @@
     <ClCompile Include="OniContext.cpp" />
     <ClCompile Include="OniDevice.cpp" />
     <ClCompile Include="OniDeviceDriver.cpp" />
+    <ClCompile Include="OniFrameManager.cpp" />
     <ClCompile Include="OniRecorder.cpp" />
+    <ClCompile Include="OniSensor.cpp" />
     <ClCompile Include="OniSyncedStreamsFrameHolder.cpp" />
     <ClCompile Include="OniStream.cpp" />
     <ClCompile Include="OniStreamFrameHolder.cpp" />

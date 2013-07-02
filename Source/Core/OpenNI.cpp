@@ -131,9 +131,12 @@ ONI_C_API int oniFormatBytesPerPixel(OniPixelFormat format)
 	case ONI_PIXEL_FORMAT_RGB888:
 		return 3;
 	case ONI_PIXEL_FORMAT_YUV422:
+	case ONI_PIXEL_FORMAT_YUYV:
 		return 2;
 	case ONI_PIXEL_FORMAT_JPEG:
+		return 1;
 	default:
+		XN_ASSERT(FALSE);
 		return 0;
 	}
 }
@@ -142,8 +145,12 @@ ONI_C_API int oniFormatBytesPerPixel(OniPixelFormat format)
 
 ONI_C_API OniStatus oniDeviceOpen(const char* uri, OniDeviceHandle* pDevice)
 {
+	return oniDeviceOpenEx(uri, NULL, pDevice);
+}
+ONI_C_API OniStatus oniDeviceOpenEx(const char* uri, const char* mode, OniDeviceHandle* pDevice)
+{
 	g_Context.clearErrorLogger();
-	return g_Context.deviceOpen(uri, pDevice);
+	return g_Context.deviceOpen(uri, mode, pDevice);
 }
 ONI_C_API OniStatus oniDeviceClose(OniDeviceHandle device)
 {
@@ -186,6 +193,11 @@ ONI_C_API void oniDeviceDisableDepthColorSync(OniDeviceHandle device)
 	g_Context.clearErrorLogger();
 	device->pDevice->disableDepthColorSync();
 }
+ONI_C_API OniBool oniDeviceGetDepthColorSyncEnabled(OniDeviceHandle device)
+{
+	g_Context.clearErrorLogger();
+	return device->pDevice->isDepthColorSyncEnabled();
+}
 
 ONI_C_API OniStatus oniDeviceSetProperty(OniDeviceHandle device, int propertyId, const void* data, int dataSize)
 {
@@ -202,7 +214,7 @@ ONI_C_API OniBool oniDeviceIsPropertySupported(OniDeviceHandle device, int prope
 	g_Context.clearErrorLogger();
 	return device->pDevice->isPropertySupported(propertyId);
 }
-ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, const void* data, int dataSize)
+ONI_C_API OniStatus oniDeviceInvoke(OniDeviceHandle device, int commandId, void* data, int dataSize)
 {
 	g_Context.clearErrorLogger();
 	return device->pDevice->invoke(commandId, data, dataSize);
@@ -327,7 +339,7 @@ ONI_C_API OniBool oniStreamIsPropertySupported(OniStreamHandle stream, int prope
 	return stream->pStream->isPropertySupported(propertyId);
 }
 
-ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, const void* data, int dataSize)
+ONI_C_API OniStatus oniStreamInvoke(OniStreamHandle stream, int commandId, void* data, int dataSize)
 {
 	g_Context.clearErrorLogger();
 	return stream->pStream->invoke(commandId, data, dataSize);
@@ -336,6 +348,12 @@ ONI_C_API OniBool oniStreamIsCommandSupported(OniStreamHandle stream, int comman
 {
 	g_Context.clearErrorLogger();
 	return stream->pStream->isCommandSupported(commandId);
+}
+
+ONI_C_API OniStatus oniStreamSetFrameBuffersAllocator(OniStreamHandle stream, OniFrameAllocBufferCallback alloc, OniFrameFreeBufferCallback free, void* pCookie)
+{
+	g_Context.clearErrorLogger();
+	return stream->pStream->setFrameBufferAllocator(alloc, free, pCookie);	
 }
 
 ////
@@ -417,6 +435,67 @@ ONI_C_API void oniWriteLogEntry(const char* mask, int severity, const char* mess
 	xnLogWrite(mask, (XnLogSeverity)severity, "External", 0, message);
 }
 
+ONI_C_API OniStatus oniSetLogOutputFolder(const char* strOutputFolder)
+{
+	XnStatus rc = xnLogSetOutputFolder((XnChar*)strOutputFolder);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+	
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniGetLogFileName(char* strFileName, int nBufferSize)
+{
+	XnStatus rc = xnLogGetFileName((XnChar*)strFileName, (XnUInt32)nBufferSize);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogMinSeverity(int nMinSeverity)
+{
+	XnStatus rc = xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nMinSeverity);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogConsoleOutput(OniBool bConsoleOutput)
+{
+	XnStatus rc = xnLogSetConsoleOutput(bConsoleOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+ONI_C_API OniStatus oniSetLogFileOutput(OniBool bFileOutput)
+{
+	XnStatus rc = xnLogSetFileOutput(bFileOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+
+#if ONI_PLATFORM == ONI_PLATFORM_ANDROID_ARM
+ONI_C_API OniStatus oniSetLogAndroidOutput(OniBool bAndroidOutput)
+{
+	XnStatus rc = xnLogSetAndroidOutput((XnBool)bAndroidOutput);
+
+	if (rc != XN_STATUS_OK)
+		return ONI_STATUS_ERROR;
+
+	return ONI_STATUS_OK;
+}
+#endif
 ONI_C_API OniStatus oniCoordinateConverterDepthToWorld(OniStreamHandle depthStream, float depthX, float depthY, float depthZ, float* pWorldX, float* pWorldY, float* pWorldZ)
 {
 	g_Context.clearErrorLogger();

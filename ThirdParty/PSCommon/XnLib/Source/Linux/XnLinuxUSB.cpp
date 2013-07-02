@@ -36,6 +36,10 @@
 #include <XnOSCpp.h>
 #include <XnList.h>
 
+#if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
+#include <libudev.h>
+#define XN_USE_UDEV
+#endif
 
 //---------------------------------------------------------------------------
 // Types
@@ -44,11 +48,38 @@ typedef struct XnUSBEventCallback
 {
 	XnUSBDeviceCallbackFunctionPtr pFunc;
 	void* pCookie;
+
+	// What kind of device are we hooking on
+	XnUInt16 nVendorID;
+	XnUInt16 nProductID;
 } XnUSBEventCallback;
 
 typedef xnl::List<XnUSBEventCallback*> XnUSBEventCallbackList;
 
 XnUSBEventCallbackList g_connectivityEvent;
+
+#ifdef XN_USE_UDEV
+typedef struct XnUSBConnectedDevice
+{
+	XnUInt16 nVendorID;
+	XnUInt16 nProductID;
+
+	XnUInt8 nBusNum;
+	XnUInt8 nDevNum;
+
+	// /dev/bus/usb/001/016
+	XnChar strNode[XN_FILE_MAX_PATH + 1];
+	// id27/0601@1/16
+	XnChar strDevicePath[XN_FILE_MAX_PATH + 1];
+} XnUSBConnectedDevice;
+
+typedef xnl::List<XnUSBConnectedDevice*> XnUSBConnectedDeviceList;
+
+XnUSBConnectedDeviceList g_connectedDevices;
+
+XN_THREAD_HANDLE g_hUDEVThread = NULL;
+XnBool g_bShouldRunUDEVThread = false;
+#endif
 
 //---------------------------------------------------------------------------
 // Defines
@@ -85,6 +116,248 @@ XnStatus xnUSBPlatformSpecificShutdown();
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
+#ifdef XN_USE_UDEV
+void xnUSBDeviceConnected(struct udev_device *dev)
+{
+	XnUSBConnectedDevice *pConnected;
+	pConnected = XN_NEW(XnUSBConnectedDevice);
+
+	pConnected->nVendorID  = strtoul(udev_device_get_sysattr_value(dev,"idVendor"),  NULL, 16);
+	pConnected->nProductID = strtoul(udev_device_get_sysattr_value(dev,"idProduct"), NULL, 16);
+	pConnected->nBusNum    = strtoul(udev_device_get_sysattr_value(dev,"busnum"),    NULL, 10);
+	pConnected->nDevNum    = strtoul(udev_device_get_sysattr_value(dev,"devnum"),    NULL, 10);
+
+	// copy the device node path aside, to be used upon removal
+	xnOSStrCopy(pConnected->strNode, udev_device_get_devnode(dev), XN_FILE_MAX_PATH);
+
+	// generate our unique URI
+	snprintf(pConnected->strDevicePath, XN_FILE_MAX_PATH,
+				"%04hx/%04hx@%hhu/%hhu",
+				pConnected->nVendorID,
+				pConnected->nProductID,
+				pConnected->nBusNum,
+				pConnected->nDevNum);
+
+	// add the device to the connectedDevices List
+	g_connectedDevices.AddLast(pConnected);
+
+	// notify the proper events of the connection
+	for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
+	{
+		XnUSBEventCallback* pCallback = *it;
+
+		if(pCallback->nVendorID == pConnected->nVendorID && pCallback->nProductID == pConnected->nProductID)
+		{
+			XnUSBEventArgs args;
+			args.strDevicePath = pConnected->strDevicePath;
+			args.eventType = XN_USB_EVENT_DEVICE_CONNECT;
+			pCallback->pFunc(&args, pCallback->pCookie);
+		}
+	}
+}
+
+void xnUSBDeviceDisconnected(struct udev_device *dev)
+{
+	// find dev in the connected devices' list
+	XnUSBConnectedDevice *pConnected = NULL;
+	for (XnUSBConnectedDeviceList::Iterator it = g_connectedDevices.Begin(); it != g_connectedDevices.End(); ++it)
+	{
+		if (!xnOSStrCmp(((XnUSBConnectedDevice *)*it)->strNode, udev_device_get_devnode(dev)))
+		{
+			pConnected = *it;
+			break;
+		}
+	}
+
+	if(!pConnected)
+	{
+		// got disconnection of an unknown device. not good.
+		xnLogWarning(XN_MASK_USB, "Got device disconnection event - for an unknown device!");
+		return;
+	}
+
+	// notify the proper events of the disconnection
+	for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
+	{
+		XnUSBEventCallback* pCallback = *it;
+
+		if(pCallback->nVendorID == pConnected->nVendorID && pCallback->nProductID == pConnected->nProductID)
+		{
+			XnUSBEventArgs args;
+			args.strDevicePath = pConnected->strDevicePath;
+			args.eventType = XN_USB_EVENT_DEVICE_DISCONNECT;
+			pCallback->pFunc(&args, pCallback->pCookie);
+		}
+	}
+
+	// remove the device from connectedDevices List
+	g_connectedDevices.Remove(pConnected);
+	XN_DELETE(pConnected);
+}
+
+XN_THREAD_PROC xnUSBUDEVEventsThread(XN_THREAD_PARAM pThreadParam)
+{
+	struct udev *udev;
+	struct udev_device *dev;
+   	struct udev_monitor *mon;
+	int fd;
+	
+	/* Create the udev object */
+	udev = udev_new();
+	if (!udev) {
+		printf("Can't create udev\n");
+		exit(1);
+	}
+
+	/* This section sets up a monitor which will report events when
+	   devices attached to the system change.  Events include "add",
+	   "remove", "change", "online", and "offline".
+	   
+	   This section sets up and starts the monitoring. Events are
+	   polled for (and delivered) later on.
+	   
+	   It is important that the monitor be set up before the call to
+	   udev_enumerate_scan_devices() so that events (and devices) are
+	   not missed.  For example, if enumeration happened first, there
+	   would be no event generated for a device which was attached after
+	   enumeration but before monitoring began.
+	   
+	   Note that a filter is added so that we only get events for
+	   "usb/usb_device" devices. */
+	
+	/* Set up a monitor to monitor "usb_device" devices */
+	mon = udev_monitor_new_from_netlink(udev, "udev");
+	udev_monitor_filter_add_match_subsystem_devtype(mon, "usb", "usb_device");
+	udev_monitor_enable_receiving(mon);
+	/* Get the file descriptor (fd) for the monitor.
+	   This fd will get passed to select() */
+	fd = udev_monitor_get_fd(mon);
+	
+	//////////////////////////////////////////////////////////////////////////
+
+	/* Enumerate the currently connected devices and store them, 
+	   so we can notify of their disconnection */
+
+	struct udev_enumerate *enumerate;
+	struct udev_list_entry *devices, *dev_list_entry;
+
+
+	enumerate = udev_enumerate_new(udev);
+	/* Create a list of the devices.
+	   Note that it's not possible to match by "devtype="usb_device"",
+	   as in monitor filter, but this filter combination seems to do the job... */
+	udev_enumerate_add_match_subsystem(enumerate, "usb");
+	udev_enumerate_add_match_sysattr(enumerate, "idVendor", NULL);
+	udev_enumerate_add_match_sysattr(enumerate, "idProduct", NULL);
+	udev_enumerate_add_match_sysattr(enumerate, "busnum", NULL);
+	udev_enumerate_add_match_sysattr(enumerate, "devnum", NULL);
+
+	udev_enumerate_scan_devices(enumerate);
+	devices = udev_enumerate_get_list_entry(enumerate);
+	/* udev_list_entry_foreach is a macro which expands to
+	   a loop. The loop will be executed for each member in
+	   devices, setting dev_list_entry to a list entry
+	   which contains the device's path in /sys. */
+	udev_list_entry_foreach(dev_list_entry, devices) {
+		const char *path;
+		
+		/* Get the filename of the /sys entry for the device
+		   and create a udev_device object (dev) representing it */
+		path = udev_list_entry_get_name(dev_list_entry);
+		dev = udev_device_new_from_syspath(udev, path);
+
+		/* Notify as if it was just connected */
+		// note - it's better that connectivity events register AFTER this point,
+		//        so they don't get notified of already connected devices.
+		xnUSBDeviceConnected(dev);
+	
+		udev_device_unref(dev);
+	}
+	/* Free the enumerator object */
+	udev_enumerate_unref(enumerate);
+
+	//////////////////////////////////////////////////////////////////////////
+
+	/* Begin polling for udev events. Events occur when devices
+	   attached to the system are added, removed, or change state. 
+	   udev_monitor_receive_device() will return a device
+	   object representing the device which changed and what type of
+	   change occured.
+
+	   The select() system call is used to ensure that the call to
+	   udev_monitor_receive_device() will not block.
+	   
+	   The monitor was set up earler in this file, and monitoring is
+	   already underway.
+	   
+	   This section will run continuously, calling usleep() at the end
+	   of each pass. This is to demonstrate how to use a udev_monitor
+	   in a non-blocking way. */
+	while (g_bShouldRunUDEVThread)
+	{
+		/* Set up the call to select(). In this case, select() will
+		   only operate on a single file descriptor, the one
+		   associated with our udev_monitor. Note that the timeval
+		   object is set to 0, which will cause select() to not
+		   block. */
+		fd_set fds;
+		struct timeval tv;
+		int ret;
+		
+		FD_ZERO(&fds);
+		FD_SET(fd, &fds);
+		tv.tv_sec = 0;
+		tv.tv_usec = 250 * 1000;
+		
+		ret = select(fd+1, &fds, NULL, NULL, &tv);
+		
+		/* Check if our file descriptor has received data. */
+		if (ret > 0 && FD_ISSET(fd, &fds)) {
+			/* Make the call to receive the device.
+			   select() ensured that this will not block. */
+			dev = udev_monitor_receive_device(mon);
+			if (dev) {
+			/*
+				printf("   Node: %s\n", udev_device_get_devnode(dev));
+				printf("   Subsystem: %s\n", udev_device_get_subsystem(dev));
+				printf("   Devtype: %s\n", udev_device_get_devtype(dev));
+				printf("   Action: %s\n", udev_device_get_action(dev));
+
+				printf("  VID/PID: %s %s\n",
+						udev_device_get_sysattr_value(dev,"idVendor"),
+						udev_device_get_sysattr_value(dev,"idProduct"));
+				printf("  %s\n  %s\n",
+						udev_device_get_sysattr_value(dev,"manufacturer"),
+						udev_device_get_sysattr_value(dev,"product"));
+				fflush(stdout);
+			*/
+				const XnChar *action = udev_device_get_action(dev);
+
+				if (!xnOSStrCmp(action, "add"))
+				{
+					xnUSBDeviceConnected(dev);
+				}
+				else if (!xnOSStrCmp(action, "remove"))
+				{
+					xnUSBDeviceDisconnected(dev);
+				}
+				//note - handle the other events? "change" event might be useful...
+
+				// now release dev
+				udev_device_unref(dev);
+			}
+			else {
+				xnLogWarning(XN_MASK_USB, "No Device from udev_monitor_receive_device(). An error occured.");
+			}					
+		}
+	}
+	udev_monitor_unref(mon);
+	udev_unref(udev);
+
+	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+}
+#endif
+
 XN_THREAD_PROC xnUSBHandleEventsThread(XN_THREAD_PARAM pThreadParam)
 {
 	// init timeout
@@ -115,6 +388,20 @@ XnStatus xnUSBPlatformSpecificInit()
 	XnStatus nRetVal = xnOSCreateCriticalSection(&g_InitData.hLock);
 	XN_IS_STATUS_OK(nRetVal);
 	
+#ifdef XN_USE_UDEV
+	// initialize the UDEV Events thread
+	g_bShouldRunUDEVThread = true;
+	nRetVal = xnOSCreateThread(xnUSBUDEVEventsThread, NULL, &g_hUDEVThread);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		g_hUDEVThread = NULL;
+		g_bShouldRunUDEVThread = false;
+		// clean-up
+		xnUSBPlatformSpecificShutdown();
+		return nRetVal;
+	}
+#endif
+
 	//libusb_set_debug(g_InitData.pContext, 3);
 
 	xnLogInfo(XN_MASK_USB, "USB is initialized.");
@@ -196,6 +483,11 @@ void xnUSBAsynchThreadRelease()
 XnStatus xnUSBPlatformSpecificShutdown()
 {
 	xnUSBAsynchThreadStop();
+#ifdef XN_USE_UDEV
+	g_bShouldRunUDEVThread = false;
+	xnOSWaitAndTerminateThread(&g_hUDEVThread, 2 * 1000);
+	g_hUDEVThread = NULL;
+#endif
 
 	if (g_InitData.hLock != NULL)
 	{
@@ -567,7 +859,19 @@ XN_C_API XnStatus xnUSBSetInterface(XN_USB_DEV_HANDLE pDevHandle, XnUInt8 nInter
 
 XN_C_API XnStatus xnUSBGetInterface(XN_USB_DEV_HANDLE pDevHandle, XnUInt8* pnInterface, XnUInt8* pnAltInterface)
 {
-	return XN_STATUS_OS_UNSUPPORTED_FUNCTION;
+	XnUInt8 nAltInterface;
+	int rc = libusb_control_transfer(pDevHandle->hDevice, 
+		LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_STANDARD | LIBUSB_RECIPIENT_INTERFACE,
+		LIBUSB_REQUEST_GET_INTERFACE, 0, 0, &nAltInterface, 1, 1000);
+	if (rc != 1)
+	{
+		return (XN_STATUS_USB_GET_INTERFACE_FAILED);
+	}
+
+	*pnInterface = 0;
+	*pnAltInterface = nAltInterface;
+
+	return (XN_STATUS_OK);
 }
 
 XN_C_API XnStatus xnUSBOpenEndPoint(XN_USB_DEV_HANDLE pDevHandle, XnUInt16 nEndPointID, XnUSBEndPointType nEPType, XnUSBDirectionType nDirType, XN_USB_EP_HANDLE* pEPHandlePtr)
@@ -1069,11 +1373,22 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 				int rc = libusb_cancel_transfer(pBufferInfo->transfer);
 				if (rc != 0)
 				{
-					xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
+					// If we get LIBUSB_ERROR_NOT_FOUND it means that the transfer was already cancaled/completed which is a very common thing during normal shutdown so there's no need to print it.
+					if (rc != LIBUSB_ERROR_NOT_FOUND)
+					{
+						if (rc == LIBUSB_ERROR_NO_DEVICE)
+						{
+							goto disconnect;
+						}
+						else
+						{
+							xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to cancel asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
+						}
+					}
 				}
-			
-				// wait for it to cancel	
-				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, XN_WAIT_INFINITE);
+
+				// wait for it to cancel
+				nRetVal = xnOSWaitEvent(pBufferInfo->hEvent, pThreadData->nTimeOut);
 			}
 			
 			if (nRetVal != XN_STATUS_OK)
@@ -1090,39 +1405,61 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 			}
 			else // transfer done
 			{
+				// check for unexpected disconnects
+				if (pTransfer->status == LIBUSB_TRANSFER_NO_DEVICE)
+				{
+					goto disconnect;
+				}
+
 				if (pBufferInfo->nLastStatus == LIBUSB_TRANSFER_COMPLETED || // read succeeded
 					pBufferInfo->nLastStatus == LIBUSB_TRANSFER_CANCELLED)   // cancelled, but maybe some data arrived
 				{
 					if (pTransfer->type == LIBUSB_TRANSFER_TYPE_ISOCHRONOUS)
 					{
+						XnUChar* pBuffer = NULL;
 						XnUInt32 nTotalBytes = 0;
-						
-						// some packets may return empty, so we need to remove spaces, and make the buffer sequential
+						XnBool bCompletePacket;
+
+						// some packets may return empty or partial, aggregate as many consequent packets as possible, and then send them to processing
 						for (XnInt32 i = 0; i < pTransfer->num_iso_packets; ++i)
 						{
 							struct libusb_iso_packet_descriptor* pPacket = &pTransfer->iso_packet_desc[i];
-							if (pPacket->status == LIBUSB_TRANSFER_COMPLETED && pPacket->actual_length != 0)
+
+							// continue aggregating
+							if (pPacket->status == LIBUSB_TRANSFER_COMPLETED)
 							{
-								XnUChar* pBuffer = libusb_get_iso_packet_buffer_simple(pTransfer, i);
-								// if buffer is not at same offset, move it
-								if (pTransfer->buffer + nTotalBytes != pBuffer)
+								if (pBuffer == NULL)
 								{
-//									printf("buffer %d has %d bytes. Moving to offset %d...\n", i, pPacket->actual_length, nTotalBytes);
-									memmove(pTransfer->buffer + nTotalBytes, pBuffer, pPacket->actual_length);
+									pBuffer = libusb_get_iso_packet_buffer_simple(pTransfer, i);
 								}
+
 								nTotalBytes += pPacket->actual_length;
+
+								bCompletePacket = TRUE;
 							}
-							else if (pPacket->status != LIBUSB_TRANSFER_COMPLETED)
+							else
 							{
-								xnLogWarning(XN_MASK_USB, "Endpoint 0x%x, Buffer %d, packet %d Asynch transfer failed (status: %d)", pTransfer->endpoint, pBufferInfo->nBufferID, i, pPacket->status);
+								if (pPacket->status != LIBUSB_TRANSFER_ERROR) //Skip printing uninformative common errors
+								{
+									xnLogWarning(XN_MASK_USB, "Endpoint 0x%x, Buffer %d, packet %d Asynch transfer failed (status: %d)", pTransfer->endpoint, pBufferInfo->nBufferID, i, pPacket->status);
+								}
+
+								bCompletePacket = FALSE;
 							}
-						}
-						
-						if (nTotalBytes != 0)
-						{
-							// call callback method
-							pBufferInfo->pThreadData->pCallbackFunction(pTransfer->buffer, nTotalBytes, pBufferInfo->pThreadData->pCallbackData);
-						}
+
+							// stop condition for aggregating
+							if (!bCompletePacket || // failed packet
+								pPacket->actual_length != pPacket->length || // partial packet
+								i == pTransfer->num_iso_packets - 1) // last packet
+							{
+								if (nTotalBytes != 0)
+								{
+									pBufferInfo->pThreadData->pCallbackFunction(pBuffer, nTotalBytes, pBufferInfo->pThreadData->pCallbackData);
+								}
+								pBuffer = NULL;
+								nTotalBytes = 0;
+							}
+						} // packets loop
 					}
 					else
 					{
@@ -1146,25 +1483,24 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 					int rc = libusb_submit_transfer(pTransfer);
 					if (rc != 0)
 					{
-						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to re-submit asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
 						if (rc == LIBUSB_ERROR_NO_DEVICE)
 						{
-							for (XnUSBEventCallbackList::Iterator it = g_connectivityEvent.Begin(); it != g_connectivityEvent.End(); ++it)
-							{
-								XnUSBEventCallback* pCallback = *it;
-								XnUSBEventArgs args;
-								args.strDevicePath = NULL;
-								args.eventType = XN_USB_EVENT_DEVICE_DISCONNECT;
-								pCallback->pFunc(&args, pCallback->pCookie);
-							}
+							goto disconnect;
 						}
 
+						xnLogError(XN_MASK_USB, "Endpoint 0x%x, Buffer %d: Failed to re-submit asynch I/O transfer (err=%d)!", pTransfer->endpoint, pBufferInfo->nBufferID, rc);
 					}
 				}
 			}
 		}
 	}
 	
+	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+
+disconnect:
+	xnLogError(XN_MASK_USB, "Unexpected device disconnect, aborting the read thread!");
+
+	// close the thread, the device is gone...
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
 }
 
@@ -1365,6 +1701,8 @@ XN_C_API XnStatus XN_C_DECL xnUSBRegisterToConnectivityEvents(XnUInt16 nVendorID
 	XN_VALIDATE_NEW(pCallback, XnUSBEventCallback);
 	pCallback->pFunc = pFunc;
 	pCallback->pCookie = pCookie;
+	pCallback->nVendorID  = nVendorID;
+	pCallback->nProductID = nProductID;
 
 	nRetVal = g_connectivityEvent.AddLast(pCallback);
 	if (nRetVal != XN_STATUS_OK)

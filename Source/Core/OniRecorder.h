@@ -32,6 +32,7 @@
 #include "XnUncompressedCodec.h"
 
 #include "OniCommon.h"
+#include "OniFrameManager.h"
 #include "OniDataRecords.h"
 #include "OniStream.h"
 #include "OniCTypes.h"
@@ -51,7 +52,7 @@ public:
      * @note The newly constructed recorder becomes the owner of the handle.
      * @note The handle might be NULL.
      */
-    Recorder(xnl::ErrorLogger& errorLogger, OniRecorderHandle handle = NULL);
+    Recorder(FrameManager& frameManager, xnl::ErrorLogger& errorLogger, OniRecorderHandle handle = NULL);
 
     /**
      * Destroys the recorder and stops recording if needed.
@@ -171,6 +172,8 @@ private:
             XnUInt32    propertyId,
             const void* pData,
             XnSizeT     dataSize);
+
+	FrameManager& m_frameManager;
 
     // Error logger.
     xnl::ErrorLogger& m_errorLogger;
