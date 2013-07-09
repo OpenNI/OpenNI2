@@ -143,6 +143,10 @@ XN_C_API XnStatus xnOSQueryTimer(XnOSTimer Timer, XnUInt64* pnTimeSinceStart)
 	}
 	
 	*pnTimeSinceStart = ((now.tv_sec - Timer.tStartTime.tv_sec) * 1E6 + (now.tv_nsec - Timer.tStartTime.tv_nsec) / 1E3);
+	if (!Timer.bHighRes)
+	{
+		*pnTimeSinceStart /= 1000;
+	}
 	
 	return XN_STATUS_OK;
 }
