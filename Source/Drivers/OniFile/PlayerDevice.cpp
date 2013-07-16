@@ -31,6 +31,7 @@
 #include "Formats/XnCodec.h"
 #include "PlayerCodecFactory.h"
 #include "PS1080.h"
+#include "PSLink.h"
 
 namespace oni_file {
 
@@ -55,9 +56,9 @@ typedef struct
 	// Name of the property.
 	XnChar propertyName[40];
 
-} PS1080Property;
+} PropertyEntry;
 
-static PS1080Property PS1080PropertyList[] = 
+static PropertyEntry PS1080PropertyList[] = 
 {
 	{ XN_STREAM_PROPERTY_INPUT_FORMAT,				"InputFormat" },
 	{ XN_STREAM_PROPERTY_CROPPING_MODE,				"CroppingMode" },
@@ -90,11 +91,26 @@ static PS1080Property PS1080PropertyList[] =
 	*/
 };
 
+static PropertyEntry PSLinkPropertyList[] =
+{
+	{ LINK_PROP_MAX_SHIFT,						"MaxShift" },
+	{ LINK_PROP_ZERO_PLANE_DISTANCE,			"ZPD" },
+	{ LINK_PROP_CONST_SHIFT,					"ConstShift" },
+	{ LINK_PROP_PARAM_COEFF,					"ParamCoeff" },
+	{ LINK_PROP_SHIFT_SCALE,					"ShiftScale" },
+	{ LINK_PROP_ZERO_PLANE_PIXEL_SIZE,			"ZPPS" },
+	{ LINK_PROP_ZERO_PLANE_OUTPUT_PIXEL_SIZE,	"ZPOPS" },
+	{ LINK_PROP_EMITTER_DEPTH_CMOS_DISTANCE,	"LDDIS" },
+	{ LINK_PROP_SHIFT_TO_DEPTH_TABLE,			"S2D" },
+	{ LINK_PROP_DEPTH_TO_SHIFT_TABLE,			"D2S" },
+};
+
 PlayerDevice::PlayerDevice(const xnl::String& filePath) : 
 	m_filePath(filePath), m_fileHandle(0), m_threadHandle(NULL), m_running(FALSE), m_isSeeking(FALSE),
 	m_dPlaybackSpeed(1.0), m_nStartTimestamp(0), m_nStartTime(0), m_bHasTimeReference(FALSE), 
 	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL), m_bStreamsLocked(FALSE)
 {
+	xnOSMemSet(m_originalDevice, 0, sizeof(m_originalDevice));
 	// Create the events.
 	m_readyForDataInternalEvent.Create(FALSE);
 	m_manualTriggerInternalEvent.Create(FALSE);
@@ -258,7 +274,7 @@ driver::StreamBase* PlayerDevice::createStream(OniSensorType sensorType)
 	}
 
 	// Create a new stream using the source.
-	PlayerStream* pStream = XN_NEW(PlayerStream, pSource);
+	PlayerStream* pStream = XN_NEW(PlayerStream, this, pSource);
 	if (pStream == NULL)
 	{
 		return NULL;
@@ -957,6 +973,10 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeGeneralPropChanged(void* pCookie, 
 				}
 			}
 		}
+		else if (strcmp(strPropName, XN_PROP_ORIGINAL_DEVICE) == 0)
+		{
+			xnOSStrCopy(pThis->m_originalDevice, (char*)pBuffer, sizeof(pThis->m_originalDevice));
+		}
 		else
 		{
 			nRetVal = pThis->AddPrivateProperty(pSource, strPropName, nBufferSize, pBuffer);
@@ -1072,6 +1092,36 @@ void XN_CALLBACK_TYPE PlayerDevice::OnEndOfFileReached(void* pCookie)
 }
 
 XnStatus PlayerDevice::AddPrivateProperty(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer)
+{
+	if (xnOSStrCmp(m_originalDevice, "PSLink") == 0)
+	{
+		return AddPrivateProperty_PSLink(pSource, strPropName, nBufferSize, pBuffer);
+	}
+	return AddPrivateProperty_PS1080(pSource, strPropName, nBufferSize, pBuffer);
+}
+
+XnStatus PlayerDevice::AddPrivateProperty_PSLink(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	// Find the property name in the PSLink properties.
+	int numProperties = ARRAYSIZE(PSLinkPropertyList);
+	for (int i = 0; i < numProperties; ++i)
+	{
+		if (strcmp(strPropName, PSLinkPropertyList[i].propertyName) == 0)
+		{
+			OniStatus rc = pSource->SetProperty(PSLinkPropertyList[i].propertyId, pBuffer, nBufferSize);
+			if (rc != ONI_STATUS_OK)
+			{
+				nRetVal = XN_STATUS_ERROR;
+			}
+			break;
+		}
+	}
+
+	return nRetVal;
+}
+XnStatus PlayerDevice::AddPrivateProperty_PS1080(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 

@@ -84,6 +84,9 @@ public:
 		return ONI_STATUS_OK;
 	}
 
+	typedef xnl::Hash<int, OniGeneralBuffer*> PropertiesHash;
+	PropertiesHash::ConstIterator Begin() const {return m_properties.Begin();}
+	PropertiesHash::ConstIterator End() const {return m_properties.End();}
 private:
 
 	OniGeneralBuffer* CreateBuffer(const void* data, int dataSize)
@@ -113,7 +116,6 @@ private:
 		XN_DELETE(pBuffer);
 	}
 
-	typedef xnl::Hash<int, OniGeneralBuffer*> PropertiesHash;
 	PropertiesHash m_properties;
 };
 

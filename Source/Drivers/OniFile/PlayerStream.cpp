@@ -24,6 +24,8 @@
 
 #include "PlayerStream.h"
 #include "PlayerSource.h"
+#include "PlayerDevice.h"
+#include "FileProperties.h"
 #include "XnMemory.h"
 #include "OniProperties.h"
 #include "XnPlatform.h"
@@ -31,8 +33,8 @@
 
 namespace oni_file {
 
-PlayerStream::PlayerStream(PlayerSource* pSource) :
-	m_pSource(pSource), m_newDataHandle(NULL), m_isStarted(false), m_requiredFrameSize(0)
+PlayerStream::PlayerStream(PlayerDevice* pDevice, PlayerSource* pSource) :
+	m_pSource(pSource), m_newDataHandle(NULL), m_isStarted(false), m_requiredFrameSize(0), m_pDevice(pDevice)
 {
 }
 
@@ -254,6 +256,23 @@ void PlayerStream::Lock()
 void PlayerStream::Unlock()
 {
 	m_cs.Unlock();
+}
+
+void PlayerStream::notifyAllProperties()
+{
+	raisePropertyChanged(ONI_FILE_PROPERTY_ORIGINAL_DEVICE, m_pDevice->getOriginalDevice(), ONI_MAX_STR);
+
+	for (PlayerProperties::PropertiesHash::ConstIterator property = m_properties.Begin();
+		property != m_properties.End(); ++property)
+	{
+		raisePropertyChanged(property->Key(), property->Value()->data, property->Value()->dataSize);
+	}
+
+	for (PlayerProperties::PropertiesHash::ConstIterator property = m_pSource->Begin();
+		property != m_pSource->End(); ++property)
+	{
+		raisePropertyChanged(property->Key(), property->Value()->data, property->Value()->dataSize);
+	}
 }
 
 } // namespace oni_files_player

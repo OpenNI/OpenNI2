@@ -82,6 +82,7 @@ public:
 	};
 	void TriggerDriverEOFCallback() { if(m_driverEOFCallback) (m_driverEOFCallback)(m_driverCookie, m_filePath.Data()); };
 
+	const char* getOriginalDevice() {return m_originalDevice;}
 protected:
 
 	void Lock() { m_cs.Lock(); }
@@ -119,6 +120,8 @@ private:
 	static XnStatus XN_CALLBACK_TYPE OnNodeNewData(void* pCookie, const XnChar* strNodeName, XnUInt64 nTimeStamp, XnUInt32 nFrame, const void* pData, XnUInt32 nSize);
 	static void		XN_CALLBACK_TYPE OnEndOfFileReached(void* pCookie);
 	XnStatus AddPrivateProperty(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
+	XnStatus AddPrivateProperty_PS1080(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
+	XnStatus AddPrivateProperty_PSLink(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
 
 	static XnStatus XN_CALLBACK_TYPE FileOpen(void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE FileRead(void* pCookie, void* pBuffer, XnUInt32 nSize, XnUInt32* pnBytesRead);
@@ -191,6 +194,8 @@ private:
 
 	// Critical section.
 	xnl::CriticalSection m_cs;
+
+	char m_originalDevice[ONI_MAX_STR];
 };
 
 } // namespace oni_files_player

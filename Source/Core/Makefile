@@ -6,6 +6,7 @@ INC_DIRS = \
 	../../Include \
 	../../ThirdParty/PSCommon/XnLib/Include \
 	../Drivers/OniFile/Formats \
+	../Drivers/OniFile \
 	../../ThirdParty/LibJPEG
 
 SRC_FILES = \

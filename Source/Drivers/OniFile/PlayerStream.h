@@ -33,6 +33,7 @@
 namespace oni_file {
 
 class Decoder;
+class PlayerDevice;
 
 /// Implements a stream from a virtual OpenNI device.
 class PlayerStream : public oni::driver::StreamBase
@@ -59,7 +60,7 @@ public:
 
 public:
 	/// Constructor.
-    PlayerStream(PlayerSource* pSource);
+    PlayerStream(PlayerDevice* pDevice, PlayerSource* pSource);
 
 	/// Destructor.
 	virtual ~PlayerStream();
@@ -103,6 +104,7 @@ public:
 	void Lock();
 	void Unlock();
 
+	void notifyAllProperties();
 private:
 	void destroy();
 
@@ -137,6 +139,8 @@ private:
 	bool m_isStarted;
 
 	int m_requiredFrameSize;
+
+	PlayerDevice* m_pDevice;
 };
 
 } // namespace oni_files_player
