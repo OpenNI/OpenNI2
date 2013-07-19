@@ -1,11 +1,13 @@
 #include "BaseKinectStream.h"
 #include "KinectStreamImpl.h"
+
 #include <Shlobj.h>
 #include "XnHash.h"
 #include "XnEvent.h"
 #include "XnPlatform.h"
 #include "NuiApi.h"
 #include "PS1080.h"
+#include "KinectProperty.h"
 #include "XnMath.h"
 
 using namespace oni::driver;
@@ -60,6 +62,20 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 			status = GetCropping((OniCropping*)data);
 		}
 		break;
+
+	case ONI_STREAM_PROPERTY_MIRRORING:
+		if (*pDataSize != sizeof(OniBool))
+		{
+			printf("Unexpected size: %d != %d\n", *pDataSize, sizeof(OniBool));
+			status = ONI_STATUS_ERROR;
+		}
+		else
+		{
+			*(OniBool*)data = m_mirroring;
+			status = ONI_STATUS_OK;
+		}
+		break;
+
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
 		{
 			float* val = (float*)data;
@@ -98,6 +114,12 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 			
 			break;
 		}		
+
+	case KINECT_DEPTH_PROPERTY_NEAR_MODE:
+		{
+			return m_pStreamImpl->getNearMode( (OniBool*)data );
+		}
+
 	default:
 		status = ONI_STATUS_NOT_SUPPORTED;
 		break;
@@ -118,6 +140,16 @@ OniStatus BaseKinectStream::setProperty(int propertyId, const void* data, int da
 		}
 		status = SetCropping((OniCropping*)data);
 	}
+	else if (propertyId == ONI_STREAM_PROPERTY_MIRRORING)
+	{
+		if (dataSize != sizeof(OniBool))
+		{
+			printf("Unexpected size: %d != %d\n", dataSize, sizeof(OniBool));
+			status = ONI_STATUS_ERROR;
+		}
+		m_mirroring = *(OniBool*)data;
+		status = ONI_STATUS_OK;
+	}
 	else if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
 	{
 		if (dataSize != sizeof(OniVideoMode))
@@ -126,6 +158,10 @@ OniStatus BaseKinectStream::setProperty(int propertyId, const void* data, int da
 			 status = ONI_STATUS_ERROR;
 		}
 		status = SetVideoMode((OniVideoMode*)data);
+	}
+	else if( propertyId == KINECT_DEPTH_PROPERTY_NEAR_MODE )
+	{
+		return m_pStreamImpl->setNearMode( *((OniBool*)data) );
 	}
 	return status;
 }
@@ -136,6 +172,7 @@ OniBool BaseKinectStream::isPropertySupported(int propertyId)
 	switch (propertyId)
 	{
 	case ONI_STREAM_PROPERTY_CROPPING:
+	case ONI_STREAM_PROPERTY_MIRRORING:
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
 	case ONI_STREAM_PROPERTY_VERTICAL_FOV:
 	case ONI_STREAM_PROPERTY_VIDEO_MODE:

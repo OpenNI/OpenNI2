@@ -1,3 +1,4 @@
+#include "KinectProperty.h"
 #include "KinectDevice.h"
 #include "DepthKinectStream.h"
 #include "ColorKinectStream.h"
@@ -142,6 +143,14 @@ OniStatus KinectDevice::setProperty(int propertyId, const void* data, int dataSi
 				return ONI_STATUS_ERROR;
 			}
 		}
+
+	case KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION:
+		{
+			if( S_OK == m_pNuiSensor->NuiCameraElevationSetAngle( *(LONG*)data ) )
+				return ONI_STATUS_OK;
+			else
+				return ONI_STATUS_ERROR;
+		}
 	}
 
 	return ONI_STATUS_NOT_IMPLEMENTED;
@@ -161,6 +170,26 @@ OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 				return ONI_STATUS_ERROR;
 			}
 		}
+
+	case KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION:
+		{
+			LONG* pAngle = (LONG*)data;
+			if( S_OK == m_pNuiSensor->NuiCameraElevationGetAngle( pAngle ) )
+				return ONI_STATUS_OK;
+			else
+				return ONI_STATUS_ERROR;
+		}
+
+	case KINECT_DEVICE_PROPERTY_ACCELEROMETER:
+		{
+			Vector4* pRes = (Vector4*)data;
+			if( S_OK == m_pNuiSensor->NuiAccelerometerGetCurrentReading( pRes ) )
+			{
+				return ONI_STATUS_OK;
+			}
+			else
+				return ONI_STATUS_ERROR;
+		}
 	}
 
 	return ONI_STATUS_NOT_IMPLEMENTED;
@@ -168,12 +197,35 @@ OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 
 OniBool KinectDevice::isPropertySupported(int propertyId)
 {
-	return (propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION);
+	if( propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION ||
+		propertyId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION ||
+		propertyId == KINECT_DEVICE_PROPERTY_ACCELEROMETER )
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+OniStatus KinectDevice::invoke(int commandId, void* data, int dataSize)
+{
+	if( commandId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION )
+	{
+		if( S_OK == m_pNuiSensor->NuiCameraElevationSetAngle( *(LONG*)data ) )
+			return ONI_STATUS_OK;
+		else
+			return ONI_STATUS_ERROR;
+	}
+	return ONI_STATUS_NOT_IMPLEMENTED;
 }
 
 OniBool KinectDevice::isCommandSupported(int commandId)
 {
-	return ONI_STATUS_NOT_IMPLEMENTED;
+	if( commandId == KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION )
+	{
+		return true;
+	}
+	return false;
 }
 
 OniStatus KinectDevice::tryManualTrigger()
