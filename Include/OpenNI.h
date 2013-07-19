@@ -1707,7 +1707,7 @@ public:
 		return speed;
 	}
 	/**
-	* Setter function for the playback speed of the device.  For a full explaination of 
+	* Setter function for the playback speed of the device.  For a full explanation of 
 	* what this value means @see PlaybackControl::getSpeed().
 	*
 	* @param [in] speed Desired new value of playback speed, as ratio of original recording.

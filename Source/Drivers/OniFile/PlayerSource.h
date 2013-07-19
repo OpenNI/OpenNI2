@@ -86,6 +86,8 @@ public:
 	void SetRequiredFrameSize(int requiredFrameSize) { m_requiredFrameSize = requiredFrameSize; }
 	int GetRequiredFrameSize() const { return m_requiredFrameSize; }
 
+	PlayerProperties::PropertiesHash::ConstIterator Begin() {return m_properties.Begin();}
+	PlayerProperties::PropertiesHash::ConstIterator End() {return m_properties.End();}
 protected:
 	XN_DISABLE_COPY_AND_ASSIGN(PlayerSource);
 

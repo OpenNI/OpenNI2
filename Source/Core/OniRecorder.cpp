@@ -30,6 +30,8 @@
 #include "OniContext.h"
 #include "OniProperties.h"
 #include "PS1080.h"
+#include "PSLink.h"
+#include "FileProperties.h"
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
@@ -51,6 +53,7 @@ const struct PropertyTable {
     const char*  propertyName;
 	PropertyType propertyType;
 } propertyTable[] = {
+	// PS1080 Properties
     { XN_STREAM_PROPERTY_INPUT_FORMAT,				"InputFormat"         , PROPERTY_TYPE_INTEGER  },
     { XN_STREAM_PROPERTY_CROPPING_MODE,				"CroppingMode"        , PROPERTY_TYPE_INTEGER  },
     { XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED,		"WhiteBalancedEnabled", PROPERTY_TYPE_INTEGER  },
@@ -71,6 +74,18 @@ const struct PropertyTable {
     { XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE,		"DCRCDIS"             , PROPERTY_TYPE_REAL     },
     { XN_STREAM_PROPERTY_CLOSE_RANGE,				"CloseRange"          , PROPERTY_TYPE_INTEGER  },
     { XN_STREAM_PROPERTY_PIXEL_REGISTRATION,		"PixelRegistration"   , PROPERTY_TYPE_GENERAL  },
+	// PSLink Properties
+	{ LINK_PROP_MAX_SHIFT,						"MaxShift",		PROPERTY_TYPE_INTEGER},
+	{ LINK_PROP_ZERO_PLANE_DISTANCE,			"ZPD",			PROPERTY_TYPE_INTEGER},
+	{ LINK_PROP_CONST_SHIFT,					"ConstShift",	PROPERTY_TYPE_INTEGER},
+	{ LINK_PROP_PARAM_COEFF,					"ParamCoeff",	PROPERTY_TYPE_INTEGER},
+	{ LINK_PROP_SHIFT_SCALE,					"ShiftScale",	PROPERTY_TYPE_INTEGER},
+	{ LINK_PROP_ZERO_PLANE_PIXEL_SIZE,			"ZPPS",			PROPERTY_TYPE_REAL},
+	{ LINK_PROP_EMITTER_DEPTH_CMOS_DISTANCE,	"LDDIS", 		PROPERTY_TYPE_REAL},
+	{ LINK_PROP_SHIFT_TO_DEPTH_TABLE,			"S2D",			PROPERTY_TYPE_GENERAL},
+	{ LINK_PROP_DEPTH_TO_SHIFT_TABLE,			"D2S",			PROPERTY_TYPE_GENERAL},
+	// File Properties
+	{ ONI_FILE_PROPERTY_ORIGINAL_DEVICE,		"oniOriginalDevice", PROPERTY_TYPE_GENERAL}
 };
 
 const XnSizeT propertyTableItemsCount = sizeof(propertyTable) / sizeof(propertyTable[0]);
@@ -715,6 +730,15 @@ void Recorder::onAttach(XnUInt32 nodeId, VideoStream* pStream)
             /* seekTablePosition = */ XN_UINT64_C(0)
         ))
     undoPoint.Reuse();
+
+	EMIT(RECORD_GENERAL_PROPERTY(
+		nodeId,
+		getLastPropertyRecordPos(nodeId, "oniOriginalDevice", undoPoint.GetPosition()),
+		"oniOriginalDevice",
+		pStream->getDevice().getInfo()->name,
+		sizeof(pStream->getDevice().getInfo()->name)
+		));
+	undoPoint.Reuse();
 
 	// required data size (for cases where data is larger than video mode)
 	EMIT(RECORD_INT_PROPERTY(

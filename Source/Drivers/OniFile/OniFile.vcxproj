@@ -248,6 +248,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DataRecords.h" />
+    <ClInclude Include="FileProperties.h" />
     <ClInclude Include="PlayerDriver.h" />
     <ClInclude Include="Formats\Xn16zCodec.h" />
     <ClInclude Include="Formats\Xn16zEmbTablesCodec.h" />
