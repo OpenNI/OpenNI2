@@ -1,8 +1,9 @@
 package org.openni;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The {@link VideoStream} object encapsulates a single video stream from a device. Once created, it
@@ -111,7 +112,9 @@ public class VideoStream {
    */
   public static VideoStream create(Device device, SensorType sensorType) {
     VideoStream videoStream = new VideoStream(sensorType);
-    if (mFrameListeners == null) mFrameListeners = new HashMap<VideoStream, NewFrameListener>();
+    if (mHandleToFrameListenerRecord == null) {
+      mHandleToFrameListenerRecord = new HashMap<Long,FrameListenerRecord>();
+    }
     NativeMethods.checkReturnStatus(NativeMethods.oniDeviceCreateStream(device.getHandle(),
         sensorType.toNative(), videoStream));
     return videoStream;
@@ -178,8 +181,16 @@ public class VideoStream {
    * @param streamListener Object which implements {@link VideoStream.NewFrameListener} that will
    *        respond to this event.
    */
-  public void addNewFrameListener(NewFrameListener streamListener) {
-    mFrameListeners.put(this, streamListener);
+  public void addNewFrameListener(NewFrameListener frameListener) {
+    Long h = new Long(getHandle());
+    synchronized(mHandleToFrameListenerRecord) {
+      FrameListenerRecord frameListenerRecord = mHandleToFrameListenerRecord.get(h);
+      if (frameListenerRecord == null) {
+        frameListenerRecord = new FrameListenerRecord(this);
+        mHandleToFrameListenerRecord.put(h, frameListenerRecord);
+      }
+      frameListenerRecord.frameListeners.add(frameListener);
+    }
   }
 
   /**
@@ -188,14 +199,12 @@ public class VideoStream {
    *
    * @param streamListener Object of the listener to be removed.
    */
-  public void removeNewFrameListener(NewFrameListener streamListener) {
-    for (Map.Entry<VideoStream, NewFrameListener> pairs : mFrameListeners.entrySet()) {
-      VideoStream videoStream = pairs.getKey();
-      if (videoStream.getHandle() == mStreamHandle) {
-        if (streamListener.equals(pairs.getValue())) {
-          mFrameListeners.remove(pairs.getKey());
-          return;
-        }
+  public void removeNewFrameListener(NewFrameListener frameListener) {
+    Long h = new Long(getHandle());
+    synchronized(mHandleToFrameListenerRecord) {
+      FrameListenerRecord frameListenerRecord = mHandleToFrameListenerRecord.get(h);
+      if (frameListenerRecord != null) {
+        frameListenerRecord.frameListeners.remove(frameListener);
       }
     }
   }
@@ -381,17 +390,29 @@ public class VideoStream {
   }
 
   private static void onFrameReady(long streamHandle) {
-    for (Map.Entry<VideoStream, NewFrameListener> pairs : mFrameListeners.entrySet()) {
-      VideoStream videoStream = pairs.getKey();
-      if (videoStream.getHandle() == streamHandle) {
-        pairs.getValue().onFrameReady(videoStream);
+    Long h = new Long(streamHandle);
+    synchronized(mHandleToFrameListenerRecord) {
+      FrameListenerRecord frameListenerRecord = mHandleToFrameListenerRecord.get(h);
+      if (frameListenerRecord != null) {
+        for (NewFrameListener frameListener : frameListenerRecord.frameListeners) {
+          frameListener.onFrameReady(frameListenerRecord.videoStream);
+        }
       }
     }
+  }
 
+  private final class FrameListenerRecord {
+    public final VideoStream videoStream;
+    public final Set<NewFrameListener> frameListeners;
+
+    public FrameListenerRecord(VideoStream videoStream) {
+      this.videoStream = videoStream;
+      this.frameListeners = new LinkedHashSet<NewFrameListener>();
+    }
   }
 
   private final SensorType mSensorType;
-  private static HashMap<VideoStream, NewFrameListener> mFrameListeners;
+  private static Map<Long,FrameListenerRecord> mHandleToFrameListenerRecord;
   private long mStreamHandle;
   private long mCallbackHandle;
 }
