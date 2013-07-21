@@ -10,20 +10,20 @@ import java.util.Iterator;
  * central class used to obtain data in OpenNI. It provides the ability to manually read data in a
  * polling loop, as well as providing events and a Listener class that can be used to implement
  * event-driven data acquisition.
- * 
+ *
  * Aside from the video data frames themselves, the class offers a number of functions used for
  * obtaining information about a {@link VideoStream}. Field of view, available video modes, and
  * minimum and maximum valid pixel values can all be obtained.
- * 
+ *
  * In addition to obtaining data, the {@link VideoStream} object is used to set all configuration
  * properties that apply to a specific stream (rather than to an entire device). In particular, it
  * is used to control cropping, mirroring, and video modes.
- * 
+ *
  * A valid, initialized device that provides the desired stream type is required to create a stream.
- * 
+ *
  * Several video streams can be created to stream data from the same sensor. This is useful if
  * several components of an application need to read frames separately.
- * 
+ *
  * While some device might allow different streams from the same sensor to have different
  * configurations, most devices will have a single configuration for the sensor, shared by all
  * streams.
@@ -36,7 +36,7 @@ public class VideoStream {
   public class CameraSettings {
     /**
      * Set Auto Exposure Enabled for corresponding sensor
-     * 
+     *
      * @param enabled boolean value for set and unset auto exposure mode
      */
     public void setAutoExposureEnabled(boolean enabled) {
@@ -46,7 +46,7 @@ public class VideoStream {
 
     /**
      * Set Auto White Balance for corresponding sensor
-     * 
+     *
      * @param enabled boolean value for set and unset auto white balance mode
      */
     public void setAutoWhiteBalanceEnabled(boolean enabled) {
@@ -56,7 +56,7 @@ public class VideoStream {
 
     /**
      * Set Auto Exposure Enabled for corresponding sensor
-     * 
+     *
      * @return enabled boolean value which define auto exposure mode state
      */
     public boolean getAutoExposureEnabled() {
@@ -68,7 +68,7 @@ public class VideoStream {
 
     /**
      * Set Auto White Balance Enabled for corresponding sensor
-     * 
+     *
      * @return enabled boolean value which define auto white balance mode state
      */
     public boolean getAutoWhiteBalanceEnabled() {
@@ -105,7 +105,7 @@ public class VideoStream {
    * reference to a Device that supplies the sensor type requested. You can use
    * {@link org.openni.Device#hasSensor(SensorType)} to check whether a given sensor is available on
    * your target device before calling create().
-   * 
+   *
    * @param device A reference to the {@link Device} you want to create the stream on.
    * @param sensorType The type of sensor the stream should produce data from.
    */
@@ -130,10 +130,10 @@ public class VideoStream {
   /**
    * Provides the {@link SensorInfo} object associated with the sensor that is producing this
    * {@link VideoStream}.
-   * 
+   *
    * {@link SensorInfo} is useful primarily as a means of learning which video modes are valid for
    * this VideoStream.
-   * 
+   *
    * @return SensorInfo object associated with the sensor providing this stream.
    */
   public final SensorInfo getSensorInfo() {
@@ -161,7 +161,7 @@ public class VideoStream {
    * {@link VideoStream.NewFrameListener} to implement an event driven architecture. Another
    * alternative is to use {@link org.openni.OpenNI#waitForAnyStream(java.util.List, int)} to wait
    * for new frames from several streams
-   * 
+   *
    * @return VideoFrameRef object which hold the data of the new frame.
    */
   public VideoFrameRef readFrame() {
@@ -174,7 +174,7 @@ public class VideoStream {
    * Adds a new Listener to receive this VideoStream onNewFrame event. See
    * {@link VideoStream.NewFrameListener} for more information on implementing an event driven
    * frame reading architecture.
-   * 
+   *
    * @param streamListener Object which implements {@link VideoStream.NewFrameListener} that will
    *        respond to this event.
    */
@@ -185,7 +185,7 @@ public class VideoStream {
   /**
    * Removes a Listener from this video stream list. The listener removed will no longer receive new
    * frame events from this stream.
-   * 
+   *
    * @param streamListener Object of the listener to be removed.
    */
   public void removeNewFrameListener(NewFrameListener streamListener) {
@@ -202,7 +202,7 @@ public class VideoStream {
 
   /**
    * This function return stream handle.
-   * 
+   *
    * @return OpenNI stream handle.
    */
   public long getHandle() {
@@ -211,7 +211,7 @@ public class VideoStream {
 
   /**
    * Gets an object through which several camera settings can be configured.
-   * 
+   *
    * @return null if the stream doesn't support camera settings.
    */
   public CameraSettings getCameraSettings() {
@@ -227,7 +227,7 @@ public class VideoStream {
   /**
    * Get the current video mode information for this video stream. This includes its resolution, fps
    * and stream format.
-   * 
+   *
    * @return Current video mode information for this video stream.
    */
   public final VideoMode getVideoMode() {
@@ -242,7 +242,7 @@ public class VideoStream {
    * {@link org.openni.SensorInfo#getSupportedVideoModes()} to obtain a list of valid video mode
    * settings for this stream. Then, pass a valid {@link VideoMode} to setVideoMode(VideoMode) to
    * ensure correct operation.
-   * 
+   *
    * @param videoMode Desired new video mode for this stream. returns Status code indicating success
    *        or failure of this operation.
    */
@@ -255,7 +255,7 @@ public class VideoStream {
   /**
    * Provides the maximum possible value for pixels obtained by this stream. This is most useful for
    * getting the maximum possible value of depth streams.
-   * 
+   *
    * @return Maximum possible pixel value.
    */
   public int getMaxPixelValue() {
@@ -268,7 +268,7 @@ public class VideoStream {
   /**
    * Provides the smallest possible value for pixels obtains by this VideoStream. This is most
    * useful for getting the minimum possible value that will be reported by a depth stream.
-   * 
+   *
    * @return Minimum possible pixel value that can come from this stream.
    */
   public int getMinPixelValue() {
@@ -280,7 +280,7 @@ public class VideoStream {
 
   /**
    * Checks whether this stream supports cropping.
-   * 
+   *
    * @return true if the stream supports cropping, false if it does not.
    */
   public boolean isCroppingSupported() {
@@ -290,7 +290,7 @@ public class VideoStream {
 
   /**
    * Obtains the current cropping settings for this stream.
-   * 
+   *
    * @return CropArea CropArea object which encapsulated cropping info.
    */
   public CropArea getCropping() {
@@ -306,7 +306,7 @@ public class VideoStream {
   /**
    * Changes the cropping settings for this stream. You can use the {@link #isCroppingSupported()}
    * function to make sure cropping is supported before calling this function.
-   * 
+   *
    * @param cropping CropArea object which set corresponding cropping information.
    */
   public void setCropping(CropArea cropping) {
@@ -323,7 +323,7 @@ public class VideoStream {
 
   /**
    * Check whether mirroring is currently turned on for this stream.
-   * 
+   *
    * @return true if mirroring is currently enabled, false otherwise.
    */
   public boolean getMirroringEnabled() {
@@ -335,7 +335,7 @@ public class VideoStream {
 
   /**
    * Enable or disable mirroring for this stream.
-   * 
+   *
    * @param isEnabled true to enable mirroring, false to disable it.
    */
   public void setMirroringEnabled(boolean isEnabled) {
@@ -345,7 +345,7 @@ public class VideoStream {
 
   /**
    * Gets the horizontal field of view of frames received from this stream.
-   * 
+   *
    * @return Horizontal field of view, in radians.
    */
   public float getHorizontalFieldOfView() {
@@ -357,7 +357,7 @@ public class VideoStream {
 
   /**
    * Gets the vertical field of view of frames received from this stream.
-   * 
+   *
    * @return Vertical field of view, in radians.
    */
   public float getVerticalFieldOfView() {
@@ -369,7 +369,7 @@ public class VideoStream {
 
   /**
    * Gets the sensor type for this stream.
-   * 
+   *
    * @return sensor type.
    */
   public SensorType getSensorType() {
