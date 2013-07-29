@@ -77,14 +77,19 @@ void PlayerStream::destroy()
 
 OniStatus PlayerStream::start()
 {
+	m_cs.Lock();
 	m_isStarted = true;
 	m_requiredFrameSize = getRequiredFrameSize();
+	m_cs.Unlock();
+
 	return ONI_STATUS_OK;
 }
 
 void PlayerStream::stop()
 {
+	m_cs.Lock();
 	m_isStarted = false;
+	m_cs.Unlock();
 }
 
 PlayerSource* PlayerStream::GetSource()
@@ -144,6 +149,7 @@ void PlayerStream::UnregisterDestroyEvent(OniCallbackHandle handle)
 void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDataEventArgs& newDataEventArgs, void* pCookie)
 {
 	PlayerStream* pStream = (PlayerStream*)pCookie;
+	xnl::AutoCSLocker lock(pStream->m_cs);
 
 	// Don't process new frames until the stream is started.
 	if(!pStream->m_isStarted)
@@ -181,8 +187,6 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 		XN_ASSERT(FALSE);
 		return;
 	}
-
-	pStream->m_cs.Lock();
 
 	// Allocate new frame and fill it.
 	OniFrame* pFrame = pStream->getServices().acquireFrame();
@@ -228,8 +232,6 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 		pFrame->dataSize = pStream->m_requiredFrameSize;
 	}
 	memcpy(pFrame->data, newDataEventArgs.pData, pFrame->dataSize);
-
-	pStream->m_cs.Unlock();
 
 	// Process the new frame.
 	pStream->raiseNewFrame(pFrame);
