@@ -317,6 +317,10 @@ $(OUTPUT_FILE): copy-redist
         # Include
         shutil.copytree(os.path.join(rootDir, 'Include'), os.path.join(self.outDir, 'Include'))
         
+        # Release notes and change log
+        shutil.copy(os.path.join(rootDir, 'ReleaseNotes.txt'), self.outDir)
+        shutil.copy(os.path.join(rootDir, 'CHANGES.txt'), self.outDir)
+        
         # Licenses
         shutil.copy(os.path.join(rootDir, 'NOTICE'), self.outDir)
         shutil.copy(os.path.join(rootDir, 'LICENSE'), self.outDir)
