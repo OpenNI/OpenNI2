@@ -1,16 +1,20 @@
 Change Log:
 -----------
 
-OpenNI 2.3.0:
+OpenNI 2.3:
   - Fix pure-C APIs
   - OPENNITWO-493: Single pixel translation is wrong when image res is 1280x1024
   - Bug Fix: no even frame indexes from Capri devices.
   - Properties are now saved in recordings of Capri devices and input files
   - Link console: allow running a single command and exit
+  - Capri:
+    - Bug Fix: Depth stops working if switching to QQVGA and then back to VGA
+    - i2c device list now also states the master and slave IDs
+    - add commands for turning on/off ACC
   - Build:
     - Support gold linker in compilation
 
-OpenNI 2.2.0:
+OpenNI 2.2:
   - Added getDepthColorSyncEnabled() API
   - Added log settings API
   - Add a typedef: OniGrayscale8Pixel
@@ -59,7 +63,7 @@ OpenNI 2.2.0:
     - Support WIX 3.6 and up
     - ReleaseVersion script won't fail if output file exists (overwrite it)
 
-OpenNI 2.1.0:
+OpenNI 2.1:
   - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.
   - Support for Mac OSX
   - Support for Linux on Arm
@@ -89,7 +93,7 @@ OpenNI 2.1.0:
   - Bug Fix: ReleaseVersion script did not work on 32-bit machines
   - Linux Bug Fix: log timestamps did not start from 0.
   
-OpenNI 2.0.0:
+OpenNI 2:
   - Brand new API (see documentation)
   - Algorithms API were removed, and are now part of middleware libraries (such as NiTE)
   - New deployment model - private copy to each application (see documentation)

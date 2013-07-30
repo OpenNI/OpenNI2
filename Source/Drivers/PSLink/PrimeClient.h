@@ -54,6 +54,8 @@ public:
 	virtual XnStatus SoftReset();
 	virtual XnStatus HardReset();
     virtual XnStatus SetEmitterActive(XnBool bActive);
+    virtual XnStatus SetAccActive(XnBool bActive);
+    virtual XnStatus GetAccActive(XnBool& bActive);    
     virtual XnStatus StartFWLog();
     virtual XnStatus StopFWLog();
 	virtual XnStatus OpenFWLogFile(XnUInt8 logID);
@@ -89,6 +91,12 @@ public:
 	virtual XnStatus GetFileList(xnl::Array<XnFwFileEntry>& files);
 	virtual XnStatus DownloadFile(XnUInt16 zone, const XnChar* strFirmwareFileName, const XnChar* strTargetFile);
 	
+	virtual XnStatus EnableProjectorPulse(XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip);
+	virtual XnStatus DisableProjectorPulse();
+	virtual XnStatus GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip);
+	virtual XnStatus SetProjectorPower(XnUInt16 power);
+	virtual XnStatus GetProjectorPower(XnUInt16& power);
+
 	virtual void HandleLinkDataEndpointDisconnection(XnUInt16 nEndpointID);
 
 protected:

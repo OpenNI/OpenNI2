@@ -1595,6 +1595,36 @@ XnStatus LinkControlEndpoint::SetEmitterActive(XnBool bActive)
 	return (XN_STATUS_OK);
 }
 
+// Enables/Disables the BIST
+XnStatus LinkControlEndpoint::SetAccActive(XnBool bActive)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	
+	xnLogVerbose(XN_MASK_LINK, "LINK: Turning Acc %s...", bActive ? "on" : "off");
+
+    nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_ACC_ENABLED, XnUInt64(bActive));
+	XN_IS_STATUS_OK(nRetVal);
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Acc was turned %s", bActive ? "on" : "off");
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus LinkControlEndpoint::GetAccActive(XnBool& bActive)
+{
+    XnUInt64 nValue;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Getting Acc ...");
+
+    XnStatus nRetVal = GetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_ACC_ENABLED, nValue);
+    XN_IS_STATUS_OK(nRetVal);
+
+    bActive = (nValue == TRUE);
+
+    xnLogInfo(XN_MASK_LINK, "LINK: Acc is %s", bActive ?  "on" : "off");
+
+    return nRetVal;
+}
 XnStatus LinkControlEndpoint::GetStreamFragLevel(XnUInt16 nStreamID, XnStreamFragLevel& streamFragLevel)
 {
     XnStatus nRetVal = XN_STATUS_OK;
@@ -1737,6 +1767,114 @@ XnStatus LinkControlEndpoint::CloseFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamI
 	xnLogInfo(XN_MASK_LINK, "LINK: FW log file %u disabled", logID);
 
 	return XN_STATUS_OK;
+}
+
+XnStatus LinkControlEndpoint::SetProjectorPulse(XnBool enabled, XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Setting projector pulse...");
+
+	XnLinkProjectorPulse pulse;
+	pulse.m_bEnabled = enabled ? 1 : 0;
+	pulse.m_nDelay = XN_PREPARE_VAR16_IN_BUFFER(delay);
+	pulse.m_nWidth = XN_PREPARE_VAR16_IN_BUFFER(width);
+	pulse.m_nFramesToSkip = XN_PREPARE_VAR16_IN_BUFFER(framesToskip);
+
+	nRetVal = SetGeneralProperty(XN_LINK_PROP_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_PULSE, sizeof(pulse), &pulse);
+	XN_IS_STATUS_OK(nRetVal);
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Projector pulse set");
+
+	return XN_STATUS_OK;
+}
+
+XnStatus LinkControlEndpoint::GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Getting projector pulse...");
+
+	XnLinkProjectorPulse pulse;
+	XnUInt32 nPropSize = sizeof(pulse);
+	nRetVal = GetGeneralProperty(XN_LINK_PROP_ID_NONE, XN_LINK_PROP_ID_FW_VERSION, nPropSize, &pulse);
+	XN_IS_STATUS_OK_LOG_ERROR("Execute get version command", nRetVal);
+
+	if (nPropSize != sizeof(pulse))
+	{
+		xnLogError(XN_MASK_LINK, "LINK: Got bad size of projector pulse property: %u instead of %u", nPropSize, sizeof(pulse));
+		XN_ASSERT(FALSE);
+		return XN_STATUS_LINK_BAD_RESPONSE_SIZE;
+	}
+
+	enabled = (pulse.m_bEnabled != 0);
+	delay = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nDelay);
+	width = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nWidth);
+	framesToskip = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nFramesToSkip);
+
+	return XN_STATUS_OK;
+}
+
+XnStatus LinkControlEndpoint::SetProjectorPower(XnUInt16 power)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Setting emitter power to %u...", power);
+
+	nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_POWER, XnUInt64(power));
+	XN_IS_STATUS_OK(nRetVal);
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Emitter power was set to %u", power);
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus LinkControlEndpoint::GetProjectorPower(XnUInt16& power)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Getting projector power...");
+
+	XnUInt64 power64 = 0;
+	nRetVal = GetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_POWER, power64);
+	XN_IS_STATUS_OK(nRetVal);
+
+	power = (XnUInt16)power64;
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Projector power is %u", power);
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus LinkControlEndpoint::SetGain(XnUInt16 streamID, XnUInt16 gain)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Setting stream %u gain to %u...", streamID, gain);
+
+	nRetVal = SetIntProperty(streamID, XN_LINK_PROP_ID_GAIN, XnUInt64(gain));
+	XN_IS_STATUS_OK(nRetVal);
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Stream %u gain was set to %u", streamID, gain);
+
+	return (XN_STATUS_OK);
+}
+
+XnStatus LinkControlEndpoint::GetGain(XnUInt16 streamID, XnUInt16& gain)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	xnLogVerbose(XN_MASK_LINK, "LINK: Getting stream %u gain...", streamID);
+
+	XnUInt64 gain64 = 0;
+	nRetVal = GetIntProperty(streamID, XN_LINK_PROP_ID_GAIN, gain64);
+	XN_IS_STATUS_OK(nRetVal);
+
+	gain = (XnUInt16)gain64;
+
+	xnLogInfo(XN_MASK_LINK, "LINK: Stream %u gain is %u", streamID, gain);
+
+	return (XN_STATUS_OK);
 }
 
 }

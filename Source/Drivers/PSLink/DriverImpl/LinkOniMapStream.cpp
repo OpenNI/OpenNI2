@@ -134,6 +134,16 @@ OniStatus LinkOniMapStream::getProperty(int propertyId, void* data, int* pDataSi
 			ASSIGN_PROP_VALUE_INT(data, *pDataSize, m_pInputStream->GetVideoMode().m_nCompression);
 			break;
 
+		case PS_PROPERTY_GAIN:
+			{
+				ENSURE_PROP_SIZE(*pDataSize, XnUInt16);
+				XnUInt16 gain;
+				nRetVal = m_pInputStream->GetGain(gain);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+				ASSIGN_PROP_VALUE_INT(data, *pDataSize, gain);
+			}
+			break;
+
 		default:
 		{
 			return LinkOniStream::getProperty(propertyId, data, pDataSize);
@@ -183,6 +193,14 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 				XnFwStreamVideoMode mode = m_pInputStream->GetVideoMode();
 				mode.m_nCompression = *(XnFwCompressionType*)data;
 				nRetVal = m_pInputStream->SetVideoMode(mode);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+				break;
+			}
+
+		case PS_PROPERTY_GAIN:
+			{
+				ENSURE_PROP_SIZE(dataSize, XnUInt16);
+				nRetVal = m_pInputStream->SetGain(*(XnUInt16*)data);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
 			}
@@ -242,10 +260,12 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	OniVideoMode current;
-	GetVideoMode(&current);
+	XnFwStreamVideoMode currFwMode = m_pInputStream->GetVideoMode();
 
-	if (!xnOSMemCmp(&current, pVideoMode, sizeof(OniVideoMode)))
+	if ((int)currFwMode.m_nXRes == pVideoMode->resolutionX &&
+		(int)currFwMode.m_nYRes == pVideoMode->resolutionY &&
+		(int)currFwMode.m_nFPS == pVideoMode->fps &&
+		m_pInputStream->GetOutputFormat() == pVideoMode->pixelFormat)
 	{
 		// nothing to do here
 		return (ONI_STATUS_OK);
@@ -260,8 +280,17 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 			pVideoMode->resolutionY == (int)supportedModes[i].m_nYRes &&
 			pVideoMode->fps         == (int)supportedModes[i].m_nFPS)
 		{
-			selectedIndex = i;
-			break;
+			// prefer the one that also keeps on other parameters. If no such mode exists, switch to the first one on the list
+			if (supportedModes[i].m_nPixelFormat == currFwMode.m_nPixelFormat &&
+				supportedModes[i].m_nCompression == currFwMode.m_nCompression)
+			{
+				selectedIndex = i;
+				break;
+			}
+			else if (selectedIndex == -1)
+			{
+				selectedIndex = i;
+			}		
 		}
 	}
 

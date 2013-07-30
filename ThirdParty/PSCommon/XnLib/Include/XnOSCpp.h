@@ -63,6 +63,38 @@ private:
 	XN_CRITICAL_SECTION_HANDLE m_cs;
 };
 
+class Mutex
+{
+public:
+	Mutex()
+	{
+		xnOSCreateMutex(&m_mutex);
+	}
+	Mutex(const char* name)
+	{
+		xnOSCreateNamedMutex(&m_mutex, name);
+	}
+	~Mutex()
+	{
+		Unlock();
+		xnOSCloseMutex(&m_mutex);
+	}
+	XnStatus Lock(XnUInt32 milliseconds = XN_WAIT_INFINITE)
+	{
+		return xnOSLockMutex(m_mutex, milliseconds);
+	}
+	void Unlock()
+	{
+		xnOSUnLockMutex(m_mutex);
+	}
+private:
+	Mutex(const Mutex& other);
+	Mutex& operator=(const Mutex& other);
+
+	friend class AutoMutexLocker;
+	XN_MUTEX_HANDLE m_mutex;
+};
+
 template<bool TThreadSafe>
 class VirtualLock {};
 
@@ -77,9 +109,12 @@ class AutoMutexLocker
 public:
 	inline AutoMutexLocker(XN_MUTEX_HANDLE hMutex, XnUInt32 nMilliseconds) : m_hMutex(hMutex)
 	{
-		m_nStatus = xnOSLockMutex(m_hMutex, nMilliseconds);
+		Lock(nMilliseconds);
 	}
-
+	AutoMutexLocker(const Mutex& mutex, XnUInt32 nMilliseconds) : m_hMutex(mutex.m_mutex)
+	{
+		Lock(nMilliseconds);
+	}
 	XnStatus GetStatus() const
 	{
 		return m_nStatus;
@@ -87,14 +122,21 @@ public:
 
 	inline ~AutoMutexLocker()
 	{
+		Unlock();
+	}
+private:
+	void Lock(XnUInt32 milliseconds)
+	{
+		m_nStatus = xnOSLockMutex(m_hMutex, milliseconds);
+	}
+	void Unlock()
+	{
 		if (m_nStatus == XN_STATUS_OK)
 		{
 			//Only unlock if we managed to lock in the first place
 			xnOSUnLockMutex(m_hMutex);
 		}
 	}
-
-private:
 	XN_MUTEX_HANDLE m_hMutex;
 	XnStatus m_nStatus;
 };

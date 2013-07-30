@@ -83,11 +83,18 @@ public:
 	XnStatus SetCropping(XnUInt16 nStreamID, const OniCropping& cropping);
 	XnStatus GetCropping(XnUInt16 nStreamID, OniCropping& cropping);
     XnStatus SetEmitterActive(XnBool bActive);
+    XnStatus SetAccActive(XnBool bActive);
+    XnStatus GetAccActive(XnBool& bActive);
 	XnStatus GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& supportedFiles);
 	XnStatus OpenFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamID);
 	XnStatus CloseFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamID);
-
-    //TODO: Implement Get emitter active
+	XnStatus SetProjectorPulse(XnBool enabled, XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip);
+	XnStatus GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip);
+	XnStatus SetProjectorPower(XnUInt16 power);
+	XnStatus GetProjectorPower(XnUInt16& power);
+	XnStatus SetGain(XnUInt16 streamID, XnUInt16 gain);
+	XnStatus GetGain(XnUInt16 streamID, XnUInt16& gain);
+	//TODO: Implement Get emitter active
 
     XnStatus GetStreamFragLevel(XnUInt16 nStreamID, XnStreamFragLevel& streamFragLevel);
 	XnStatus GetMirror(XnUInt16 nStreamID, XnBool& bMirror);

@@ -332,6 +332,7 @@ typedef enum XnLinkPropID
 	XN_LINK_PROP_ID_SUPPORTED_BIST_TESTS		= 0x0201, //General property, holds XnLinkSupportedBistTests
 	XN_LINK_PROP_ID_SUPPORTED_I2C_DEVICES       = 0x0202, //General property, holds XnLinkSupportedI2CDevices
 	XN_LINK_PROP_ID_SUPPORTED_LOG_FILES         = 0x0203, //General property, holds XnLinkSupportedLogFiles
+	XN_LINK_PROP_ID_ACC_ENABLED                 = 0x0204, //Int property, 0 = ACC & Periodic Thermistor disabled, 1 = enabled
 
 	//Map generator properties - group 0x05
 	XN_LINK_PROP_ID_SUPPORTED_VIDEO_MODES		= 0x0501, //General property, holds XnLinkSupportedVideoModes

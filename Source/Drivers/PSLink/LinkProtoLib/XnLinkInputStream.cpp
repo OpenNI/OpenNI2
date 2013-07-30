@@ -170,4 +170,14 @@ XnStatus LinkInputStream::SetOutputFormat(OniPixelFormat format)
 	return XN_STATUS_OK;
 }
 
+XnStatus LinkInputStream::SetGain(XnUInt16 gain)
+{
+	return m_pLinkControlEndpoint->SetGain(m_nStreamID, gain);
+}
+
+XnStatus LinkInputStream::GetGain(XnUInt16& gain)
+{
+	return m_pLinkControlEndpoint->GetGain(m_nStreamID, gain);
+}
+
 }

@@ -1071,6 +1071,45 @@ int Emitter(int argc, const char* argv[])
 	return nRetVal;
 }
 
+// Enables/Disables the BIST (XN_LINK_PROP_ID_ACC_ENABLED)
+int Acc(int argc, const char* argv[])
+{
+    XnBool bAccEnabled;
+    Status nRetVal;
+    if(argc == 1)
+    {
+        nRetVal = g_device.getProperty(PS_PROPERTY_ACC_ENABLED, &bAccEnabled);
+        if (nRetVal == STATUS_OK)
+        {
+            printf("Acc is %s.\n\n", (bAccEnabled ? "on" : "off"));
+        }
+        else
+        {
+            printf("Failed to get Acc: %s\n\n", OpenNI::getExtendedError());
+        }
+
+        return nRetVal;
+    }
+
+    if((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0))
+    {
+        printf("Usage: %s <on|off>\n\n", argv[0]);
+        return -1;
+    }
+	const XnChar* strAccActive = argv[1];
+	bAccEnabled = (xnOSStrCaseCmp(strAccActive, "on") == 0);
+	nRetVal = g_device.setProperty(PS_PROPERTY_ACC_ENABLED, bAccEnabled);
+	if (nRetVal == STATUS_OK)
+	{
+		printf("Acc is now %s.\n\n", strAccActive);
+	}
+	else
+	{
+		printf("Failed to set Acc %s: %s\n\n", strAccActive, OpenNI::getExtendedError());
+	}
+
+	return nRetVal;
+}
 xnl::Array<XnFwLogMask>& GetLogMaskList()
 {
 	static xnl::Array<XnFwLogMask> s_masks;
@@ -1253,9 +1292,13 @@ int PrintLogFilesList(int /*argc*/, const char* /*argv*/[])
 int PrintI2CList(int /*argc*/, const char* /*argv*/[])
 {
 	xnl::Array<XnI2CDeviceInfo>& deviceList = GetI2CDeviceList();
+    
+    printf("%2s %32s %9s %8s", "ID", "NAME", "MASTER-ID", "SLAVE-ID\n");
+    printf("%2s %32s %9s %8s", "==", "====", "=========", "========\n");
+
 	for (XnUInt32 i = 0; i < deviceList.GetSize(); ++i)
 	{
-		printf("%4u %s\n", deviceList[i].id, deviceList[i].name);
+        printf("%2u %32s %9u %8u\n", deviceList[i].id, deviceList[i].name, deviceList[i].masterId, deviceList[i].slaveId);
 	}
 
 	return 0;
@@ -1296,24 +1339,24 @@ int RunBist(int argc, const char* argv[])
 		return -1;
 	}
 
+	XnBistInfo bistInfos[20];
+	XnCommandGetBistList supportedTests;
+	supportedTests.tests = bistInfos;
+	supportedTests.count = sizeof(bistInfos)/sizeof(bistInfos[0]);
+
+	if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, supportedTests))
+	{
+		printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
+		return -2;
+	}
+
 	xnl::BitSet requestedTests;
 
 	if (xnOSStrCaseCmp(argv[1], "ALL") == 0)
 	{
-		XnBistInfo tests[20];
-		XnCommandGetBistList args;
-		args.tests = tests;
-		args.count = sizeof(tests)/sizeof(tests[0]);
-
-		if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, args))
+		for (XnUInt32 i = 0; i < supportedTests.count; ++i)
 		{
-			printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
-			return -2;
-		}
-
-		for (XnUInt32 i = 0; i < args.count; ++i)
-		{
-			requestedTests.Set(tests[i].id, TRUE);
+			requestedTests.Set(supportedTests.tests[i].id, TRUE);
 		}
 	}
 	else
@@ -1335,7 +1378,19 @@ int RunBist(int argc, const char* argv[])
 			continue;
 		}
 
-		printf("Executing test %u...\n", i);
+		// search for test in list (for its name)
+		const XnChar* testName = "Unknown";
+		for (XnUInt32 j = 0; j < supportedTests.count; ++j)
+		{
+			if (supportedTests.tests[j].id == i)
+			{
+				testName = supportedTests.tests[j].name;
+				break;
+			}
+		}
+
+		printf("Executing test %u (%s)...\n", i, testName);
+
 		args.id = i;
 		args.extraDataSize = sizeof(response);
 		nRetVal = g_device.invoke(PS_COMMAND_EXECUTE_BIST, args);
@@ -1345,7 +1400,7 @@ int RunBist(int argc, const char* argv[])
 			return nRetVal;
 		}
 
-		printf("Test %u ", i);
+		printf("Test %u (%s) ", i, testName);
 
 		if (args.errorCode != 0)
 		{
@@ -1501,6 +1556,88 @@ int TestAll(int /*argc*/, const char* /*argv*/[])
 	return XN_STATUS_OK;
 }
 
+int Projector(int argc, const char* argv[])
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (argc > 1)
+	{
+		if (xnOSStrCaseCmp(argv[1], "power") == 0)
+		{
+			if (argc > 2)
+			{
+				// set power
+				XnUInt16 power = (XnUInt16)MyAtoi(argv[2]);
+				nRetVal = g_device.setProperty(LINK_PROP_PROJECTOR_POWER, power);
+				if (nRetVal != XN_STATUS_OK)
+				{
+					printf("Failed to set projector power: %s\n\n", xnGetStatusString(nRetVal));
+					return -2;
+				}
+
+				return 0;
+			}
+			else
+			{
+				// get power
+				XnUInt16 power;
+				nRetVal = g_device.getProperty(LINK_PROP_PROJECTOR_POWER, &power);
+				if (nRetVal != XN_STATUS_OK)
+				{
+					printf("Failed to get projector power: %s\n\n", xnGetStatusString(nRetVal));
+					return -3;
+				}
+
+				printf("Projector power is %u\n\n", power);
+				return 0;
+			}
+		}
+		else if (xnOSStrCaseCmp(argv[1], "pulse") == 0)
+		{
+			if (argc > 2)
+			{
+				if (xnOSStrCaseCmp(argv[2], "on") == 0 && argc > 5)
+				{
+					XnCommandSetProjectorPulse args;
+					args.delay = MyAtoi(argv[3]);
+					args.width = MyAtoi(argv[4]);
+					args.frames = MyAtoi(argv[5]);
+
+					nRetVal = g_device.invoke(LINK_COMMAND_SET_PROJECTOR_PULSE, args);
+					if (nRetVal != XN_STATUS_OK)
+					{
+						printf("Failed to set projector pulse: %s\n\n", xnGetStatusString(nRetVal));
+						return -3;
+					}
+
+					printf("Projector pulse set\n\n");
+					return 0;
+				}
+				else if (xnOSStrCaseCmp(argv[2], "off") == 0)
+				{
+					nRetVal = g_device.invoke(LINK_COMMAND_DISABLE_PROJECTOR_PULSE, NULL, 0);
+					if (nRetVal != XN_STATUS_OK)
+					{
+						printf("Failed to disable projector pulse: %s\n\n", xnGetStatusString(nRetVal));
+						return -3;
+					}
+
+					printf("Projector pulse disabled\n\n");
+					return 0;
+				}
+			}
+		}
+	}
+
+	// if we got here, something was wrong with the arguments
+	printf("Usage: \n");
+	printf("\t%s power [newVal]\n", argv[0]);
+	printf("\t%s pulse on <delay> <width> <frames>\n", argv[0]);
+	printf("\t%s pulse off\n", argv[0]);
+	printf("\n");
+	return -1;
+}
+
 void RegisterCommands()
 {
 	RegisterCommand("Help", Help);
@@ -1529,7 +1666,8 @@ void RegisterCommands()
 	RegisterCommand("ReadAHB", ReadAHB);
 	RegisterCommand("SoftReset", SoftReset);
 	RegisterCommand("HardReset", HardReset);
-	RegisterCommand("Emitter", Emitter);
+    RegisterCommand("Emitter", Emitter);
+    RegisterCommand("Acc", Acc);
 	RegisterCommand("Log", Log);
 	RegisterCommand("LogList", PrintLogFilesList);
 	RegisterCommand("Script", Script);
@@ -1539,6 +1677,7 @@ void RegisterCommands()
 	RegisterCommand("FormatZone", FormatZone);
 	RegisterCommand("UsbTest", UsbTest);
 	RegisterCommand("TestAll", TestAll);
+	RegisterCommand("Projector", Projector);
 	RegisterCommand("Quit", Quit);
 	RegisterCommand("Bye", Quit);
 	RegisterCommand("Exit", Quit);

@@ -19,6 +19,8 @@ enum
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
 	/* Get only */
 	LINK_PROP_BOOT_STATUS = 0x1200000b,
+	/* Int - system specific units */
+	LINK_PROP_PROJECTOR_POWER = 0x1200000c,
 
 	/**** Device commands ****/
 	/* XnCommandGetFwStreams */
@@ -37,6 +39,10 @@ enum
 	LINK_COMMAND_SET_FW_STREAM_VIDEO_MODE = 0x1200F007,
 	/* XnCommandGetFwStreamVideoMode */
 	LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE = 0x1200F008,
+	/* XnCommandSetProjectorPulse */
+	LINK_COMMAND_SET_PROJECTOR_PULSE = 0x1200F009,
+	/* No args */
+	LINK_COMMAND_DISABLE_PROJECTOR_PULSE = 0x1200F00a,
 
 	/**** Stream properties ****/
 	/* Int. 1 - Shifts 9.3, 2 - Grayscale16, 3 - YUV422, 4 - Bayer8 */
@@ -193,6 +199,13 @@ typedef struct XnCommandGetFwStreamVideoMode
 	int streamId;
 	XnFwStreamVideoMode videoMode; // out
 } XnCommandGetFwStreamVideoMode;
+
+typedef struct XnCommandSetProjectorPulse
+{
+	int delay;
+	int width;
+	int frames;
+} XnCommandSetProjectorPulse;
 
 #pragma pack (pop)
 

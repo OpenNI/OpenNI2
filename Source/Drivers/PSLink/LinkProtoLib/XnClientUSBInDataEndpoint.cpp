@@ -103,10 +103,11 @@ void ClientUSBInDataEndpoint::Disconnect()
 	XnStatus nRetVal = XN_STATUS_OK;
 	if (m_bConnected)
 	{
+		xnLogVerbose(XN_MASK_USB, "Shutting down endpoint 0x%x read thread...", m_nEndpointID);
 		nRetVal = xnUSBShutdownReadThread(m_hEndpoint);
 		if (nRetVal != XN_STATUS_OK)
 		{
-			xnLogWarning("Failed to shutdown usb read thread: %s", xnGetStatusString(nRetVal));
+			xnLogWarning(XN_MASK_USB, "Failed to shutdown endpoint 0x%x read thread: %s", m_nEndpointID, xnGetStatusString(nRetVal));
 			XN_ASSERT(FALSE);
 		}
 		m_bConnected = FALSE;
