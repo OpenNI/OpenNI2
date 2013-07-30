@@ -283,7 +283,7 @@ void Context::shutdown()
 	--m_initializationCounter;
 	if (m_initializationCounter > 0)
 	{
-		xnLogInfo(XN_MASK_ONI_CONTEXT, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "Shutdown: still need %d more shutdown calls (to match initializations)", m_initializationCounter);
 		return;
 	}
 	if (!s_valid)
@@ -327,6 +327,7 @@ void Context::shutdown()
 
 	m_cs.Unlock();
 
+	xnLogVerbose(XN_MASK_ONI_CONTEXT, "Shutdown: successful.");
 	xnLogClose();
 }
 
