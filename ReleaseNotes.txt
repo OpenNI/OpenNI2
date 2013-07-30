@@ -20,6 +20,26 @@ Minimum Requirements:
   - GCC 4.x
 - Some of the sample applications require a graphics card equivalent to: ATI RADEON x1300 or NVIDIA GeForce 7300.
 
+Prerequisets:
+-------------
+- Windows:
+  - Microsoft Kinect SDK v1.6 (for using with Kinect devices)
+    From: http://go.microsoft.com/fwlink/?LinkID=262831
+
+- Linux:
+  - LibUSB 1.0.x
+    From: http://sourceforge.net/projects/libusb/files/libusb-1.0/
+    Or via apt:
+    sudo apt-get install libusb-1.0-0
+  - LibUDEV
+    sudo apt-get install libudev0
+  - FreeGLUT3
+    From: http://freeglut.sourceforge.net/index.php#download
+    You only need the run-time version to run the OpenGL samples:
+    sudo apt-get install freeglut3
+    If you also want to compile the OpenGL samples, you'll need to install the development version:
+    sudo apt-get install freeglut3-dev
+
 Notes:
 ------
 - On Android, only native support (and samples) is currently provided. Please note that as bionic (Android linker) does not
