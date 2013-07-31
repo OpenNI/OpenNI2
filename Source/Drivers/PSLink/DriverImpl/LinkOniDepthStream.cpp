@@ -227,3 +227,24 @@ void LinkOniDepthStream::notifyAllProperties()
 
 	raisePropertyChanged(LINK_PROP_DEPTH_TO_SHIFT_TABLE, pTables->pDepthToShiftTable, pTables->nDepthsCount * sizeof(XnUInt16));
 }
+
+XnStatus LinkOniDepthStream::GetDefaultVideoMode( OniVideoMode* pVideoMode )
+{
+	if(pVideoMode != NULL)
+	{
+		//ARM cannot handle QVGA, so we default to QQVGA
+#if (XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
+		pVideoMode->resolutionX = 160;
+		pVideoMode->resolutionY = 120;
+#else
+		pVideoMode->resolutionX = 320;
+		pVideoMode->resolutionY = 240;
+#endif		
+
+		return XN_STATUS_OK;
+	}
+	else
+	{
+		return LinkOniMapStream::GetDefaultVideoMode(pVideoMode);
+	}
+}

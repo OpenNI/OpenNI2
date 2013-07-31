@@ -37,6 +37,9 @@ public:
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	virtual OniBool isPropertySupported(int propertyId);
 	virtual void notifyAllProperties();
+
+protected:
+	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
 };
 
 #endif // __LINK_ONI_DEPTH_STREAM_H__

@@ -61,6 +61,10 @@ XnStatus LinkOniMapStream::Init()
 	OniVideoMode videoMode;
 	GetVideoMode(&videoMode);
 
+	// override with streams default values
+	GetDefaultVideoMode(&videoMode);
+
+	// override with INI config
 	XnInt32 temp32;
 	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "XResolution", &temp32))
 	{
@@ -356,5 +360,10 @@ XnStatus LinkOniMapStream::GetCropping(OniCropping &cropping)
 XnStatus LinkOniMapStream::SetCropping(const OniCropping &cropping)
 {
 	return m_pInputStream->SetCropping(cropping);
+}
+
+XnStatus LinkOniMapStream::GetDefaultVideoMode( OniVideoMode* /*pVideoMode*/ )
+{
+	return XN_STATUS_IS_EMPTY;
 }
 
