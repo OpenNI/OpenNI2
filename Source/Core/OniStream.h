@@ -142,6 +142,7 @@ private:
 		int resolutionY;
 		int halfResX;
 		int halfResY;
+		float zFactor;
 	} m_worldConvertCache;
 };
 
