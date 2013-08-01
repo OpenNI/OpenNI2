@@ -3,16 +3,24 @@ Change Log:
 
 OpenNI 2.3:
   - Fix pure-C APIs
-  - OPENNITWO-493: Single pixel translation is wrong when image res is 1280x1024
+  - Bug Fix: Single pixel translation is wrong when image res is 1280x1024
+  - Bug Fix: depth/world conversion was wrong when depth is in 100 um format
   - Bug Fix: no even frame indexes from Capri devices.
   - Properties are now saved in recordings of Capri devices and input files
   - Link console: allow running a single command and exit
   - Capri:
     - Bug Fix: Depth stops working if switching to QQVGA and then back to VGA
     - i2c device list now also states the master and slave IDs
-    - add commands for turning on/off ACC
+    - Add commands for turning on/off ACC
+    - Fixed a weird log during shutdown
+    - Add commands for projector pulse and projector power
+    - Add commands for setting CMOS gain
+    - Print test name when running BIST
+    - Default resolution is now QQVGA on ARM machines
   - Build:
     - Support gold linker in compilation
+    - Add Linux prerequisites to release notes
+    - Add release notes and change log to installation
 
 OpenNI 2.2:
   - Added getDepthColorSyncEnabled() API
