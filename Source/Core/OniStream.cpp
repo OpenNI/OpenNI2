@@ -440,8 +440,8 @@ void VideoStream::refreshWorldConversionCache()
 	getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
 
 	size = sizeof(float);
-	float horizontalFov;
-	float verticalFov;
+	float horizontalFov = 0.0;
+	float verticalFov = 0.0;
 	getProperty(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &horizontalFov, &size);
 	getProperty(ONI_STREAM_PROPERTY_VERTICAL_FOV, &verticalFov, &size);
 
