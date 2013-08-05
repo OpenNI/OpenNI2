@@ -56,8 +56,8 @@ XnStatus LinkOniMapStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 	// read video mode
-	XnChar section[255];
-	sprintf(section, "%s.VideoMode", m_configSection);
+	XnChar videoModeSection[255];
+	sprintf(videoModeSection, "%s.VideoMode", m_configSection);
 	OniVideoMode videoMode;
 	GetVideoMode(&videoMode);
 
@@ -66,19 +66,19 @@ XnStatus LinkOniMapStream::Init()
 
 	// override with INI config
 	XnInt32 temp32;
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "XResolution", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "XResolution", &temp32))
 	{
 		videoMode.resolutionX = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "YResolution", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "YResolution", &temp32))
 	{
 		videoMode.resolutionY = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "FPS", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "FPS", &temp32))
 	{
 		videoMode.fps = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "PixelFormat", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "PixelFormat", &temp32))
 	{
 		videoMode.pixelFormat = (OniPixelFormat)temp32;
 	}
@@ -93,7 +93,7 @@ XnStatus LinkOniMapStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 	OniBool bMirror = TRUE;
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "Mirror", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, m_configSection, "Mirror", &temp32))
 	{
 		bMirror = (temp32 == 1);
 	}
