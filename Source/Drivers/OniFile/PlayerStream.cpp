@@ -208,13 +208,11 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 
 	// Set the cropping property.
 	OniCropping cropping;
-	cropping.enabled = FALSE;
 	int dataSize = sizeof(cropping);
 	rc = pStream->m_pSource->GetProperty(ONI_STREAM_PROPERTY_CROPPING, &cropping, &dataSize);
 	if (rc != ONI_STATUS_OK)
 	{
-		XN_ASSERT(FALSE);
-		return;
+		cropping.enabled = FALSE;
 	}
 
 	// Allocate new frame and fill it.
