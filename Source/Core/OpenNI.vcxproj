@@ -189,6 +189,7 @@
     <ClInclude Include="..\..\Include\OniCEnums.h" />
     <ClInclude Include="..\..\Include\OniCProperties.h" />
     <ClInclude Include="..\..\Include\OniEnums.h" />
+    <ClInclude Include="..\..\Include\OniTest.h" />
     <ClInclude Include="..\..\Include\OpenNI.h" />
     <ClInclude Include="..\..\Include\OniPlatform.h" />
     <ClInclude Include="..\..\Include\OniProperties.h" />
