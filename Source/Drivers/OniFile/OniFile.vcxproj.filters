@@ -81,6 +81,9 @@
     <ClInclude Include="XnPlayerTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FileProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Formats\XnStreamCompression.cpp">

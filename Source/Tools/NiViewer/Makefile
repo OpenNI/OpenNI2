@@ -26,7 +26,11 @@ else
 endif
 
 LIB_DIRS  += ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS += OpenNI2 XnLib
+USED_LIBS += OpenNI2 XnLib pthread
+ifneq ("$(OSTYPE)","Darwin")
+        USED_LIBS += rt 
+endif
+
 
 EXE_NAME = NiViewer
 

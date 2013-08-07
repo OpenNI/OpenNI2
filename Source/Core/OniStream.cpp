@@ -67,7 +67,12 @@ VideoStream::~VideoStream()
 
 	if (m_hNewFrameEvent != NULL)
 	{
-		m_pSensor->newFrameEvent().Unregister(m_hNewFrameEvent);
+		//If device has no handle then the m_pSensor object is not valid
+		if(m_device.getHandle() != NULL)
+		{
+			m_pSensor->newFrameEvent().Unregister(m_hNewFrameEvent);
+		}
+
 		m_hNewFrameEvent = NULL;
 	}
 

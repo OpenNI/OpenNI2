@@ -37,7 +37,9 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS) -DOPENNI2_EXPORT
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../Include \
 	$(LOCAL_PATH)/../../ThirdParty/PSCommon/XnLib/Include \
-	$(LOCAL_PATH)/../Drivers/OniFile/Formats
+	$(LOCAL_PATH)/../Drivers/OniFile/Formats \
+	$(LOCAL_PATH)/../Drivers/OniFile
+
 
 ifdef OPENNI2_ANDROID_NDK_BUILD
     LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG

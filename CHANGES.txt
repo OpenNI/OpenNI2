@@ -1,6 +1,15 @@
 Change Log:
 -----------
 
+OpenNI 2.3.0:
+  - Fix pure-C APIs
+  - OPENNITWO-493: Single pixel translation is wrong when image res is 1280x1024
+  - Bug Fix: no even frame indexes from Capri devices.
+  - Properties are now saved in recordings of Capri devices and input files
+  - Link console: allow running a single command and exit
+  - Build:
+    - Support gold linker in compilation
+
 OpenNI 2.2.0:
   - Added getDepthColorSyncEnabled() API
   - Added log settings API

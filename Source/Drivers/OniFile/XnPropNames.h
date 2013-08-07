@@ -62,4 +62,6 @@
 #define XN_PROP_ONI_PIXEL_FORMAT "oniPixelFormat"
 #define XN_PROP_ONI_REQUIRED_FRAME_SIZE "oniRequiredFrameSize"
 
+#define XN_PROP_ORIGINAL_DEVICE "oniOriginalDevice"
+
 #endif //__XN_PROP_NAMES_H__
