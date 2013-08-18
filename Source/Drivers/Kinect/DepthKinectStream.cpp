@@ -130,11 +130,11 @@ struct DepthMapper
 
 		for (unsigned int i = 0; i < numPoints; i++)
 		{
-			const unsigned int x = *mappedCoordsIter++ - minX;
+			const unsigned int x = transformX(*mappedCoordsIter++) - minX;
 			const unsigned int y = *mappedCoordsIter++ - minY;
 			if (x < width - 1 && y < height) {
 				const unsigned short d = filterReliableDepthValue((in+i)->depth);
-				OniDepthPixel* p = out + transformX(x) + y * width;
+				OniDepthPixel* p = out + x + y * width;
 				if (*p == 0 || *p > d) *p = d;
 				p++;
 				if (*p == 0 || *p > d) *p = d;
@@ -186,7 +186,7 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMA
 		};
 
 		DepthMapper<BackwardXTransformer> mapDepth;
-		mapDepth(source, target, m_mappedCoordsBuffer.GetData(), numPoints, pFrame, BackwardXTransformer(pFrame->width));
+		mapDepth(source, target, m_mappedCoordsBuffer.GetData(), numPoints, pFrame, BackwardXTransformer(pFrame->videoMode.resolutionX));
 	}
 
 	// FIXME: for preliminary benchmarking purpose
