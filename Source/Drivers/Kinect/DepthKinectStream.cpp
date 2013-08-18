@@ -57,6 +57,7 @@ void DepthKinectStream::populateFrameImageMetadata(OniFrame* pFrame, int dataUni
 		pFrame->cropOriginY = m_cropping.originY;
 		pFrame->croppingEnabled = TRUE;
 	}
+	pFrame->dataSize = pFrame->width * pFrame->height * dataUnitSize;
 	pFrame->stride = pFrame->width * dataUnitSize;
 	pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
 	pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
@@ -78,65 +79,91 @@ static void recordAverageProcessTime(const char* message, LARGE_INTEGER* pAccTim
 
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping but NO depth-to-image registration.
-void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniFrame* pFrame)
+void DepthKinectStream::copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* in, int numPoints, OniFrame* pFrame)
 {
-	// Note: The local variable assignments and const qualifiers are carefully designed to generate
-	// a high performance code with VC 2010. We recommend check the performance when changing the code
-	// even if it was a trivial change.
-
-	// For benchmarking purpose
+	// FIXME: for preliminary benchmarking purpose
 	LARGE_INTEGER startTime;
 	QueryPerformanceCounter(&startTime);
 
-	unsigned short* target = (unsigned short*) pFrame->data;
-
-	const unsigned int width = pFrame->width;
-	const unsigned int height = pFrame->height;
-	const unsigned int skipWidth = m_videoMode.resolutionX - width;
-
-	// Offset the starting position
-	source += pFrame->cropOriginX + pFrame->cropOriginY * m_videoMode.resolutionX;
-
-	for (unsigned int y = 0; y < height; y++)
+	struct DepthPixelCopier
 	{
-		for (unsigned int x = 0; x < width; x++)
+		void operator()(const NUI_DEPTH_IMAGE_PIXEL* const in, OniDepthPixel* const out)
 		{
-			*(target++) = filterReliableDepthValue((source++)->depth);
+			*out = filterReliableDepthValue(in->depth);
 		}
-		source += skipWidth;
-	}
+	};
+
+	typedef LineCopier<NUI_DEPTH_IMAGE_PIXEL, OniDepthPixel, DepthPixelCopier, ForwardMover<NUI_DEPTH_IMAGE_PIXEL> > ForwardLineCopier;
+	typedef RectCopier<NUI_DEPTH_IMAGE_PIXEL, OniDepthPixel, DepthPixelCopier, ForwardMover<NUI_DEPTH_IMAGE_PIXEL>, ForwardMover<NUI_DEPTH_IMAGE_PIXEL> > ForwardRectCopier;
+	typedef RectCopier<NUI_DEPTH_IMAGE_PIXEL, OniDepthPixel, DepthPixelCopier, BackwardMover<NUI_DEPTH_IMAGE_PIXEL>, ForwardMover<NUI_DEPTH_IMAGE_PIXEL> > MirrorRectCopier;
+
+	OniDepthPixel* out = reinterpret_cast<OniDepthPixel*>(pFrame->data);
+
+	FrameCopier<NUI_DEPTH_IMAGE_PIXEL, OniDepthPixel, ForwardLineCopier, ForwardRectCopier, MirrorRectCopier> copyFrame;
+	copyFrame(in, out, pFrame, m_videoMode, m_cropping, m_mirroring);
 
 	// FIXME: for preliminary benchmarking purpose
 	static LARGE_INTEGER accTime, accCount;
 	recordAverageProcessTime("No Image Reg", &accTime, &accCount, startTime);
 }
 
+//
 // Copy the depth pixels (NUI_DEPTH_IMAGE_PIXEL) to OniDriverFrame
 // with applying cropping and depth-to-image registration.
+//
+// Note: The local variable assignments and const qualifiers are carefully designed to generate
+// a high performance code with VC 2010. We recommend check the performance when changing the code
+// even if it was a trivial change.
+//
+
+// Helper template
+template<typename XTransformer>
+struct DepthMapper
+{
+	void operator()(const NUI_DEPTH_IMAGE_PIXEL* const in, OniDepthPixel* const out,
+		const LONG* mappedCoordsIter, const unsigned int numPoints, OniFrame* pFrame, XTransformer transformX)
+	{
+		const unsigned int width = pFrame->width;
+		const unsigned int height = pFrame->height;
+		const unsigned int minX = pFrame->cropOriginX;
+		const unsigned int minY = pFrame->cropOriginY;
+
+		for (unsigned int i = 0; i < numPoints; i++)
+		{
+			const unsigned int x = *mappedCoordsIter++ - minX;
+			const unsigned int y = *mappedCoordsIter++ - minY;
+			if (x < width - 1 && y < height) {
+				const unsigned short d = filterReliableDepthValue((in+i)->depth);
+				OniDepthPixel* p = out + transformX(x) + y * width;
+				if (*p == 0 || *p > d) *p = d;
+				p++;
+				if (*p == 0 || *p > d) *p = d;
+			}
+		}
+	}
+};
+
+// Function body
 void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniFrame* pFrame)
 {
 	// Note: We evaluated another possible implementation using INuiCoordinateMapper*::MapColorFrameToDepthFrame,
 	// but, counterintuitively, it turned out to be slower than this implementation. We reverted it back.
 
-	// Note: The local variable assignments and const qualifiers are carefully designed to generate
-	// a high performance code with VC 2010. We recommend check the performance when changing the code
-	// even if it was a trivial change.
-
-	// For benchmarking purpose
+	// FIXME: for preliminary benchmarking purpose
 	LARGE_INTEGER startTime;
 	QueryPerformanceCounter(&startTime);
 
 	NUI_IMAGE_RESOLUTION nuiResolution =
 		m_pStreamImpl->getNuiImagResolution(pFrame->videoMode.resolutionX, pFrame->videoMode.resolutionY);
 
-	unsigned short* const target = (unsigned short*) pFrame->data;
+	OniDepthPixel* const target = (OniDepthPixel*) pFrame->data;
 	xnOSMemSet(target, 0, pFrame->dataSize);
 
 	m_depthValuesBuffer.SetSize(numPoints);
 	m_mappedCoordsBuffer.SetSize(numPoints * 2);
 
 	// Pack depth data for NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
-	USHORT* depthValuesIter = m_depthValuesBuffer.GetData();
+	unsigned short* depthValuesIter = m_depthValuesBuffer.GetData();
 	for (int i = 0; i < numPoints; i++) {
 		*(depthValuesIter++) = (source + i)->depth << 3;
 	}
@@ -151,23 +178,27 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMA
 		m_mappedCoordsBuffer.GetData()
 		);
 
-	const unsigned int minX = pFrame->cropOriginX;
-	const unsigned int minY = pFrame->cropOriginY;
-	const unsigned int width = pFrame->width;
-	const unsigned int height = pFrame->height;
-	const LONG* mappedCoordsIter = m_mappedCoordsBuffer.GetData();
+	if (!m_mirroring) {
+		struct ForwardXTransformer
+		{
+			unsigned int operator()(const unsigned int x) { return x; }
+		};
 
-	for (int i = 0; i < numPoints; i++)
-	{
-		const unsigned int x = *mappedCoordsIter++ - minX;
-		const unsigned int y = *mappedCoordsIter++ - minY;
-		if (x < width - 1 && y < height) {
-			const unsigned short d = filterReliableDepthValue((source+i)->depth);
-			unsigned short* p = target + x + y * width;
-			if (*p == 0 || *p > d) *p = d;
-			p++;
-			if (*p == 0 || *p > d) *p = d;
-		}
+		DepthMapper<ForwardXTransformer> mapDepth;
+		mapDepth(source, target, m_mappedCoordsBuffer.GetData(), numPoints, pFrame, ForwardXTransformer());
+	} else {
+		struct BackwardXTransformer
+		{
+			const unsigned int m_width;
+
+			BackwardXTransformer(unsigned int width) : m_width(width) {}
+
+			// Note the range of x is 0 <= x <= width - 2
+			unsigned int operator()(const unsigned int x) { return m_width - x - 2; }
+		};
+
+		DepthMapper<BackwardXTransformer> mapDepth;
+		mapDepth(source, target, m_mappedCoordsBuffer.GetData(), numPoints, pFrame, BackwardXTransformer(pFrame->width));
 	}
 
 	// FIXME: for preliminary benchmarking purpose
@@ -214,13 +245,6 @@ OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataS
 		{
 			XnInt * val = (XnInt *)data;
 			*val = DEVICE_MAX_DEPTH_VAL;
-			status = ONI_STATUS_OK;
-			break;
-		}
-	case ONI_STREAM_PROPERTY_MIRRORING:
-		{
-			XnBool * val = (XnBool *)data;
-			*val = TRUE;
 			status = ONI_STATUS_OK;
 			break;
 		}
