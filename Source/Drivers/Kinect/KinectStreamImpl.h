@@ -5,6 +5,7 @@
 #include <Shlobj.h>
 #include "NuiApi.h"
 #include "XnList.h"
+#include "XnArray.h"
 
 struct INuiSensor;
 
@@ -51,10 +52,9 @@ public:
 	OniStatus convertDepthToColorCoordinates(oni::driver::StreamBase* colorStream, 
 								int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
-	static NUI_IMAGE_RESOLUTION getNuiImagResolution(int resolutionX, int resolutionY);
+	OniStatus convertDepthFrameToColorCoordinates(const OniVideoMode& colorVideoMode,
+								const NUI_DEPTH_IMAGE_PIXEL* depthPixels, int numPoints, int* colorXYs);
 
-	INuiSensor* getNuiSensor() { return m_pNuiSensor; } // Need review: not sure if it is a good idea to expose this.
-	
 private:
 		
 	void setDefaultVideoMode();
@@ -63,6 +63,8 @@ private:
 
 	static XN_THREAD_PROC threadFunc(XN_THREAD_PARAM pThreadParam);
 
+	static NUI_IMAGE_RESOLUTION getNuiImageResolution(int resolutionX, int resolutionY);
+	
 	xnl::List<BaseKinectStream*> m_streamList;
 
 	OniImageRegistrationMode m_imageRegistrationMode;
@@ -76,6 +78,18 @@ private:
 	OniVideoMode m_videoMode;
 	
 	XN_THREAD_HANDLE m_threadHandle;	
+
+	// Helper class to depth frame to image coordinate conversion
+	class DepthToImageCoordsConverter
+	{
+	public:
+		DepthToImageCoordsConverter(INuiSensor* pNuiSensor);
+		OniStatus convert(const OniVideoMode& depthVideoMode, const OniVideoMode& colorVideoMode, const NUI_DEPTH_IMAGE_PIXEL* depthPixels, int numPoints, int* colorXYs);
+
+	private:
+		INuiSensor* m_pNuiSensor;
+		xnl::Array<USHORT> m_depthValuesBuffer; // temporary buffer for depth values shifted by 3 bits
+	} m_depthToImageCoordsConverter;
 };
 
 //

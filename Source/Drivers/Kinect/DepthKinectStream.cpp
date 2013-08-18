@@ -121,7 +121,7 @@ template<typename XTransformer>
 struct DepthMapper
 {
 	void operator()(const NUI_DEPTH_IMAGE_PIXEL* const in, OniDepthPixel* const out,
-		const LONG* mappedCoordsIter, const unsigned int numPoints, OniFrame* pFrame, XTransformer transformX)
+		const int* mappedCoordsIter, const unsigned int numPoints, OniFrame* pFrame, XTransformer transformX)
 	{
 		const unsigned int width = pFrame->width;
 		const unsigned int height = pFrame->height;
@@ -153,30 +153,18 @@ void DepthKinectStream::copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMA
 	LARGE_INTEGER startTime;
 	QueryPerformanceCounter(&startTime);
 
-	NUI_IMAGE_RESOLUTION nuiResolution =
-		m_pStreamImpl->getNuiImagResolution(pFrame->videoMode.resolutionX, pFrame->videoMode.resolutionY);
-
 	OniDepthPixel* const target = (OniDepthPixel*) pFrame->data;
 	xnOSMemSet(target, 0, pFrame->dataSize);
 
-	m_depthValuesBuffer.SetSize(numPoints);
 	m_mappedCoordsBuffer.SetSize(numPoints * 2);
 
-	// Pack depth data for NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
-	unsigned short* depthValuesIter = m_depthValuesBuffer.GetData();
-	for (int i = 0; i < numPoints; i++) {
-		*(depthValuesIter++) = (source + i)->depth << 3;
-	}
-
-	// Need review: not sure if it is a good idea to directly invoke INuiSensore here.
-	m_pStreamImpl->getNuiSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
-		nuiResolution, // assume the target image with the same resolution as the source.
-		nuiResolution,
+	HRESULT hr = m_pStreamImpl->convertDepthFrameToColorCoordinates(
+		m_videoMode, // assume the target image with the same resolution as the source.
+		source,
 		numPoints,
-		m_depthValuesBuffer.GetData(),
-		numPoints * 2,
 		m_mappedCoordsBuffer.GetData()
 		);
+	XN_ASSERT(SUCCEEDED(hr));
 
 	if (!m_mirroring) {
 		struct ForwardXTransformer

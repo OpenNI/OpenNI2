@@ -23,8 +23,7 @@ public:
 	virtual void notifyAllProperties();
 
 private:
-	xnl::Array<USHORT> m_depthValuesBuffer;
-	xnl::Array<LONG> m_mappedCoordsBuffer;
+	xnl::Array<int> m_mappedCoordsBuffer;
 
 	void populateFrameImageMetadata(OniFrame* pFrame, int dataUnitSize);
 	void copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniFrame* pFrame);
