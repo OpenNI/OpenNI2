@@ -186,6 +186,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Include\Driver\OniDriverAPI.h" />
     <ClInclude Include="..\..\Include\Driver\OniDriverTypes.h" />
+    <ClInclude Include="..\..\Include\KinectProperties.h" />
     <ClInclude Include="..\..\Include\OniCEnums.h" />
     <ClInclude Include="..\..\Include\OniCProperties.h" />
     <ClInclude Include="..\..\Include\OniEnums.h" />

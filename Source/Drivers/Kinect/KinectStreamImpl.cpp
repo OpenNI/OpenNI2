@@ -10,6 +10,7 @@ using namespace xnl;
 #define DEFAULT_FPS 30
 
 KinectStreamImpl::KinectStreamImpl(INuiSensor *pNuiSensor, OniSensorType sensorType):
+									m_imageFrameFlags(0),
 									m_pNuiSensor(pNuiSensor), m_sensorType(sensorType),
 									m_running(FALSE), m_hStreamHandle(INVALID_HANDLE_VALUE),
 									m_hNextFrameEvent(CreateEvent(NULL, TRUE, FALSE, NULL)),
@@ -72,7 +73,10 @@ OniStatus KinectStreamImpl::start()
 			return ONI_STATUS_ERROR;
 		}
 
-		//m_pNuiSensor->NuiImageStreamSetImageFrameFlags(m_pStreamHandle, NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE);
+		if (pushImageFrameFlags() != ONI_STATUS_OK)
+		{
+			// ignore error
+		}
 
 		XnStatus nRetVal = xnOSCreateThread(threadFunc, this, &m_threadHandle);
 		if (nRetVal != XN_STATUS_OK)
@@ -322,6 +326,57 @@ XN_THREAD_PROC KinectStreamImpl::threadFunc(XN_THREAD_PARAM pThreadParam)
 	KinectStreamImpl* pStream = (KinectStreamImpl*)pThreadParam;
 	pStream->mainLoop();
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+}
+
+DWORD KinectStreamImpl::getImageFrameFlags()
+{
+	if (m_hStreamHandle != INVALID_HANDLE_VALUE)
+	{
+		// Read the up-to-date status. Ignore errors.
+		m_pNuiSensor->NuiImageStreamGetImageFrameFlags(m_hStreamHandle, &m_imageFrameFlags);
+	}
+
+	return m_imageFrameFlags;
+}
+
+OniStatus KinectStreamImpl::setImageFrameFlags(DWORD value)
+{
+	m_imageFrameFlags = value;
+
+	if (m_hStreamHandle != INVALID_HANDLE_VALUE)
+	{
+		return pushImageFrameFlags();
+	}
+	else
+	{
+		// The stream is not initialized yet.
+		// Suspend pushing the flag to the stream for now.
+		return ONI_STATUS_OK;
+	}
+}
+
+OniStatus KinectStreamImpl::setImageFrameFlags(DWORD mask, OniBool value)
+{
+	return setImageFrameFlags(value ? (m_imageFrameFlags | mask) : (m_imageFrameFlags & ~mask));
+}
+
+OniStatus KinectStreamImpl::pushImageFrameFlags()
+{
+	XN_ASSERT(m_hStreamHandle != INVALID_HANDLE_VALUE);
+
+	HRESULT hr;
+	
+	// Push the flag
+	hr = m_pNuiSensor->NuiImageStreamSetImageFrameFlags(m_hStreamHandle, m_imageFrameFlags);
+
+	if (FAILED(hr))
+	{
+		printf("Failed to set ImageFrameFlags to %08x\n", m_imageFrameFlags); // TODO: use log
+		getImageFrameFlags();
+		return ONI_STATUS_ERROR;
+	}
+
+	return ONI_STATUS_OK;
 }
 
 // Depth to image coordinates converter

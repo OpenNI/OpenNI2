@@ -27,6 +27,7 @@
 #include <math.h>
 #include <XnLog.h>
 #include <PS1080.h>
+#include <KinectProperties.h>
 
 // --------------------------------
 // Defines
@@ -364,14 +365,46 @@ void toggleMirror(int )
 
 void toggleCloseRange(int )
 {
-	bool bCloseRange;
-	g_depthStream.getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &bCloseRange);
+	static OniBool bCloseRange = FALSE;
+
+	if (g_depthStream.getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &bCloseRange) != XN_STATUS_OK &&
+		g_depthStream.getProperty(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, &bCloseRange) != XN_STATUS_OK)
+	{
+		// Continue with the latest value even in case of error
+	}
 
 	bCloseRange = !bCloseRange;
 
-	g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange);
+	if (g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange) != XN_STATUS_OK &&
+		g_depthStream.setProperty(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, bCloseRange) != XN_STATUS_OK)
+	{
+		displayError("Couldn't set the close range");
+		return;
+	}
 
 	displayMessage ("Close range: %s", bCloseRange?"On":"Off");	
+}
+
+void toggleEmitterState(int)
+{
+	static OniBool bEmitterState = TRUE;
+
+	if (g_device.getProperty(XN_MODULE_PROPERTY_EMITTER_STATE, &bEmitterState) != XN_STATUS_OK &&
+		g_device.getProperty(KINECT_DEVICE_PROPERTY_EMITTER_STATE, &bEmitterState) != XN_STATUS_OK)
+	{
+		// Continue with the latest value even in case of error
+	}
+
+	bEmitterState = !bEmitterState;
+
+	if (g_device.setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, bEmitterState) != XN_STATUS_OK &&
+		g_device.setProperty(KINECT_DEVICE_PROPERTY_EMITTER_STATE, bEmitterState) != XN_STATUS_OK)
+	{
+		displayError("Couldn't set the emitter state");
+		return;
+	}
+
+	displayMessage ("Emitter state: %s", bEmitterState?"On":"Off");	
 }
 
 void toggleImageRegistration(int)

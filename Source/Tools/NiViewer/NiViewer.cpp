@@ -305,15 +305,16 @@ void createKeyboardMap()
  			registerKey('m', "Mirror on/off", toggleMirror, 0);
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
 
-			registerKey('a', "toggle Auto Exposure", toggleImageAutoExposure, 0);
-			registerKey('q', "toggle AWB", toggleImageAutoWhiteBalance, 0);
+			registerKey('a', "Toggle Auto Exposure", toggleImageAutoExposure, 0);
+			registerKey('q', "Toggle AWB", toggleImageAutoWhiteBalance, 0);
 			registerKey('e', "Increase Exposure", changeImageExposure, 1);
 			registerKey('E', "Decrease Exposure", changeImageExposure, -1);
 			registerKey('g', "Increase Gain", changeImageGain, 10);
 			registerKey('G', "Decrease Gain", changeImageGain, -10);
 
-			registerKey('x', "Close Range", toggleCloseRange, 0);
+			registerKey('x', "Toggle Close Range", toggleCloseRange, 0);
 			registerKey('i', "Toggle Image Registration", toggleImageRegistration, 0);
+			registerKey('t', "IR Emitter on/off", toggleEmitterState, 0);
  		}
  		endKeyboardGroup();
  		startKeyboardGroup(KEYBOARD_GROUP_CAPTURE);

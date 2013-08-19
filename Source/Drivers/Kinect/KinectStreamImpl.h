@@ -55,11 +55,21 @@ public:
 	OniStatus convertDepthFrameToColorCoordinates(const OniVideoMode& colorVideoMode,
 								const NUI_DEPTH_IMAGE_PIXEL* depthPixels, int numPoints, int* colorXYs);
 
+	DWORD getImageFrameFlags();
+
+	OniBool getImageFrameFlags(DWORD mask) { return (getImageFrameFlags() & mask) != 0; }
+
+	OniStatus setImageFrameFlags(DWORD value);
+
+	OniStatus setImageFrameFlags(DWORD mask, OniBool value);
+
 private:
 		
 	void setDefaultVideoMode();
 	
 	NUI_IMAGE_TYPE getNuiImageType();
+
+	OniStatus pushImageFrameFlags();
 
 	static XN_THREAD_PROC threadFunc(XN_THREAD_PARAM pThreadParam);
 
@@ -68,6 +78,8 @@ private:
 	xnl::List<BaseKinectStream*> m_streamList;
 
 	OniImageRegistrationMode m_imageRegistrationMode;
+
+	DWORD m_imageFrameFlags;
 
 	// Thread
 	INuiSensor* m_pNuiSensor;
