@@ -18,6 +18,8 @@ public:
 	
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 
+	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
+
 	virtual OniBool isPropertySupported(int propertyId);
 
 	virtual void notifyAllProperties();
@@ -28,6 +30,9 @@ private:
 	void populateFrameImageMetadata(OniFrame* pFrame, int dataUnitSize);
 	void copyDepthPixelsStraight(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniFrame* pFrame);
 	void copyDepthPixelsWithImageRegistration(const NUI_DEPTH_IMAGE_PIXEL* source, int numPoints, OniFrame* pFrame);
+
+	OniStatus setNearMode(OniBool value);
+	OniStatus getNearMode(OniBool* pValue);
 };
 } // namespace kinect_device
 #endif //_DEPTH_KINECT_STREAM_H_

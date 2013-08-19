@@ -112,6 +112,7 @@ void changeImageExposure(int);
 void changeImageGain(int);
 
 void toggleCloseRange(int);
+void toggleEmitterState(int);
 void toggleImageRegistration(int);
 
 void setStreamCropping(openni::VideoStream& stream, int originX, int originY, int width, int height);

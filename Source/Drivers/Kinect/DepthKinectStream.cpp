@@ -9,6 +9,7 @@
 #include "D2S.h.h"
 #include "S2D.h.h"
 #include "KinectStreamImpl.h"
+#include "KinectProperties.h"
 
 using namespace oni::driver;
 using namespace kinect_device;
@@ -323,8 +324,33 @@ OniStatus DepthKinectStream::getProperty(int propertyId, void* data, int* pDataS
 			status = ONI_STATUS_OK;
 			break;
 		}
+	case KINECT_DEPTH_PROPERTY_CLOSE_RANGE:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, OniBool);
+			status = getNearMode((OniBool*)data);
+			break;
+		}
 	default:
 		status = BaseKinectStream::getProperty(propertyId, data, pDataSize);
+		break;
+	}
+
+	return status;
+}
+
+OniStatus DepthKinectStream::setProperty(int propertyId, const void* data, int dataSize)
+{
+	OniStatus status = ONI_STATUS_NOT_SUPPORTED;
+	switch (propertyId)
+	{
+	case KINECT_DEPTH_PROPERTY_CLOSE_RANGE:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(dataSize, OniBool);
+			status = setNearMode(*(OniBool*)data);
+			break;
+		}
+	default:
+		status = BaseKinectStream::setProperty(propertyId, data, dataSize);
 		break;
 	}
 
@@ -348,6 +374,7 @@ OniBool DepthKinectStream::isPropertySupported(int propertyId)
 	case XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE:
 	case XN_STREAM_PROPERTY_S2D_TABLE:
 	case XN_STREAM_PROPERTY_D2S_TABLE:
+	case KINECT_DEPTH_PROPERTY_CLOSE_RANGE:
 		status = TRUE;
 	default:
 		status = BaseKinectStream::isPropertySupported(propertyId);
@@ -394,5 +421,23 @@ void DepthKinectStream::notifyAllProperties()
 	size = sizeof(D2S);
 	getProperty(XN_STREAM_PROPERTY_D2S_TABLE, nBuff, &size);
 	raisePropertyChanged(XN_STREAM_PROPERTY_D2S_TABLE, nBuff, size);
+
+	// Is this really necessary to save? Just in case.
+	OniBool nearMode;
+	size = sizeof(nearMode);
+	getProperty(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, &nearMode, &size);
+	raisePropertyChanged(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, &nearMode, size);
+
 	BaseKinectStream::notifyAllProperties();
+}
+
+OniStatus DepthKinectStream::setNearMode(OniBool value)
+{
+	return m_pStreamImpl->setImageFrameFlags(NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE, value);
+}
+
+OniStatus DepthKinectStream::getNearMode(OniBool* pValue)
+{
+	*pValue = m_pStreamImpl->getImageFrameFlags(NUI_IMAGE_STREAM_FLAG_ENABLE_NEAR_MODE);
+	return ONI_STATUS_OK;
 }
