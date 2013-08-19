@@ -12,8 +12,8 @@ using namespace xnl;
 KinectStreamImpl::KinectStreamImpl(INuiSensor *pNuiSensor, OniSensorType sensorType):
 									m_pNuiSensor(pNuiSensor), m_sensorType(sensorType),
 									m_running(FALSE), m_hStreamHandle(INVALID_HANDLE_VALUE),
-									m_hNextFrameEvent(CreateEvent(NULL, TRUE, FALSE, NULL))
-															
+									m_hNextFrameEvent(CreateEvent(NULL, TRUE, FALSE, NULL)),
+									m_depthToImageCoordsConverter(pNuiSensor)
 {
 	setDefaultVideoMode();
 }
@@ -61,7 +61,7 @@ OniStatus KinectStreamImpl::start()
 		// Open a color image stream to receive frames
 		HRESULT hr = m_pNuiSensor->NuiImageStreamOpen(
 			getNuiImageType(),
-			getNuiImagResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
+			getNuiImageResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
 			0,
 			2,
 			m_hNextFrameEvent,
@@ -228,12 +228,18 @@ OniStatus KinectStreamImpl::convertDepthToColorCoordinates(StreamBase* colorStre
 	 if (ONI_STATUS_OK != colorStream->getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size))
 		 return ONI_STATUS_ERROR;
 	 HRESULT hr = m_pNuiSensor->NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution(
-				getNuiImagResolution(videoMode.resolutionX, videoMode.resolutionY),
-				getNuiImagResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
+				getNuiImageResolution(videoMode.resolutionX, videoMode.resolutionY),
+				getNuiImageResolution(m_videoMode.resolutionX, m_videoMode.resolutionY),
 				NULL, depthX, depthY, depthZ << 3, (LONG*)pColorX, (LONG*)pColorY);
 	 if (FAILED(hr))
 		 return ONI_STATUS_ERROR;
 	return ONI_STATUS_OK;
+}
+
+OniStatus KinectStreamImpl::convertDepthFrameToColorCoordinates(const OniVideoMode& colorVideoMode,
+								const NUI_DEPTH_IMAGE_PIXEL* depthPixels, int numPoints, int* colorXYs)
+{
+	return m_depthToImageCoordsConverter.convert(m_videoMode, colorVideoMode, depthPixels, numPoints, colorXYs);
 }
 
 void KinectStreamImpl::setDefaultVideoMode()
@@ -265,7 +271,7 @@ void KinectStreamImpl::setDefaultVideoMode()
 	}
 }
 
-NUI_IMAGE_RESOLUTION KinectStreamImpl::getNuiImagResolution(int resolutionX, int resolutionY)
+NUI_IMAGE_RESOLUTION KinectStreamImpl::getNuiImageResolution(int resolutionX, int resolutionY)
 {
 	NUI_IMAGE_RESOLUTION imgResolution = NUI_IMAGE_RESOLUTION_320x240;
 	if (resolutionX == KINECT_RESOLUTION_X_80 && resolutionY == KINECT_RESOLUTION_Y_60 )
@@ -316,4 +322,35 @@ XN_THREAD_PROC KinectStreamImpl::threadFunc(XN_THREAD_PARAM pThreadParam)
 	KinectStreamImpl* pStream = (KinectStreamImpl*)pThreadParam;
 	pStream->mainLoop();
 	XN_THREAD_PROC_RETURN(XN_STATUS_OK);
+}
+
+// Depth to image coordinates converter
+
+KinectStreamImpl::DepthToImageCoordsConverter::DepthToImageCoordsConverter(INuiSensor* pNuiSensor) : m_pNuiSensor(pNuiSensor)
+{
+}
+
+OniStatus KinectStreamImpl::DepthToImageCoordsConverter::convert(const OniVideoMode& depthVideoMode,
+	const OniVideoMode& colorVideoMode, const NUI_DEPTH_IMAGE_PIXEL* const depthPixels, const int numPoints, int* const outCoords)
+{
+	XN_ASSERT(sizeof(LONG) == sizeof(int));
+
+	m_depthValuesBuffer.SetSize(numPoints);
+	
+	// Pack depth data for NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution
+	USHORT* depthValuesIter = m_depthValuesBuffer.GetData();
+	for (int i = 0; i < numPoints; i++) {
+		*(depthValuesIter++) = (depthPixels + i)->depth << 3;
+	}
+		
+	HRESULT hr = m_pNuiSensor->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
+		KinectStreamImpl::getNuiImageResolution(colorVideoMode.resolutionX, colorVideoMode.resolutionY),
+		KinectStreamImpl::getNuiImageResolution(depthVideoMode.resolutionX, depthVideoMode.resolutionY),
+		numPoints,
+		m_depthValuesBuffer.GetData(),
+		numPoints * 2,
+		reinterpret_cast<LONG*>(outCoords)
+		);
+
+	return SUCCEEDED(hr) ? ONI_STATUS_OK : ONI_STATUS_ERROR;
 }
