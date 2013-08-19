@@ -16,6 +16,7 @@ BaseKinectStream::BaseKinectStream(KinectStreamImpl* pStreamImpl):
 {
 	m_running = false;
 	m_cropping.enabled = FALSE;
+	m_mirroring = FALSE;
 	pStreamImpl->addStream(this);
 }
 
@@ -44,6 +45,7 @@ void BaseKinectStream::destroy()
 	m_pStreamImpl->removeStream(this);
 }
 
+// TODO: EXACT_PROP_SIZE_OR_XXX should be used for property size checking rather than copy-and-pasting
 OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
 	OniStatus status = ONI_STATUS_NOT_SUPPORTED;
@@ -58,6 +60,13 @@ OniStatus BaseKinectStream::getProperty(int propertyId, void* data, int* pDataSi
 		else
 		{
 			status = GetCropping((OniCropping*)data);
+		}
+		break;
+	case ONI_STREAM_PROPERTY_MIRRORING:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, OniBool);
+			*(OniBool*)data = m_mirroring;
+			status = ONI_STATUS_OK;
 		}
 		break;
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
@@ -118,6 +127,12 @@ OniStatus BaseKinectStream::setProperty(int propertyId, const void* data, int da
 		}
 		status = SetCropping((OniCropping*)data);
 	}
+	else if (propertyId == ONI_STREAM_PROPERTY_MIRRORING)
+	{
+		EXACT_PROP_SIZE_OR_RETURN(dataSize, OniBool);
+		m_mirroring = *(OniBool*)data;
+		status = ONI_STATUS_OK;
+	}
 	else if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
 	{
 		if (dataSize != sizeof(OniVideoMode))
@@ -136,6 +151,7 @@ OniBool BaseKinectStream::isPropertySupported(int propertyId)
 	switch (propertyId)
 	{
 	case ONI_STREAM_PROPERTY_CROPPING:
+	case ONI_STREAM_PROPERTY_MIRRORING:
 	case ONI_STREAM_PROPERTY_HORIZONTAL_FOV:
 	case ONI_STREAM_PROPERTY_VERTICAL_FOV:
 	case ONI_STREAM_PROPERTY_VIDEO_MODE:
