@@ -95,7 +95,7 @@
       <Filter>Header files\API</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\KinectProperties.h">
-      <Filter>Header files\API</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
