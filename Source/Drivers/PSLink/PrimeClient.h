@@ -53,9 +53,13 @@ public:
     virtual XnStatus ReadAHB(XnUInt32 nAddress, XnUInt8 nBitOffset, XnUInt8 nBitWidth, XnUInt32& nValue);
 	virtual XnStatus SoftReset();
 	virtual XnStatus HardReset();
-    virtual XnStatus SetEmitterActive(XnBool bActive);
+    virtual XnStatus SetProjectorActive(XnBool bActive);
     virtual XnStatus SetAccActive(XnBool bActive);
-    virtual XnStatus GetAccActive(XnBool& bActive);    
+    virtual XnStatus GetAccActive(XnBool& bActive); 
+    virtual XnStatus SetVDDActive(XnBool bActive);  
+    virtual XnStatus GetVDDActive(XnBool& bActive); 
+    virtual XnStatus SetPeriodicBistActive(XnBool bActive);  
+    virtual XnStatus GetPeriodicBistActive(XnBool& bActive);   
     virtual XnStatus StartFWLog();
     virtual XnStatus StopFWLog();
 	virtual XnStatus OpenFWLogFile(XnUInt8 logID);
@@ -64,6 +68,8 @@ public:
 
 	virtual XnStatus RunPresetFile(const XnChar* strFileName);
 	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
+    virtual XnStatus GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTempList);
+    virtual XnStatus GetTemperature(XnCommandTemperatureResponse& temp);
 	virtual XnStatus ExecuteBist(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	virtual XnStatus FormatZone(XnUInt8 nZone);
     //TODO: Implement Get emitter active
@@ -91,9 +97,9 @@ public:
 	virtual XnStatus GetFileList(xnl::Array<XnFwFileEntry>& files);
 	virtual XnStatus DownloadFile(XnUInt16 zone, const XnChar* strFirmwareFileName, const XnChar* strTargetFile);
 	
-	virtual XnStatus EnableProjectorPulse(XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip);
+	virtual XnStatus EnableProjectorPulse(XnFloat delay, XnFloat width, XnFloat cycle);
 	virtual XnStatus DisableProjectorPulse();
-	virtual XnStatus GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip);
+	virtual XnStatus GetProjectorPulse(XnBool& enabled, XnFloat& delay, XnFloat& width, XnFloat& framesToskip);
 	virtual XnStatus SetProjectorPower(XnUInt16 power);
 	virtual XnStatus GetProjectorPower(XnUInt16& power);
 

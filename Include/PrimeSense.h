@@ -42,7 +42,6 @@ enum
 
 	// Device Properties
     PS_PROPERTY_USB_INTERFACE = 0x1d27F001, // values from XnUsbInterfaceType
-    PS_PROPERTY_ACC_ENABLED = 0x1d27F002, // SetAccActive
 };
 
 /**
@@ -77,6 +76,8 @@ enum
 	PS_COMMAND_SET_LOG_MASK_STATE = 0x1d27E013, // XnCommandSetLogMaskState
 	PS_COMMAND_START_LOG = 0x1d27E014, // no arguments
     PS_COMMAND_STOP_LOG = 0x1d27E015, // no arguments
+    PS_COMMAND_READ_TEMPERATURE = 0x1d27E016, // no arguments    
+    LINK_COMMAND_GET_TEMP_LIST = 0x1d27E017,// PrintTempList
 };
 
 typedef enum XnUsbInterfaceType
@@ -126,6 +127,12 @@ typedef struct XnBistInfo
 	uint32_t id;
 	char name[32];
 } XnBistInfo;
+
+typedef struct XnTempInfo
+{
+    uint32_t id;
+    char name[16];
+} XnTempInfo;
 
 typedef struct XnFwLogMask
 {
@@ -201,6 +208,12 @@ typedef struct XnCommandGetBistList
 	XnBistInfo* tests;
 } XnCommandGetBistList;
 
+typedef struct XnCommandGetTempList
+{
+	uint32_t count;	// in: number of allocated elements in tests array. out: number of written elements in the array
+	XnTempInfo* pTempInfos;
+} XnCommandGetTempList;
+
 typedef struct XnCommandExecuteBist
 {
 	uint32_t id;
@@ -208,6 +221,12 @@ typedef struct XnCommandExecuteBist
 	uint32_t extraDataSize;	// in: number of allocated bytes in extraData. out: number of written bytes in extraData
 	uint8_t* extraData;
 } XnCommandExecuteBist;
+
+typedef struct XnCommandTemperatureResponse
+{
+    uint32_t id;
+    float temperature;
+} XnCommandTemperatureResponse;
 
 typedef struct XnCommandUsbTest
 {

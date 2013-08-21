@@ -330,9 +330,9 @@ XnStatus PrimeClient::DownloadFile(XnUInt16 zone, const XnChar* strFirmwareFileN
 	return m_linkControlEndpoint.DownloadFile(zone, strFirmwareFileName, strTargetFile);
 }
 
-XnStatus PrimeClient::SetEmitterActive(XnBool bActive)
+XnStatus PrimeClient::SetProjectorActive(XnBool bActive)
 {
-    return m_linkControlEndpoint.SetEmitterActive(bActive);
+    return m_linkControlEndpoint.SetProjectorActive(bActive);
 }
 
 XnStatus PrimeClient::SetAccActive(XnBool bActive)
@@ -345,6 +345,25 @@ XnStatus PrimeClient::GetAccActive(XnBool& bActive)
     return m_linkControlEndpoint.GetAccActive(bActive);
 }
 
+XnStatus PrimeClient::SetVDDActive(XnBool bActive)
+{
+    return m_linkControlEndpoint.SetVDDActive(bActive);
+}
+
+XnStatus PrimeClient::GetVDDActive(XnBool& bActive)
+{
+    return m_linkControlEndpoint.GetVDDActive(bActive);
+}
+
+XnStatus PrimeClient::SetPeriodicBistActive(XnBool bActive)
+{
+    return m_linkControlEndpoint.SetPeriodicBistActive(bActive);
+}
+
+XnStatus PrimeClient::GetPeriodicBistActive(XnBool& bActive)
+{
+    return m_linkControlEndpoint.GetPeriodicBistActive(bActive);
+}
 void PrimeClient::LogVersions()
 {
     static XnBool bVersionsLoggedOnce = FALSE;
@@ -623,7 +642,14 @@ XnStatus PrimeClient::GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTes
 {
 	return m_linkControlEndpoint.GetSupportedBistTests(supportedTests);
 }
-
+XnStatus PrimeClient::GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTempList)
+{
+    return m_linkControlEndpoint.GetSupportedTempList(supportedTempList);
+}
+XnStatus PrimeClient::GetTemperature(XnCommandTemperatureResponse& temp)
+{
+    return m_linkControlEndpoint.GetTemperature(temp);
+}
 XnStatus PrimeClient::GetSupportedI2CDevices(xnl::Array<XnLinkI2CDevice>& supportedDevices)
 {
 	return m_linkControlEndpoint.GetSupportedI2CDevices(supportedDevices);
@@ -651,9 +677,9 @@ XnStatus PrimeClient::GetBootStatus(XnBootStatus& bootStatus)
 	return m_linkControlEndpoint.GetBootStatus(bootStatus);
 }
 
-XnStatus PrimeClient::EnableProjectorPulse(XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip)
+XnStatus PrimeClient::EnableProjectorPulse(XnFloat delay, XnFloat width, XnFloat cycle)
 {
-	return m_linkControlEndpoint.SetProjectorPulse(TRUE, delay, width, framesToskip);
+	return m_linkControlEndpoint.SetProjectorPulse(TRUE, delay, width, cycle);
 }
 
 XnStatus PrimeClient::DisableProjectorPulse()
@@ -661,7 +687,7 @@ XnStatus PrimeClient::DisableProjectorPulse()
 	return m_linkControlEndpoint.SetProjectorPulse(FALSE, 0, 0, 0);
 }
 
-XnStatus PrimeClient::GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip)
+XnStatus PrimeClient::GetProjectorPulse(XnBool& enabled, XnFloat& delay, XnFloat& width, XnFloat& framesToskip)
 {
 	return m_linkControlEndpoint.GetProjectorPulse(enabled, delay, width, framesToskip);
 }

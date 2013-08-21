@@ -540,7 +540,7 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
-    case PS_PROPERTY_ACC_ENABLED:
+    case LINK_PROP_ACC_ENABLED:
         {
             ENSURE_PROP_SIZE(*pDataSize, XnBool);
 
@@ -551,6 +551,31 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
             ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
         }
         break;
+
+    case LINK_PROP_VDD_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetVDDActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetPeriodicBistActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
 
 	case LINK_PROP_PROJECTOR_POWER:
 		{
@@ -610,15 +635,27 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 
 	// Internal Link Properties
 	// int props
-	case LINK_PROP_EMITTER_ACTIVE:
-		nRetVal = m_pSensor->SetEmitterActive(*(XnBool*)data);
-		XN_IS_STATUS_OK_LOG_ERROR_RET("Set emitter active", nRetVal, ONI_STATUS_ERROR);
+	case LINK_PROP_PROJECTOR_ACTIVE:
+		nRetVal = m_pSensor->SetProjectorActive(*(XnBool*)data);
+		XN_IS_STATUS_OK_LOG_ERROR_RET("Set Projector active", nRetVal, ONI_STATUS_ERROR);
 		break;
 
     //controls if the firmware runs all its control loops (BIST)
-    case PS_PROPERTY_ACC_ENABLED:
+    case LINK_PROP_ACC_ENABLED:
         nRetVal = m_pSensor->SetAccActive(*(XnBool*)data);
         XN_IS_STATUS_OK_LOG_ERROR_RET("Set Acc active", nRetVal, ONI_STATUS_ERROR);
+        break;
+
+        //
+    case LINK_PROP_VDD_ENABLED:
+        nRetVal = m_pSensor->SetVDDActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set VDD active", nRetVal, ONI_STATUS_ERROR);
+        break;
+
+        //
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
+        nRetVal = m_pSensor->SetPeriodicBistActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set PeriodicBist active", nRetVal, ONI_STATUS_ERROR);
         break;
 
 		// string props
@@ -675,8 +712,10 @@ OniBool LinkOniDevice::isPropertySupported(int propertyId)
 	case LINK_PROP_FW_VERSION:
 	case LINK_PROP_VERSIONS_INFO_COUNT:
 	case LINK_PROP_VERSIONS_INFO:
-	case LINK_PROP_EMITTER_ACTIVE:
-    case PS_PROPERTY_ACC_ENABLED:
+	case LINK_PROP_PROJECTOR_ACTIVE:
+    case LINK_PROP_ACC_ENABLED:
+    case LINK_PROP_VDD_ENABLED:
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
 	case LINK_PROP_PRESET_FILE:
 	case PS_PROPERTY_USB_INTERFACE:
 	case LINK_PROP_BOOT_STATUS:
@@ -972,6 +1011,55 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		}
 		break;
 
+    case LINK_COMMAND_GET_TEMP_LIST:
+        {
+            EXACT_PROP_SIZE_DO(dataSize, XnCommandGetTempList)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetTempList));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            XnCommandGetTempList* pArgs = reinterpret_cast<XnCommandGetTempList*>(data);
+            if (pArgs->pTempInfos == NULL)
+            {
+                m_driverServices.errorLoggerAppend("Temp array must point to valid memory: \n");
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            xnl::Array<XnTempInfo> tempInfos;
+            nRetVal = m_pSensor->GetSupportedTempList(tempInfos);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Get Temp list", nRetVal, ONI_STATUS_ERROR);
+
+            if (pArgs->count < tempInfos.GetSize())
+            {
+                m_driverServices.errorLoggerAppend("Insufficient memory for Temperature list. available: %d, required: %d\n", pArgs->pTempInfos, tempInfos.GetSize());
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            for (int i = 0; i < (int)tempInfos.GetSize(); ++i)
+            {
+                pArgs->pTempInfos[i] = tempInfos[i];
+            }
+            pArgs->count = tempInfos.GetSize();
+        }
+        break;
+    case PS_COMMAND_READ_TEMPERATURE:
+        {
+            XnCommandTemperatureResponse* pArg;
+            EXACT_PROP_SIZE_DO(dataSize,XnCommandTemperatureResponse)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandTemperatureResponse));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+            pArg = reinterpret_cast<XnCommandTemperatureResponse*>(data);
+            nRetVal = m_pSensor->GetTemperature(*pArg);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Get Temperature", nRetVal, ONI_STATUS_ERROR);
+        }
+        break;
 	case PS_COMMAND_EXECUTE_BIST:
 		{
 			EXACT_PROP_SIZE_DO(dataSize, XnCommandExecuteBist)
@@ -1325,7 +1413,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 			}
 
 			XnCommandSetProjectorPulse* pArgs = reinterpret_cast<XnCommandSetProjectorPulse*>(data);
-			nRetVal = m_pSensor->EnableProjectorPulse((XnUInt16)pArgs->delay, (XnUInt16)pArgs->width, (XnUInt16)pArgs->frames);
+			nRetVal = m_pSensor->EnableProjectorPulse((XnFloat)pArgs->delay, (XnFloat)pArgs->width, (XnFloat)pArgs->cycle);
 			XN_IS_STATUS_OK_LOG_ERROR_RET("Enable projector pulse", nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
@@ -1363,6 +1451,8 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_DUMP_ENDPOINT:
 	case PS_COMMAND_GET_I2C_DEVICE_LIST:
 	case PS_COMMAND_GET_BIST_LIST:
+    case LINK_COMMAND_GET_TEMP_LIST:
+    case PS_COMMAND_READ_TEMPERATURE:
 	case PS_COMMAND_EXECUTE_BIST:
 	case PS_COMMAND_USB_TEST:
 	case PS_COMMAND_GET_LOG_MASK_LIST:

@@ -450,13 +450,23 @@ typedef struct XnLinkSupportedLogFiles
 
 typedef struct XnLinkProjectorPulse
 {
-	XnUInt8 m_bEnabled;
-	XnUInt8 m_nReserved;
-	XnUInt16 m_nDelay; // Delay between frame start and the start of pulse, in milliseconds
-	XnUInt16 m_nWidth; // Pulse width, in milliseconds
-	XnUInt16 m_nFramesToSkip; // number of frames to skip between projector pulses, from pulse start to next pulse start.
+	XnUInt16 m_bEnabled;
+	XnUInt16 m_nReserved;
+	XnFloat  m_nDelay; // Delay between frame start and the start of pulse, in milliseconds
+	XnFloat  m_nWidth; // Pulse width, in milliseconds
+	XnFloat  m_nCycle; // in pulse mode: number of frames to skip between projector pulses, from pulse start to next pulse start. in PWM : Cycle time
 } XnLinkProjectorPulse;
 
+typedef struct XnLinkTemperatureSensor
+{
+	XnUInt32 m_nID;
+	XnUInt8 m_strName[XN_LINK_MAX_SENSOR_NAME_LENGTH];
+} XnLinkTemperatureSensor;
+
+typedef struct XnLinkTemperatureSensorsList{
+ 	XnUInt32 m_nCount;
+ 	XnLinkTemperatureSensor m_aSensors[XN_LINK_MAX_TEMPERATURE_SENSORS];
+}XnLinkTemperatureSensorsList;
 //-----------------------------------------------------------------------
 // Command Parameters 
 //-----------------------------------------------------------------------
@@ -579,9 +589,20 @@ typedef struct XnLinkLogOpenCloseParams
 	XnUInt8 m_nID;
 } XnLinkLogOpenCloseParams;
 
+typedef struct XnLinkGetTemperatureParams
+{
+	XnUInt32 m_nID;
+} XnLinkGetTemperatureParams;
+
 //-----------------------------------------------------------------------
 // Command Response Structures 
 //-----------------------------------------------------------------------
+typedef struct XnLinkTemperatureResponse
+{
+	XnUInt32 m_nID;
+	XnFloat value;
+} XnLinkTemperatureResponse;
+
 typedef struct XnLinkResponseInfo
 {
 	XnUInt16 m_nResponseCode;

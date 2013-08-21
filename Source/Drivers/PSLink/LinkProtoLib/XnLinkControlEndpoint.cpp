@@ -890,6 +890,40 @@ XnStatus LinkControlEndpoint::GetSupportedBistTests(xnl::Array<XnBistInfo>& supp
 	return XN_STATUS_OK;
 }
 
+XnStatus LinkControlEndpoint::GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTempList)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	xnLogVerbose(XN_MASK_LINK, "LINK: Getting supported Temperature list...");
+
+	XnLinkTemperatureSensorsList* pSupportedList = 
+		reinterpret_cast<XnLinkTemperatureSensorsList*>(m_pIncomingResponse);
+    XnUInt32 nResponseSize = m_nMaxResponseSize;
+
+	nRetVal = GetGeneralProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_TEMPERATURE_LIST, nResponseSize, pSupportedList);
+	XN_IS_STATUS_OK_LOG_ERROR("Execute get supported Temperature list command", nRetVal);
+
+	nRetVal = xnLinkParseSupportedTempList(pSupportedList, nResponseSize, supportedTempList);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return XN_STATUS_OK;
+}
+XnStatus LinkControlEndpoint::GetTemperature(XnCommandTemperatureResponse& tempData)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+	xnLogVerbose(XN_MASK_LINK, "LINK: Getting Temperature for id %d...",tempData.id);
+
+	XnLinkTemperatureResponse* pTemp = 
+		reinterpret_cast<XnLinkTemperatureResponse*>(m_pIncomingResponse);
+    XnUInt32 nResponseSize = m_nMaxResponseSize;
+
+	nRetVal = ExecuteCommand(XN_LINK_MSG_READ_TEMPERATURE, XN_LINK_STREAM_ID_NONE, &tempData,sizeof(XnCommandTemperatureResponse),pTemp, nResponseSize);
+	XN_IS_STATUS_OK_LOG_ERROR("Execute Get Temperature command", nRetVal);
+
+	nRetVal = xnLinkParseGetTemperature(pTemp, nResponseSize, tempData);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return XN_STATUS_OK;
+}
 XnStatus LinkControlEndpoint::ExecuteBistTests(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
@@ -1581,16 +1615,16 @@ XnStatus LinkControlEndpoint::GetSupportedInterfaces(XnUInt16 nStreamID, xnl::Bi
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::SetEmitterActive(XnBool bActive)
+XnStatus LinkControlEndpoint::SetProjectorActive(XnBool bActive)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	
-	xnLogVerbose(XN_MASK_LINK, "LINK: Turning emitter %s...", bActive ? "on" : "off");
+	xnLogVerbose(XN_MASK_LINK, "LINK: Turning Projector %s...", bActive ? "on" : "off");
 
-    nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_EMITTER_ACTIVE, XnUInt64(bActive));
+    nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_ENABLED, XnUInt64(bActive));
 	XN_IS_STATUS_OK(nRetVal);
 
-	xnLogInfo(XN_MASK_LINK, "LINK: Emitter was turned %s", bActive ? "on" : "off");
+	xnLogInfo(XN_MASK_LINK, "LINK: Projector was turned %s", bActive ? "on" : "off");
 
 	return (XN_STATUS_OK);
 }
@@ -1622,6 +1656,70 @@ XnStatus LinkControlEndpoint::GetAccActive(XnBool& bActive)
     bActive = (nValue == TRUE);
 
     xnLogInfo(XN_MASK_LINK, "LINK: Acc is %s", bActive ?  "on" : "off");
+
+    return nRetVal;
+}
+
+// Enables/Disables the BIST
+XnStatus LinkControlEndpoint::SetVDDActive(XnBool bActive)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Turning VDD %s...", bActive ? "on" : "off");
+
+    nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_VDD_ENABLED, XnUInt64(bActive));
+    XN_IS_STATUS_OK(nRetVal);
+
+    xnLogInfo(XN_MASK_LINK, "LINK: VDD was turned %s", bActive ? "on" : "off");
+
+    return (XN_STATUS_OK);
+}
+// Enables/Disables the VDD - Valid Depth Detect (XN_LINK_PROP_ID_VDD_ENABLED) 
+//on - Safety mechanism is on | off - reduce power
+XnStatus LinkControlEndpoint::GetVDDActive(XnBool& bActive)
+{
+    XnUInt64 nValue;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Getting VDD ...");
+    
+    XnStatus nRetVal = GetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_VDD_ENABLED, nValue);
+    XN_IS_STATUS_OK(nRetVal);
+
+    bActive = (nValue == TRUE);
+
+    xnLogInfo(XN_MASK_LINK, "LINK: VDD is %s", bActive ?  "on" : "off");
+
+    return nRetVal;
+}
+
+
+// Enables/Disables the Periodic BIST - monitors the 
+XnStatus LinkControlEndpoint::SetPeriodicBistActive(XnBool bActive)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Turning Periodic BIST %s...", bActive ? "on" : "off");
+
+    nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PERIODIC_BIST_ENABLED, XnUInt64(bActive));
+    XN_IS_STATUS_OK(nRetVal);
+
+    xnLogInfo(XN_MASK_LINK, "LINK: Periodic BIST was turned %s", bActive ? "on" : "off");
+
+    return (XN_STATUS_OK);
+}
+
+XnStatus LinkControlEndpoint::GetPeriodicBistActive(XnBool& bActive)
+{
+    XnUInt64 nValue;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Getting Periodic BIST ...");
+
+    XnStatus nRetVal = GetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PERIODIC_BIST_ENABLED, nValue);
+    XN_IS_STATUS_OK(nRetVal);
+
+    bActive = (nValue == TRUE);
+
+    xnLogInfo(XN_MASK_LINK, "LINK: Periodic BIST is %s", bActive ?  "on" : "off");
 
     return nRetVal;
 }
@@ -1769,7 +1867,7 @@ XnStatus LinkControlEndpoint::CloseFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamI
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::SetProjectorPulse(XnBool enabled, XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip)
+XnStatus LinkControlEndpoint::SetProjectorPulse(XnBool enabled, XnFloat delay, XnFloat width, XnFloat cycle)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1777,9 +1875,9 @@ XnStatus LinkControlEndpoint::SetProjectorPulse(XnBool enabled, XnUInt16 delay, 
 
 	XnLinkProjectorPulse pulse;
 	pulse.m_bEnabled = enabled ? 1 : 0;
-	pulse.m_nDelay = XN_PREPARE_VAR16_IN_BUFFER(delay);
-	pulse.m_nWidth = XN_PREPARE_VAR16_IN_BUFFER(width);
-	pulse.m_nFramesToSkip = XN_PREPARE_VAR16_IN_BUFFER(framesToskip);
+	pulse.m_nDelay = XN_PREPARE_VAR_FLOAT_IN_BUFFER(delay);
+	pulse.m_nWidth = XN_PREPARE_VAR_FLOAT_IN_BUFFER(width);
+	pulse.m_nCycle = XN_PREPARE_VAR_FLOAT_IN_BUFFER(cycle);
 
 	nRetVal = SetGeneralProperty(XN_LINK_PROP_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_PULSE, sizeof(pulse), &pulse);
 	XN_IS_STATUS_OK(nRetVal);
@@ -1789,7 +1887,7 @@ XnStatus LinkControlEndpoint::SetProjectorPulse(XnBool enabled, XnUInt16 delay, 
 	return XN_STATUS_OK;
 }
 
-XnStatus LinkControlEndpoint::GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip)
+XnStatus LinkControlEndpoint::GetProjectorPulse(XnBool& enabled, XnFloat& delay, XnFloat& width, XnFloat& framesToskip)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
@@ -1808,9 +1906,9 @@ XnStatus LinkControlEndpoint::GetProjectorPulse(XnBool& enabled, XnUInt16& delay
 	}
 
 	enabled = (pulse.m_bEnabled != 0);
-	delay = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nDelay);
+	delay = XN_PREPARE_VAR_FLOAT_IN_BUFFER(pulse.m_nDelay);
 	width = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nWidth);
-	framesToskip = XN_PREPARE_VAR16_IN_BUFFER(pulse.m_nFramesToSkip);
+	framesToskip = XnFloat(pulse.m_nCycle);
 
 	return XN_STATUS_OK;
 }
@@ -1819,12 +1917,12 @@ XnStatus LinkControlEndpoint::SetProjectorPower(XnUInt16 power)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	xnLogVerbose(XN_MASK_LINK, "LINK: Setting emitter power to %u...", power);
+	xnLogVerbose(XN_MASK_LINK, "LINK: Setting Projector power to %u...", power);
 
 	nRetVal = SetIntProperty(XN_LINK_STREAM_ID_NONE, XN_LINK_PROP_ID_PROJECTOR_POWER, XnUInt64(power));
 	XN_IS_STATUS_OK(nRetVal);
 
-	xnLogInfo(XN_MASK_LINK, "LINK: Emitter power was set to %u", power);
+	xnLogInfo(XN_MASK_LINK, "LINK: Projector power was set to %u", power);
 
 	return (XN_STATUS_OK);
 }

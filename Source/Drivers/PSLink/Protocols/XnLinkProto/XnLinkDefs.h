@@ -22,6 +22,8 @@
 #define XN_LINK_MAX_VERSION_LENGTH					32
 #define XN_LINK_MAX_I2C_DEVICE_NAME_LENGTH			32
 #define XN_LINK_MAX_LOG_FILE_NAME_LENGTH			32
+#define XN_LINK_MAX_SENSOR_NAME_LENGTH				16
+#define XN_LINK_MAX_TEMPERATURE_SENSORS				2
 
 /* Interface ID's */
 typedef enum XnLinkInterfaceID
@@ -108,6 +110,8 @@ typedef enum XnLinkMsgType
 	XN_LINK_MSG_STOP_USB_TEST					= 0x020B, 
 	XN_LINK_MSG_START_LOG_FILE					= 0x020C,
 	XN_LINK_MSG_STOP_LOG_FILE					= 0x020D,
+	XN_LINK_MSG_READ_TEMPERATURE				= 0x020E,
+
 
 //XN_LINK_INTERFACE_DATA_STREAMING - Data streaming messages - group 0x03
 	XN_LINK_MSG_START_STREAMING					= 0x0300,
@@ -324,7 +328,7 @@ typedef enum XnLinkPropID
 	XN_LINK_PROP_ID_SUPPORTED_PROPS				= 0x0005, //General property, holds XnLinkIDSet (read only property)
     XN_LINK_PROP_ID_HW_VERSION                  = 0x0006, //Int property (read only property)
     XN_LINK_PROP_ID_SERIAL_NUMBER				= 0x0007, //General property, holds XnLinkSerialNumber (read only property)
-    XN_LINK_PROP_ID_EMITTER_ACTIVE              = 0x0008, //Int property, 1/0 for emitter on/off
+    XN_LINK_PROP_ID_RESERVED					= 0x0008,
 	XN_LINK_PROP_ID_COMPONENT_VERSIONS			= 0x0009, //General property, holds XnLinkComponentVersionsList (read only property)
 	XN_LINK_PROP_ID_BOOT_STATUS					= 0x000A, //General property, holds XnLinkBootStatus (read only property)
 
@@ -332,7 +336,6 @@ typedef enum XnLinkPropID
 	XN_LINK_PROP_ID_SUPPORTED_BIST_TESTS		= 0x0201, //General property, holds XnLinkSupportedBistTests
 	XN_LINK_PROP_ID_SUPPORTED_I2C_DEVICES       = 0x0202, //General property, holds XnLinkSupportedI2CDevices
 	XN_LINK_PROP_ID_SUPPORTED_LOG_FILES         = 0x0203, //General property, holds XnLinkSupportedLogFiles
-	XN_LINK_PROP_ID_ACC_ENABLED                 = 0x0204, //Int property, 0 = ACC & Periodic Thermistor disabled, 1 = enabled
 
 	//Map generator properties - group 0x05
 	XN_LINK_PROP_ID_SUPPORTED_VIDEO_MODES		= 0x0501, //General property, holds XnLinkSupportedVideoModes
@@ -367,7 +370,12 @@ typedef enum XnLinkPropID
 	// PROJECTOR_MGMT messages - group 0x2B
 	XN_LINK_PROP_ID_PROJECTOR_PULSE				= 0x2B01, //General property, holds XnLinkProjectorPulse
 	XN_LINK_PROP_ID_PROJECTOR_POWER				= 0x2B02, //Int property
-
+	XN_LINK_PROP_ID_ACC_ENABLED                 = 0x2B03, //Int property ACC, 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_VDD_ENABLED					= 0x2B04, //Int property vdd sampling , 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_PROJECTOR_ENABLED			= 0x2B05, //Int property projector, 0 = OFF, 1 = ON
+	XN_LINK_PROP_ID_PERIODIC_BIST_ENABLED		= 0x2B06, //Int property voltage sampling , 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_TEMPERATURE_LIST			= 0x2B07,
+	//INVALID
 	XN_LINK_PROP_ID_INVALID						= 0xFFFF, //Indicates invalid property ID
 } XnLinkPropID;
 

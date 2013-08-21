@@ -1068,6 +1068,73 @@ XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupporte
 	return XN_STATUS_OK;
 }
 
+XnStatus xnLinkParseSupportedTempList(const XnLinkTemperatureSensorsList* pSupportedList, XnUInt32 nBufferSize, xnl::Array<XnTempInfo>& supportedTempList)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnUInt32 nTemp = 0;
+    XnUInt32 nExpectedSize = 0;
+
+    XN_VALIDATE_INPUT_PTR(pSupportedList);
+
+    if (nBufferSize < sizeof(pSupportedList->m_nCount))
+    {
+        xnLogError(XN_MASK_LINK, "Size of link supported Temperature list was only %u bytes, must be at least %u.", nBufferSize, 
+            sizeof(pSupportedList->m_nCount));
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+
+    nTemp = XN_PREPARE_VAR32_IN_BUFFER(pSupportedList->m_nCount);
+    nExpectedSize = (sizeof(pSupportedList->m_nCount) + 
+        (sizeof(pSupportedList->m_aSensors[0]) * nTemp));
+    if (nBufferSize != nExpectedSize)
+    {
+        xnLogError(XN_MASK_LINK, "Got bad size of 'supported Temperature list' property: %u instead of %u", nBufferSize, nExpectedSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_RESPONSE_SIZE;
+    }
+
+    nRetVal = supportedTempList.SetSize(nTemp);
+    XN_IS_STATUS_OK_LOG_ERROR("Set size of output supported Temperature list array", nRetVal);
+
+    for (XnUInt32 i = 0; i < nTemp; i++)
+    {
+        supportedTempList[i].id = XN_PREPARE_VAR32_IN_BUFFER(pSupportedList->m_aSensors[i].m_nID);
+        nRetVal = xnOSStrCopy(supportedTempList[i].name, (const XnChar*) pSupportedList->m_aSensors[i].m_strName, sizeof(supportedTempList[i].name));
+        XN_IS_STATUS_OK_LOG_ERROR("Copy Temperature list name", nRetVal);
+    }
+
+    return XN_STATUS_OK;
+}
+
+XnStatus xnLinkParseGetTemperature(const XnLinkTemperatureResponse* tempResponse, XnUInt32 nBufferSize, XnCommandTemperatureResponse& tempData)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnUInt32 nExpectedSize = 0;
+
+    XN_VALIDATE_INPUT_PTR(tempResponse);
+
+    if (nBufferSize < sizeof(tempData.temperature))
+    {
+        xnLogError(XN_MASK_LINK, "Size of link Get Temperature was only %u bytes, must be at least %u.", nBufferSize, 
+            sizeof(tempData.temperature));
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+
+    nExpectedSize = (sizeof(tempResponse));
+    if (nBufferSize != nExpectedSize)
+    {
+        xnLogError(XN_MASK_LINK, "Got bad size of 'Temperature struct' property: %u instead of %u", nBufferSize, nExpectedSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_RESPONSE_SIZE;
+    }
+    tempData.id = XN_PREPARE_VAR32_IN_BUFFER(tempResponse->m_nID);
+    tempData.temperature = XN_PREPARE_VAR_FLOAT_IN_BUFFER(tempResponse->value);
+    XN_IS_STATUS_OK_LOG_ERROR("Copy Temperature value", nRetVal);
+
+    return XN_STATUS_OK;
+}
 const XnChar* xnLinkPixelFormatToName(XnFwPixelFormat pixelFormat)
 {
 	switch (pixelFormat)

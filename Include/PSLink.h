@@ -14,13 +14,20 @@ enum
 	/* General - array - XnComponentVersion * count elements, get only */
 	LINK_PROP_VERSIONS_INFO = 0x12000003, // "VersionsInfo"
 	/* Int - 0 means off, 1 means on. */
-	LINK_PROP_EMITTER_ACTIVE = 0x12000008, // "EmitterActive"
+	LINK_PROP_PROJECTOR_ACTIVE = 0x12000008, // "ProjectorActive"
 	/* String. Set only */
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
 	/* Get only */
 	LINK_PROP_BOOT_STATUS = 0x1200000b,
 	/* Int - system specific units */
-	LINK_PROP_PROJECTOR_POWER = 0x1200000c,
+    LINK_PROP_PROJECTOR_POWER = 0x1200000c,
+    /* SetAccActive*/   
+    LINK_PROP_ACC_ENABLED = 0x1200000d, 
+    /* SetAccActive*/   
+    LINK_PROP_VDD_ENABLED = 0x1200000e, 
+    /* SetAccActive*/   
+    LINK_PROP_PERIODIC_BIST_ENABLED = 0x1200000f, 
+
 
 	/**** Device commands ****/
 	/* XnCommandGetFwStreams */
@@ -42,7 +49,7 @@ enum
 	/* XnCommandSetProjectorPulse */
 	LINK_COMMAND_SET_PROJECTOR_PULSE = 0x1200F009,
 	/* No args */
-	LINK_COMMAND_DISABLE_PROJECTOR_PULSE = 0x1200F00a,
+    LINK_COMMAND_DISABLE_PROJECTOR_PULSE = 0x1200F00a,
 
 	/**** Stream properties ****/
 	/* Int. 1 - Shifts 9.3, 2 - Grayscale16, 3 - YUV422, 4 - Bayer8 */
@@ -202,9 +209,9 @@ typedef struct XnCommandGetFwStreamVideoMode
 
 typedef struct XnCommandSetProjectorPulse
 {
-	int delay;
-	int width;
-	int frames;
+	float delay; //start delay - delay time before start pulse
+	float width; //DC - duty cycle - the percentage of the pulse out of total cycle
+	float cycle;
 } XnCommandSetProjectorPulse;
 
 #pragma pack (pop)
