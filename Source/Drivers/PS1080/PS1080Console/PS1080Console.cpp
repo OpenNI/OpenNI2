@@ -1616,7 +1616,7 @@ bool StartReadData(openni::Device& Device, vector<string>& Command)
 
 	if (!g_colorStream.isValid())
 	{
-		rc = g_depthStream.create(Device, openni::SENSOR_COLOR);
+		rc = g_colorStream.create(Device, openni::SENSOR_COLOR);
 		if (rc != openni::STATUS_OK)
 		{
 			printf("Can't create image stream: %s\n", openni::OpenNI::getExtendedError());
