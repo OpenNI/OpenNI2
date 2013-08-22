@@ -327,5 +327,8 @@
     </ClCompile>
     <ClCompile Include="PrimeClient.cpp" />
     <ClCompile Include="PS1200Device.cpp" />
+    <ClCompile Include="LinkErrorCodes.cpp">
+      <Filter>DriverImpl</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

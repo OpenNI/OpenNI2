@@ -249,6 +249,7 @@
     <ClInclude Include="PrimeClientDefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LinkErrorCodes.cpp" />
     <ClCompile Include="LinkProtoLib\XnClientSocketInConnection.cpp" />
     <ClCompile Include="LinkProtoLib\XnClientSyncSocketConnection.cpp" />
     <ClCompile Include="LinkProtoLib\XnClientUSBConnectionFactory.cpp" />
