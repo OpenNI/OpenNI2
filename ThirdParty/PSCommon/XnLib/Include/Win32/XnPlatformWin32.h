@@ -253,5 +253,5 @@ typedef	HMODULE	XN_LIB_HANDLE;
 		return TRUE;																	\
 	}
 
-#define XN_ASSERT(assertion) assert(assertion)
+#define XN_ASSERT(assertion) _ASSERT(assertion)
 #endif //_XN_PLATFORM_WIN32_H_
