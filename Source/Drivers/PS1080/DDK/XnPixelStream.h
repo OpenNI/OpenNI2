@@ -132,6 +132,7 @@ private:
 	XnGeneralProperty m_SupportedModes;
 
 	xnl::Array<XnCmosPreset> m_supportedModesData;
+protected:
 	XnBool m_bAllowCustomResolutions;
 };
 

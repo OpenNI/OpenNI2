@@ -93,8 +93,8 @@ private:
 	XnBool m_bMiscSupported;
 	XnChar m_strDeviceName[XN_DEVICE_MAX_STRING_LENGTH];
 	XnBool m_bIsLowBandwidth;
-	XnUSBEventCallbackFunctionPtr m_pCallbackPtr; 
-	void* m_pCallbackData;
+	//XnUSBEventCallbackFunctionPtr m_pCallbackPtr; //private field is not used, clashes with clang due to [-Werror,-Wunused-private-field]
+	//void* m_pCallbackData; //private field is not used, clashes with clang due to [-Werror,-Wunused-private-field]
 };
 
 #endif //__XN_DEVICE_SENSOR_I_O_H__
