@@ -277,6 +277,8 @@ public:
 	{
 		while (!IsEmpty())
 		{
+            if(Begin() == End())
+                break;
 			Remove(Begin());
 		}
 		return XN_STATUS_OK;
