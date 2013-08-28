@@ -212,6 +212,7 @@ typedef enum
 	XN_SENSOR_FW_VER_5_6 = 12,
 	XN_SENSOR_FW_VER_5_7 = 13,
 	XN_SENSOR_FW_VER_5_8 = 14,
+	XN_SENSOR_FW_VER_5_9 = 15,
 } XnFWVer;
 
 typedef enum {
