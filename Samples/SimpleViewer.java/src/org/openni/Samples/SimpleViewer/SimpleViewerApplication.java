@@ -76,6 +76,11 @@ public class SimpleViewerApplication implements ItemListener {
             mComboBoxStreams.addItem("Depth");
         }
         
+        if (device.getSensorInfo(SensorType.IR) != null) {
+            mDeviceSensors.add(SensorType.IR);
+            mComboBoxStreams.addItem("IR");
+        }
+        
         mComboBoxStreams.addItemListener(this);
         mComboBoxVideoModes.addItemListener(this);
         mViewer.setSize(800,600);
@@ -128,6 +133,8 @@ public class SimpleViewerApplication implements ItemListener {
                 case SHIFT_9_2:
                 case SHIFT_9_3:
                 case RGB888:
+                case GRAY8:
+                case GRAY16:
                     mSupportedModes.add(mode);
                     break;
             }
@@ -154,6 +161,8 @@ public class SimpleViewerApplication implements ItemListener {
             case SHIFT_9_2:     return "9.2";
             case SHIFT_9_3:     return "9.3";
             case RGB888:        return "RGB";
+            case GRAY8:         return "Gray8";
+            case GRAY16:        return "Gray16";
             default:            return "UNKNOWN";
         }
     }

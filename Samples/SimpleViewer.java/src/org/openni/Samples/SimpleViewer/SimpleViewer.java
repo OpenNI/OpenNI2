@@ -13,6 +13,7 @@ public class SimpleViewer extends Component
     
     float mHistogram[];
     int[] mImagePixels;
+    int mMaxGray16Value = 0;
     VideoStream mVideoStream;
     VideoFrameRef mLastFrame;
     BufferedImage mBufferedImage;
@@ -80,7 +81,6 @@ public class SimpleViewer extends Component
             case SHIFT_9_2:
             case SHIFT_9_3:
                 calcHist(frameData);
-                frameData.rewind();
                 int pos = 0;
                 while(frameData.remaining() > 0) {
                     int depth = (int)frameData.getShort() & 0xFFFF;
@@ -96,6 +96,24 @@ public class SimpleViewer extends Component
                     int green = (int)frameData.get() & 0xFF;
                     int blue = (int)frameData.get() & 0xFF;
                     mImagePixels[pos] = 0xFF000000 | (red << 16) | (green << 8) | blue;
+                    pos++;
+                }
+                break;
+            case GRAY8:
+                pos = 0;
+                while (frameData.remaining() > 0) {
+                    int pixel = (int)frameData.get() & 0xFF;
+                    mImagePixels[pos] = 0xFF000000 | (pixel << 16) | (pixel << 8) | pixel;
+                    pos++;
+                }
+                break;
+            case GRAY16:
+                calcMaxGray16Value(frameData);
+                pos = 0;
+                while (frameData.remaining() > 0) {
+                    int pixel = (int)frameData.getShort() & 0xFFFF;
+                    pixel = (int)(pixel * 255.0 / mMaxGray16Value);
+                    mImagePixels[pos] = 0xFF000000 | (pixel << 16) | (pixel << 8) | pixel;
                     pos++;
                 }
                 break;
@@ -136,5 +154,16 @@ public class SimpleViewer extends Component
                 mHistogram[i] = (int) (256 * (1.0f - (mHistogram[i] / (float) points)));
             }
         }
+        depthBuffer.rewind();
+    }
+    
+    private void calcMaxGray16Value(ByteBuffer gray16Buffer) {
+        while (gray16Buffer.remaining() > 0) {
+            int pixel = (int)gray16Buffer.getShort() & 0xFFFF;
+            if (pixel > mMaxGray16Value) {
+                mMaxGray16Value = pixel;
+            }
+        }
+        gray16Buffer.rewind();
     }
 }
