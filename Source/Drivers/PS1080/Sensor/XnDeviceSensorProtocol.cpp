@@ -81,18 +81,43 @@ XnBool XN_CALLBACK_TYPE XnDeviceSensorProtocolUsbEpCb(XnUChar* pBuffer, XnUInt32
 
 		case XN_LOOKING_FOR_MAGIC:
 			nMagic = XN_PREPARE_VAR16_IN_BUFFER(pDevicePrivateData->FWInfo.nFWMagic);
-			if (nMagic == *(XnUInt16*)(pBuffer))
+
+			if (pCurrState->nMissingBytesInState == sizeof(XnUInt8) && // first byte already found
+				pBuffer[0] == ((XnUInt8*)&nMagic)[1])	// we have here second byte
 			{
+				// move to next byte
+				pBuffer++;
+
+				// move to next state
 				pCurrState->CurrHeader.nMagic = nMagic;
 				pCurrState->State = XN_PACKET_HEADER;
 				pCurrState->nMissingBytesInState = sizeof(XnSensorProtocolResponseHeader);
+				break;
 			}
-			else
+
+			while (pBuffer < pBufEnd)
 			{
-				// no magic! ignore the rest of this buffer
-				xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Can't find magic. Dropping usb buffer.");
-				pBuffer = pBufEnd;
+				if ((pBuffer + sizeof(XnUInt16) <= pBufEnd) && 
+					nMagic == *(XnUInt16*)(pBuffer))
+				{
+					pCurrState->CurrHeader.nMagic = nMagic;
+					pCurrState->State = XN_PACKET_HEADER;
+					pCurrState->nMissingBytesInState = sizeof(XnSensorProtocolResponseHeader);
+					break;
+				}
+				else
+				{
+					pBuffer++;
+				}
 			}
+
+			if (pBuffer == pBufEnd &&					// magic wasn't found
+				pBuffer[-1] == ((XnUInt8*)&nMagic)[0])	// last byte in buffer is first in magic
+			{
+				// mark that we found first one
+				pCurrState->nMissingBytesInState--;
+			}
+
 			break;
 
 		case XN_PACKET_HEADER:
