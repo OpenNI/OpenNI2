@@ -136,6 +136,8 @@ openni::VideoFrameRef& getIRFrame();
 
 void toggleFrameSync(int);
 
+void toggleZoomCrop(int);
+
 void togglePlaybackRepeat(int /*ignored*/);
 openni::Status setPlaybackSpeed(float speed);
 float getPlaybackSpeed();

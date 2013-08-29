@@ -302,6 +302,8 @@ void createKeyboardMap()
  		startKeyboardGroup(KEYBOARD_GROUP_DEVICE);
  		{
 			registerKey('y', "Frame sync on/off", toggleFrameSync, 0);
+			registerKey('z', "Zoom crop on/off", toggleZoomCrop, 0);
+
  			registerKey('m', "Mirror on/off", toggleMirror, 0);
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
 

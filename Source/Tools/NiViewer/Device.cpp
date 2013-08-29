@@ -34,6 +34,11 @@
 // --------------------------------
 #define MAX_STRINGS 20
 
+#define ZOOM_CROP_VGA_MODE_X_RES 640
+#define ZOOM_CROP_VGA_MODE_Y_RES 480
+#define ZOOM_CROP_HIRES_MODE_X_RES 1280
+#define ZOOM_CROP_HIRES_MODE_Y_RES 1024
+
 // --------------------------------
 // Global Variables
 // --------------------------------
@@ -915,6 +920,46 @@ void toggleFrameSync(int)
 		displayMessage("Frame sync on");
 	}
 	g_bFrameSyncOn = !g_bFrameSyncOn;
+}
+
+bool g_bZoomCropOn = false;
+void toggleZoomCrop(int)
+{
+	if (g_bZoomCropOn)
+	{
+		displayMessage("Fast zoom crop off");
+
+		openni::VideoMode vm = g_colorStream.getVideoMode();
+		vm.setResolution(ZOOM_CROP_VGA_MODE_X_RES, ZOOM_CROP_VGA_MODE_Y_RES); 
+
+		g_colorStream.setVideoMode(vm);
+
+		g_colorStream.resetCropping();
+
+		g_colorStream.start();
+
+		g_depthStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, FALSE); 
+	}
+	else
+	{
+		g_depthStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, TRUE); 
+
+		displayMessage("Fast zoom crop on");
+		
+		g_colorStream.stop();
+	
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_CROPPING_MODE, XN_CROPPING_MODE_INCREASED_FPS); 
+
+		openni::VideoMode vm = g_colorStream.getVideoMode();
+		vm.setResolution(ZOOM_CROP_HIRES_MODE_X_RES, ZOOM_CROP_HIRES_MODE_Y_RES); 
+		g_colorStream.setVideoMode(vm);
+
+		g_colorStream.setCropping(ZOOM_CROP_VGA_MODE_X_RES/2, ZOOM_CROP_VGA_MODE_Y_RES/2, ZOOM_CROP_VGA_MODE_X_RES, ZOOM_CROP_VGA_MODE_Y_RES);
+
+		g_colorStream.start();
+	}
+
+	g_bZoomCropOn = !g_bZoomCropOn;
 }
 
 bool convertDepthPointToColor(int depthX, int depthY, openni::DepthPixel depthZ, int* pColorX, int* pColorY)
