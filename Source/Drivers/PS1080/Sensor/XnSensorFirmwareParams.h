@@ -108,6 +108,7 @@ public:
 	XnActualIntProperty m_ImageLowLightCompensation;
 	XnActualIntProperty m_ImageGain;
 	XnActualIntProperty m_DepthCloseRange;
+	XnActualIntProperty m_FastZoomCrop;
 	XnActualIntProperty m_LogFilter;
 	XnActualIntProperty m_GMCDebug;
 	XnActualIntProperty m_APCEnabled;

@@ -117,6 +117,7 @@ protected:
 	XnStatus SetActualRead(XnBool bRead);
 	virtual XnStatus SetGMCMode(XnBool bGMCMode);
 	virtual XnStatus SetCloseRange(XnBool bCloseRange);
+	virtual XnStatus SetFastZoomCrop(XnBool bFastZoomCrop);
 	virtual XnStatus SetCroppingMode(XnCroppingMode mode);
 	XnStatus GetImageCoordinatesOfDepthPixel(XnUInt32 x, XnUInt32 y, OniDepthPixel z, XnUInt32 imageXRes, XnUInt32 imageYRes, XnUInt32& imageX, XnUInt32& imageY);
 	virtual XnStatus SetGMCDebug(XnBool bGMCDebug);
@@ -144,6 +145,7 @@ private:
 	static XnStatus XN_CALLBACK_TYPE ReadAGCBinsFromFile(XnGeneralProperty* pSender, const XnChar* csINIFile, const XnChar* csSection);
 	static XnStatus XN_CALLBACK_TYPE SetGMCModeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetCloseRangeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFastZoomCropCallback(XnActualIntProperty* pSendoer, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetCroppingModeCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE GetPixelRegistrationCallback(const XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetGMCDebugCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
@@ -175,6 +177,7 @@ private:
 	XnActualIntProperty m_ActualRead;
 	XnActualIntProperty m_GMCMode;
 	XnActualIntProperty m_CloseRange;
+	XnActualIntProperty m_FastZoomCrop;
 	XnGeneralProperty m_PixelRegistration;
 
 	XnActualRealProperty m_HorizontalFOV;

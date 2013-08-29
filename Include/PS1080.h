@@ -143,6 +143,8 @@ enum
 
 	/** unsigned long long */
 	XN_STREAM_PROPERTY_CLOSE_RANGE = 0x1080F003, // "CloseRange"
+	/** unsigned long long */
+	XN_STREAM_PROPERTY_FAST_ZOOM_CROP = 0x1080F009, // "FastZoomCrop"
 	/** XnPixelRegistration - get only */
 	XN_STREAM_PROPERTY_PIXEL_REGISTRATION = 0x10801001, // "PixelRegistration"
 	/** unsigned long long */
