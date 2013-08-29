@@ -111,9 +111,37 @@ OniStatus PlayerStream::getProperty(int propertyId, void* pData, int* pDataSize)
 	return rc;
 }
 
-OniStatus PlayerStream::setProperty(int /*propertyId*/, const void* /*pData*/, int /*dataSize*/)
+OniStatus PlayerStream::setProperty(int propertyId, const void* pData, int dataSize)
 {
-	return ONI_STATUS_ERROR;
+	OniStatus nRetVal = ONI_STATUS_OK;
+
+	if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
+	{
+		if (dataSize != sizeof(OniVideoMode))
+		{
+			return ONI_STATUS_BAD_PARAMETER;
+		}
+
+		OniVideoMode currMode;
+		int size = sizeof(currMode);
+		nRetVal = getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &currMode, &size);
+		XN_ASSERT(nRetVal == ONI_STATUS_OK);
+
+		OniVideoMode* pRequestedMode = (OniVideoMode*)pData;
+		if (pRequestedMode->resolutionX == currMode.resolutionX &&
+			pRequestedMode->resolutionY == currMode.resolutionY &&
+			pRequestedMode->fps == currMode.fps &&
+			pRequestedMode->pixelFormat == currMode.pixelFormat)
+		{
+			return ONI_STATUS_OK;
+		}
+
+		return ONI_STATUS_BAD_PARAMETER;
+	}
+	else
+	{
+		return ONI_STATUS_ERROR;
+	}
 }
 
 OniStatus PlayerStream::RegisterReadyForDataEvent(ReadyForDataCallback callback, void* pCookie, OniCallbackHandle& handle)
