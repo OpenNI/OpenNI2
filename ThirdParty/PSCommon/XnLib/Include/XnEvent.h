@@ -48,6 +48,7 @@ public:
 	{
 		Clear();
 		xnOSCloseCriticalSection(&m_hLock);
+		xnOSCloseCriticalSection(&m_hModLock);
 	}
 	XnStatus Register(FuncPtr pFunc, void* pCookie, XnCallbackHandle& handle)
 	{
@@ -59,7 +60,7 @@ public:
 		pCallback = XN_NEW(Callback, pFunc, pCookie);
 
 		{
-			AutoCSLocker locker(m_hLock);
+			AutoCSLocker locker(m_hModLock);
 			retVal = m_toAdd.AddLast(pCallback);
 		}
 
@@ -79,7 +80,7 @@ public:
 		Callback* pCallback = (Callback*)handle;
 
 		{
-			AutoCSLocker locker(m_hLock);
+			AutoCSLocker locker(m_hModLock);
 			if (!RemoveCallback(m_toAdd, pCallback))
 			{
 				retVal = m_toRemove.AddLast(pCallback);
@@ -103,7 +104,9 @@ protected:
 	{
 		Clear();
 		AutoCSLocker otherLocker(other.m_hLock);
+		AutoCSLocker otherModLocker(other.m_hModLock);
 		AutoCSLocker locker(m_hLock);
+		AutoCSLocker modLocker(m_hModLock);
 
 		m_callbacks = other.m_callbacks;
 		m_toAdd = other.m_toAdd;
@@ -116,6 +119,8 @@ protected:
 	XnStatus Clear()
 	{
 		AutoCSLocker locker(m_hLock);
+		AutoCSLocker modLocker(m_hModLock);
+
 		ApplyListChanges();
 
 		for (typename CallbackPtrList::ConstIterator it = m_callbacks.Begin(); it != m_callbacks.End(); ++it)
@@ -134,6 +139,7 @@ protected:
 	XnStatus ApplyListChanges()
 	{
 		AutoCSLocker locker(m_hLock);
+		AutoCSLocker modLocker(m_hModLock);
 
 		for (typename CallbackPtrList::ConstIterator it = m_toAdd.Begin(); it != m_toAdd.End(); ++it)
 		{
@@ -167,10 +173,18 @@ protected:
 	CallbackPtrList m_toAdd;
 	CallbackPtrList m_toRemove;
 private:
+	XN_CRITICAL_SECTION_HANDLE m_hModLock;
 	void Init()
 	{
 		m_hLock = NULL;
 		XnStatus retVal = xnOSCreateCriticalSection(&m_hLock);
+		if (retVal != XN_STATUS_OK)
+		{
+			//XN_ASSERT(false);
+		}
+
+		m_hModLock = NULL;
+		retVal = xnOSCreateCriticalSection(&m_hModLock);
 		if (retVal != XN_STATUS_OK)
 		{
 			//XN_ASSERT(false);

@@ -108,7 +108,7 @@ shutil.copy(JAR_FILE, DEBUG_DIR)
 if main_class != "":
     print "Creating batch file..."
     batch = open(BATCH_FILE, 'w')
-    batch.write('java -Xmx768m -jar ' + proj_name + '.jar\n')
+    batch.write('java -Xmx768m -jar ' + proj_name + '.jar %*\n')
     batch.close()
 
     # copy batch to Bin/Debug

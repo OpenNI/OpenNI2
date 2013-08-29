@@ -188,14 +188,21 @@ public class SimpleViewerApplication implements ItemListener {
     public static void main(String s[]) {
         // initialize OpenNI
         OpenNI.initialize();
+
+        String uri;
         
-        List<DeviceInfo> devicesInfo = OpenNI.enumerateDevices();
-        if (devicesInfo.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No device is connected", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (s.length > 0) {
+            uri = s[0];
+        } else {
+            List<DeviceInfo> devicesInfo = OpenNI.enumerateDevices();
+            if (devicesInfo.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No device is connected", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            uri = devicesInfo.get(0).getUri();
         }
         
-        Device device = Device.open(devicesInfo.get(0).getUri());
+        Device device = Device.open(uri);
 
         final SimpleViewerApplication app = new SimpleViewerApplication(device);
         app.run();
