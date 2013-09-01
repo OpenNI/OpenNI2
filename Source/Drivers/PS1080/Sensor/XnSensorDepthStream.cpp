@@ -70,7 +70,6 @@ XnSensorDepthStream::XnSensorDepthStream(const XnChar* strName, XnSensorObjects*
 	m_ActualRead(XN_STREAM_PROPERTY_ACTUAL_READ_DATA, "ActualReadData", FALSE),
 	m_GMCMode(XN_STREAM_PROPERTY_GMC_MODE, "GMCMode", XN_DEPTH_STREAM_DEFAULT_GMC_MODE),
 	m_CloseRange(XN_STREAM_PROPERTY_CLOSE_RANGE, "CloseRange", XN_DEPTH_STREAM_DEFAULT_CLOSE_RANGE),
-	m_FastZoomCrop(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, "FastZoomCrop", false),
 	m_PixelRegistration(XN_STREAM_PROPERTY_PIXEL_REGISTRATION, "PixelRegistration"),
 	m_HorizontalFOV(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, "HorizontalFov"),
 	m_VerticalFOV(ONI_STREAM_PROPERTY_VERTICAL_FOV, "VerticalFov"),
@@ -105,7 +104,6 @@ XnStatus XnSensorDepthStream::Init()
 	m_AGCBin.UpdateGetCallback(GetAGCBinCallback, this);
 	m_GMCMode.UpdateSetCallback(SetGMCModeCallback, this);
 	m_CloseRange.UpdateSetCallback(SetCloseRangeCallback, this);
-	m_FastZoomCrop.UpdateSetCallback(SetFastZoomCropCallback, this);
 	m_CroppingMode.UpdateSetCallback(SetCroppingModeCallback, this);
 	m_PixelRegistration.UpdateGetCallback(GetPixelRegistrationCallback, this);
 	m_GMCDebug.UpdateSetCallback(SetGMCDebugCallback, this);
@@ -114,7 +112,7 @@ XnStatus XnSensorDepthStream::Init()
 
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_InputFormat, &m_DepthRegistration, &m_HoleFilter, 
 		&m_WhiteBalance, &m_Gain, &m_AGCBin, &m_ActualRead, &m_GMCMode, 
-		&m_CloseRange, &m_FastZoomCrop, &m_CroppingMode, &m_RegistrationType, &m_PixelRegistration,
+		&m_CloseRange, &m_CroppingMode, &m_RegistrationType, &m_PixelRegistration,
 		&m_HorizontalFOV, &m_VerticalFOV, &m_GMCDebug, &m_WavelengthCorrection, &m_WavelengthCorrectionDebug);
 
 	// register supported modes
@@ -308,8 +306,6 @@ XnStatus XnSensorDepthStream::MapPropertiesToFirmware()
 	nRetVal = m_Helper.MapFirmwareProperty(m_GMCMode, GetFirmwareParams()->m_GMCMode, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.MapFirmwareProperty(m_CloseRange, GetFirmwareParams()->m_DepthCloseRange, TRUE);
-	XN_IS_STATUS_OK(nRetVal);;
-	nRetVal = m_Helper.MapFirmwareProperty(m_FastZoomCrop, GetFirmwareParams()->m_FastZoomCrop, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
 	nRetVal = m_Helper.MapFirmwareProperty(m_GMCDebug, GetFirmwareParams()->m_GMCDebug, TRUE);
 	XN_IS_STATUS_OK(nRetVal);;
@@ -676,15 +672,6 @@ XnStatus XnSensorDepthStream::SetCloseRange(XnBool bCloseRange)
 	}
 
 	return (XN_STATUS_OK);
-}
-
-XnStatus XnSensorDepthStream::SetFastZoomCrop(XnBool bFastZoomCrop)
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	nRetVal = m_Helper.SimpleSetFirmwareParam(m_FastZoomCrop, (XnUInt16)bFastZoomCrop);
-
-	return nRetVal;
 }
 
 XnStatus XnSensorDepthStream::SetCroppingMode(XnCroppingMode mode)
@@ -1175,12 +1162,6 @@ XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetCloseRangeCallback(XnActualInt
 {
 	XnSensorDepthStream* pStream = (XnSensorDepthStream*)pCookie;
 	return pStream->SetCloseRange((XnBool)nValue);
-}
-
-XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetFastZoomCropCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
-{
-	XnSensorDepthStream* pStream = (XnSensorDepthStream*)pCookie;
-	return pStream->SetFastZoomCrop((XnBool)nValue);
 }
 
 XnStatus XN_CALLBACK_TYPE XnSensorDepthStream::SetCroppingModeCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)

@@ -938,11 +938,11 @@ void toggleZoomCrop(int)
 
 		g_colorStream.start();
 
-		g_depthStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, FALSE); 
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, FALSE); 
 	}
 	else
 	{
-		g_depthStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, TRUE); 
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, TRUE); 
 
 		displayMessage("Fast zoom crop on");
 		
