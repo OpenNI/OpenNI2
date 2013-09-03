@@ -139,7 +139,7 @@ typedef size_t				XnSizeT;
 // Files
 //---------------------------------------------------------------------------
 /** The maximum allowed file path size (in bytes). */ 
-#define XN_FILE_MAX_PATH 256
+#define XN_FILE_MAX_PATH PATH_MAX
 
 //---------------------------------------------------------------------------
 // Call back
