@@ -401,11 +401,13 @@ OniStatus VideoStream::convertDepthToWorldCoordinates(float depthX, float depthY
 		return ONI_STATUS_NOT_SUPPORTED;
 	}
 
+	float depthZmm = depthZ * m_worldConvertCache.zFactor;
+
 	float normalizedX = depthX / m_worldConvertCache.resolutionX - .5f;
 	float normalizedY = .5f - depthY / m_worldConvertCache.resolutionY;
 
-	*pWorldX = normalizedX * depthZ * m_worldConvertCache.xzFactor;
-	*pWorldY = normalizedY * depthZ * m_worldConvertCache.yzFactor;
+	*pWorldX = normalizedX * depthZmm * m_worldConvertCache.xzFactor;
+	*pWorldY = normalizedY * depthZmm * m_worldConvertCache.yzFactor;
 	*pWorldZ = depthZ;
 	return ONI_STATUS_OK;
 }
@@ -418,8 +420,10 @@ OniStatus VideoStream::convertWorldToDepthCoordinates(float worldX, float worldY
 		return ONI_STATUS_NOT_SUPPORTED;
 	}
 
-	*pDepthX = m_worldConvertCache.coeffX * worldX / worldZ + m_worldConvertCache.halfResX;
-	*pDepthY = m_worldConvertCache.halfResY - m_worldConvertCache.coeffY * worldY / worldZ;
+	float worldZmm = worldZ * m_worldConvertCache.zFactor;
+
+	*pDepthX = m_worldConvertCache.coeffX * worldX / worldZmm + m_worldConvertCache.halfResX;
+	*pDepthY = m_worldConvertCache.halfResY - m_worldConvertCache.coeffY * worldY / worldZmm;
 	*pDepthZ = worldZ;
 	return ONI_STATUS_OK;
 }
@@ -436,8 +440,8 @@ void VideoStream::refreshWorldConversionCache()
 	getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
 
 	size = sizeof(float);
-	float horizontalFov;
-	float verticalFov;
+	float horizontalFov = 0.0;
+	float verticalFov = 0.0;
 	getProperty(ONI_STREAM_PROPERTY_HORIZONTAL_FOV, &horizontalFov, &size);
 	getProperty(ONI_STREAM_PROPERTY_VERTICAL_FOV, &verticalFov, &size);
 
@@ -449,6 +453,18 @@ void VideoStream::refreshWorldConversionCache()
 	m_worldConvertCache.halfResY = m_worldConvertCache.resolutionY / 2;
 	m_worldConvertCache.coeffX = m_worldConvertCache.resolutionX / m_worldConvertCache.xzFactor;
 	m_worldConvertCache.coeffY = m_worldConvertCache.resolutionY / m_worldConvertCache.yzFactor;
+
+	switch (videoMode.pixelFormat)
+	{
+	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
+		m_worldConvertCache.zFactor = 1.f;
+		break;
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
+		m_worldConvertCache.zFactor = 0.1f;
+		break;
+	default:
+		XN_ASSERT(FALSE);
+	}
 }
 
 OniStatus VideoStream::convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY)

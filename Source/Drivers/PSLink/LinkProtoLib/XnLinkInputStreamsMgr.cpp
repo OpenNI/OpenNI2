@@ -229,7 +229,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 			nPacketID, nStreamID, 
 			xnFragmentationFlagsToStr(fragmentation),
 			xnFragmentationFlagsToStr(pStreamInfo->prevFragmentation));
-		XN_ASSERT(FALSE);
 		pStreamInfo->packetLoss = TRUE;
 	}
 
@@ -247,7 +246,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 		{
 			xnLogWarning(XN_MASK_LINK, "Inconsistent msg type for stream %u - expected 0x%04X but got 0x%04X",
 				nStreamID, pStreamInfo->nMsgType, nMsgType);
-			XN_ASSERT(FALSE);
 			pStreamInfo->packetLoss = TRUE;
 			return;
 		}
@@ -267,7 +265,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 	{
 		xnLogWarning(XN_MASK_LINK, "Failed to handle packet of %u bytes in stream %u: %s", 
 			pLinkPacketHeader->GetDataSize(), nStreamID, xnGetStatusString(nRetVal));
-		XN_ASSERT(FALSE);
 		return;
 	}
 }

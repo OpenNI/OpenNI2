@@ -540,6 +540,29 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
+    case PS_PROPERTY_ACC_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetAccActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
+	case LINK_PROP_PROJECTOR_POWER:
+		{
+			ENSURE_PROP_SIZE(*pDataSize, XnUInt16);
+
+			XnUInt16 power;
+			nRetVal = m_pSensor->GetProjectorPower(power);
+			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+			ASSIGN_PROP_VALUE_INT(data, *pDataSize, power)
+		}
+		break;
 
 	default:
 		return ONI_STATUS_BAD_PARAMETER;
@@ -592,6 +615,12 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Set emitter active", nRetVal, ONI_STATUS_ERROR);
 		break;
 
+    //controls if the firmware runs all its control loops (BIST)
+    case PS_PROPERTY_ACC_ENABLED:
+        nRetVal = m_pSensor->SetAccActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set Acc active", nRetVal, ONI_STATUS_ERROR);
+        break;
+
 		// string props
 	case LINK_PROP_PRESET_FILE:
 		nRetVal = m_pSensor->RunPresetFile((XnChar *)data);
@@ -619,6 +648,12 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 		}
 		break;
 
+	case LINK_PROP_PROJECTOR_POWER:
+		ENSURE_PROP_SIZE(dataSize, XnUInt16);
+		nRetVal = m_pSensor->SetProjectorPower(*(XnUInt16*)data);
+		XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+		break;
+
 	default:
 			return ONI_STATUS_BAD_PARAMETER;
 	}
@@ -641,9 +676,11 @@ OniBool LinkOniDevice::isPropertySupported(int propertyId)
 	case LINK_PROP_VERSIONS_INFO_COUNT:
 	case LINK_PROP_VERSIONS_INFO:
 	case LINK_PROP_EMITTER_ACTIVE:
+    case PS_PROPERTY_ACC_ENABLED:
 	case LINK_PROP_PRESET_FILE:
 	case PS_PROPERTY_USB_INTERFACE:
 	case LINK_PROP_BOOT_STATUS:
+	case LINK_PROP_PROJECTOR_POWER:
 		return true;
 	default:
 		return false;
@@ -890,6 +927,8 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 
 			for (int i = 0; i < (int)devices.GetSize(); ++i)
 			{
+                pArgs->devices[i].masterId = devices[i].m_nMasterID;
+                pArgs->devices[i].slaveId = devices[i].m_nSlaveID;
 				pArgs->devices[i].id = devices[i].m_nID;
 				xnOSStrCopy(pArgs->devices[i].name, devices[i].m_strName, sizeof(pArgs->devices[i].name));
 			}
@@ -1273,6 +1312,28 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 
 			xn::LinkFrameInputStream* pFrameInputStream = (xn::LinkFrameInputStream*)pInputStream;
 			pArgs->videoMode = pFrameInputStream->GetVideoMode();
+		}
+		break;
+
+	case LINK_COMMAND_SET_PROJECTOR_PULSE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandSetProjectorPulse)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandSetProjectorPulse));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandSetProjectorPulse* pArgs = reinterpret_cast<XnCommandSetProjectorPulse*>(data);
+			nRetVal = m_pSensor->EnableProjectorPulse((XnUInt16)pArgs->delay, (XnUInt16)pArgs->width, (XnUInt16)pArgs->frames);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Enable projector pulse", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_DISABLE_PROJECTOR_PULSE:
+		{
+			nRetVal = m_pSensor->DisableProjectorPulse();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Disable projector pulse", nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
 

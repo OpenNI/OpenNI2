@@ -51,6 +51,9 @@ public:
     virtual XnBool GetMirror() const;
     virtual XnStatus SetMirror(XnBool bMirror);
 
+	virtual XnStatus SetGain(XnUInt16 gain);
+	virtual XnStatus GetGain(XnUInt16& gain);
+
 protected:
 	virtual XnStatus StartImpl() = 0;
 	virtual XnStatus StopImpl() = 0;

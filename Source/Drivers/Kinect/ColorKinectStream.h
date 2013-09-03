@@ -21,6 +21,10 @@ public:
 	virtual OniStatus setProperty(int propertyId, const void* data, int pDataSize);
 	
 	virtual OniBool isPropertySupported(int propertyId);
+
+private:
+	void copyFrameRGB888(OniFrame* pFrame, NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect);
+	void copyFrameYUV422(OniFrame* pFrame, NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect);
 };
 } // namespace kinect_device
 

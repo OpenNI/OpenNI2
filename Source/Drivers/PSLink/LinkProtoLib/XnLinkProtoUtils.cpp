@@ -975,6 +975,8 @@ XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pDevice
 		supportedDevices[i].m_nID = XN_PREPARE_VAR32_IN_BUFFER(pDevicesList->m_aI2CDevices[i].m_nID);
 		nRetVal = xnOSStrCopy(supportedDevices[i].m_strName, pDevicesList->m_aI2CDevices[i].m_strName, sizeof(supportedDevices[i].m_strName));
 		XN_IS_STATUS_OK_LOG_ERROR("Copy I2C device name", nRetVal);
+        supportedDevices[i].m_nMasterID = pDevicesList->m_aI2CDevices[i].m_nMasterID;
+        supportedDevices[i].m_nSlaveID = pDevicesList->m_aI2CDevices[i].m_nSlaveID;
 	}
 
 	return XN_STATUS_OK;

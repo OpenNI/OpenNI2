@@ -38,9 +38,11 @@ enum
 {
 	// Stream Properties
 	PS_PROPERTY_DUMP_DATA = 0x1d270001, // boolean
+	PS_PROPERTY_GAIN = 0x1d270002, // int - system specific
 
 	// Device Properties
-	PS_PROPERTY_USB_INTERFACE = 0x1d27F001, // values from XnUsbInterfaceType
+    PS_PROPERTY_USB_INTERFACE = 0x1d27F001, // values from XnUsbInterfaceType
+    PS_PROPERTY_ACC_ENABLED = 0x1d27F002, // SetAccActive
 };
 
 /**
@@ -74,7 +76,7 @@ enum
 	PS_COMMAND_GET_LOG_MASK_LIST = 0x1d27E012, // XnCommandGetLogMaskList
 	PS_COMMAND_SET_LOG_MASK_STATE = 0x1d27E013, // XnCommandSetLogMaskState
 	PS_COMMAND_START_LOG = 0x1d27E014, // no arguments
-	PS_COMMAND_STOP_LOG = 0x1d27E015, // no arguments
+    PS_COMMAND_STOP_LOG = 0x1d27E015, // no arguments
 };
 
 typedef enum XnUsbInterfaceType
@@ -113,7 +115,9 @@ typedef struct XnFwFileEntry
 
 typedef struct XnI2CDeviceInfo
 {
-	uint32_t id;
+    uint8_t masterId;
+    uint8_t slaveId;
+ 	uint32_t id;
 	char name[32];
 } XnI2CDeviceInfo;
 

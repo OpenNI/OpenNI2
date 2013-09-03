@@ -335,6 +335,16 @@ XnStatus PrimeClient::SetEmitterActive(XnBool bActive)
     return m_linkControlEndpoint.SetEmitterActive(bActive);
 }
 
+XnStatus PrimeClient::SetAccActive(XnBool bActive)
+{
+    return m_linkControlEndpoint.SetAccActive(bActive);
+}
+
+XnStatus PrimeClient::GetAccActive(XnBool& bActive)
+{
+    return m_linkControlEndpoint.GetAccActive(bActive);
+}
+
 void PrimeClient::LogVersions()
 {
     static XnBool bVersionsLoggedOnce = FALSE;
@@ -639,6 +649,31 @@ XnBool PrimeClient::IsPropertySupported(XnUInt16 propID)
 XnStatus PrimeClient::GetBootStatus(XnBootStatus& bootStatus)
 {
 	return m_linkControlEndpoint.GetBootStatus(bootStatus);
+}
+
+XnStatus PrimeClient::EnableProjectorPulse(XnUInt16 delay, XnUInt16 width, XnUInt16 framesToskip)
+{
+	return m_linkControlEndpoint.SetProjectorPulse(TRUE, delay, width, framesToskip);
+}
+
+XnStatus PrimeClient::DisableProjectorPulse()
+{
+	return m_linkControlEndpoint.SetProjectorPulse(FALSE, 0, 0, 0);
+}
+
+XnStatus PrimeClient::GetProjectorPulse(XnBool& enabled, XnUInt16& delay, XnUInt16& width, XnUInt16& framesToskip)
+{
+	return m_linkControlEndpoint.GetProjectorPulse(enabled, delay, width, framesToskip);
+}
+
+XnStatus PrimeClient::SetProjectorPower(XnUInt16 power)
+{
+	return m_linkControlEndpoint.SetProjectorPower(power);
+}
+
+XnStatus PrimeClient::GetProjectorPower(XnUInt16& power)
+{
+	return m_linkControlEndpoint.GetProjectorPower(power);
 }
 
 }

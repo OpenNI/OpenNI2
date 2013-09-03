@@ -18,28 +18,71 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#include "TestDriver.h"
+#include "TestDevice.h"
+#include <OniTest.h>
 
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include "LinkOniMapStream.h"
+TestDriver::TestDriver(OniDriverServices* pDriverServices) : DriverBase(pDriverServices)
+{}
 
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class LinkOniDepthStream :
-	public LinkOniMapStream
+oni::driver::DeviceBase* TestDriver::deviceOpen(const char* uri, const char* /*mode*/)
 {
-public:
-	LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-	virtual void notifyAllProperties();
+	for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
+	{
+		if (xnOSStrCmp(iter->Key()->uri, uri) == 0)
+		{
+			// Found
+			if (iter->Value() != NULL)
+			{
+				// already using
+				return iter->Value();
+			}
 
-protected:
-	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
-};
+			TestDevice* pDevice = XN_NEW(TestDevice, iter->Key(), getServices());
+			iter->Value() = pDevice;
+			return pDevice;
+		}
+	}
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+	getServices().errorLoggerAppend("Looking for '%s'", uri);
+	return NULL;
+}
+
+void TestDriver::deviceClose(oni::driver::DeviceBase* pDevice)
+{
+	for (xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*>::Iterator iter = m_devices.Begin(); iter != m_devices.End(); ++iter)
+	{
+		if (iter->Value() == pDevice)
+		{
+			iter->Value() = NULL;
+			XN_DELETE(pDevice);
+			return;
+		}
+	}
+
+	// not our device?!
+	XN_ASSERT(FALSE);
+}
+
+OniStatus TestDriver::tryDevice(const char* uri)
+{
+	if (xnOSStrCmp(uri, TEST_DEVICE_NAME))
+	{
+		return ONI_STATUS_ERROR;
+	}
+
+
+	OniDeviceInfo* pInfo = XN_NEW(OniDeviceInfo);
+	xnOSStrCopy(pInfo->uri, uri, ONI_MAX_STR);
+	xnOSStrCopy(pInfo->vendor, "Test", ONI_MAX_STR);
+	m_devices[pInfo] = NULL;
+
+	deviceConnected(pInfo);
+
+	return ONI_STATUS_OK;
+}
+
+void TestDriver::shutdown() 
+{}
+
+ONI_EXPORT_DRIVER(TestDriver);

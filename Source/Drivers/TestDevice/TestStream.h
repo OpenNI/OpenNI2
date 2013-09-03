@@ -18,28 +18,43 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#ifndef _TEST_STREAM_H_
+#define _TEST_STREAM_H_
 
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include "LinkOniMapStream.h"
+#include <Driver\OniDriverAPI.h>
+#include <XnLib.h>
+#include <XnOSCpp.h>
 
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class LinkOniDepthStream :
-	public LinkOniMapStream
+#define DEFAULT_RESOLUTION_X 640
+#define DEFAULT_RESOLUTION_Y 480
+#define DEFAULT_FPS 30
+
+class TestStream : public oni::driver::StreamBase
 {
 public:
-	LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
+	TestStream(OniSensorType sensorType);
+	virtual ~TestStream();
+	virtual OniStatus start();
+	virtual void stop();
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-	virtual void notifyAllProperties();
+	virtual OniStatus setProperty(int propertyId, const void* data, int dataSize);
+	virtual OniStatus invoke(int commandId, void* data, int dataSize);
+
+	static OniPixelFormat getDefaultPixelFormat(OniSensorType sensorType);
 
 protected:
-	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
+	OniStatus setVideoMode(OniVideoMode*);
+	OniStatus getVideoMode(OniVideoMode* pVideoMode);
+
+	bool m_running;
+	OniVideoMode m_videoMode;
+	OniSensorType m_sensorType;
+	int m_frameIndex;
+
+	XN_THREAD_HANDLE m_threadHandle;
+
+	xnl::CriticalSection m_cs;
+	xnl::OSEvent m_osEvent;
 };
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+#endif //_TEST_STREAM_H_

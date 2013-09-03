@@ -423,6 +423,9 @@ typedef struct XnLinkCameraIntrinsics
 
 typedef struct XnLinkI2CDevice
 {
+	XnUInt8 m_nMasterID;
+	XnUInt8 m_nSlaveID;
+	XnUInt16 m_nReserved;
 	XnUInt32 m_nID;
 	XnChar m_strName[XN_LINK_MAX_I2C_DEVICE_NAME_LENGTH];
 } XnLinkI2CDevice;

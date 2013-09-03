@@ -18,28 +18,28 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#ifndef _TEST_DRIVER_H_
+#define _TEST_DRIVER_H_
 
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include "LinkOniMapStream.h"
+#include <Driver\OniDriverAPI.h>
+#include <XnLib.h>
+#include <XnHash.h>
 
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class LinkOniDepthStream :
-	public LinkOniMapStream
+class TestDriver : public oni::driver::DriverBase
 {
 public:
-	LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-	virtual void notifyAllProperties();
+	TestDriver(OniDriverServices* pDriverServices);
+
+	virtual oni::driver::DeviceBase* deviceOpen(const char* uri, const char* mode);
+	virtual void deviceClose(oni::driver::DeviceBase* pDevice);
+	virtual OniStatus tryDevice(const char* uri);
+
+	void shutdown();
 
 protected:
-	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
+	XN_THREAD_HANDLE m_threadHandle;
+	xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*> m_devices;
 };
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+#endif //_TEST_DRIVER_H_
+

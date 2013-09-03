@@ -91,6 +91,12 @@
     <ClInclude Include="OniSensor.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\OniTest.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\KinectProperties.h">
+      <Filter>Header files\API</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header files">

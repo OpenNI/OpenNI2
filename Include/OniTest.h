@@ -18,28 +18,23 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#ifndef _ONI_TEST_H_
+#define _ONI_TEST_H_
 
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include "LinkOniMapStream.h"
+#define TEST_DEVICE_NAME "Test" // use with device.open() to create a test device
 
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class LinkOniDepthStream :
-	public LinkOniMapStream
+/**
+* Additional commands for Test device streams
+*/
+enum
 {
-public:
-	LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-	virtual void notifyAllProperties();
-
-protected:
-	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
+	TEST_COMMAND_ISSUE_FRAME = 0xFFFF0001, // TestCommandIssueFrame
 };
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+typedef struct TestCommandIssueFrame
+{
+	uint64_t timestamp;
+	void* data;
+} TestCommandIssueFrame;
+
+#endif //_ONI_TEST_H_

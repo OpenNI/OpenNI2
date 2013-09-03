@@ -59,6 +59,8 @@ protected:
 		XnFwPixelFormat nInputFormat;
 	};
 
+	virtual XnStatus GetDefaultVideoMode(OniVideoMode* pVideoMode);
+
 	int                 m_nSupportedModesCount;
 	SupportedVideoMode*	m_aSupportedModes;
 

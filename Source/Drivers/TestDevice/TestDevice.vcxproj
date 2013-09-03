@@ -172,6 +172,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestDevice.cpp" />
+    <ClCompile Include="TestDriver.cpp" />
+    <ClCompile Include="TestStream.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestDevice.h" />
+    <ClInclude Include="TestDriver.h" />
+    <ClInclude Include="TestStream.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

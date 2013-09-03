@@ -18,28 +18,34 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#ifndef _TEST_DEVICE_H_
+#define _TEST_DEVICE_H_
 
-//---------------------------------------------------------------------------
-// Includes
-//---------------------------------------------------------------------------
-#include "LinkOniMapStream.h"
+#include <Driver\OniDriverAPI.h>
+#include "TestStream.h"
 
-//---------------------------------------------------------------------------
-// Types
-//---------------------------------------------------------------------------
-class LinkOniDepthStream :
-	public LinkOniMapStream
+class TestDevice : public oni::driver::DeviceBase
 {
 public:
-	LinkOniDepthStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
-	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
-	virtual OniBool isPropertySupported(int propertyId);
-	virtual void notifyAllProperties();
+	TestDevice(OniDeviceInfo* pInfo, oni::driver::DriverServices& driverServices);
+	OniDeviceInfo* GetInfo();
 
-protected:
-	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
+	OniStatus getSensorInfoList(OniSensorInfo** pSensors, int* numSensors);
+
+	oni::driver::StreamBase* createStream(OniSensorType sensorType);
+
+	void destroyStream(oni::driver::StreamBase* pStream);
+
+	OniStatus getProperty(int propertyId, void* data, int* pDataSize);
+
+private:
+	TestDevice(const TestDevice&);
+	void operator=(const TestDevice&);
+
+	OniDeviceInfo* m_pInfo;
+	int m_numSensors;
+	OniSensorInfo m_sensors[10];
+	oni::driver::DriverServices& m_driverServices;
 };
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+#endif //_TEST_DEVICE_H_
