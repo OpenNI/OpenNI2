@@ -26,7 +26,18 @@
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-XnIRStream::XnIRStream(const XnChar* csName, XnBool bAllowCustomResolutions) :
-	XnPixelStream(XN_STREAM_TYPE_IR, csName, bAllowCustomResolutions)
+XnIRStream::XnIRStream(const XnChar* csName, XnBool bAllowCustomResolutions, OniIRPixel nDeviceMaxIR) :
+	XnPixelStream(XN_STREAM_TYPE_IR, csName, bAllowCustomResolutions), 
+    m_DeviceMaxIR(XN_STREAM_PROPERTY_DEVICE_MAX_IR, "DeviceMaxIR", nDeviceMaxIR)
 {
+}
+
+XnStatus XnIRStream::Init()
+{
+    XnStatus nRetVal = XnPixelStream::Init();
+    XN_IS_STATUS_OK(nRetVal);
+
+    XN_VALIDATE_ADD_PROPERTIES(this, &m_DeviceMaxIR);
+
+    return XN_STATUS_OK;
 }

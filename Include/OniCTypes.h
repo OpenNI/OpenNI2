@@ -141,6 +141,7 @@ typedef struct
 Pixel type used to store depth images.
 */
 typedef uint16_t OniDepthPixel;
+typedef uint16_t OniIRPixel;
 
 /**
 Pixel type used to store 16-bit grayscale images

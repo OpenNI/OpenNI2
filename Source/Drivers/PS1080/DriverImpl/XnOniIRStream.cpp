@@ -27,9 +27,33 @@
 // XnOniIRStream class
 //---------------------------------------------------------------------------
 
-XnOniIRStream::XnOniIRStream(XnSensor* pSensor, XnOniDevice* pDevice) : 
-	XnOniMapStream(pSensor, XN_STREAM_TYPE_IR, ONI_SENSOR_IR, pDevice)
+XnOniIRStream::XnOniIRStream(XnSensor* pSensor, XnOniDevice* pDevice) : XnOniMapStream(pSensor, XN_STREAM_TYPE_IR, ONI_SENSOR_IR, pDevice)
 {
 }
 
+OniStatus XnOniIRStream::getProperty(int propertyId, void* data, int* pDataSize)
+{
+    switch (propertyId)
+    {
+    case ONI_STREAM_PROPERTY_MAX_VALUE:
+        if (*pDataSize != sizeof(int))
+        {
+            return ONI_STATUS_BAD_PARAMETER;
+        }
 
+        XnUInt64 nValue;
+        m_pSensor->GetProperty(m_strType, XN_STREAM_PROPERTY_DEVICE_MAX_IR, &nValue);
+
+        *(int*)data = (int)nValue;
+        return ONI_STATUS_OK;
+    default:
+        return XnOniMapStream::getProperty(propertyId, data, pDataSize);
+    }
+}
+
+OniBool XnOniIRStream::isPropertySupported(int propertyId)
+{
+    return (
+        propertyId == ONI_STREAM_PROPERTY_MAX_VALUE ||
+        XnOniMapStream::isPropertySupported(propertyId));
+}

@@ -34,7 +34,26 @@
 class XnIRStream : public XnPixelStream
 {
 public:
-	XnIRStream(const XnChar* csName, XnBool bAllowCustomResolutions);
+	XnIRStream(const XnChar* csName, XnBool bAllowCustomResolutions, OniIRPixel nDeviceMaxIR);
+
+    XnStatus Init();
+
+    //---------------------------------------------------------------------------
+    // Getters
+    //---------------------------------------------------------------------------
+    inline OniIRPixel GetDeviceMaxIR() const { return (OniIRPixel)m_DeviceMaxIR.GetValue(); }
+
+protected:
+    //---------------------------------------------------------------------------
+    // Properties Getters
+    //---------------------------------------------------------------------------
+    inline XnActualIntProperty& DeviceMaxIRProperty() { return m_DeviceMaxIR; }
+
+private:
+    //---------------------------------------------------------------------------
+    // Members
+    //---------------------------------------------------------------------------
+    XnActualIntProperty m_DeviceMaxIR;
 };
 
 #endif //__XN_IR_STREAM_H__
