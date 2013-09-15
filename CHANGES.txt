@@ -22,6 +22,9 @@ OpenNI 2.3:
     - Add Linux prerequisites to release notes
     - Add release notes and change log to installation
 
+OpenNI 2.2.1:
+  - PS1080: Added a property for reading from all endpoints, regardless of streams
+
 OpenNI 2.2:
   - Added getDepthColorSyncEnabled() API
   - Added log settings API

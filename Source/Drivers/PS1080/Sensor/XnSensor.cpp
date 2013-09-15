@@ -100,6 +100,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 	m_FirmwareCPUInterval(XN_MODULE_PROPERTY_FIRMWARE_CPU_INTERVAL, "FirmwareCPUInterval", 0),
 	m_APCEnabled(XN_MODULE_PROPERTY_APC_ENABLED, "APCEnabled", TRUE),
 	m_FirmwareTecDebugPrint(XN_MODULE_PROPERTY_FIRMWARE_TEC_DEBUG_PRINT, "TecDebugPrint", FALSE),
+	m_ReadAllEndpoints(XN_MODULE_PROPERTY_READ_ALL_ENDPOINTS, "ReadAllEndpoints", 0),
 	m_I2C(XN_MODULE_PROPERTY_I2C, "I2C", NULL),
 	m_DeleteFile(XN_MODULE_PROPERTY_DELETE_FILE, "DeleteFile"),
 	m_TecSetPoint(XN_MODULE_PROPERTY_TEC_SET_POINT, "TecSetPoint"),
@@ -178,6 +179,7 @@ XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FA
 	m_BIST.UpdateSetCallback(RunBISTCallback, this);
 	m_ProjectorFault.UpdateSetCallback(SetProjectorFaultCallback, this);
 	m_FirmwareTecDebugPrint.UpdateSetCallbackToDefault();
+	m_ReadAllEndpoints.UpdateSetCallback(SetReadAllEndpointsCallback, this);
 
 	// Clear the frame-synced streams.
 	m_nFrameSyncEnabled = FALSE;
@@ -376,7 +378,7 @@ XnStatus XnSensor::CreateDeviceModule(XnDeviceModuleHolder** ppModuleHolder)
 		&m_FirmwareLogInterval, &m_FirmwareLogPrint, &m_FirmwareCPUInterval, &m_DeleteFile, 
 		&m_APCEnabled, &m_TecSetPoint, &m_TecStatus, &m_TecFastConvergenceStatus, &m_EmitterSetPoint, &m_EmitterStatus, &m_I2C,
 		&m_FileAttributes, &m_FlashFile, &m_FirmwareLogFilter, &m_FirmwareLog, &m_FlashChunk, &m_FileList, 
-		&m_ProjectorFault, &m_BIST, &m_FirmwareTecDebugPrint, &m_DeviceName 
+		&m_ProjectorFault, &m_BIST, &m_FirmwareTecDebugPrint, &m_DeviceName, &m_ReadAllEndpoints 
 	};
 
 	nRetVal = pModule->AddProperties(pProps, sizeof(pProps)/sizeof(XnProperty*));
@@ -1073,6 +1075,42 @@ XnStatus XnSensor::RunBIST(XnUInt32 nTestsMask, XnUInt32* pnFailures)
 	nRetVal = XnHostProtocolRunBIST(&m_DevicePrivateData, nTestsMask, pnFailures);
 	XN_IS_STATUS_OK(nRetVal);
 	
+	return (XN_STATUS_OK);
+}
+
+XnStatus XnSensor::SetReadAllEndpoints(XnBool bEnabled)
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (m_ReadAllEndpoints.GetValue() == (XnUInt64)bEnabled)
+	{
+		return XN_STATUS_OK;
+	}
+
+	if (bEnabled)
+	{
+		xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB depth read thread...");
+		XnSpecificUsbDevice* pUSB = m_DevicePrivateData.pSpecificDepthUsb;
+		nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+		XN_IS_STATUS_OK(nRetVal);
+
+		xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Creating USB image read thread...");
+		pUSB = m_DevicePrivateData.pSpecificImageUsb;
+		nRetVal = xnUSBInitReadThread(pUSB->pUsbConnection->UsbEp, pUSB->nChunkReadBytes, pUSB->nNumberOfBuffers, pUSB->nTimeout, XnDeviceSensorProtocolUsbEpCb, pUSB);
+		XN_IS_STATUS_OK(nRetVal);
+	}
+	else
+	{
+		xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Shutting down USB depth read thread...");
+		xnUSBShutdownReadThread(m_DevicePrivateData.pSpecificDepthUsb->pUsbConnection->UsbEp);
+
+		xnLogVerbose(XN_MASK_DEVICE_SENSOR, "Shutting down USB image read thread...");
+		xnUSBShutdownReadThread(m_DevicePrivateData.pSpecificImageUsb->pUsbConnection->UsbEp);
+	}
+
+	nRetVal = m_ReadAllEndpoints.UnsafeUpdateValue(bEnabled);
+	XN_IS_STATUS_OK(nRetVal);
+
 	return (XN_STATUS_OK);
 }
 
@@ -1829,6 +1867,12 @@ XnStatus XN_CALLBACK_TYPE XnSensor::SetFirmwareCPUIntervalCallback(XnActualIntPr
 {
 	XnSensor* pThis = (XnSensor*)pCookie;
 	return pThis->SetFirmwareCPUInterval((XnUInt32)nValue);
+}
+
+XnStatus XN_CALLBACK_TYPE XnSensor::SetReadAllEndpointsCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)
+{
+	XnSensor* pThis = (XnSensor*)pCookie;
+	return pThis->SetReadAllEndpoints((XnBool)nValue);
 }
 
 XnStatus XN_CALLBACK_TYPE XnSensor::SetAPCEnabledCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)

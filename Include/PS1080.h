@@ -127,6 +127,9 @@ enum
 	XN_MODULE_PROPERTY_APC_ENABLED = 0x1080FF91, // "APCEnabled"
 	/** Boolean */
 	XN_MODULE_PROPERTY_FIRMWARE_TEC_DEBUG_PRINT = 0x1080FF92, // "TecDebugPrint"
+	/** Boolean, set only */
+	XN_MODULE_PROPERTY_READ_ALL_ENDPOINTS = 0x1080FF93,
+
 
 	/*******************************************************************/
 	/* Common stream properties                                        */

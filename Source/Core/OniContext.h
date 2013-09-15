@@ -137,6 +137,7 @@ private:
 	char m_overrideDevice[XN_FILE_MAX_PATH];
 
 	int m_initializationCounter;
+	XnUInt64 m_lastFPSPrint;
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END

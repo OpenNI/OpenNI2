@@ -30,6 +30,7 @@
 #include "XnErrorLogger.h"
 #include "XnHash.h"
 #include "XnLockable.h"
+#include <XnFPSCalculator.h>
 
 ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
@@ -70,6 +71,7 @@ public:
 	const OniSensorInfo* getSensorInfo() const;
 
 	Device& getDevice();
+	const XnChar* getSensorName() { return m_sensorName; }
 
 	void* getHandle() const;
 
@@ -89,6 +91,8 @@ public:
 	OniStatus convertDepthToColorCoordinates(VideoStream* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 
 	int getRequiredFrameSize();
+
+	double calcCurrentFPS();
 
 protected:
 	XN_EVENT_HANDLE m_newFrameInternalEvent;
@@ -114,6 +118,7 @@ private:
 	static void ONI_CALLBACK_TYPE stream_PropertyChanged(void* streamHandle, int propertyId, const void* data, int dataSize, void* pCookie);
 
 	void refreshWorldConversionCache();
+	static const XnChar* getSensorName(OniSensorType sensorType);
 
 	NewFrameFuncPtr m_newFrameCallback;
 	void* m_newFrameCookie;
@@ -131,6 +136,8 @@ private:
     // Recorder* -> Recorder* map to mimic a set.
     typedef xnl::Lockable<xnl::Hash<Recorder*, Recorder*> > Recorders;
     Recorders m_recorders;
+	XnFPSData m_FPS;
+	XnChar m_sensorName[80];
 
 	struct WorldConversionCache
 	{

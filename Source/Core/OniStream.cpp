@@ -57,6 +57,9 @@ VideoStream::VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Devi
     m_driverHandler.streamSetPropertyChangedCallback(m_pSensor->streamHandle(), stream_PropertyChanged, this);
 
 	refreshWorldConversionCache();
+
+	xnFPSInit(&m_FPS, 180);
+	xnOSStrCopy(m_sensorName, getSensorName(pSensorInfo->sensorType), sizeof(m_sensorName));
 }
 
 // Stream
@@ -64,6 +67,8 @@ VideoStream::~VideoStream()
 {
 	// Make sure stream is stopped.
 	stop();
+
+	xnFPSFree(&m_FPS);
 
 	if (m_hNewFrameEvent != NULL)
 	{
@@ -346,6 +351,7 @@ void ONI_CALLBACK_TYPE VideoStream::stream_NewFrame(OniFrame* pFrame, void* pCoo
 
 void VideoStream::raiseNewFrameEvent()
 {
+	xnFPSMarkFrame(&m_FPS);
 	xnOSSetEvent(m_newFrameInternalEvent);
 	xnOSSetEvent(m_newFrameInternalEventForFrameHolder);
 	m_newFrameCallback(m_newFrameCookie);
@@ -486,6 +492,27 @@ OniStatus VideoStream::convertDepthToColorCoordinates(VideoStream* colorStream, 
 int VideoStream::getRequiredFrameSize()
 {
 	return m_driverHandler.streamGetRequiredFrameSize(m_pSensor->streamHandle());
+}
+
+double VideoStream::calcCurrentFPS()
+{
+	return xnFPSCalc(&m_FPS);
+}
+
+const XnChar* VideoStream::getSensorName(OniSensorType sensorType)
+{
+	switch (sensorType)
+	{
+	case ONI_SENSOR_DEPTH:
+		return "Depth";
+	case ONI_SENSOR_COLOR:
+		return "Color";
+	case ONI_SENSOR_IR:
+		return "IR";
+	default:
+		XN_ASSERT(FALSE);
+		return "(Unknown)";
+	}
 }
 
 ONI_NAMESPACE_IMPLEMENTATION_END

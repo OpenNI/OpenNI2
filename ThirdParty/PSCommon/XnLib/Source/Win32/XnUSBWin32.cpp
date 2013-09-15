@@ -1373,6 +1373,10 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 		return (XN_STATUS_ERROR);
 	}
 
+	XnUInt64 nLastPrint;
+	xnOSGetHighResTimeStamp(&nLastPrint);
+	XnUInt32 nTotalBytesSinceLastPrint = 0;
+
 	// Dereference common variables
 	hEPOvlp = pThreadData->pEPHandle->hEPHandleOvlp;
 	pOvlpIO = pThreadData->pOvlpIO;
@@ -1448,6 +1452,7 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 		if (bResult == TRUE)
 		{
 			pCallbackFunction(pBuffersInfo[nOVIdx].pBuffer, nBytesRead, pCallbackData);
+			nTotalBytesSinceLastPrint += nBytesRead;
 		}
 
 		// Re-queue the request
@@ -1463,6 +1468,16 @@ XN_THREAD_PROC xnUSBReadThreadMain(XN_THREAD_PARAM pThreadParam)
 			}
 		}
 */
+
+		XnUInt64 nNow;
+		xnOSGetHighResTimeStamp(&nNow);
+		if (nNow - nLastPrint > 1000000)
+		{
+			XnDouble bandwidth = nTotalBytesSinceLastPrint / 1024. / (nNow - nLastPrint) * 1e6;
+			xnLogVerbose(XN_MASK_USB, "Endpoint 0x%x bandwidth: %.2f KB/s", pThreadData->pEPHandle->nEndPointID, bandwidth);
+			nLastPrint = nNow;
+			nTotalBytesSinceLastPrint = 0;
+		}
 	}
 }
 

@@ -32,7 +32,7 @@ ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 OniBool Context::s_valid = FALSE;
 
-Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_initializationCounter(0)
+Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_initializationCounter(0), m_lastFPSPrint(0)
 {
 	xnOSMemSet(m_overrideDevice, 0, XN_FILE_MAX_PATH);
 }
@@ -1028,10 +1028,39 @@ void Context::addToLogger(const XnChar* cpFormat, ...)
 
 void Context::onNewFrame()
 {
+	XnUInt64 nNow;
+	xnOSGetHighResTimeStamp(&nNow);
+	nNow /= 1000000;
+
 	m_cs.Lock();
 	for (xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE>::Iterator it = m_waitingThreads.Begin(); it != m_waitingThreads.End(); ++it)
 	{
 		xnOSSetEvent(it->Value());
+	}
+
+	if (nNow != m_lastFPSPrint)
+	{
+		XnChar fpsInfo[2048] = "";
+		XnUInt32 written = 0;
+		XnUInt32 writtenNow = 0;
+		xnOSStrFormat(fpsInfo + written, sizeof(fpsInfo) - written, &writtenNow, "[FPS] ");
+		written += writtenNow;
+
+		for (xnl::List<VideoStream*>::Iterator it = m_streams.Begin(); it != m_streams.End(); ++it)
+		{
+			VideoStream* pStream = *it;
+			if (written > sizeof(fpsInfo))
+			{
+				break;
+			}
+
+			xnOSStrFormat(fpsInfo + written, sizeof(fpsInfo) - written, &writtenNow, "%s: %.2f ", 
+				pStream->getSensorName(), pStream->calcCurrentFPS());
+			written += writtenNow;
+		}
+
+		xnLogVerbose(XN_MASK_ONI_CONTEXT, "%s", fpsInfo);
+		m_lastFPSPrint = nNow;
 	}
 	m_cs.Unlock();
 }
