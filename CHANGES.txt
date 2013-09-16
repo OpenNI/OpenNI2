@@ -3,24 +3,54 @@ Change Log:
 
 OpenNI 2.3:
   - Fix pure-C APIs
-  - Bug Fix: Single pixel translation is wrong when image res is 1280x1024
   - Bug Fix: depth/world conversion was wrong when depth is in 100 um format
-  - Bug Fix: no even frame indexes from Capri devices.
-  - Properties are now saved in recordings of Capri devices and input files
-  - Link console: allow running a single command and exit
+  - Adding logs for endpoints bandwidth and FPS
+  - Better handling of cases where device does not report its FOV
+  - NiViewer: 
+    - IR emitter on/off is added for both PS1080 and Kinect.
+    - Near mode on/off is added for Kinect (was already there for PS1080)
+  - Java SimpleViewer
+    - Allow passing file name in command prompt
+    - Add support for IR streams
+  - Carmine:
+    - Add support for FW 5.9
+    - PS1080Console bug: "startread" did not work properly
+    - Added support for the fast zoom crop (640x480 regular -> 640x480 zoomed) - 'z' in NiViewer
+    - Add a property that allows reading from endpoints without creating streams
+    - Bug Fix: Disconnect event was fired twice
+    - Implement MAX_PIXEL_VALUE for IR stream
+    - Bug Fix: Single pixel translation is wrong when image res is 1280x1024
+  - Kinect:
+    - Add mirror support
+    - Rewrite image registration for better performance
+    - Support of additional properties (exposed via KinectProperties.h):
+      - 3D sensing properties: Near Mode, IR Emitter On/Off
+      - Non-3D sensing properties: Camera Elevation, Accelerometer, Audio Array ID
   - Capri:
     - Bug Fix: Depth stops working if switching to QQVGA and then back to VGA
     - i2c device list now also states the master and slave IDs
-    - Add commands for turning on/off ACC
     - Fixed a weird log during shutdown
-    - Add commands for projector pulse and projector power
+    - Add projector commands: projector on/off, pulse on/off
     - Add commands for setting CMOS gain
+    - Add commands for reading temperature sensors
+    - Add commands for toggling ACC, periodic-BIST and VDD
     - Print test name when running BIST
     - Default resolution is now QQVGA on ARM machines
+    - Bug Fix: Setting Mirror from INI file didn't work
+    - Handle some protocol error codes that weren't handled
+    - Bug Fix: error strings were missing from log
+    - Implement MAX_PIXEL_VALUE for IR stream
+    - Bug Fix: no even frame indexes from Capri devices.
+    - Properties are now saved in recordings
+    - PSLinkConsole: allow running a single command and exit
+  - OniFile:
+    - Allow calling setVideoMode() as long as it's the same mode (needed by some applications)
+    - Properties are now saved in recordings
   - Build:
     - Support gold linker in compilation
     - Add Linux prerequisites to release notes
     - Add release notes and change log to installation
+    - Refactor TestDevice so it can actually be used for testing
 
 OpenNI 2.2.1:
   - PS1080: Added a property for reading from all endpoints, regardless of streams
