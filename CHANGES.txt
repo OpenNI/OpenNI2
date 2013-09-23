@@ -2,13 +2,26 @@ Change Log:
 -----------
 
 OpenNI 2.3:
+  - Android support added
+    - OpenNIHelper class to handle device permissions
+    - OpenNIView class to allow drawing of VideoFrameRef objects
+    - SimpleRead and SimpleViewer sample applications
+    - NiViewer application
   - Fix pure-C APIs
+  - Allow providing driver list from config file
   - Bug Fix: depth/world conversion was wrong when depth is in 100 um format
   - Adding logs for endpoints bandwidth and FPS
   - Better handling of cases where device does not report its FOV
   - NiViewer: 
     - IR emitter on/off is added for both PS1080 and Kinect.
     - Near mode on/off is added for Kinect (was already there for PS1080)
+  - Java APIs
+    - Add log APIs
+    - Implemented hashCode() and equals() for VideoMode
+    - Bug Fix: VideoFrameRef.getData() returned ByteBuffer with big endianity, whereas data was with little endianity
+    - Bug Fix: bad JNI calls in oniGetDeviceList, oniStreamGetSensorInfo and oniDeviceGetSensorInfo.
+    - Fix callbacks JNI calls
+    - Bug Fix: memory leak in waitForAnyStream()
   - Java SimpleViewer
     - Allow passing file name in command prompt
     - Add support for IR streams
@@ -51,6 +64,7 @@ OpenNI 2.3:
     - Add Linux prerequisites to release notes
     - Add release notes and change log to installation
     - Refactor TestDevice so it can actually be used for testing
+    - ReleaseVersion script now also creates a full Android package
 
 OpenNI 2.2.1:
   - PS1080: Added a property for reading from all endpoints, regardless of streams
