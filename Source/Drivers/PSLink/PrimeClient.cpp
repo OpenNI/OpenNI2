@@ -589,6 +589,18 @@ XnStatus PrimeClient::RunPresetFile(const XnChar* strFileName)
 		{
 			continue;
 		}
+        // skip comments
+        int i;
+        int length = (int)strlen(strLine);
+        for(i = 0; i < length; i++) {
+            if(strLine[i] == ' ' || strLine[i] == '\t') {
+                continue;
+            }
+        }
+        if (i < length && strLine[i] == '#' ) 
+        {
+            continue;
+        }
 
 		// block name
 		XnChar* pToken = strtok(strLine, ",");
