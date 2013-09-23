@@ -40,8 +40,8 @@ ALL_DRIVERS = \
 
 # list all wrappers
 ALL_WRAPPERS = \
-	Wrappers/java/OpenNI.jni \
-	Wrappers/java/OpenNI.java 
+	Wrappers/java \
+	Wrappers/java/jni
 
 # list all tools
 ALL_TOOLS = \
@@ -121,29 +121,29 @@ samples: $(ALL_SAMPLES)
 $(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
 
 # additional dependencies
-$(OPENNI):                            $(XNLIB)
-Wrappers/java/OpenNI.jni:   $(OPENNI) $(XNLIB)
+$(OPENNI):                                      $(XNLIB)
+Wrappers/java/jni:                    $(OPENNI) $(XNLIB)
 
-Source/Drivers/DummyDevice: $(OPENNI) $(XNLIB)
-Source/Drivers/RawDevice:   $(OPENNI) $(XNLIB)
-Source/Drivers/PS1080:      $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
-Source/Drivers/PS1080/PS1080Console: $(OPENNI) $(XNLIB)
-Source/Drivers/PSLink:      $(OPENNI) $(XNLIB)
-Source/Drivers/PSLink/PSLinkConsole: $(OPENNI) $(XNLIB)
-Source/Drivers/OniFile:     $(OPENNI) $(XNLIB)
+Source/Drivers/DummyDevice:           $(OPENNI) $(XNLIB)
+Source/Drivers/RawDevice:             $(OPENNI) $(XNLIB)
+Source/Drivers/PS1080:                $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
+Source/Drivers/PS1080/PS1080Console:  $(OPENNI) $(XNLIB)
+Source/Drivers/PSLink:                $(OPENNI) $(XNLIB)
+Source/Drivers/PSLink/PSLinkConsole:  $(OPENNI) $(XNLIB)
+Source/Drivers/OniFile:               $(OPENNI) $(XNLIB)
 
-Source/Tools/NiViewer:      $(OPENNI) $(XNLIB)
+Source/Tools/NiViewer:                $(OPENNI) $(XNLIB)
 
-Samples/SimpleRead:         $(OPENNI)
-Samples/EventBasedRead:     $(OPENNI)
-Samples/MultipleStreamRead: $(OPENNI)
-Samples/MWClosestPoint:     $(OPENNI)
-Samples/MWClosestPointApp:  $(OPENNI) Samples/MWClosestPoint
+Samples/SimpleRead:                   $(OPENNI)
+Samples/EventBasedRead:               $(OPENNI)
+Samples/MultipleStreamRead:           $(OPENNI)
+Samples/MWClosestPoint:               $(OPENNI)
+Samples/MWClosestPointApp:            $(OPENNI) Samples/MWClosestPoint
 
-Samples/SimpleViewer:       $(OPENNI)
-Samples/MultiDepthViewer:   $(OPENNI)
-Samples/ClosestPointViewer: $(OPENNI) Samples/MWClosestPoint
-Samples/SimpleViewer.java:            Wrappers/java/OpenNI.java
+Samples/SimpleViewer:                 $(OPENNI)
+Samples/MultiDepthViewer:             $(OPENNI)
+Samples/ClosestPointViewer:           $(OPENNI) Samples/MWClosestPoint
+Samples/SimpleViewer.java:            Wrappers/java
 
 $(FINAL_DIR):
 	mkdir -p $(FINAL_DIR)

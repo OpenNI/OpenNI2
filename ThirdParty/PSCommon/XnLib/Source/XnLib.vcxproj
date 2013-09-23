@@ -49,6 +49,7 @@
     <ClInclude Include="..\Include\XnSIMD-None.h" />
     <ClInclude Include="..\Include\XnSIMD-SSE.h" />
     <ClInclude Include="..\Include\XnSIMD.h" />
+    <ClInclude Include="..\Include\XnSimpleString.h" />
     <ClInclude Include="..\Include\XnSmartPointer.h" />
     <ClInclude Include="..\Include\XnStatus.h" />
     <ClInclude Include="..\Include\XnStatusCodes.h" />

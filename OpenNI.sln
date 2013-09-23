@@ -104,7 +104,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSLinkConsole", "Source\Dri
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wrappers", "Wrappers", "{9FCEE1ED-B0D9-46D7-A014-98FBDD0EF6A9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenNI.jni", "Wrappers\java\OpenNI.jni\OpenNI.jni.vcxproj", "{1723CBBA-8EE7-439A-93FB-2E94B4DB2E63}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenNI.jni", "Wrappers\java\jni\OpenNI.jni.vcxproj", "{1723CBBA-8EE7-439A-93FB-2E94B4DB2E63}"
 	ProjectSection(ProjectDependencies) = postProject
 		{72D595BB-8C52-449B-91DB-0E9F6AEAF53A} = {72D595BB-8C52-449B-91DB-0E9F6AEAF53A}
 	EndProjectSection

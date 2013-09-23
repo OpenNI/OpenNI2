@@ -31,11 +31,11 @@
 #if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
 static XnStatus FindLibrary(const XnChar* strLibName, XnChar* cpLibPath, const XnUInt32 nBufferSize)
 {
-	XnChar strAppLibDir[XN_FILE_MAX_PATH];
 	XnBool bExists;
 
+	// try application libraries
+	XnChar strAppLibDir[XN_FILE_MAX_PATH];
 	xnOSGetApplicationLibDir(strAppLibDir, sizeof(strAppLibDir));
-
 	snprintf(cpLibPath, nBufferSize, "%s/%s", strAppLibDir, strLibName);
 	xnOSDoesFileExist(cpLibPath, &bExists);
 	if (bExists)
@@ -43,6 +43,15 @@ static XnStatus FindLibrary(const XnChar* strLibName, XnChar* cpLibPath, const X
 		return XN_STATUS_OK;
 	}
 
+	// otherwise, try current dir
+	snprintf(cpLibPath, nBufferSize, "./%s", strLibName);
+	xnOSDoesFileExist(cpLibPath, &bExists);
+	if (bExists)
+	{
+		return XN_STATUS_OK;
+	}
+
+	// otherwise, try system dir
 	snprintf(cpLibPath, nBufferSize, "/system/lib/%s", strLibName);
 	xnOSDoesFileExist(cpLibPath, &bExists);
 	if (bExists)

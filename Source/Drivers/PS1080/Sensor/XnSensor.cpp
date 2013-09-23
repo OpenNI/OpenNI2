@@ -702,10 +702,34 @@ XnStatus XnSensor::ValidateSensorID(XnChar* csSensorID)
 
 XnStatus XnSensor::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir)
 {
+	XnStatus rc = XN_STATUS_OK;
+
 	// If strConfigDir is NULL, tries to resolve the config file based on the driver's directory
 	XnChar strBaseDir[XN_FILE_MAX_PATH];
 	if (strConfigDir == NULL)
 	{
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+		// support for applications
+		xnOSGetApplicationFilesDir(strBaseDir, nBufSize);
+
+		XnChar strTempFileName[XN_FILE_MAX_PATH];
+		xnOSStrCopy(strTempFileName, strBaseDir, sizeof(strTempFileName));
+		rc = xnOSAppendFilePath(strTempFileName, XN_GLOBAL_CONFIG_FILE_NAME, sizeof(strTempFileName));
+		XN_IS_STATUS_OK(rc);
+
+		XnBool bExists;
+		xnOSDoesFileExist(strTempFileName, &bExists);
+
+		if (bExists)
+		{
+			strConfigDir = strBaseDir;
+		}
+		else
+		{
+			// support for native use - search in current dir
+			strConfigDir = ".";
+		}
+#else
 		if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&XnSensor::ResolveGlobalConfigFileName), strBaseDir) == XN_STATUS_OK &&
 				xnOSGetDirName(strBaseDir, strBaseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK)
 		{
@@ -717,9 +741,9 @@ XnStatus XnSensor::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 n
 			// Something wrong happened. Use the current directory as the fallback.
 			strConfigDir = ".";
 		}
+#endif
 	}
 
-	XnStatus rc;
 	XN_VALIDATE_STR_COPY(strConfigFile, strConfigDir, nBufSize, rc);
 	return xnOSAppendFilePath(strConfigFile, XN_GLOBAL_CONFIG_FILE_NAME, nBufSize);
 }

@@ -25,11 +25,13 @@
 #include "OniRecorder.h"
 #include "OniFrameManager.h"
 
-#include "XnList.h"
-#include "XnHash.h"
-#include "XnEvent.h"
 #include "OniDriverHandler.h"
 #include "OniCommon.h"
+
+#include <XnList.h>
+#include <XnSimpleString.h>
+#include <XnHash.h>
+#include <XnEvent.h>
 
 struct _OniDevice
 {
@@ -112,7 +114,10 @@ private:
 	Context(const Context& other);
 	Context& operator=(const Context&other);
 
-	XnStatus loadLibraries(const char* directoryName);
+	XnStatus resolvePathToOpenNI();
+	XnStatus configure();
+	XnStatus resolveConfigurationFile(char* strConfigurationFile);
+	XnStatus loadLibraries();
 	void onNewFrame();
 	XN_EVENT_HANDLE getThreadEvent();
 	static void XN_CALLBACK_TYPE newFrameCallback(void* pCookie);
@@ -134,7 +139,10 @@ private:
 
 	xnl::CriticalSection m_cs;
 
+	char m_pathToOpenNI[XN_FILE_MAX_PATH];
 	char m_overrideDevice[XN_FILE_MAX_PATH];
+	char m_driverRepo[XN_FILE_MAX_PATH];
+	xnl::Array<xnl::FileName> m_driversList;
 
 	int m_initializationCounter;
 	XnUInt64 m_lastFPSPrint;

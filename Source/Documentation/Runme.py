@@ -38,7 +38,7 @@ if platform.system() == 'Windows':
 else:
     javaDocExe = 'javadoc'
 
-javaSrc = os.path.join('..', '..', 'Wrappers', 'java', 'OpenNI.java', 'src', 'org', 'openni')
+javaSrc = os.path.join('..', '..', 'Wrappers', 'java', 'src', 'org', 'openni')
 
 # workaround a strange linux behavior where you must pass the list of files
 cmd = [javaDocExe, '-d', 'java']

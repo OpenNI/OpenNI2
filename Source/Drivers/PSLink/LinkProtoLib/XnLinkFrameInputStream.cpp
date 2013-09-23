@@ -662,7 +662,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 			if (pixelFormat != XN_FW_PIXEL_FORMAT_SHIFTS_9_3)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to depth!", pixelFormat);
-				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_SHIFTS_9_3);
+				XN_ASSERT(pixelFormat == XN_FW_PIXEL_FORMAT_SHIFTS_9_3);
 				return NULL;
 			}
 
@@ -687,7 +687,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 			if (pixelFormat != XN_FW_PIXEL_FORMAT_YUV422)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to YUV422!", pixelFormat);
-				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_YUV422);
+				XN_ASSERT(pixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
 				return NULL;
 			}
 

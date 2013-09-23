@@ -27,6 +27,8 @@
 #include <XnOS.h>
 #include <XnLogWriterBase.h>
 
+#define LINK_CONFIGURATION_FILE "PSLink.ini"
+
 //---------------------------------------------------------------------------
 // LinkOniDriver class
 //---------------------------------------------------------------------------
@@ -292,6 +294,21 @@ void LinkOniDriver::resolveConfigFilePath()
 {
 	XnChar strModulePath[XN_FILE_MAX_PATH];
 
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+	XnStatus rc = XN_STATUS_OK;
+	// support for applications
+	xnOSGetApplicationFilesDir(strModulePath, XN_FILE_MAX_PATH);
+	xnOSAppendFilePath(strModulePath, LINK_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+
+	XnBool bExists;
+	xnOSDoesFileExist(strModulePath, &bExists);
+
+	if (!bExists)
+	{
+		// support for native use - search in current dir
+		xnOSStrCopy(strModulePath, LINK_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+	}
+#else
 	if (xnOSGetModulePathForProcAddress(reinterpret_cast<void*>(&LinkOniDriver::OnDeviceConnected), strModulePath) != XN_STATUS_OK ||
 		xnOSGetDirName(strModulePath, m_configFilePath, sizeof(m_configFilePath)) != XN_STATUS_OK)
 	{
@@ -300,5 +317,6 @@ void LinkOniDriver::resolveConfigFilePath()
 	}
 
 	xnOSAppendFilePath(m_configFilePath, "PSLink.ini", sizeof(m_configFilePath));
+#endif
 }
 

@@ -168,6 +168,9 @@
     <ClInclude Include="..\Include\Win32\XnOSWin32.h">
       <Filter>Header Files\API\Win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\XnSimpleString.h">
+      <Filter>Header Files\API</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XnSytmmetricMatrix3x3.cpp">

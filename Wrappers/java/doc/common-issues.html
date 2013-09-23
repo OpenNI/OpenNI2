@@ -1,0 +1,12 @@
+<h1>Common Issues</h1>
+<h2>A blank screen appears after launching an SDK sample</strong></h2>
+<img src="images/blank-screen.png" width=600>
+<p>
+  Normally after launching an OpenNI-based application, a dialog appears asking
+  the user to grant USB access permissions to the application. If such a dialog
+  does not appear, it may indicate that the platform has modified or replaced
+  the SystemUI package that implements this dialog.
+</p>
+<p>
+  The dialog is implemented in <code>frameworks/base/packages/SystemUI/src/com/android/systemui/usb/UsbPermissionActivity.java</code>.
+</p>
