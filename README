@@ -46,12 +46,7 @@ Linux
 - JDK 6.0
     From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
     Or via apt:
-    Ubuntu 10.x:
-        sudo add-apt-repository "deb http://archive.canonical.com/ lucid partner"
-        sudo apt-get update
-        sudo apt-get install sun-java6-jdk
-    Ubuntu 12.x:
-        sudo apt-get install openjdk-6-jdk
+    sudo apt-get install openjdk-6-jdk
 - FreeGLUT3
     From: http://freeglut.sourceforge.net/index.php#download
     Or via apt:
@@ -67,8 +62,24 @@ Linux
 
 Android
 -------
-- Android NDK r8d
+- Android NDK
     From: http://developer.android.com/tools/sdk/ndk/index.html#Downloads
+    You must also define an environment variable called "NDK_HOME" that points to the NDK installation directory.
+- Android SDK
+    From: http://developer.android.com/sdk/index.html#download
+    You must also define an environment variable called "ANDROID_HOME" that points to the SDK installation directory.
+- Ant
+    On Ubuntu machine: sudo apt-get install ant
+    For Windows, from: https://code.google.com/p/winant
+- JDK 6.0
+    For Windows:
+      From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
+      You must also define an environment variable called "JAVA_HOME" that points to the JDK installation directory.
+      For example: set JAVA_HOME=c:\Program Files (x86)\Java\jdk1.6.0_32
+    For Ubuntu:
+      From: http://www.oracle.com/technetwork/java/javase/downloads/jdk-6u32-downloads-1594644.html
+      Or via apt:
+      sudo apt-get install openjdk-6-jdk
 
 Building
 ========
@@ -78,17 +89,21 @@ Building on Windows:
 Building on Linux:
   Run:
   $ make
-  
+
 Cross-Compiling for ARM on Linux:
   The following environment variables should be defined:
   - ARM_CXX=<path to cross-compilation g++>
   - ARM_STAGING=<path to cross-compilation staging dir>
   Then, run:
   $ PLATFORM=Arm make
+  
+Building for Android:
+  - Create a workspace in eclipse
+  - Import all projects under root directory
 
-Creating OpenNI2 package:
-  - Go into the directory 'Packaging'
-  - Run ReleaseVersion.py [x86|x64|arm|android]
-    NOTE: for android, NDK_ROOT must be defined, pointing to the NDK installation dir.
-  - Installer will be placed in the 'Final' directory
+Creating OpenNI2 Package
+========================
+- Go into the directory 'Packaging'
+- Run ReleaseVersion.py [x86|x64|Arm|Android]
+- Installer will be placed in the 'Final' directory
 
