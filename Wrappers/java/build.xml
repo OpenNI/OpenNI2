@@ -120,7 +120,9 @@
     </target>
 
     <target name="-pre-build">
-        <exec executable="${ndk.build}" failonerror="true"/>
+        <exec executable="${ndk.build}" failonerror="true">
+            <arg value="-j6"/>
+        </exec>
     </target>
 
     <target name="clean" depends="android_rules.clean">
