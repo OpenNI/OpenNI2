@@ -207,6 +207,7 @@
     <ClInclude Include="OniDevice.h" />
     <ClInclude Include="OniDeviceDriver.h" />
     <ClInclude Include="OniDriverServices.h" />
+    <ClInclude Include="OniFileRecorder.h" />
     <ClInclude Include="OniFrameHolder.h" />
     <ClInclude Include="OniFrameManager.h" />
     <ClInclude Include="OniRecorder.h" />
@@ -685,6 +686,7 @@
     <ClCompile Include="OniContext.cpp" />
     <ClCompile Include="OniDevice.cpp" />
     <ClCompile Include="OniDeviceDriver.cpp" />
+    <ClCompile Include="OniFileRecorder.cpp" />
     <ClCompile Include="OniFrameManager.cpp" />
     <ClCompile Include="OniRecorder.cpp" />
     <ClCompile Include="OniSensor.cpp" />

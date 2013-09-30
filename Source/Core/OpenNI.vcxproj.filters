@@ -97,6 +97,9 @@
     <ClInclude Include="..\..\Include\KinectProperties.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="OniFileRecorder.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header files">
@@ -303,6 +306,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="OniSensor.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="OniFileRecorder.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -19,6 +19,7 @@
 *                                                                            *
 *****************************************************************************/
 #include "OniContext.h"
+#include "OniFileRecorder.h"
 #include "OniStreamFrameHolder.h"
 #include <XnLog.h>
 #include <XnOSCpp.h>
@@ -32,7 +33,7 @@ ONI_NAMESPACE_IMPLEMENTATION_BEGIN
 
 OniBool Context::s_valid = FALSE;
 
-Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_initializationCounter(0), m_lastFPSPrint(0)
+Context::Context() : m_errorLogger(xnl::ErrorLogger::GetInstance()), m_autoRecording(false), m_autoRecordingStarted(false), m_initializationCounter(0), m_lastFPSPrint(0)
 {
 	m_overrideDevice[0] = '\0';
 	m_driverRepo[0] = '\0';
@@ -202,6 +203,17 @@ XnStatus Context::configure()
 	if (rc == XN_STATUS_OK)
 	{
 		xnLogWarning(XN_MASK_ONI_CONTEXT, "Device will be overridden with '%s'", m_overrideDevice);
+	}
+
+	XnChar autoRecordingName[XN_FILE_MAX_PATH];
+	rc = xnOSReadStringFromINI(strOniConfigurationFile, "Device", "RecordTo", autoRecordingName, XN_FILE_MAX_PATH);
+	if (rc == XN_STATUS_OK)
+	{
+		OniStatus oniRc = recorderOpen(autoRecordingName, &m_autoRecorder);
+		if (oniRc == ONI_STATUS_OK)
+		{
+			m_autoRecording = true;
+		}
 	}
 
 	XnChar strRepo[XN_FILE_MAX_PATH];
@@ -630,6 +642,13 @@ OniStatus Context::createStream(OniDeviceHandle device, OniSensorType sensorType
 	m_streams.AddLast(pMyStream);
 	m_cs.Unlock();
 
+	if (m_autoRecording)
+	{
+		m_streamsToAutoRecord.Lock();
+		m_streamsToAutoRecord.AddLast(*pStream);
+		m_streamsToAutoRecord.Unlock();
+	}
+
 	return ONI_STATUS_OK;
 }
 
@@ -640,6 +659,13 @@ OniStatus Context::streamDestroy(OniStreamHandle stream)
 	if (stream == NULL)
 	{
 		return ONI_STATUS_OK;
+	}
+
+	if (m_autoRecording)
+	{
+		m_streamsToAutoRecord.Lock();
+		m_streamsToAutoRecord.Remove(stream);
+		m_streamsToAutoRecord.Unlock();
 	}
 
 	VideoStream* pStream = stream->pStream;
@@ -738,6 +764,19 @@ void Context::frameAddRef(OniFrame* pFrame)
 
 OniStatus Context::waitForStreams(OniStreamHandle* pStreams, int streamCount, int* pStreamIndex, int timeout)
 {
+	if (m_autoRecording && !m_autoRecordingStarted)
+	{
+		m_streamsToAutoRecord.Lock();
+		for (xnl::List<OniStreamHandle>::ConstIterator iter = m_streamsToAutoRecord.Begin(); iter != m_streamsToAutoRecord.End(); ++iter)
+		{
+			m_autoRecorder->pRecorder->attachStream(*(*iter)->pStream, true);
+		}
+		m_streamsToAutoRecord.Unlock();
+
+		m_autoRecorder->pRecorder->start();
+		m_autoRecordingStarted = true;
+	}
+
 	static const int MAX_WAITED_STREAMS = 50;
 	Device* deviceList[MAX_WAITED_STREAMS];
 	VideoStream* streamsList[MAX_WAITED_STREAMS];
@@ -1021,7 +1060,9 @@ OniStatus Context::recorderOpen(const char* fileName, OniRecorderHandle* pRecord
         return ONI_STATUS_ERROR;
     }
     // Create the recorder itself.
-    if (NULL == ((*pRecorder)->pRecorder = XN_NEW(Recorder, m_frameManager, m_errorLogger, *pRecorder)))
+	(*pRecorder)->pRecorder = XN_NEW(FileRecorder, m_frameManager, m_errorLogger, *pRecorder);
+
+    if (NULL == (*pRecorder)->pRecorder)
     {
         XN_DELETE(*pRecorder);
         return ONI_STATUS_ERROR;
