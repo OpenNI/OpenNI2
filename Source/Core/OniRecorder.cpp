@@ -74,13 +74,11 @@ OniStatus Recorder::detachStream(VideoStream& stream)
 OniStatus Recorder::detachAllStreams()
 {
 	xnl::LockGuard<StreamFrameIDList> guard(m_frameIds);
-	for (StreamFrameIDList::Iterator 
-		i = m_frameIds.Begin(),
-		e = m_frameIds.End();
-	i != e; ++i)
+	while (!m_frameIds.IsEmpty())
 	{
-		detachStream(*i->Key());
+		detachStream(*m_frameIds.Begin()->Key());
 	}
+
 	return ONI_STATUS_OK;
 }
 
