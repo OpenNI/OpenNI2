@@ -77,19 +77,17 @@ void PlayerStream::destroy()
 
 OniStatus PlayerStream::start()
 {
-	m_cs.Lock();
+	xnl::AutoCSLocker lock(m_cs);
 	m_isStarted = true;
 	m_requiredFrameSize = getRequiredFrameSize();
-	m_cs.Unlock();
 
 	return ONI_STATUS_OK;
 }
 
 void PlayerStream::stop()
 {
-	m_cs.Lock();
+	xnl::AutoCSLocker lock(m_cs);
 	m_isStarted = false;
-	m_cs.Unlock();
 }
 
 PlayerSource* PlayerStream::GetSource()
@@ -100,13 +98,12 @@ PlayerSource* PlayerStream::GetSource()
 OniStatus PlayerStream::getProperty(int propertyId, void* pData, int* pDataSize)
 {
 	// Check if the property exists.
-	m_cs.Lock();
+	xnl::AutoCSLocker lock(m_cs);
 	OniStatus rc = m_properties.GetProperty(propertyId, pData, pDataSize);
 	if (rc != ONI_STATUS_OK)
 	{
 		rc = m_pSource->GetProperty(propertyId, pData, pDataSize);
 	}
-	m_cs.Unlock();
 
 	return rc;
 }
@@ -267,6 +264,7 @@ void ONI_CALLBACK_TYPE PlayerStream::OnNewDataCallback(const PlayerSource::NewDa
 
 int PlayerStream::getRequiredFrameSize()
 {
+	xnl::AutoCSLocker lock(m_cs);
 	int requiredFrameSize = m_pSource->GetRequiredFrameSize();
 	if (requiredFrameSize == 0)
 	{
@@ -277,18 +275,9 @@ int PlayerStream::getRequiredFrameSize()
 	return requiredFrameSize;
 }
 
-void PlayerStream::Lock()
-{
-	m_cs.Lock();
-}
-
-void PlayerStream::Unlock()
-{
-	m_cs.Unlock();
-}
-
 void PlayerStream::notifyAllProperties()
 {
+	xnl::AutoCSLocker lock(m_cs);
 	raisePropertyChanged(ONI_FILE_PROPERTY_ORIGINAL_DEVICE, m_pDevice->getOriginalDevice(), ONI_MAX_STR);
 
 	for (PlayerProperties::PropertiesHash::ConstIterator property = m_properties.Begin();

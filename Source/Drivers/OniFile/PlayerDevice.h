@@ -84,10 +84,6 @@ public:
 
 	const char* getOriginalDevice() {return m_originalDevice;}
 protected:
-
-	void Lock() { m_cs.Lock(); }
-	void Unlock() { m_cs.Unlock(); }
-
 	PlayerSource* FindSource(const XnChar* strNodeName);
 
 	// Wake up when timestamp is valid.
@@ -103,7 +99,6 @@ private:
 	} Seek;
 
 	void MainLoop();
-	void LockStreams(bool toLock);
 
 	static XN_THREAD_PROC ThreadProc(XN_THREAD_PARAM pThreadParam);
 
@@ -181,7 +176,6 @@ private:
 	// List of streams.
 	typedef xnl::List<PlayerStream*> StreamList;
 	StreamList m_streams;
-	bool m_bStreamsLocked;
 
 	// Internal event for stream ready for data.
 	xnl::OSEvent m_readyForDataInternalEvent;

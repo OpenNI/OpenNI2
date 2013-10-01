@@ -44,6 +44,7 @@ PlayerSource::~PlayerSource()
 /// Return the source info associated with the source.
 OniSensorInfo* PlayerSource::GetInfo()
 {
+	xnl::AutoCSLocker lock(m_cs);
 	return &m_sourceInfo;
 }
 
@@ -55,12 +56,14 @@ const XnChar* PlayerSource::GetNodeName()
 /// Get property.
 OniStatus PlayerSource::GetProperty(int propertyId, void* data, int* pDataSize)
 {
+	xnl::AutoCSLocker lock(m_cs);
 	return m_properties.GetProperty(propertyId, data, pDataSize);
 }
 
 /// Set property.
 OniStatus PlayerSource::SetProperty(int propertyId, const void* data, int dataSize)
 {
+	xnl::AutoCSLocker lock(m_cs);
 	if (propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE)
 	{
 		if(m_sourceInfo.numSupportedVideoModes == 0)

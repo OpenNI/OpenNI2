@@ -100,10 +100,6 @@ public:
 	// Unregister from 'destroy' event.
 	void UnregisterDestroyEvent(OniCallbackHandle handle);
 
-	//Used to prevent any access to the stream while it is being modified externally (by a device, for example)
-	void Lock();
-	void Unlock();
-
 	void notifyAllProperties();
 private:
 	void destroy();

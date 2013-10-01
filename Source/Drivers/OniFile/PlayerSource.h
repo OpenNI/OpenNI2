@@ -104,6 +104,8 @@ protected:
 	NewDataEvent m_newDataEvent;
 
 	int m_requiredFrameSize;
+
+	xnl::CriticalSection m_cs;
 };
 
 } // namespace oni_files_player

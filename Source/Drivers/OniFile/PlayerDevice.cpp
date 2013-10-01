@@ -109,7 +109,7 @@ static PropertyEntry PSLinkPropertyList[] =
 PlayerDevice::PlayerDevice(const xnl::String& filePath) : 
 	m_filePath(filePath), m_fileHandle(0), m_threadHandle(NULL), m_running(FALSE), m_isSeeking(FALSE),
 	m_dPlaybackSpeed(1.0), m_nStartTimestamp(0), m_nStartTime(0), m_bHasTimeReference(FALSE), 
-	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL), m_bStreamsLocked(FALSE)
+	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL)
 {
 	xnOSMemSet(m_originalDevice, 0, sizeof(m_originalDevice));
 	// Create the events.
@@ -218,7 +218,7 @@ void PlayerDevice::close()
 	m_player.Destroy();
 
 	// Delete all the sources and streams.
-	Lock();
+	xnl::AutoCSLocker lock(m_cs);
 	while (m_streams.Begin() != m_streams.End())
 	{
 		PlayerStream* pStream = *m_streams.Begin();
@@ -230,12 +230,11 @@ void PlayerDevice::close()
 		m_sources.Remove(pSource);
 		XN_DELETE(pSource);
 	}
-	Unlock();
 }
 
 OniStatus PlayerDevice::getSensorInfoList(OniSensorInfo** pSources, int* numSources)
 {
-	Lock();
+	xnl::AutoCSLocker lock(m_cs);
 
 	// Update source count.
 	*numSources = (int)m_sources.Size();
@@ -248,25 +247,25 @@ OniStatus PlayerDevice::getSensorInfoList(OniSensorInfo** pSources, int* numSour
 		xnOSMemCopy(&(*pSources)[i],  (*iter)->GetInfo(), sizeof(OniSensorInfo));
 	}
 
-	Unlock();
-
     return ONI_STATUS_OK;
 }
 
 driver::StreamBase* PlayerDevice::createStream(OniSensorType sensorType)
 {
 	// Find the requested source.
-	Lock();
 	PlayerSource* pSource = NULL;
-	for (SourceList::Iterator iter = m_sources.Begin(); iter != m_sources.End(); ++iter)
+
 	{
-		if ((*iter)->GetInfo()->sensorType == sensorType)
+		xnl::AutoCSLocker lock(m_cs);
+		for (SourceList::Iterator iter = m_sources.Begin(); iter != m_sources.End(); ++iter)
 		{
-			pSource = (*iter);
-			break;
+			if ((*iter)->GetInfo()->sensorType == sensorType)
+			{
+				pSource = (*iter);
+				break;
+			}
 		}
 	}
-	Unlock();
 
 	// Check if source was found.
 	if (pSource == NULL)
@@ -289,12 +288,10 @@ driver::StreamBase* PlayerDevice::createStream(OniSensorType sensorType)
 		return NULL;
 	}
 
-	Lock();
-
+	xnl::AutoCSLocker lock(m_cs);
 	XnStatus xnrc = m_streams.AddLast(pStream);
 	if (xnrc != XN_STATUS_OK)
 	{
-		Unlock();
 		XN_DELETE(pStream);
 		return NULL;
 	}
@@ -306,7 +303,6 @@ driver::StreamBase* PlayerDevice::createStream(OniSensorType sensorType)
 	if (rc != ONI_STATUS_OK)
 	{
 		m_streams.Remove(pStream);
-		Unlock();
 		XN_DELETE(pStream);
 		return NULL;
 	}
@@ -317,18 +313,16 @@ driver::StreamBase* PlayerDevice::createStream(OniSensorType sensorType)
 	if (rc != ONI_STATUS_OK)
 	{
 		m_streams.Remove(pStream);
-		Unlock();
 		XN_DELETE(pStream);
 		return NULL;
 	}
-
-	Unlock();
 
 	return pStream;
 }
 
 void PlayerDevice::destroyStream(oni::driver::StreamBase* pStream)
 {
+	xnl::AutoCSLocker lock(m_cs);
 	m_streams.Remove((PlayerStream*)pStream);
 	XN_DELETE(pStream);
 }
@@ -376,9 +370,8 @@ OniStatus PlayerDevice::getProperty(int propertyId, void* data, int* pDataSize)
 	else
 	{
 		// Get the property.
-		Lock();
+		xnl::AutoCSLocker lock(m_cs);
 		rc = m_properties.GetProperty(propertyId, data, pDataSize);
-		Unlock();
 	}
 
 	return rc;
@@ -419,9 +412,8 @@ OniStatus PlayerDevice::setProperty(int propertyId, const void* data, int dataSi
 	else
 	{
 		// Set the property.
-		Lock();
+		xnl::AutoCSLocker lock(m_cs);
 		rc = m_properties.SetProperty(propertyId, data, dataSize);
-		Unlock();
 	}
 
 	return rc;
@@ -478,7 +470,7 @@ OniBool PlayerDevice::isCommandSupported(int commandId)
 
 PlayerSource* PlayerDevice::FindSource(const XnChar* strNodeName)
 {
-	Lock();
+	xnl::AutoCSLocker lock(m_cs);
 
 	// Find the relevant source.
 	for (SourceList::Iterator iter = m_sources.Begin(); iter != m_sources.End(); ++iter)
@@ -486,12 +478,9 @@ PlayerSource* PlayerDevice::FindSource(const XnChar* strNodeName)
 		if (strcmp((*iter)->GetNodeName(), strNodeName) == 0)
 		{
 			PlayerSource* pSource = *iter;
-			Unlock();
 			return pSource;
 		}
 	}
-
-	Unlock();
 
 	return NULL;
 }
@@ -501,19 +490,18 @@ void PlayerDevice::SleepToTimestamp(XnUInt64 nTimeStamp)
 	XnUInt64 nNow;
 	xnOSGetHighResTimeStamp(&nNow);
 
-	m_cs.Lock();
-
 	XnBool bHasTimeReference = TRUE;
-	if (!m_bHasTimeReference /*&& (nTimeStamp <= m_nStartTimestamp)*/)
 	{
-		m_nStartTimestamp = nTimeStamp;
-		m_nStartTime = nNow;
+		xnl::AutoCSLocker lock(m_cs);
+		if (!m_bHasTimeReference /*&& (nTimeStamp <= m_nStartTimestamp)*/)
+		{
+			m_nStartTimestamp = nTimeStamp;
+			m_nStartTime = nNow;
 
-		m_bHasTimeReference = TRUE;
-		bHasTimeReference = FALSE;
+			m_bHasTimeReference = TRUE;
+			bHasTimeReference = FALSE;
+		}
 	}
-
-	m_cs.Unlock();
 
 	if (bHasTimeReference && (m_dPlaybackSpeed > 0.0f))
 	{
@@ -540,20 +528,6 @@ void PlayerDevice::SleepToTimestamp(XnUInt64 nTimeStamp)
 			xnOSGetHighResTimeStamp(&m_nStartTime);
 		}
 	}
-}
-
-void PlayerDevice::LockStreams(bool toLock)
-{
-	for (StreamList::Iterator iter = m_streams.Begin(); iter != m_streams.End(); iter++)
-	{
-		PlayerStream* pStream = *iter;
-		if(toLock)
-			pStream->Lock();
-		else
-			pStream->Unlock();
-	}
-
-	m_bStreamsLocked = toLock;
 }
 
 void PlayerDevice::MainLoop()
@@ -635,9 +609,8 @@ void ONI_CALLBACK_TYPE PlayerDevice::ReadyForDataCallback(const PlayerStream::Re
 void ONI_CALLBACK_TYPE PlayerDevice::StreamDestroyCallback(const PlayerStream::DestroyEventArgs& destroyEventArgs, void* pCookie)
 {
 	PlayerDevice* pThis = (PlayerDevice*)(pCookie);
-	pThis->Lock();
+	xnl::AutoCSLocker lock(pThis->m_cs);
 	pThis->m_streams.Remove(destroyEventArgs.pStream);
-	pThis->Unlock();
 }
 
 XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeAdded(void* pCookie, const XnChar* strNodeName, XnProductionNodeType type, XnCodecID /*compression*/, XnUInt32 nNumberOfFrames)
@@ -672,9 +645,8 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeAdded(void* pCookie, const XnChar*
 				pSource->SetProperty(ONI_STREAM_PROPERTY_NUMBER_OF_FRAMES, &nNumberOfFrames, sizeof(int));
 
 				// Add the source.
-				pThis->Lock();
+				xnl::AutoCSLocker lock(pThis->m_cs);
 				pThis->m_sources.AddLast(pSource);
-				pThis->Unlock();
 			}
 
 			break;
@@ -694,21 +666,7 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeAdded(void* pCookie, const XnChar*
 
 XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeRemoved(void* /*pCookie*/, const XnChar* /*strNodeName*/)
 {
-	/*PlayerDevice* pThis = (PlayerDevice*)pCookie;
-
-	// Remove the source.
-	pThis->Lock();
-	PlayerSource* pSource = pThis->FindSource(strNodeName);
-	if (pSource != NULL)
-	{
-		pThis->m_sources.Remove(pSource);
-		XN_DELETE(pSource);
-	}
-	pThis->Unlock();
-
-	return (pSource != NULL) ? XN_STATUS_OK : XN_STATUS_NO_MATCH;*/
-	
-	// Do not remove the node.
+	// Do not remove the node (sensors can't disappear)
 	return XN_STATUS_OK;
 }
 
@@ -719,7 +677,6 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeIntPropChanged(void* pCookie, cons
 	OniStatus rc;
 
 	// Find the source.
-	pThis->Lock();
 	PlayerSource* pSource = pThis->FindSource(strNodeName);
 	if (pSource != NULL)
 	{
@@ -816,7 +773,6 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeIntPropChanged(void* pCookie, cons
 			nRetVal = pThis->AddPrivateProperty(pSource, strPropName, sizeof(nValue), &nValue);
 		}
 	}
-	pThis->Unlock();
 
 	return nRetVal;
 }
@@ -827,13 +783,11 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeRealPropChanged(void* pCookie, con
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	// Find the source.
-	pThis->Lock();
 	PlayerSource* pSource = pThis->FindSource(strNodeName);
 	if (pSource != NULL)
 	{
 		nRetVal = pThis->AddPrivateProperty(pSource, strPropName, sizeof(dValue), &dValue);
 	}
-	pThis->Unlock();
 
 	return nRetVal;
 }
@@ -844,13 +798,11 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeStringPropChanged(void* pCookie, c
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	// Find the source.
-	pThis->Lock();
 	PlayerSource* pSource = pThis->FindSource(strNodeName);
 	if (pSource != NULL)
 	{
 		nRetVal = pThis->AddPrivateProperty(pSource, strPropName, (XnUInt32)strlen(strValue)+1, strValue);
 	}
-	pThis->Unlock();
 
 	return nRetVal;
 }
@@ -862,7 +814,6 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeGeneralPropChanged(void* pCookie, 
 	OniStatus rc;
 
 	// Find the source.
-	pThis->Lock();
 	PlayerSource* pSource = pThis->FindSource(strNodeName);
 	if (pSource != NULL)
 	{
@@ -983,7 +934,6 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeGeneralPropChanged(void* pCookie, 
 			nRetVal = pThis->AddPrivateProperty(pSource, strPropName, nBufferSize, pBuffer);
 		}
 	}
-	pThis->Unlock();
 
 	return nRetVal;
 }
@@ -1015,29 +965,26 @@ XnStatus XN_CALLBACK_TYPE PlayerDevice::OnNodeNewData(void* pCookie, const XnCha
 		{
 			// Check if any stream is ready to receive the frames.
 			// NOTE: all the streams have a local 'last frame' buffer, so worst case other streams on source will buffer the frame.
-			pThis->Lock();
-			hasStreams = FALSE;
-			for (StreamList::Iterator iter = pThis->m_streams.Begin(); iter != pThis->m_streams.End(); iter++)
 			{
-				PlayerStream* pStream = *iter;
-				if (pStream->GetSource() == pSource)
+				xnl::AutoCSLocker lock(pThis->m_cs);
+				hasStreams = FALSE;
+				for (StreamList::Iterator iter = pThis->m_streams.Begin(); iter != pThis->m_streams.End(); iter++)
 				{
-					hasStreams = TRUE;
-					ready = TRUE;
-					break;
+					PlayerStream* pStream = *iter;
+					if (pStream->GetSource() == pSource)
+					{
+						hasStreams = TRUE;
+						ready = TRUE;
+						break;
+					}
 				}
 			}
-			pThis->Unlock();
 
 			// If no ready device found, wait for ready for data event.
 			if (hasStreams)
 			{
 				if (ready)
 				{
-					// If we have locked streams (due to reset), unlock them.
-					if(pThis->m_bStreamsLocked)
-						pThis->LockStreams(false);
-
 					// Check if waiting for manual trigger (playback speed is zero).
 					if (pThis->m_dPlaybackSpeed == XN_PLAYBACK_SPEED_MANUAL)
 					{
@@ -1076,19 +1023,15 @@ void XN_CALLBACK_TYPE PlayerDevice::OnEndOfFileReached(void* pCookie)
 {
 	// Reset time reference for all streams.
 	PlayerDevice* pThis = (PlayerDevice*)pCookie;
-	pThis->Lock();
-	pThis->m_bHasTimeReference = FALSE;
-	pThis->Unlock();
+	{
+		xnl::AutoCSLocker lock(pThis->m_cs);
+		pThis->m_bHasTimeReference = FALSE;
+	}
 
 	// Notify the driver in case the player has finished playing (no-rewind)
 	if (pThis->isPlayerEOF())
 	{
 		pThis->TriggerDriverEOFCallback();
-	}
-	//Lock the streams until new data will arrive
-	else
-	{
-		pThis->LockStreams(true);
 	}
 }
 
