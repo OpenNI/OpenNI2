@@ -75,11 +75,12 @@ public class SimpleViewerActivity
 		List<DeviceInfo> devices = OpenNI.enumerateDevices();
 		if (devices.isEmpty()) {
 			showAlertAndExit("No OpenNI-compliant device found.");
-		}
-		uri = devices.get(0).getUri();
-		
-		mDeviceOpenPending = true;
-		mOpenNIHelper.requestDeviceOpen(uri, this);
+		} else {
+      uri = devices.get(0).getUri();
+
+      mDeviceOpenPending = true;
+      mOpenNIHelper.requestDeviceOpen(uri, this);
+    }
 	}
 
 	private void showAlertAndExit(String message) {
