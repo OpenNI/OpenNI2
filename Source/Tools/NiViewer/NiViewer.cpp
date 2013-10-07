@@ -53,7 +53,11 @@
 #include "OpenNI.h"
 #include "XnLib.h"
 
+#ifdef MACOS
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 #include "Capture.h"
 #include "Draw.h"
