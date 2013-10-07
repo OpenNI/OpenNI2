@@ -149,7 +149,6 @@ class Harvest:
         # copy GL headers
         if self.osName == 'Windows' and isGL:
             shutil.copytree(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'GL'), os.path.join(sampleTargetDir, 'GL'))
-            shutil.copytree(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glh'), os.path.join(sampleTargetDir, 'glh'))
             # and lib
             shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut32.lib'), sampleTargetDir)
             shutil.copy(os.path.join(self.rootDir, 'ThirdParty', 'GL', 'glut64.lib'), sampleTargetDir)
