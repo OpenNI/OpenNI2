@@ -43,20 +43,6 @@
 // R - Increase the maximum depth cutoff by 50.
 // ESC - exit.
 
-// --------------------------------
-// Includes
-// --------------------------------
-// #include <XnCppWrapper.h>
-// 
-// #if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
-// 	#define UNIX
-// 	#define GLX_GLXEXT_LEGACY
-// #endif
-// 
-// #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
-// 	#define MACOS
-// #endif
-
 // Undeprecate CRT functions
 #ifndef _CRT_SECURE_NO_DEPRECATE 
 	#define _CRT_SECURE_NO_DEPRECATE 1
@@ -67,19 +53,8 @@
 #include "OpenNI.h"
 #include "XnLib.h"
 
-#define GLH_EXT_SINGLE_FILE
-#if (ONI_PLATFORM == ONI_PLATFORM_WIN32)
-#pragma warning(push, 3)
-#endif
-#include <glh/glh_obs.h>
-#include <glh/glh_glut2.h>
-#if (ONI_PLATFORM == ONI_PLATFORM_WIN32)
-#pragma warning(pop)
-#endif
+#include <GL/glut.h>
 
-using namespace glh;
-
-// #include <XnLog.h>
 #include "Capture.h"
 #include "Draw.h"
 #include "Keyboard.h"
@@ -116,9 +91,6 @@ bool g_bPause = false;
 /* When true, only a single frame will be read, and then reading will be paused. */
 bool g_bStep = false;
 bool g_bShutdown = false;
-
-glut_perspective_reshaper reshaper;
-glut_callbacks cb;
 
 IntPair mouseLocation;
 IntPair windowSize;
@@ -166,6 +138,14 @@ void keyboardSpecialCallback(int key, int /*x*/, int /*y*/)
 
 void reshapeCallback(int width, int height)
 {
+	glViewport(0, 0, width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(20, (GLdouble)width / height, 1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
+
 	windowSize.X = width;
 	windowSize.Y = height;
 	windowReshaped(width, height);
@@ -695,18 +675,6 @@ int main(int argc, char **argv)
 // 	audioInit();
  	captureInit();
 
-	reshaper.zNear = 1;
-	reshaper.zFar = 100;
-	glut_add_interactor(&reshaper);
-
-	cb.mouse_function = mouseCallback;
-	cb.motion_function = motionCallback;
-	cb.passive_motion_function = motionCallback;
-	cb.keyboard_function = keyboardCallback;
-	cb.special_function  = keyboardSpecialCallback;
-	cb.reshape_function = reshapeCallback;
-	glut_add_interactor(&cb);
-
 	glutInit(&argc, argv);
 	glutInitDisplayString("stencil double rgb");
 	glutInitWindowSize(WIN_SIZE_X, WIN_SIZE_Y);
@@ -716,7 +684,12 @@ int main(int argc, char **argv)
 
 	init_opengl();
 
-	glut_helpers_initialize();
+	glutMouseFunc(mouseCallback);
+	glutMotionFunc(motionCallback);
+	glutPassiveMotionFunc(motionCallback);
+	glutKeyboardFunc(keyboardCallback);
+	glutSpecialFunc(keyboardSpecialCallback);
+	glutReshapeFunc(reshapeCallback);
 
 	glutIdleFunc(idleCallback);
 	glutDisplayFunc(drawFrame);
