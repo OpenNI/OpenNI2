@@ -159,6 +159,7 @@ public class NiViewerActivity
 			List<DeviceInfo> devices = OpenNI.enumerateDevices();
 			if (devices.isEmpty()) {
 				showAlertAndExit("No OpenNI-compliant device found.");
+				return;
 			}
 			uri = devices.get(0).getUri();
 		}
