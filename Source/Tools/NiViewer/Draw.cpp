@@ -49,8 +49,6 @@
 // --------------------------------
 // Defines
 // --------------------------------
-#define MAX_DEPTH XN_MAX_UINT16
-
 #define YUV422_U  0
 #define YUV422_Y1 1
 #define YUV422_V  2
@@ -122,8 +120,9 @@ XnUInt8 PalletIntsR [256] = {0};
 XnUInt8 PalletIntsG [256] = {0};
 XnUInt8 PalletIntsB [256] = {0};
 
-/* Linear Depth Histogram */
-float g_pDepthHist[MAX_DEPTH];
+/* Histograms */
+float* g_pDepthHist = NULL;
+int g_nMaxDepth = 0;
 unsigned short g_nMaxGrayscale16Value = 0;
 
 const char* g_DepthDrawColoring[NUM_OF_DEPTH_DRAW_TYPES];
@@ -137,8 +136,6 @@ typedef struct DrawUserInput
 } DrawUserInput;
 
 DrawUserInput g_DrawUserInput;
-
-float g_fMaxDepth = 0;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
@@ -577,15 +574,24 @@ void toggleHelpScreen(int)
 
 void calculateHistogram()
 {
-	xnOSMemSet(g_pDepthHist, 0, MAX_DEPTH*sizeof(float));
-	int nNumberOfPoints = 0;
-
-	openni::DepthPixel nValue;
-
 	openni::VideoStream& depthGen = getDepthStream();
 
 	if (!depthGen.isValid() || !getDepthFrame().isValid())
 		return;
+
+	int maxDepthValue = getDepthStream().getMaxPixelValue() + 1;
+	if (g_pDepthHist == NULL || maxDepthValue > g_nMaxDepth)
+	{
+		delete[] g_pDepthHist;
+		g_pDepthHist = new float[maxDepthValue];
+		g_nMaxDepth = maxDepthValue;
+	}
+
+	xnOSMemSet(g_pDepthHist, 0, g_nMaxDepth*sizeof(float));
+	int nNumberOfPoints = 0;
+
+	openni::DepthPixel nValue;
+
 
 	const openni::DepthPixel* pDepth = (const openni::DepthPixel*)getDepthFrame().getData();
 	const openni::DepthPixel* pDepthEnd = pDepth + (getDepthFrame().getDataSize() / sizeof(openni::DepthPixel));
@@ -594,7 +600,7 @@ void calculateHistogram()
 	{
 		nValue = *pDepth;
 
-		XN_ASSERT(nValue <= MAX_DEPTH);
+		XN_ASSERT(nValue <= g_nMaxDepth);
 
 		if (nValue != 0)
 		{
@@ -605,12 +611,12 @@ void calculateHistogram()
 		pDepth++;
 	}
 
-	XnUInt32 nIndex;
-	for (nIndex=1; nIndex<MAX_DEPTH; nIndex++)
+	int nIndex;
+	for (nIndex=1; nIndex<g_nMaxDepth; nIndex++)
 	{
 		g_pDepthHist[nIndex] += g_pDepthHist[nIndex-1];
 	}
-	for (nIndex=1; nIndex<MAX_DEPTH; nIndex++)
+	for (nIndex=1; nIndex<g_nMaxDepth; nIndex++)
 	{
 		if (g_pDepthHist[nIndex] != 0)
 		{
@@ -1184,7 +1190,7 @@ void drawDepth(IntRect* pLocation, IntPair* pPointer)
 					}
 					break;
 				case RAINBOW:
-					nColIndex = (XnUInt16)((*pDepth / (g_fMaxDepth / 256)));
+					nColIndex = (XnUInt16)((*pDepth / (g_nMaxDepth / 256.)));
 					nRed   = PalletIntsR[nColIndex];
 					nGreen = PalletIntsG[nColIndex];
 					nBlue  = PalletIntsB[nColIndex];
@@ -1262,7 +1268,7 @@ void drawPointerMode(IntPair* pPointer)
 
 		// Print the scale data
 		glBegin(GL_POINTS);
-		for (int i=0; i<g_fMaxDepth; i+=1)
+		for (int i=0; i<g_nMaxDepth; i+=1)
 		{
 			float fNewColor = g_pDepthHist[i];
 			if ((fNewColor > 0.004) && (fNewColor < 0.996))
@@ -1296,7 +1302,7 @@ void drawPointerMode(IntPair* pPointer)
 		}
 
 		// Print the scale texts
-		for (int i=0; i<g_fMaxDepth/10; i+=25)
+		for (int i=0; i<g_nMaxDepth/10; i+=25)
 		{
 			int xPos = i*2 + 10;
 
@@ -1350,10 +1356,10 @@ void drawPointerMode(IntPair* pPointer)
 	{
 		// Print the pointer text
 		XnUInt64 nCutOffMin = 0;
-		XnUInt64 nCutOffMax = (pDepthMD != NULL) ? g_fMaxDepth : 0;
+		XnUInt64 nCutOffMax = (pDepthMD != NULL) ? g_nMaxDepth : 0;
 
 		XnChar sPointerValue[100];
-		if (nPointerValue != g_fMaxDepth)
+		if (nPointerValue != g_nMaxDepth)
 		{
 			xnOSStrFormat(sPointerValue, sizeof(sPointerValue), &chars, "%.1f", (float)nPointerValue/10);
 		}
@@ -1745,10 +1751,6 @@ void drawFrame()
 	openni::VideoFrameRef* pDepthMD = &getDepthFrame();
 	if (isDepthOn() && pDepthMD->isValid())
 	{
-		int maxDepth = 0;
-		maxDepth = getDepthStream().getMaxPixelValue();
-		g_fMaxDepth = maxDepth;
-		
 		TextureMapInit(&g_texDepth, pDepthMD->getVideoMode().getResolutionX(), pDepthMD->getVideoMode().getResolutionY(), 4, pDepthMD->getWidth(), pDepthMD->getHeight());
 		fixLocation(&g_DrawConfig.DepthLocation, pDepthMD->getVideoMode().getResolutionX(), pDepthMD->getVideoMode().getResolutionY());
 	}
