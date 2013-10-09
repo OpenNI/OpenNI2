@@ -47,24 +47,6 @@ public class OpenNIView extends GLSurfaceView {
 		super.finalize();
 	}
 	
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int frameWidth = mPrevFrameWidth;
-		int frameHeight = mPrevFrameHeight;
-		
-		int width = getDefaultSize(frameWidth, widthMeasureSpec);
-		int height = getDefaultSize(frameHeight, heightMeasureSpec);
-		
-		if (frameWidth > 0 && frameHeight > 0) {
-			if (frameWidth * height > width * frameHeight) {
-				height = width * frameHeight / frameWidth;
-			} else if (frameWidth * height < width * frameHeight) {
-				width = height * frameWidth / frameHeight;
-			}
-		}
-		setMeasuredDimension(width, height);
-	}
-	
 	public void setAlphaValue(int alpha) {
 		nativeSetAlphaValue(mNativePtr, alpha);
 		requestRender();

@@ -324,6 +324,23 @@ void OpenNIView::calcDepthHist(VideoFrameRef& frame)
 
 void OpenNIView::onDraw()
 {
+	int startX = 0;
+	int startY = 0;
+	int viewAreaWidth = m_viewWidth;
+	int viewAreaHeight = m_viewHeight;
+
+	// if view ratio is larger than frame ratio, make width smaller. Otherwise, make height smaller
+	if (m_xres * viewAreaHeight > m_yres * viewAreaWidth)
+	{
+		viewAreaHeight = m_yres * viewAreaWidth / m_xres;
+		startY = (m_viewHeight - viewAreaHeight) / 2;
+	}
+	else
+	{
+		viewAreaWidth = m_xres * viewAreaHeight / m_yres;
+		startX = (m_viewWidth - viewAreaWidth) / 2;
+	}
+
 	glBindTexture(GL_TEXTURE_2D, m_textureId);
 	int rect[4] = {0, m_yres, m_xres, -m_yres};
 	glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, rect);
@@ -332,7 +349,7 @@ void OpenNIView::onDraw()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_textureWidth, m_textureHeight, 0, GL_RGBA,
 		GL_UNSIGNED_BYTE, m_texture);
 
-	glDrawTexiOES(0, 0, 0, m_viewWidth, m_viewHeight);
+	glDrawTexiOES(startX, startY, 0, viewAreaWidth, viewAreaHeight);
 }
 
 void OpenNIView::onSurfaceCreated()
