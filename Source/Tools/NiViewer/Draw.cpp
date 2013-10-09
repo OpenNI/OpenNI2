@@ -1679,18 +1679,20 @@ void fixLocation(IntRect* pLocation, int xRes, int yRes)
 {
 	double resRatio = (double)xRes / yRes;
 
-	double locationRatio = (pLocation->uRight - pLocation->uLeft) / (pLocation->uTop - pLocation->uBottom);
+	double locationRatio = double(pLocation->uRight - pLocation->uLeft) / (pLocation->uTop - pLocation->uBottom);
 
 	if (locationRatio > resRatio) 
 	{
 		// location is wider. use height as reference.
 		double width = (pLocation->uTop - pLocation->uBottom) * resRatio;
+		pLocation->uLeft += (pLocation->uRight - pLocation->uLeft - width) / 2;
 		pLocation->uRight = (pLocation->uLeft + width);
 	}
 	else if (locationRatio < resRatio)
 	{
 		// res is wider. use width as reference.
 		double height = (pLocation->uRight - pLocation->uLeft) / resRatio;
+		pLocation->uBottom += (pLocation->uTop - pLocation->uBottom - height) / 2;
 		pLocation->uTop = (pLocation->uBottom + height);
 	}
 }
