@@ -1617,16 +1617,16 @@ void drawHelpScreen()
 	// print left pane
 	int nXLocation = nXStartLocation;
 	int nYLocation = nYStartLocation;
+	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_GENERAL);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_PRESETS);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DISPLAY);
-	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DEVICE);
 
 	// print right pane
 	nXLocation = WIN_SIZE_X/2;
 	nYLocation = nYStartLocation;
+	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DEVICE);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_PLAYER);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_CAPTURE);
-	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_GENERAL);
 }
 
 void drawUserInput(bool bCursor)
