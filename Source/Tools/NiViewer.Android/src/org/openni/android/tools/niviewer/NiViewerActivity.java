@@ -4,35 +4,26 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
 import android.hardware.usb.UsbDeviceConnection;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import org.openni.Device;
 import org.openni.DeviceInfo;
 import org.openni.OpenNI;
 import org.openni.Recorder;
-import org.openni.SensorType;
-import org.openni.VideoFrameRef;
-import org.openni.VideoMode;
-import org.openni.VideoStream;
 import org.openni.android.OpenNIHelper;
-import org.openni.android.OpenNIView;
 
 public class NiViewerActivity 
 		extends Activity 
@@ -42,21 +33,11 @@ public class NiViewerActivity
 	private OpenNIHelper mOpenNIHelper;
 	private UsbDeviceConnection mDeviceConnection;
 	private boolean mDeviceOpenPending = false;
-	private Thread mMainLoopThread;
-	private boolean mShouldRun = true;
 	private Device mDevice;
-	private VideoStream mStream;
 	private Recorder mRecorder;
 	private String mRecordingName;
-	private Spinner mSensorSpinner;
-	private List<SensorType> mDeviceSensors;
-	private List<VideoMode> mStreamVideoModes;
-	private Spinner mVideoModeSpinner;
-	private OpenNIView mFrameView;
-	private TextView mStatusLine;
 	private String mRecording;
-	private static SensorType[] SENSORS = { SensorType.DEPTH, SensorType.COLOR, SensorType.IR };
-	private static CharSequence[] SENSOR_NAMES = { "Depth", "Color", "IR" };
+	private LinearLayout mStreamsContainer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,41 +46,14 @@ public class NiViewerActivity
 		OpenNI.setLogMinSeverity(0);
 		OpenNI.initialize();
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_simple_viewer);
-		mSensorSpinner = (Spinner) findViewById(R.id.spinnerSensor);
-		mVideoModeSpinner = (Spinner) findViewById(R.id.spinnerVideoMode);
-		mFrameView = (OpenNIView) findViewById(R.id.frameView);
-		mStatusLine = (TextView) findViewById(R.id.status_line);
-		
-		mSensorSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				onSensorSelected(position);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
-
-		mVideoModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				onVideoModeSelected(position);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+		setContentView(R.layout.activity_niviewer);
+		mStreamsContainer = (LinearLayout)findViewById(R.id.streams_container);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.simple_viewer, menu);
+		getMenuInflater().inflate(R.menu.niviewer_menu, menu);
 		return true;
 	}
 	
@@ -108,6 +62,9 @@ public class NiViewerActivity
 		switch (item.getItemId()) {
 			case R.id.record:
 				toggleRecording(item);
+				return true;
+			case R.id.add_stream:
+				addStream();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -167,7 +124,7 @@ public class NiViewerActivity
 		mDeviceOpenPending = true;
 		mOpenNIHelper.requestDeviceOpen(uri, this);
 	}
-
+	
 	private void showAlert(String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(message);
@@ -192,141 +149,28 @@ public class NiViewerActivity
 		mDeviceOpenPending = false;
 
 		mDevice = aDevice;
-		mDeviceSensors = new ArrayList<SensorType>();
+		for (StreamView streamView : getStreamViews()) {
+			streamView.setDevice(mDevice);
+		}
+		
+		mStreamsContainer.requestLayout();
+		addStream();
+	}
+	
+	private void addStream() {
+		StreamView streamView = new StreamView(this);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		params.width = 0;
+		params.weight = 1;
+		params.gravity = Gravity.CENTER_HORIZONTAL;
+		streamView.setLayoutParams(params);
+		
+		streamView.setDevice(mDevice);
+		mStreamsContainer.addView(streamView);
+		mStreamsContainer.requestLayout();
+	}
 
-		List<CharSequence> sensors = new ArrayList<CharSequence>();
-		
-		for (int i = 0; i < SENSORS.length; ++i) {
-			if (mDevice.hasSensor(SENSORS[i])) {
-				sensors.add(SENSOR_NAMES[i]);
-				mDeviceSensors.add(SENSORS[i]);
-			}
-		}
-		
-		ArrayAdapter<CharSequence> sensorsAdapter = new ArrayAdapter<CharSequence>(this,
-				android.R.layout.simple_spinner_item, sensors);
-		sensorsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSensorSpinner.setAdapter(sensorsAdapter);
-		
-		mSensorSpinner.setSelection(0);
-	}
-	
-	private void onSensorSelected(int pos) {
-		try {
-			stop();
-			
-			if (mStream != null) {
-				mStream.destroy();
-				mStream = null;
-			}
-		
-			mStream = VideoStream.create(mDevice, mDeviceSensors.get(pos));
-			List<CharSequence> videoModesNames = new ArrayList<CharSequence>();
-	
-			mStreamVideoModes = mStream.getSensorInfo().getSupportedVideoModes();
-			for (int i = 0; i < mStreamVideoModes.size(); ++i) {
-				VideoMode mode = mStreamVideoModes.get(i);
-				
-				videoModesNames.add(String.format("%d x %d @ %d FPS (%s)",
-	                mode.getResolutionX(),
-	                mode.getResolutionY(), 
-	                mode.getFps(),
-	                pixelFormatToName(mode.getPixelFormat())));
-			}
-	
-			ArrayAdapter<CharSequence> videoModesAdapter = new ArrayAdapter<CharSequence>(this,
-					android.R.layout.simple_spinner_item, videoModesNames);
-			videoModesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			mVideoModeSpinner.setAdapter(videoModesAdapter);
-	
-			// use default mode
-			VideoMode currentMode = mStream.getVideoMode();
-			int selected = mStreamVideoModes.indexOf(currentMode);
-			if (selected == -1) {
-				selected = 0;
-			}
-			
-			mVideoModeSpinner.setSelection(selected);
-		} catch (RuntimeException e) {
-			showAlert("Failed to switch to stream: " + e.getMessage());
-		}
-	}
-	
-    private CharSequence pixelFormatToName(org.openni.PixelFormat format) {
-        switch (format) {
-            case DEPTH_1_MM:    return "1 mm";
-            case DEPTH_100_UM:  return "100 um";
-            case SHIFT_9_2:     return "9.2";
-            case SHIFT_9_3:     return "9.3";
-            case RGB888:        return "RGB";
-            case GRAY8:         return "Gray8";
-            case GRAY16:        return "Gray16";
-            case YUV422:		return "YUV422";
-            case YUYV:			return "YUYV";
-            default:            return "UNKNOWN";
-        }
-    }
-	
-	private void onVideoModeSelected(int pos) {
-		try {
-			stop();
-			
-			mStream.setVideoMode(mStreamVideoModes.get(pos));
-			mStream.start();
-		} catch (RuntimeException e) {
-			showAlert("Failed to switch to video mode: " + e.getMessage());
-		}
-
-		mShouldRun = true;
-		mMainLoopThread = new Thread() {
-			@Override
-			public void run() {
-				List<VideoStream> streams = new ArrayList<VideoStream>();
-				streams.add(mStream);
-				
-				while (mShouldRun) {
-					VideoFrameRef frame = null;
-					
-					try {
-						OpenNI.waitForAnyStream(streams, 100);
-						frame = mStream.readFrame();
-						
-						// Request rendering of the current OpenNI frame
-						mFrameView.update(frame);
-						updateLabel(String.format("Frame Index: %,d | Timestamp: %,d", frame.getFrameIndex(), frame.getTimestamp()));
-						
-					} catch (TimeoutException e) {
-					} catch (Exception e) {
-						Log.e(TAG, "Failed reading frame: " + e);
-					}
-				}
-			};
-		};
-		
-		mMainLoopThread.setName("SimpleViewer MainLoop Thread");
-		mMainLoopThread.start();
-	}
-	
-	private void stop() {
-		mShouldRun = false;
-		
-		while (mMainLoopThread != null) {
-			try {
-				mMainLoopThread.join();
-				mMainLoopThread = null;
-				break;
-			} catch (InterruptedException e) {
-			}
-		}
-
-		if (mStream != null) {
-			mStream.stop();
-		}
-		
-		mFrameView.clear();
-		mStatusLine.setText(R.string.waiting_for_frames);
-	}
-	
 	@SuppressLint("SimpleDateFormat")
 	private void toggleRecording(MenuItem item) {
 		if (mRecorder == null) {
@@ -335,7 +179,9 @@ public class NiViewerActivity
 			
 			try {
 				mRecorder = Recorder.create(mRecordingName);
-				mRecorder.addStream(mStream, true);
+				for (StreamView streamView : getStreamViews()) {
+					mRecorder.addStream(streamView.getStream(), true);
+				}
 				mRecorder.start();
 			} catch (RuntimeException ex) {
 				mRecorder = null;
@@ -361,14 +207,6 @@ public class NiViewerActivity
 		}
 	}
 	
-	private void updateLabel(final String message) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				mStatusLine.setText(message);								
-			}
-		});
-	}
-
 	@Override
 	public void onDeviceOpenFailed(String uri) {
 		Log.e(TAG, "Failed to open device " + uri);
@@ -387,13 +225,10 @@ public class NiViewerActivity
 		if (mDeviceOpenPending)
 			return;
 
-		stop();
-		
 		stopRecording();
-		
-		if (mStream != null) {
-			mStream.destroy();
-			mStream = null;
+
+		for (StreamView streamView : getStreamViews()) {
+			streamView.stop();
 		}
 		
 		if (mDevice != null) {
@@ -405,5 +240,15 @@ public class NiViewerActivity
 			mDeviceConnection.close();
 			mDeviceConnection = null;
 		}
+	}
+	
+	private List<StreamView> getStreamViews() {
+		int count = mStreamsContainer.getChildCount();
+		ArrayList<StreamView> list = new ArrayList<StreamView>(count);
+		for (int i = 0; i < count; ++i) {
+			StreamView view = (StreamView)mStreamsContainer.getChildAt(i);
+			list.add(view);
+		}
+		return list;
 	}
 }
