@@ -124,6 +124,7 @@ XnUInt8 PalletIntsB [256] = {0};
 
 /* Linear Depth Histogram */
 float g_pDepthHist[MAX_DEPTH];
+unsigned short g_nMaxGrayscale16Value = 0;
 
 const char* g_DepthDrawColoring[NUM_OF_DEPTH_DRAW_TYPES];
 const char* g_ColorDrawColoring[NUM_OF_COLOR_DRAW_TYPES];
@@ -986,6 +987,24 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 		pDepth = (openni::DepthPixel*)depthMetaData.getData();
 	}
 
+	// create IR histogram
+	double grayscale16Factor = 1.0;
+	if (colorMD.getVideoMode().getPixelFormat() == ONI_PIXEL_FORMAT_GRAY16)
+	{
+		int nPixelsCount = colorMD.getWidth() * colorMD.getHeight();
+		XnUInt16* pPixel = (XnUInt16*)colorMD.getData();
+		for (int i = 0; i < nPixelsCount; ++i,++pPixel)
+		{
+			if (*pPixel > g_nMaxGrayscale16Value)
+				g_nMaxGrayscale16Value = *pPixel;
+		}
+
+		if (g_nMaxGrayscale16Value > 0)
+		{
+			grayscale16Factor = 255.0 / g_nMaxGrayscale16Value;
+		}
+	}
+
 	for (XnUInt16 nY = 0; nY < height; nY++)
 	{
 		XnUInt8* pTexture = TextureMapGetLine(&g_texColor, nY + originY) + originX*4;
@@ -1025,6 +1044,8 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 					}
 				}
 
+				XnUInt16* p16;
+
 				switch (format)
  				{
 				case openni::PIXEL_FORMAT_RGB888:
@@ -1038,7 +1059,8 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
  					pColor+=1; 
  					break;
 				case openni::PIXEL_FORMAT_GRAY16:
- 					pTexture[0] = pTexture[1] = pTexture[2] = *((XnUInt16*)pColor) >> 2;
+					p16 = (XnUInt16*)pColor;
+					pTexture[0] = pTexture[1] = pTexture[2] = (XnUInt8)((*p16) * grayscale16Factor);
  					pColor+=2; 
  					break;
 				default:
@@ -1832,4 +1854,9 @@ void setDepthDrawing(int nColoring)
 void setColorDrawing(int nColoring)
 {
 	g_DrawConfig.Streams.Color.Coloring	= (ColorDrawColoringType)nColoring;
+}
+
+void resetIRHistogram(int /*dummy*/)
+{
+	g_nMaxGrayscale16Value = 0;
 }

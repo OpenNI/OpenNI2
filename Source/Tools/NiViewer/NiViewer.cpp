@@ -315,6 +315,7 @@ void createKeyboardMap()
 		{
 			registerKey('p', "Pointer Mode On/Off", togglePointerMode, 0);
 			registerKey('f', "Full Screen On/Off", toggleFullScreen, 0);
+			registerKey('h', "Reset IR histogram", resetIRHistogram, 0);
 			registerKey('?', "Show/Hide Help screen", toggleHelpScreen, 0);
 		}
 		endKeyboardGroup();
@@ -385,6 +386,7 @@ void createMenu()
 				}
 			}
 			endSubMenu();
+			createMenuEntry("Reset IR histogram", resetIRHistogram, 0);
 			createMenuEntry("Pointer Mode On/Off", togglePointerMode, 0);
 			createMenuEntry("Show/Hide Help Screen", toggleHelpScreen, 0);
 		}

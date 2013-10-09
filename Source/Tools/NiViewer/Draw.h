@@ -104,5 +104,6 @@ void windowReshaped(int width, int height);
 void setDepthDrawing(int nColoring);
 void setColorDrawing(int nColoring);
 void setErrorState(const char* strFormat, ...);
+void resetIRHistogram(int /*dummy*/);
 
 #endif //__DRAW_H__
