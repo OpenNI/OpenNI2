@@ -329,6 +329,10 @@ void OpenNIView::onDraw()
 	int viewAreaWidth = m_viewWidth;
 	int viewAreaHeight = m_viewHeight;
 
+	// skip if no frame yet
+	if (m_xres == 0 || m_yres == 0)
+		return;
+
 	// if view ratio is larger than frame ratio, make width smaller. Otherwise, make height smaller
 	if (m_xres * viewAreaHeight > m_yres * viewAreaWidth)
 	{
