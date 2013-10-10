@@ -53,6 +53,7 @@ public:
     virtual XnStatus ReadAHB(XnUInt32 nAddress, XnUInt8 nBitOffset, XnUInt8 nBitWidth, XnUInt32& nValue);
 	virtual XnStatus SoftReset();
 	virtual XnStatus HardReset();
+    virtual XnStatus ReadDebugData(XnCommandDebugData& commandDebugData);
     virtual XnStatus SetProjectorActive(XnBool bActive);
     virtual XnStatus SetAccActive(XnBool bActive);
     virtual XnStatus GetAccActive(XnBool& bActive); 

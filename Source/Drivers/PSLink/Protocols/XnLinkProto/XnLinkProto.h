@@ -594,6 +594,11 @@ typedef struct XnLinkGetTemperatureParams
 	XnUInt32 m_nID;
 } XnLinkGetTemperatureParams;
 
+typedef struct XnLinkGetDebugDataParams
+{
+	XnUInt32 m_nID;
+} XnLinkGetDebugDataParams;
+
 //-----------------------------------------------------------------------
 // Command Response Structures 
 //-----------------------------------------------------------------------
@@ -791,6 +796,18 @@ typedef struct XnLinkGetFileListResponse
 	XnUInt32 m_nCount;
 	XnLinkFileEntry m_aFileEntries[1];
 } XnLinkGetFileListResponse;
+
+typedef struct XnLinkDebugDataResponseHeader
+{
+    XnUInt16 m_nDataID;		//Values come from XnLinkInternalPropID
+    XnUInt16 m_nValueSize;
+} XnLinkDebugDataResponseHeader;
+
+typedef struct XnLinkDebugDataResponse
+{
+    XnLinkDebugDataResponseHeader m_header;
+    XnUInt8 m_data[1];
+} XnLinkDebugDataResponse;
 
 typedef struct XnLinkBootStatus
 {

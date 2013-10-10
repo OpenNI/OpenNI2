@@ -7,12 +7,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{5710a645-adf6-4ec5-b5a9-4577058dde9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\API">
-      <UniqueIdentifier>{3c2daeb7-efe8-4592-9c4b-53f6050a62b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\API\Win32">
-      <UniqueIdentifier>{b1c6bd21-c7d1-4224-9c93-543f80fe4356}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Win32">
       <UniqueIdentifier>{52fcd458-35f3-46c5-ad33-77edb75712c1}</UniqueIdentifier>
     </Filter>
@@ -22,85 +16,31 @@
     <Filter Include="Source Files\Log">
       <UniqueIdentifier>{e9f8515c-cbb9-40ee-9bc2-54d170e75d4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\OS">
+      <UniqueIdentifier>{51878d15-3fa4-4ae9-b538-c09734990ae2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OS\Win32">
+      <UniqueIdentifier>{b1c6bd21-c7d1-4224-9c93-543f80fe4356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DataContainers">
+      <UniqueIdentifier>{fdb1b249-609a-4759-a68e-717bd3a6dc49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Infrastructures">
+      <UniqueIdentifier>{3c2daeb7-efe8-4592-9c4b-53f6050a62b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\XnLib.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnBox3D.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnCriticalSection.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnDataStructures.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnHash.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnList.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMath.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMemory.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnOS.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnOSCpp.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnQueue.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSmartPointer.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnVector3D.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMatrix3x3.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnString.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnArray.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPlatform.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Win32\XnPlatformWin32.h">
-      <Filter>Header Files\API\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPair.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLog.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnProperty.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPool.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnStatus.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnStatusCodes.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnStatusRegister.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="Win32\XnWin32Internal.h">
       <Filter>Source Files\Win32</Filter>
@@ -127,49 +67,115 @@
       <Filter>Source Files\Win32</Filter>
     </ClInclude>
     <ClInclude Include="XnEnum.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnUSB.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnUSBDevice.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnErrorLogger.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnCallStackLogger.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLockable.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLockGuard.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPriorityQueue.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-Neon.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-None.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-SSE.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Win32\usb100.h">
-      <Filter>Header Files\API\Win32</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Win32\XnOSWin32.h">
-      <Filter>Header Files\API\Win32</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnCriticalSection.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnArray.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnBox3D.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnDataStructures.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnHash.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnList.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMatrix3x3.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPair.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPool.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPriorityQueue.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnProperty.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnQueue.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSmartPointer.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnString.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnVector3D.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSB.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSBDevice.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMath.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOS.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOSCpp.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMemory.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPlatform.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-Neon.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-None.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-SSE.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnStatusCodes.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnSimpleString.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\DataContainers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

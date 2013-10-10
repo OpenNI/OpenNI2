@@ -134,6 +134,7 @@ typedef enum XnLinkMsgType
 	XN_LINK_MSG_GET_PROP						= 0x0701,
 	XN_LINK_MSG_SET_PROP						= 0x0702,
 	XN_LINK_MSG_SET_MULTI_PROPS					= 0x0703,
+	XN_LINK_MSG_GET_DEBUG_DATA	                = 0x0704,
 
 //XN_LINK_INTERFACE_HANDS_GENERATOR - HandGenerator messages - group 0x09
 	XN_LINK_MSG_START_TARCKING_HAND				= 0x0901,

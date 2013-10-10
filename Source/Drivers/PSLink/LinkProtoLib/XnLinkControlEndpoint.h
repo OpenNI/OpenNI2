@@ -64,6 +64,7 @@ public:
 	XnStatus StopStreaming(XnUInt16 nStreamID);
 	XnStatus SoftReset();
 	XnStatus HardReset();
+    XnStatus ReadDebugData(XnCommandDebugData& commandDebugData);
 	XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
     XnStatus GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTests);
     XnStatus GetTemperature(XnCommandTemperatureResponse& temp);

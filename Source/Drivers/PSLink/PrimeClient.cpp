@@ -207,6 +207,11 @@ XnStatus PrimeClient::HardReset()
 	return m_linkControlEndpoint.HardReset();
 }
 
+XnStatus PrimeClient::ReadDebugData(XnCommandDebugData& commandDebugData)
+{
+    return m_linkControlEndpoint.ReadDebugData(commandDebugData);
+}
+
 XnStatus PrimeClient::WriteI2C(XnUInt8 nDeviceID, XnUInt8 nAddressSize, XnUInt32 nAddress, XnUInt8 nValueSize, XnUInt32 nValue, XnUInt32 nMask)
 {
 	return m_linkControlEndpoint.WriteI2C(nDeviceID, nAddressSize, nAddress, nValueSize, nValue, nMask);

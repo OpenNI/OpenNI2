@@ -830,7 +830,20 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		nRetVal = m_pSensor->HardReset();
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Power reset", nRetVal, ONI_STATUS_ERROR);
 		break;
+    case PS_COMMAND_READ_DEBUG_DATA:
+        {
+            EXACT_PROP_SIZE_DO(dataSize, XnCommandDebugData)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandDebugData));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
 
+            XnCommandDebugData* pArgs = reinterpret_cast<XnCommandDebugData*>(data);
+            nRetVal = m_pSensor->ReadDebugData(*pArgs);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Reading Debug Data", nRetVal, ONI_STATUS_ERROR);
+        }
+        break;
 	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
 		nRetVal = m_pSensor->BeginUploadFileOnControlEP();
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Begin update", nRetVal, ONI_STATUS_ERROR);
@@ -1442,6 +1455,7 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_I2C_WRITE:
 	case PS_COMMAND_SOFT_RESET:
 	case PS_COMMAND_POWER_RESET:
+    case PS_COMMAND_READ_DEBUG_DATA:
 	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
 	case PS_COMMAND_END_FIRMWARE_UPDATE:
 	case PS_COMMAND_UPLOAD_FILE:

@@ -78,6 +78,7 @@ enum
     PS_COMMAND_STOP_LOG = 0x1d27E015, // no arguments
     PS_COMMAND_READ_TEMPERATURE = 0x1d27E016, // no arguments    
     LINK_COMMAND_GET_TEMP_LIST = 0x1d27E017,// PrintTempList
+    PS_COMMAND_READ_DEBUG_DATA = 0x1d27E018, //ReadDebugDaata
 };
 
 typedef enum XnUsbInterfaceType
@@ -246,6 +247,13 @@ typedef struct XnCommandSetLogMaskState
 	uint32_t mask;
 	bool enabled;
 } XnCommandSetLogMaskState;
+
+typedef struct XnCommandDebugData
+{
+    uint16_t dataID;    // Values come from XnLinkInternalPropID
+    uint16_t dataSize;  // in: size of allocated buffer in data, out: actual bytes written to data
+    uint8_t* data;
+} XnCommandDebugData;
 
 #pragma pack (pop)
 

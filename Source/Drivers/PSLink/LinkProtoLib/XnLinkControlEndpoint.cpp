@@ -831,6 +831,26 @@ XnStatus LinkControlEndpoint::HardReset()
 	return XN_STATUS_OK;
 }
 
+XnStatus LinkControlEndpoint::ReadDebugData(XnCommandDebugData& commandDebugData)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+
+    xnLogVerbose(XN_MASK_LINK, "LINK: Getting debug data with ID %d...", commandDebugData.dataID);
+
+    XnLinkGetDebugDataParams params;
+    params.m_nID = commandDebugData.dataID;
+
+    XnUInt32 nResponseSize = m_nMaxResponseSize;
+
+    XnLinkDebugDataResponse* pDebugDataRespondHeader = (XnLinkDebugDataResponse*)m_pIncomingResponse;
+    nRetVal = ExecuteCommand(XN_LINK_MSG_GET_DEBUG_DATA,XN_LINK_STREAM_ID_NONE, &params, sizeof(params), m_pIncomingResponse, nResponseSize);
+    XN_IS_STATUS_OK_LOG_ERROR("Execute get debug data command", nRetVal);
+
+    nRetVal = xnLinkReadDebugData(commandDebugData, pDebugDataRespondHeader);
+    XN_IS_STATUS_OK(nRetVal);
+
+    return nRetVal;
+}
 
 XnStatus LinkControlEndpoint::GetSupportedI2CDevices(xnl::Array<XnLinkI2CDevice>& supportedDevices)
 {

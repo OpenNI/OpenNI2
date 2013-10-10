@@ -948,6 +948,24 @@ XnUInt32 xnLinkGetPixelSizeByStreamType(XnLinkStreamType streamType)
         return 0;
     }
 }
+XnStatus xnLinkReadDebugData(XnCommandDebugData& commandDebugData, XnLinkDebugDataResponse* pDebugDataResponse)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+
+    if(commandDebugData.dataSize < pDebugDataResponse->m_header.m_nValueSize)
+    {
+        xnLogError(XN_MASK_LINK, "Size of retrieved data was larger than requested: %u bytes, must be at least %u.", pDebugDataResponse->m_header.m_nValueSize, 
+            commandDebugData.dataSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+    commandDebugData.dataSize = pDebugDataResponse->m_header.m_nValueSize; //if the sized received is smaller than expected
+    for(int i = 0; i < commandDebugData.dataSize; i++)
+    {
+        commandDebugData.data[i] = pDebugDataResponse->m_data[i];
+    }
+    return nRetVal;
+}
 
 XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pDevicesList, XnUInt32 nBufferSize, xnl::Array<XnLinkI2CDevice>& supportedDevices)
 {

@@ -1047,6 +1047,44 @@ int HardReset(int /*argc*/, const char* /*argv*/[])
 
 	return nRetVal;
 }
+// Retrieve data from firmware according to the command number received from user
+int ReadDebugData(int argc, const char* argv[])
+{
+
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnCommandDebugData commandDebugData = {0};
+    if (argc < 2)
+    {
+        printf("\nUsage: %s <Command ID> \n\n", argv[0]);
+        return -1;
+    }
+    
+    XnUInt8 debugData[1024];
+    commandDebugData.dataID = (uint16_t)MyAtoi(argv[1]);
+    commandDebugData.dataSize = sizeof(debugData);
+    commandDebugData.data = debugData;
+
+    nRetVal = g_device.invoke(PS_COMMAND_READ_DEBUG_DATA, &commandDebugData, sizeof(commandDebugData));
+    if (nRetVal == STATUS_OK)
+    {
+        printf("\nCommand: %x Data size: %d \nData:" ,commandDebugData.dataID, commandDebugData.dataSize);
+        for(int i = 0; i < commandDebugData.dataSize; i++)
+        {
+            if(i % 8 == 0)
+            {
+                printf("\n");
+            }
+            printf("%02x ",commandDebugData.data[i]);
+        }
+        printf("\n\n");
+    }
+    else
+    {
+        printf("Failed to retrieve data: %s\n\n", OpenNI::getExtendedError());
+    }
+
+    return nRetVal;
+}
 
 // Enables/Disables the BIST (XN_LINK_PROP_ID_ACC_ENABLED)
 int Acc(int argc, const char* argv[])
@@ -1830,6 +1868,7 @@ void RegisterCommands()
 	RegisterCommand("ReadAHB", ReadAHB);
 	RegisterCommand("SoftReset", SoftReset);
     RegisterCommand("HardReset", HardReset);
+    RegisterCommand("ReadDebugData", ReadDebugData);
     RegisterCommand("Acc", Acc);
     RegisterCommand("VDD", VDD);
     RegisterCommand("PeriodBist", PeriodicBist);
