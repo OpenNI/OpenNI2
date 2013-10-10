@@ -995,7 +995,7 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 
 	// create IR histogram
 	double grayscale16Factor = 1.0;
-	if (colorMD.getVideoMode().getPixelFormat() == ONI_PIXEL_FORMAT_GRAY16)
+	if (colorMD.getVideoMode().getPixelFormat() == openni::PIXEL_FORMAT_GRAY16)
 	{
 		int nPixelsCount = colorMD.getWidth() * colorMD.getHeight();
 		XnUInt16* pPixel = (XnUInt16*)colorMD.getData();
