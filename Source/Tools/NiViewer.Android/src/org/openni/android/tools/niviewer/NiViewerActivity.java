@@ -9,7 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.hardware.usb.UsbDeviceConnection;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,6 +48,11 @@ public class NiViewerActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_niviewer);
 		mStreamsContainer = (LinearLayout)findViewById(R.id.streams_container);
+		if (Configuration.ORIENTATION_PORTRAIT == getResources().getConfiguration().orientation) {
+			mStreamsContainer.setOrientation(LinearLayout.VERTICAL);
+		} else {
+			mStreamsContainer.setOrientation(LinearLayout.HORIZONTAL);
+		}
 	}
 
 	@Override
@@ -161,9 +166,15 @@ public class NiViewerActivity
 		StreamView streamView = new StreamView(this);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		params.width = 0;
+		
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+			params.height = 0;
+		} else {
+			params.width = 0;
+		}
+		
 		params.weight = 1;
-		params.gravity = Gravity.CENTER_HORIZONTAL;
+		params.gravity = Gravity.CENTER;
 		streamView.setLayoutParams(params);
 		
 		streamView.setDevice(mDevice);
