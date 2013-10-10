@@ -1531,7 +1531,7 @@ int PrintTempList(int /*argc*/, const char* /*argv*/[])
     args.pTempInfos = tempInfo;
     args.count = sizeof(tempInfo)/sizeof(tempInfo[0]);
 
-    if (STATUS_OK != g_device.invoke(LINK_COMMAND_GET_TEMP_LIST, args)) 
+    if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_TEMP_LIST, args)) 
     {
         printf("Failed getting Temperature list: %s\n\n", OpenNI::getExtendedError());
         return 1;
@@ -1563,7 +1563,7 @@ int ReadTemps(int argc, const char* argv[])
 	supportedTempList.pTempInfos = TempInfos;
 	supportedTempList.count = sizeof(TempInfos)/sizeof(TempInfos[0]);
 
-	if (STATUS_OK != g_device.invoke(LINK_COMMAND_GET_TEMP_LIST, supportedTempList))
+	if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_TEMP_LIST, supportedTempList))
 	{
 		printf("Failed getting Temperature list: %s\n\n", OpenNI::getExtendedError());
 		return -2;

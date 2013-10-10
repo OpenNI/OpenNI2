@@ -1024,7 +1024,7 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		}
 		break;
 
-    case LINK_COMMAND_GET_TEMP_LIST:
+    case PS_COMMAND_GET_TEMP_LIST:
         {
             EXACT_PROP_SIZE_DO(dataSize, XnCommandGetTempList)
             {
@@ -1465,7 +1465,7 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_DUMP_ENDPOINT:
 	case PS_COMMAND_GET_I2C_DEVICE_LIST:
 	case PS_COMMAND_GET_BIST_LIST:
-    case LINK_COMMAND_GET_TEMP_LIST:
+    case PS_COMMAND_GET_TEMP_LIST:
     case PS_COMMAND_READ_TEMPERATURE:
 	case PS_COMMAND_EXECUTE_BIST:
 	case PS_COMMAND_USB_TEST:
