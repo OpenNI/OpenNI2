@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import org.openni.Device;
@@ -41,6 +42,7 @@ public class NiViewerActivity
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "onCreate");
 		mOpenNIHelper = new OpenNIHelper(this);
 		OpenNI.setLogAndroidOutput(true);
 		OpenNI.setLogMinSeverity(0);
@@ -48,11 +50,7 @@ public class NiViewerActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_niviewer);
 		mStreamsContainer = (LinearLayout)findViewById(R.id.streams_container);
-		if (Configuration.ORIENTATION_PORTRAIT == getResources().getConfiguration().orientation) {
-			mStreamsContainer.setOrientation(LinearLayout.VERTICAL);
-		} else {
-			mStreamsContainer.setOrientation(LinearLayout.HORIZONTAL);
-		}
+		onConfigurationChanged(getResources().getConfiguration());
 	}
 
 	@Override
@@ -78,6 +76,7 @@ public class NiViewerActivity
 
 	@Override
 	protected void onDestroy() {
+		Log.d(TAG, "onDestroy");
 		super.onDestroy();
 		
 		mOpenNIHelper.shutdown();
@@ -130,6 +129,23 @@ public class NiViewerActivity
 		mOpenNIHelper.requestDeviceOpen(uri, this);
 	}
 	
+	@Override
+	public void onConfigurationChanged(Configuration config) {
+		Log.d(TAG, "onConfigurationChanged");
+		
+		if (Configuration.ORIENTATION_PORTRAIT == config.orientation) {
+			mStreamsContainer.setOrientation(LinearLayout.VERTICAL);
+		} else {
+			mStreamsContainer.setOrientation(LinearLayout.HORIZONTAL);
+		}
+
+		for (StreamView streamView : getStreamViews()) {
+			setStreamViewLayout(streamView, config);
+		}
+		
+		super.onConfigurationChanged(config);
+	}
+	
 	private void showAlert(String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(message);
@@ -162,20 +178,25 @@ public class NiViewerActivity
 		addStream();
 	}
 	
-	private void addStream() {
-		StreamView streamView = new StreamView(this);
+	private void setStreamViewLayout(StreamView streamView, Configuration config) {
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT); 
+		if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+			params.width = LayoutParams.WRAP_CONTENT;
 			params.height = 0;
 		} else {
 			params.width = 0;
+			params.height = LayoutParams.WRAP_CONTENT;
 		}
-		
+
 		params.weight = 1;
 		params.gravity = Gravity.CENTER;
 		streamView.setLayoutParams(params);
+	}
+	
+	private void addStream() {
+		StreamView streamView = new StreamView(this);
+		setStreamViewLayout(streamView, getResources().getConfiguration());
 		
 		streamView.setDevice(mDevice);
 		mStreamsContainer.addView(streamView);

@@ -68,7 +68,7 @@ Android
 - Android SDK
     From: http://developer.android.com/sdk/index.html#download
     You must also define an environment variable called "ANDROID_HOME" that points to the SDK installation directory.
-    Currently requires installing SDK for API level 12 and 18 (via Android SDK Manager)
+    Currently requires installing SDK for API level 14 and 18 (via Android SDK Manager)
 - Ant
     On Ubuntu machine: sudo apt-get install ant
     For Windows, from: https://code.google.com/p/winant
