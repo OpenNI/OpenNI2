@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.openni.android"
-      android:versionCode="10"
-      android:versionName="2.3.0">
+      android:versionCode="203000010"
+      android:versionName="2.3">
     <uses-sdk android:minSdkVersion="12"/>
 </manifest>

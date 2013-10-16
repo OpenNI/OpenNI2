@@ -8,7 +8,7 @@
   <?define MinorVersion=3?>
   <?define MaintenanceVersion=0?>
   <!-- BuildVersion is NOT used by WiX in the upgrade procedure -->
-  <?define BuildVersion=9?>
+  <?define BuildVersion=10?>
   <!-- Full version number to display -->
   <?define VersionNumber="$(var.MajorVersion).$(var.MinorVersion).$(var.MaintenanceVersion).$(var.BuildVersion)"?>
   <?define VersionName="2.3"?>
