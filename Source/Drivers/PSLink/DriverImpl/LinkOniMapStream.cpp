@@ -306,12 +306,13 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 		return XN_STATUS_BAD_PARAM;
 	}
 
-	nRetVal = m_pInputStream->SetVideoMode(supportedModes[selectedIndex]);
-	XN_IS_STATUS_OK_LOG_ERROR("Set video mode", nRetVal);
-
 	nRetVal = m_pInputStream->SetOutputFormat(pVideoMode->pixelFormat);
 	XN_IS_STATUS_OK_LOG_ERROR("Set output format", nRetVal);
 
+	nRetVal = m_pInputStream->SetVideoMode(supportedModes[selectedIndex]);
+	XN_IS_STATUS_OK_LOG_ERROR("Set video mode", nRetVal);
+
+	xnLogVerbose(XN_MASK_LINK,"Set video mode to  %ux%u@%u fps & pixel format: %u", pVideoMode->resolutionX, pVideoMode->resolutionY, pVideoMode->fps, pVideoMode->pixelFormat);
 	return XN_STATUS_OK;
 }
 

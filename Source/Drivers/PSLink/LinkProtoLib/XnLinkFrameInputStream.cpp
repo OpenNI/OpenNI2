@@ -407,6 +407,7 @@ XnUInt32 LinkFrameInputStream::GetOutputBytesPerPixel() const
 	switch (m_outputFormat)
 	{
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 		return sizeof(OniDepthPixel);
 	case ONI_PIXEL_FORMAT_YUV422:
 		return sizeof(OniYUV422DoublePixel)/2;
@@ -484,6 +485,7 @@ XnBool LinkFrameInputStream::IsOutputFormatSupported(OniPixelFormat format) cons
 	switch (format)
 	{
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 		return (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS);
 	case ONI_PIXEL_FORMAT_YUV422:
 		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
@@ -539,11 +541,22 @@ XnStatus LinkFrameInputStream::SetVideoMode(const XnFwStreamVideoMode& videoMode
 
 	nRetVal = UpdateCameraIntrinsics();
 	XN_IS_STATUS_OK_LOG_ERROR("Update Camera Intrinsics", nRetVal);
-
+	
 	// if needed, build shift-to-depth tables
 	if (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS)
 	{
 		nRetVal = m_pLinkControlEndpoint->GetShiftToDepthConfig(m_nStreamID, m_shiftToDepthConfig);
+		
+		if (m_outputFormat == ONI_PIXEL_FORMAT_DEPTH_100_UM)
+		{
+			m_shiftToDepthConfig.nDeviceMaxDepthValue = XN_MIN(m_shiftToDepthConfig.nDeviceMaxDepthValue * 10, XN_MAX_UINT16);
+			m_shiftToDepthConfig.nDepthMaxCutOff = XN_MIN(m_shiftToDepthConfig.nDepthMaxCutOff * 10, XN_MAX_UINT16);
+			m_shiftToDepthConfig.dDepthScale = 10.0;
+
+			nRetVal = XnShiftToDepthInit(&m_shiftToDepthTables, &m_shiftToDepthConfig);
+			XN_IS_STATUS_OK_LOG_ERROR("Init shift to depth tables", nRetVal);
+		}
+
 		XN_IS_STATUS_OK(nRetVal);
 
 		// construct tables
@@ -570,34 +583,6 @@ XnStatus LinkFrameInputStream::GetShiftToDepthTables(const XnShiftToDepthTables*
 	pTables = &m_shiftToDepthTables;
 
 	return XN_STATUS_OK;
-}
-
-XnStatus LinkFrameInputStream::SetDepthScale(XnDouble dDepthScale)
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	XnDouble dPrevScale = m_shiftToDepthConfig.dDepthScale;
-
-	if (dDepthScale != dPrevScale)
-	{
-		XnDouble dNewMaxCutOff = m_shiftToDepthConfig.nDepthMaxCutOff / dPrevScale * dDepthScale;
-		if (dNewMaxCutOff > m_shiftToDepthConfig.nDeviceMaxDepthValue)
-		{
-			xnLogError(XN_MASK_LINK, "Can't set depth scale to %f: this will create a cut off larger than max depth (%u > %u)", 
-				dDepthScale, (XnUInt32)dNewMaxCutOff, m_shiftToDepthConfig.nDeviceMaxDepthValue);
-			XN_ASSERT(FALSE);
-			return XN_STATUS_BAD_PARAM;
-		}
-
-		m_shiftToDepthConfig.dDepthScale = dDepthScale;
-		m_shiftToDepthConfig.nDepthMaxCutOff = (OniDepthPixel)(m_shiftToDepthConfig.nDepthMaxCutOff / dPrevScale * dDepthScale);
-		m_shiftToDepthConfig.nDepthMinCutOff = (OniDepthPixel)(m_shiftToDepthConfig.nDepthMinCutOff / dPrevScale * dDepthScale);
-
-		nRetVal = XnShiftToDepthUpdate(&m_shiftToDepthTables, &m_shiftToDepthConfig);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	return (XN_STATUS_OK);
 }
 
 const OniCropping& LinkFrameInputStream::GetCropping() const
@@ -657,6 +642,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 	}
 	switch (outputFormat)
 	{
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
 		{
 			if (pixelFormat != XN_FW_PIXEL_FORMAT_SHIFTS_9_3)

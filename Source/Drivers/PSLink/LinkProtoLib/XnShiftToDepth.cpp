@@ -85,7 +85,7 @@ XnStatus XnShiftToDepthUpdate(XnShiftToDepthTables* pShiftToDepth, const XnShift
 		}
 	}
 
-	for (XnUInt16 i = nLastDepth; i <= pConfig->nDeviceMaxDepthValue; i++)
+	for (XnUInt32 i = nLastDepth; i <= pConfig->nDeviceMaxDepthValue; i++)
 		pDepthToShiftTable[i] = nLastIndex;
 
 	return XN_STATUS_OK;

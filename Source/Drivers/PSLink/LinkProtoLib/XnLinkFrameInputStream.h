@@ -59,7 +59,6 @@ public:
 
 	virtual const XnShiftToDepthConfig& GetShiftToDepthConfig() const;
 	virtual XnStatus GetShiftToDepthTables(const XnShiftToDepthTables*& pTables) const;
-	virtual XnStatus SetDepthScale(XnDouble dDepthScale);
 
 	virtual const XnLinkCameraIntrinsics& GetCameraIntrinsics() const { return m_cameraIntrinsics; }
 
