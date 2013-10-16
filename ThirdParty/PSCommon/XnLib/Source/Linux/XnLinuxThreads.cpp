@@ -172,9 +172,9 @@ XN_C_API XnStatus xnOSSetThreadPriority(XN_THREAD_HANDLE ThreadHandle, XnThreadP
 	if (rc != 0)
 	{
 #if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
-		//This should also work as a non-root user...
-		xnLogWarning(XN_MASK_OS, "Failed to use pthread_setschedparam (%d). Trying setpriority instead...", errno);
+		xnLogVerbose(XN_MASK_OS, "Can't set scheduling (%d). Using setpriority instead", rc);
 
+		//This should also work as a non-root user...
 		rc = setpriority(PRIO_PROCESS, gettid(), -8); //-8 is defined as ANDROID_PRIORITY_URGENT_DISPLAY.
 		if (rc < 0)
 		{
