@@ -185,19 +185,19 @@
       Building the Samples in Eclipse
     </h1>
     <h2>
-      Unpack the OpenNIForAndroid Package
+      Unpack the OpenNI Android Package
     </h2>
     <p>
-      The OpenNIForAndroid package is distributed as a single .tgz
+      The OpenNI Android package is distributed as a single .tgz
       archive. Unzip this distribution to any convenient location. This
       tutorial shows the package unzipped to the root of the C drive, but any
       location that you have read and write access to should work.
       <br class="atl-forced-newline">
       Once unzipped, you should have a single
-      top level folder called "OpenNIAndroidSDK-&lt;version&gt;". This folder
-      should contain six subfolders: Assets, Documentation, Include,
-      OpenNIForAndroidLibrary, Samples and Tools. Make note of the location
-      of the top level "OpenNIForAndroid" folder, as it will be referenced
+      top level folder called "OpenNI-Android-&lt;version&gt;". This folder
+      should contain seven subfolders: Assets, Documentation, Include, Libs
+      OpenNIAndroidLibrary, Samples and Tools. Make note of the location
+      of the top level "OpenNI-Android" folder, as it will be referenced
       later in the tutorial.
     </p>
     <h2>
@@ -258,7 +258,7 @@
     </p>
     <p>
       In
-      the next dialogue, enter the path to the top level OpenNIForAndroid
+      the next dialogue, enter the path to the top level OpenNI-Android
       folder that you created in the first step. Four projects should appear
       in the "Projects" box, as shown in the figure. You can now click
       "Finish".
@@ -282,8 +282,7 @@
     <ol>
       <li>
         On the tablet, go to Settings-&gt;Developer Options, and
-        enable "USB Debugging". Also, note the "Development Device ID" in the
-        field under "USB Debugging".
+        enable "USB Debugging".
         <br class="atl-forced-newline">
         <img src="./images/enable-USB-debugging.png">
       </li>
@@ -307,10 +306,10 @@
         Platform Tools bin directory is in your path). 
         <img src="./images/adb-devices.png">
       </li>
-        If
-        the device is correctly connected for USB debugging, the Device ID that
-        you noted in step 1 of this section will show up as the output of the
-        "adb devices" command, as shown in the figure.
+        If the device is correctly connected for USB debugging, the device serial
+        number should apear as the output of the "adb devices" command as shown in 
+        the figure. Note that you can check you device serial number at your device 
+        settings, under About -> Status -> Serial number.
       <li>
         In Eclipse, left click on "Simple Viewer" under the "Package explorer" to select the project.
         <br>
