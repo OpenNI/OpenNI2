@@ -17,8 +17,8 @@
 # *** Note: This module file is only in use when building via NDK! ***
 # *** 
 
-# Android should be >= v2.3
-APP_PLATFORM := android-9
+# Android should be >= v4.0
+APP_PLATFORM := android-14
 
 # Use ARM v7a instruction set
 APP_ABI := armeabi-v7a

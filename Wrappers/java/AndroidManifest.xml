@@ -3,5 +3,6 @@
       package="org.openni.android"
       android:versionCode="203000010"
       android:versionName="2.3">
-    <uses-sdk android:minSdkVersion="12"/>
+
+    <uses-sdk android:minSdkVersion="14"/>
 </manifest>
