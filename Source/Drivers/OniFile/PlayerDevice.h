@@ -89,6 +89,8 @@ protected:
 	// Wake up when timestamp is valid.
 	void SleepToTimestamp(XnUInt64 nTimeStamp);
 
+	void LoadConfigurationFromIniFile();
+
 private:
 	void close();
 
@@ -128,6 +130,8 @@ private:
 
 	static XnStatus XN_CALLBACK_TYPE CodecCreate(void* pCookie, const char* strNodeName, XnCodecID nCodecId, XnCodec** ppCodec);
 	static void     XN_CALLBACK_TYPE CodecDestroy(void* pCookie, XnCodec* pCodec);
+	
+	static XnStatus ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir);
 
 	// Name of the node (used for identifying the device in the callbacks).
 	xnl::String m_nodeName;
@@ -190,6 +194,9 @@ private:
 	xnl::CriticalSection m_cs;
 
 	char m_originalDevice[ONI_MAX_STR];
+
+	char m_iniFilePath[ONI_MAX_STR];
+
 };
 
 } // namespace oni_files_player

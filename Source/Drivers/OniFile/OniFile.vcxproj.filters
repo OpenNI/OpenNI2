@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Formats\LibJPEG">
       <UniqueIdentifier>{8505174a-1146-4871-8927-07bbe186c5e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{61985e27-6425-4e2a-9e4d-b944a16c8db4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Formats\XnStreamCompression.h">
@@ -256,5 +259,10 @@
     <ResourceCompile Include="..\..\Resources\OpenNI.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Config\OpenNI2\Drivers\OniFile.ini">
+      <Filter>Config</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -32,17 +32,23 @@
 #include "PlayerCodecFactory.h"
 #include "PS1080.h"
 #include "PSLink.h"
+#include "XnOSStrings.h"
 
 namespace oni_file {
 
 namespace driver = oni::driver;
 
+#define XN_PLAYER_CONFIGURATION_FILE "OniFile.ini"
 #define DEVICE_DESTROY_THREAD_TIMEOUT				3000
 #define DEVICE_READY_FOR_DATA_EVENT_SANITY_SLEEP	2000
 #define DEVICE_MANUAL_TRIGGER_STANITY_SLEEP			2000
 #define XN_PLAYBACK_SPEED_SANITY_SLEEP				2000
 #define XN_PLAYBACK_SPEED_FASTEST					0.0
 #define XN_PLAYBACK_SPEED_MANUAL					(-1.0)
+
+#define ONI_INIFILE_SECTION_PLAYER "Player"
+#define ONI_INIFILE_ENTRY_SPEED  "Speed"
+#define ONI_INIFILE_ENTRY_REPEAT "Repeat"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(a)								(sizeof(a)/sizeof((a)[0]))
@@ -106,12 +112,84 @@ static PropertyEntry PSLinkPropertyList[] =
 	{ LINK_PROP_DEPTH_TO_SHIFT_TABLE,			"D2S" },
 };
 
+XnStatus PlayerDevice::ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir)
+{
+	XnStatus rc = XN_STATUS_OK;
+	
+	// If strConfigDir is NULL, tries to resolve the config file based on the driver's directory
+	XnChar strBaseDir[XN_FILE_MAX_PATH];
+	if (strConfigDir == NULL)
+	{
+#if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+		// support for applications
+		xnOSGetApplicationFilesDir(strBaseDir, nBufSize);
+
+		XnChar strTempFileName[XN_FILE_MAX_PATH];
+		xnOSStrCopy(strTempFileName, strBaseDir, sizeof(strTempFileName));
+		rc = xnOSAppendFilePath(strTempFileName, XN_PLAYER_CONFIGURATION_FILE, sizeof(strTempFileName));
+		XN_IS_STATUS_OK(rc);
+
+		XnBool bExists;
+		xnOSDoesFileExist(strTempFileName, &bExists);
+
+		if (bExists)
+		{
+			strConfigDir = strBaseDir;
+		}
+		else
+		{
+			// support for native use - search in current dir
+			strConfigDir = ".";
+		}
+#else
+		if (xnOSGetModulePathForProcAddress((void*)(&PlayerDevice::ResolveGlobalConfigFileName), strBaseDir) == XN_STATUS_OK &&
+			xnOSGetDirName(strBaseDir, strBaseDir, XN_FILE_MAX_PATH) == XN_STATUS_OK)
+		{
+			// Successfully obtained the driver's path
+			strConfigDir = strBaseDir;
+		}
+		else
+		{
+			// Something wrong happened. Use the current directory as the fallback.
+			strConfigDir = ".";
+		}
+#endif
+	}
+
+	XN_VALIDATE_STR_COPY(strConfigFile, strConfigDir, nBufSize, rc);
+	return xnOSAppendFilePath(strConfigFile, XN_PLAYER_CONFIGURATION_FILE, nBufSize);
+}
+
+void PlayerDevice::LoadConfigurationFromIniFile()
+{
+	XnStatus nRetVal;
+	XnDouble dSpeed = 0;
+	XnInt32 nRepearMode = 0;
+
+	nRetVal = xnOSReadDoubleFromINI(m_iniFilePath,ONI_INIFILE_SECTION_PLAYER, ONI_INIFILE_ENTRY_SPEED, &dSpeed);
+
+	if (XN_STATUS_OK == nRetVal)
+	{
+		m_dPlaybackSpeed = dSpeed;
+	}
+
+	nRetVal = xnOSReadIntFromINI(m_iniFilePath, ONI_INIFILE_SECTION_PLAYER, ONI_INIFILE_ENTRY_REPEAT, &nRepearMode);
+
+	if (XN_STATUS_OK == nRetVal)
+	{
+		m_bRepeat = nRepearMode;
+	}
+
+
+}
+
 PlayerDevice::PlayerDevice(const xnl::String& filePath) : 
 	m_filePath(filePath), m_fileHandle(0), m_threadHandle(NULL), m_running(FALSE), m_isSeeking(FALSE),
 	m_dPlaybackSpeed(1.0), m_nStartTimestamp(0), m_nStartTime(0), m_bHasTimeReference(FALSE), 
 	m_bRepeat(TRUE), m_player(filePath.Data()), m_driverEOFCallback(NULL), m_driverCookie(NULL)
 {
 	xnOSMemSet(m_originalDevice, 0, sizeof(m_originalDevice));
+	
 	// Create the events.
 	m_readyForDataInternalEvent.Create(FALSE);
 	m_manualTriggerInternalEvent.Create(FALSE);
@@ -195,6 +273,19 @@ OniStatus PlayerDevice::Initialize()
 		return ONI_STATUS_ERROR;
 	}
 
+	status = ResolveGlobalConfigFileName(m_iniFilePath, MAX_PATH, NULL);
+	if (XN_STATUS_OK != status)
+	{
+		return ONI_STATUS_ERROR;
+	}
+
+	XnBool bIsExist = FALSE;
+	xnOSDoesFileExist(m_iniFilePath, &bIsExist);
+
+	if (bIsExist)
+	{
+		LoadConfigurationFromIniFile();
+	}
 	return ONI_STATUS_OK;
 }
 

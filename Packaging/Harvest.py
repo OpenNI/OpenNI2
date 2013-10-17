@@ -108,6 +108,7 @@ class Harvest:
         if self.osName != 'Android':
             shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'PS1080.ini'), targetDriversDir)
             shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'PSLink.ini'), targetDriversDir)
+			shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'OniFile.ini'), targetDriversDir)
 
         if self.osName == 'Windows':
             self.copySharedObject(binDriversDir, 'Kinect', targetDriversDir)
@@ -343,6 +344,7 @@ $(OUTPUT_FILE): copy-redist
         shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI.ini'), targetDir)
         shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'PS1080.ini'), targetDir)
         shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'PSLink.ini'), targetDir)
+		shutil.copy(os.path.join(self.rootDir, 'Config', 'OpenNI2', 'Drivers', 'OniFile.ini'), targetDir)
 
     def run(self):
         if os.path.exists(self.outDir):
