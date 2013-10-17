@@ -273,7 +273,7 @@ OniStatus PlayerDevice::Initialize()
 		return ONI_STATUS_ERROR;
 	}
 
-	status = ResolveGlobalConfigFileName(m_iniFilePath, MAX_PATH, NULL);
+	status = ResolveGlobalConfigFileName(m_iniFilePath, XN_FILE_MAX_PATH, NULL);
 	if (XN_STATUS_OK != status)
 	{
 		return ONI_STATUS_ERROR;
