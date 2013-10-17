@@ -297,6 +297,20 @@ XnStatus LinkOniDevice::Init(const char* mode)
 		}
 	}
 
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "FirmwareLog", &value32))
+	{
+		if (value32 == TRUE)
+		{
+			retVal = m_pSensor->StartFWLog();
+		}
+
+		if (retVal != XN_STATUS_OK)
+		{
+			XN_DELETE(pPrimeClient);
+			return retVal;
+		}
+	}
+
 	if (!leanInit)
 	{
 		retVal = FillSupportedVideoModes();
