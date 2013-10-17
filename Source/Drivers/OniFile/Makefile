@@ -25,7 +25,7 @@ endif
 LIB_NAME = OniFile
 
 LIB_DIRS = ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS = XnLib pthread 
+USED_LIBS = XnLib pthread dl
 ifneq ("$(OSTYPE)","Darwin")
         USED_LIBS += rt  
 endif
