@@ -200,11 +200,13 @@ XnStatus LinkContInputStream::StartImpl()
 	//We only need log buffer output if dumping is on
 	m_logParser.GenerateOutputBuffer(m_pDumpFile != NULL);
 
+	//We must set the streaming flag first cuz the data handler checks it
+	m_bStreaming = TRUE;
+
     nRetVal = m_pConnection->Connect();
     XN_IS_STATUS_OK_LOG_ERROR("Connect stream's input connection", nRetVal);
     nRetVal = m_pLinkControlEndpoint->StartStreaming(m_nStreamID);
     XN_IS_STATUS_OK_LOG_ERROR("Start streaming", nRetVal);
-    m_bStreaming = TRUE;
 
     return XN_STATUS_OK;
 }
