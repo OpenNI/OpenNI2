@@ -43,7 +43,6 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/Include \
 	$(LOCAL_PATH)/../../DepthUtils \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include
 
 ifdef OPENNI2_ANDROID_NDK_BUILD
     LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG
@@ -65,3 +64,6 @@ endif
 LOCAL_MODULE:= libPS1080
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Source/Android.mk

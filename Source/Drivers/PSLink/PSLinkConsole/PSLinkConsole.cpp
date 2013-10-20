@@ -1684,7 +1684,9 @@ int FormatZone(int argc, const char* argv[])
 	}
 
 	XnUInt32 nZone = MyAtoi(argv[1]);
-	Status nRetVal = g_device.invoke(PS_COMMAND_FORMAT_ZONE, nZone);
+	XnCommandFormatZone formatZone;
+	formatZone.zone = (uint8_t)nZone;
+	Status nRetVal = g_device.invoke(PS_COMMAND_FORMAT_ZONE, formatZone);
 	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully formatZone.\n\n");

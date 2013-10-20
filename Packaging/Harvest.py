@@ -100,6 +100,7 @@ class Harvest:
         else:
             binDriversDir = self.binDir
             targetDriversDir = targetDir
+            self.copySharedObject(binDriversDir, 'usb', targetDriversDir)
 
         self.copySharedObject(binDriversDir, 'OniFile', targetDriversDir)
         self.copySharedObject(binDriversDir, 'PS1080', targetDriversDir)

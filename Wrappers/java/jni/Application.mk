@@ -13,13 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License. 
 
-# *** 
-# *** Note: This module file is only in use when building via NDK! ***
-# *** 
-
 # Android should be >= v4.0
 APP_PLATFORM := android-14
 
 # Use ARM v7a instruction set
 APP_ABI := armeabi-v7a
 ARCH_ARM_HAVE_ARMV7A := true
+ARCH_ARM_HAVE_NEON := true

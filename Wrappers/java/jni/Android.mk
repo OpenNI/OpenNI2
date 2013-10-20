@@ -32,7 +32,6 @@ SDK_PATH := $(LOCAL_PATH)/../../..
 
 LOCAL_C_INCLUDES := \
 	$(SDK_PATH)/Include \
-	$(SDK_PATH)/ThirdParty/PSCommon/XnLib/Include
 
 # LD Flags
 LOCAL_LDFLAGS := -Wl,--export-dynamic

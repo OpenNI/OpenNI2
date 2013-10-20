@@ -24,7 +24,7 @@ MY_SRC_FILES := \
 	$(LOCAL_PATH)/../Drivers/OniFile/Formats/XnStreamCompression.cpp
 	
 ifdef OPENNI2_ANDROID_NDK_BUILD
-    MY_SRC_FILES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG/*.c \	
+    MY_SRC_FILES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG/*.c
 endif
 	
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
@@ -36,7 +36,6 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS) -DOPENNI2_EXPORT
 # Includes
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../Include \
-	$(LOCAL_PATH)/../../ThirdParty/PSCommon/XnLib/Include \
 	$(LOCAL_PATH)/../Drivers/OniFile/Formats \
 	$(LOCAL_PATH)/../Drivers/OniFile
 
@@ -67,3 +66,6 @@ endif
 LOCAL_MODULE := libOpenNI2
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../ThirdParty/PSCommon/XnLib/Source/Android.mk

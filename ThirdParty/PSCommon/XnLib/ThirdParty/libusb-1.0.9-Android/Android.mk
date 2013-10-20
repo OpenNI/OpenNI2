@@ -17,7 +17,10 @@
 # *** Note: This module will only get built if compiled via the NDK! ***
 # *** 
 
-ifdef OPENNI2_ANDROID_NDK_BUILD
+ifdef TARGET_BUILD_VARIANT
+	# Building as part of the OS...
+	$(info Skipping libusb in OS build...)
+else
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
@@ -45,8 +48,8 @@ LOCAL_LDLIBS += -llog
 # Output
 LOCAL_MODULE := libusb
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/libusb
+
 include $(BUILD_SHARED_LIBRARY)
 
-else
-    $(info OpenNI2: Skipping libusb in OS build...)
 endif

@@ -19,7 +19,6 @@ LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include \
 	$(LOCAL_PATH) \
 	$(LOCAL_PATH)/Protocols/XnLinkProto \
 	$(LOCAL_PATH)/LinkProtoLib \
@@ -39,3 +38,6 @@ endif
 LOCAL_MODULE := PSLink
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Source/Android.mk

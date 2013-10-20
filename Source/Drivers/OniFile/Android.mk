@@ -37,7 +37,6 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/. \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include \
 	$(LOCAL_PATH)/../../../ThirdParty/LibJPEG \
 	$(LOCAL_PATH)/Formats
 
@@ -61,3 +60,6 @@ endif
 LOCAL_MODULE:= libOniFile
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Source/Android.mk

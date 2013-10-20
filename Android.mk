@@ -14,6 +14,11 @@
 # limitations under the License. 
 
 
+############################################################
+# This makefile builds OpenNI and its drivers.
+# No samples are built.
+############################################################
+
 # Check if we're building from OS or NDK
 ifdef TARGET_BUILD_VARIANT
 	OPENNI2_ANDROID_OS_BUILD := true
@@ -33,7 +38,7 @@ ifeq ($(ARCH_ARM_HAVE_NEON),true)
 endif
 
 # Recurse through all subdirs
-include $(call all-subdir-makefiles)
+include $(call all-makefiles-under, $(call my-dir)/Source)
 
 # Cleanup the local variables
 OPENNI2_CFLAGS := 

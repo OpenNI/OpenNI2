@@ -13,13 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License. 
 
+# header guard (this library might be used more than once in a build)
+ifndef _XN_LIB_MK_
+_XN_LIB_MK_ := 1
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
 # Sources
 MY_SRC_FILES := \
-	$(LOCAL_PATH)/*.cpp \
+    $(LOCAL_PATH)/*.cpp \
     $(LOCAL_PATH)/Linux/*.cpp
 
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
@@ -30,17 +34,25 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 
 # Includes
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../Include
-	
-ifdef OPENNI2_ANDROID_NDK_BUILD
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/libusb
+    $(LOCAL_PATH)/../Include
+
+ifndef TARGET_BUILD_VARIANT
+    # building from NDK
+    LOCAL_SHARED_LIBRARIES += usb
 else
     LOCAL_C_INCLUDES += external/libusb_aah/libusb 
-endif	
+endif
 
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../../Include	
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../Include
 
 # Output
 LOCAL_MODULE := XnLib
 
 include $(BUILD_STATIC_LIBRARY)
+
+ifndef TARGET_BUILD_VARIANT
+    # building from NDK. Include libusb
+    include $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/Android.mk
+endif
+
+endif
