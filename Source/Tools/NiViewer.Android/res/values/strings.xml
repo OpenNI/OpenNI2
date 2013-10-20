@@ -9,5 +9,6 @@
     <string name="stop_record">Stop Recording</string>
     <string name="add_stream">Add Stream</string>
     <string name="remove">X</string>
+    <string name="select_device">Select device</string>
     
 </resources>

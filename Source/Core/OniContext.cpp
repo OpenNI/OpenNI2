@@ -244,6 +244,7 @@ XnStatus Context::configure()
 	m_driversList.AddLast("libOniFile.so");
 	m_driversList.AddLast("libPS1080.so");
 	m_driversList.AddLast("libPSLink.so");
+	m_driversList.AddLast("libSD.so");
 #endif
 
 	// check if driver list is overridden

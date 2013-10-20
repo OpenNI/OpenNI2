@@ -250,6 +250,13 @@ public class StreamView extends RelativeLayout {
 		mStream.destroy();
 		ViewGroup parent = (ViewGroup)this.getParent();
 		parent.removeView(this);
+		
+		//Update layout for all other children (we re-add each one because forceLayout() doesn't work)
+		for(int i=0; i < parent.getChildCount(); i++){
+			View currView = parent.getChildAt(i);
+			parent.removeView(currView);
+			parent.addView(currView);
+		}
 	}
 	
 	private void showAlert(String message) {

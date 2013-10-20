@@ -26,6 +26,8 @@ import org.openni.OpenNI;
 import org.openni.Recorder;
 import org.openni.android.OpenNIHelper;
 
+import org.openni.android.tools.niviewer.StreamView;
+
 public class NiViewerActivity 
 		extends Activity 
 		implements OpenNIHelper.DeviceOpenListener {
@@ -39,6 +41,7 @@ public class NiViewerActivity
 	private String mRecordingName;
 	private String mRecording;
 	private LinearLayout mStreamsContainer;
+	private int mActiveDeviceID = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,9 @@ public class NiViewerActivity
 				return true;
 			case R.id.add_stream:
 				addStream();
+				return true;
+			case R.id.device:
+				switchDevice();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -122,7 +128,8 @@ public class NiViewerActivity
 				showAlertAndExit("No OpenNI-compliant device found.");
 				return;
 			}
-			uri = devices.get(0).getUri();
+			
+			uri = devices.get(devices.size() - 1).getUri();
 		}
 		
 		mDeviceOpenPending = true;
@@ -139,8 +146,11 @@ public class NiViewerActivity
 			mStreamsContainer.setOrientation(LinearLayout.HORIZONTAL);
 		}
 
+		//Re-insert each view to force correct display (forceLayout() doesn't work)
 		for (StreamView streamView : getStreamViews()) {
+			mStreamsContainer.removeView(streamView);
 			setStreamViewLayout(streamView, config);
+			mStreamsContainer.addView(streamView);
 		}
 		
 		super.onConfigurationChanged(config);
@@ -170,6 +180,17 @@ public class NiViewerActivity
 		mDeviceOpenPending = false;
 
 		mDevice = aDevice;
+		
+		//Find device ID
+		List<DeviceInfo> devices = OpenNI.enumerateDevices();
+		for(int i=0; i < devices.size(); i++)
+		{
+			if(devices.get(i).getUri().equals(mDevice.getDeviceInfo().getUri())){
+				mActiveDeviceID = i;
+				break;
+			}
+		}
+		
 		for (StreamView streamView : getStreamViews()) {
 			streamView.setDevice(mDevice);
 		}
@@ -239,6 +260,36 @@ public class NiViewerActivity
 		}
 	}
 	
+	private void switchDevice() {
+		List<DeviceInfo> devices = OpenNI.enumerateDevices();
+		if (devices.isEmpty()) {
+			showAlertAndExit("No OpenNI-compliant device found.");
+			return;
+		}
+
+		new DeviceSelectDialog().showDialog(devices, mActiveDeviceID, this);
+	}
+
+	public void openDevice(String deviceURI) {
+		if (mDeviceOpenPending) {
+			return;
+		}
+
+		stopRecording();
+
+		for (StreamView streamView : getStreamViews()) {
+			streamView.stop();
+			mStreamsContainer.removeView(streamView);
+		}
+		
+		if (mDevice != null) {
+			mDevice.close();
+		}
+		
+		mDeviceOpenPending = true;
+		mOpenNIHelper.requestDeviceOpen(deviceURI, this);
+	}
+
 	@Override
 	public void onDeviceOpenFailed(String uri) {
 		Log.e(TAG, "Failed to open device " + uri);
