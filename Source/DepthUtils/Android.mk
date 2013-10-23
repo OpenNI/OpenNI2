@@ -17,6 +17,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+include $(LOCAL_PATH)/../../ThirdParty/PSCommon/BuildSystem/CommonAndroid.mk
+
 # Sources
 MY_SRC_FILES := \
 	$(LOCAL_PATH)/*.cpp \
@@ -24,15 +26,15 @@ MY_SRC_FILES := \
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
-# C/CPP Flags
-LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
-
 # Includes
-LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../Include \
-	$(LOCAL_PATH)/../../ThirdParty/PSCommon/XnLib/Include \	
-	
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Include
+
+LOCAL_STATIC_LIBRARIES := XnLib
+
 # Output
 LOCAL_MODULE := DepthUtils
 
 include $(BUILD_STATIC_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../ThirdParty/PSCommon/XnLib/Source/Android.mk

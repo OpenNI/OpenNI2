@@ -21,6 +21,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+include $(LOCAL_PATH)/../../BuildSystem/CommonAndroid.mk
+
 # Sources
 MY_SRC_FILES := \
     $(LOCAL_PATH)/*.cpp \
@@ -36,7 +38,7 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../Include
 
-ifndef TARGET_BUILD_VARIANT
+ifdef PS_NDK_BUILD
     # building from NDK
     LOCAL_SHARED_LIBRARIES += usb
 else
@@ -44,13 +46,14 @@ else
 endif
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../Include
+LOCAL_EXPORT_LDLIBS := -llog
 
 # Output
 LOCAL_MODULE := XnLib
 
 include $(BUILD_STATIC_LIBRARY)
 
-ifndef TARGET_BUILD_VARIANT
+ifdef PS_NDK_BUILD
     # building from NDK. Include libusb
     include $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/Android.mk
 endif
