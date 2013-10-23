@@ -17,6 +17,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+# Take native OpenNI Path
+SDK_PATH := $(LOCAL_PATH)/../../..
+
+include $(SDK_PATH)/ThirdParty/PSCommon/BuildSystem/CommonAndroid.mk
+
 # Sources
 MY_SRC_FILES := \
 	$(LOCAL_PATH)/*.cpp
@@ -24,26 +29,13 @@ MY_SRC_FILES := \
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
-# C/CPP Flags
-LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
-
-# Take native OpenNI Path
-SDK_PATH := $(LOCAL_PATH)/../../..
-
 LOCAL_C_INCLUDES := \
 	$(SDK_PATH)/Include \
-
-# LD Flags
-LOCAL_LDFLAGS := -Wl,--export-dynamic
 
 # Dependencies
 LOCAL_LDLIBS := -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := XnLib
-LOCAL_SHARED_LIBRARIES := liblog libdl OpenNI2
-
-ifndef OPENNI2_ANDROID_OS_BUILD
-	LOCAL_LDLIBS += -llog
-endif
+LOCAL_SHARED_LIBRARIES := OpenNI2
 
 # Output
 LOCAL_MODULE := libOpenNI2.jni
