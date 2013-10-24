@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE12F8D118188D9100396A62 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE12F8C418188D3C00396A62 /* libusb-1.0.0.dylib */; };
+		BE12F8D418188DE300396A62 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE12F8C418188D3C00396A62 /* libusb-1.0.0.dylib */; };
 		BE2A2EEC174EED10006B0ADF /* XnDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2EB7174EED10006B0ADF /* XnDump.cpp */; };
 		BE2A2EED174EED10006B0ADF /* XnDumpFileWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE2A2EB8174EED10006B0ADF /* XnDumpFileWriter.cpp */; };
 		BE2A2EEE174EED10006B0ADF /* XnDumpFileWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = BE2A2EB9174EED10006B0ADF /* XnDumpFileWriter.h */; };
@@ -512,11 +514,65 @@
 		BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547343175FD3C200AC9FB1 /* GLUT.framework */; };
 		BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 		BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
-		BEEC3121177B5BB60081B814 /* libusbx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEEC3120177B5BB40081B814 /* libusbx.dylib */; };
-		BEEC3122177B5BBC0081B814 /* libusbx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEEC3120177B5BB40081B814 /* libusbx.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		BE12F8C318188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FBF311628B79300BC5BE2;
+			remoteInfo = libusbx;
+		};
+		BE12F8C518188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FBFBD1628B9FE00BC5BE2;
+			remoteInfo = xusb;
+		};
+		BE12F8C718188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FBFF51628BB8B00BC5BE2;
+			remoteInfo = dpfp;
+		};
+		BE12F8C918188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FC0051628BBDB00BC5BE2;
+			remoteInfo = dpfp_threaded;
+		};
+		BE12F8CB18188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FC0151628BC0300BC5BE2;
+			remoteInfo = fxload;
+		};
+		BE12F8CD18188D3C00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008FC0261628BC6B00BC5BE2;
+			remoteInfo = listdevs;
+		};
+		BE12F8CF18188D4E00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008FBF301628B79300BC5BE2;
+			remoteInfo = libusbx;
+		};
+		BE12F8D218188DDE00396A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008FBF301628B79300BC5BE2;
+			remoteInfo = libusbx;
+		};
 		BE547334175FD25300AC9FB1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE2A2E8E174EEBB6006B0ADF /* Project object */;
@@ -547,6 +603,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libusbx.xcodeproj; path = ../../libusbx/Xcode/libusbx.xcodeproj; sourceTree = "<group>"; };
 		BE2A2E96174EEBB6006B0ADF /* libOpenNI2.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libOpenNI2.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE2A2EB7174EED10006B0ADF /* XnDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XnDump.cpp; path = ../ThirdParty/PSCommon/XnLib/Source/XnDump.cpp; sourceTree = "<group>"; };
 		BE2A2EB8174EED10006B0ADF /* XnDumpFileWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XnDumpFileWriter.cpp; path = ../ThirdParty/PSCommon/XnLib/Source/XnDumpFileWriter.cpp; sourceTree = "<group>"; };
@@ -974,7 +1031,6 @@
 		BE54733D175FD37F00AC9FB1 /* Viewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Viewer.h; path = ../Samples/SimpleViewer/Viewer.h; sourceTree = "<group>"; };
 		BE547341175FD3AD00AC9FB1 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		BE547343175FD3C200AC9FB1 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		BEEC3120177B5BB40081B814 /* libusbx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libusbx.dylib; path = ../../../MacOSX/Build/Products/Debug/libusbx.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -982,7 +1038,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEEC3121177B5BB60081B814 /* libusbx.dylib in Frameworks */,
+				BE12F8D118188D9100396A62 /* libusb-1.0.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -990,7 +1046,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEEC3122177B5BBC0081B814 /* libusbx.dylib in Frameworks */,
+				BE12F8D418188DE300396A62 /* libusb-1.0.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1008,10 +1064,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BE12F8BA18188D3C00396A62 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BE12F8C418188D3C00396A62 /* libusb-1.0.0.dylib */,
+				BE12F8C618188D3C00396A62 /* xusb */,
+				BE12F8C818188D3C00396A62 /* dpfp */,
+				BE12F8CA18188D3C00396A62 /* dpfp_threaded */,
+				BE12F8CC18188D3C00396A62 /* fxload */,
+				BE12F8CE18188D3C00396A62 /* listdevs */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		BE2A2E8D174EEBB6006B0ADF = {
 			isa = PBXGroup;
 			children = (
-				BEEC3120177B5BB40081B814 /* libusbx.dylib */,
+				BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */,
 				BE547343175FD3C200AC9FB1 /* GLUT.framework */,
 				BE547341175FD3AD00AC9FB1 /* OpenGL.framework */,
 				BE547340175FD39400AC9FB1 /* NiViewer */,
@@ -1855,6 +1924,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				BE12F8D018188D4E00396A62 /* PBXTargetDependency */,
 			);
 			name = OpenNI2;
 			productName = OpenNI2;
@@ -1872,6 +1942,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				BE12F8D318188DDE00396A62 /* PBXTargetDependency */,
 			);
 			name = PS1080;
 			productName = PS1080;
@@ -1916,6 +1987,12 @@
 			mainGroup = BE2A2E8D174EEBB6006B0ADF;
 			productRefGroup = BE2A2E97174EEBB6006B0ADF /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BE12F8BA18188D3C00396A62 /* Products */;
+					ProjectRef = BE12F8B918188D3C00396A62 /* libusbx.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				BE2A2E95174EEBB6006B0ADF /* OpenNI2 */,
@@ -1924,6 +2001,51 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		BE12F8C418188D3C00396A62 /* libusb-1.0.0.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = "libusb-1.0.0.dylib";
+			remoteRef = BE12F8C318188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BE12F8C618188D3C00396A62 /* xusb */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = xusb;
+			remoteRef = BE12F8C518188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BE12F8C818188D3C00396A62 /* dpfp */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = dpfp;
+			remoteRef = BE12F8C718188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BE12F8CA18188D3C00396A62 /* dpfp_threaded */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = dpfp_threaded;
+			remoteRef = BE12F8C918188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BE12F8CC18188D3C00396A62 /* fxload */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = fxload;
+			remoteRef = BE12F8CB18188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		BE12F8CE18188D3C00396A62 /* listdevs */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = listdevs;
+			remoteRef = BE12F8CD18188D3C00396A62 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		BE2A2E92174EEBB6006B0ADF /* Sources */ = {
@@ -2233,6 +2355,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		BE12F8D018188D4E00396A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libusbx;
+			targetProxy = BE12F8CF18188D4E00396A62 /* PBXContainerItemProxy */;
+		};
+		BE12F8D318188DDE00396A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libusbx;
+			targetProxy = BE12F8D218188DDE00396A62 /* PBXContainerItemProxy */;
+		};
 		BE547335175FD25300AC9FB1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BE2A2E95174EEBB6006B0ADF /* OpenNI2 */;
