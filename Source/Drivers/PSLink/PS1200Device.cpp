@@ -39,18 +39,6 @@ XnStatus PS1200Device::Init(const XnChar* strConnString, XnTransportType transpo
 	nRetVal = PrimeClient::Init(strConnString, XN_TRANSPORT_TYPE_USB);
 	XN_IS_STATUS_OK_LOG_ERROR("Init EE Device", nRetVal);
 
-#if (XN_PLATFORM == XN_PLATFORM_WIN32)
-	// On all platforms other than Windows, prefer BULK
-	nRetVal = SetUsbAltInterface(0);
-	XN_IS_STATUS_OK_LOG_ERROR("Switch to ISO", nRetVal);
-#elif (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_MACOSX || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
-	// On all platforms other than Windows, prefer BULK
-	nRetVal = SetUsbAltInterface(1);
-	XN_IS_STATUS_OK_LOG_ERROR("Switch to BULK", nRetVal);
-#else
-	#error "Unsupported platform"
-#endif
-
 	m_bInitialized = TRUE;
 	return XN_STATUS_OK;	
 }

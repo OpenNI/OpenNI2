@@ -34,6 +34,15 @@
 #define XN_MASK_LINK_DEVICE "LinkDevice"
 #define CONFIG_DEVICE_SECTION "Device"
 
+#if XN_PLATFORM == XN_PLATFORM_WIN32
+	#define XN_DEFAULT_USB_INTERFACE	PS_USB_INTERFACE_ISO_ENDPOINTS;
+#elif XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_MACOSX || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+	#define XN_DEFAULT_USB_INTERFACE	PS_USB_INTERFACE_BULK_ENDPOINTS;
+#else
+	#error Unsupported platform!
+#endif
+
+
 LinkOniDevice::LinkOniDevice(const char* configFile, const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
 	m_configFile(configFile), m_pSensor(NULL), m_driverServices(driverServices), m_pDriver(pDriver)
 {
@@ -286,15 +295,23 @@ XnStatus LinkOniDevice::Init(const char* mode)
 
 	m_pSensor = pPrimeClient;
 
+	XnUsbInterfaceType usbType = PS_USB_INTERFACE_DONT_CARE;
+	if (performReset)
+	{
+		usbType = XN_DEFAULT_USB_INTERFACE;
+	}
+
 	XnInt32 value32;
 	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "UsbInterface", &value32))
 	{
-		retVal = setProperty(PS_PROPERTY_USB_INTERFACE, &value32, sizeof(value32));
-		if (retVal != XN_STATUS_OK)
-		{
-			XN_DELETE(pPrimeClient);
-			return retVal;
-		}
+		usbType = (XnUsbInterfaceType)value32;
+	}
+
+	retVal = setProperty(PS_PROPERTY_USB_INTERFACE, &usbType, sizeof(usbType));
+	if (retVal != XN_STATUS_OK)
+	{
+		XN_DELETE(pPrimeClient);
+		return retVal;
 	}
 
 	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "FirmwareLog", &value32))
