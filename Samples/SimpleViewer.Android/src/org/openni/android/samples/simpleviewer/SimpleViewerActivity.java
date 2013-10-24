@@ -113,6 +113,7 @@ public class SimpleViewerActivity
 			}
 		} catch (RuntimeException e) {
 			showAlertAndExit("Failed to open stream: " + e.getMessage());
+			return;
 		}
 		
 		mShouldRun = true;
