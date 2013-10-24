@@ -15,7 +15,6 @@ import org.openni.VideoFrameRef;
 public class OpenNIView extends GLSurfaceView {
 
 	private long mNativePtr = 0;
-	private Renderer mRenderer;
 	private int mPrevFrameWidth = 0;
 	private int mPrevFrameHeight = 0;
 	
@@ -33,8 +32,26 @@ public class OpenNIView extends GLSurfaceView {
 			mNativePtr = nativeCreate();
 		}
 
-		mRenderer = new Renderer();
-		setRenderer(mRenderer);
+		setRenderer(new Renderer() {
+			
+			@Override
+			public void onSurfaceCreated(GL10 gl, EGLConfig c) {
+				nativeOnSurfaceCreated(mNativePtr);
+			}
+
+			@Override
+			public void onSurfaceChanged(GL10 gl, int w, int h) {
+				nativeOnSurfaceChanged(mNativePtr, w, h);
+			}
+
+			@Override
+			public void onDrawFrame(GL10 gl) {
+				synchronized (OpenNIView.this) {
+					draw(gl);
+				}
+			}
+		});
+		
 		setRenderMode(RENDERMODE_WHEN_DIRTY);
 	}
 
@@ -78,24 +95,9 @@ public class OpenNIView extends GLSurfaceView {
 		nativeClear(mNativePtr);
 		requestRender();
 	}
-
-	class Renderer implements GLSurfaceView.Renderer {
-		@Override
-		public void onSurfaceCreated(GL10 gl, EGLConfig c) {
-			nativeOnSurfaceCreated(mNativePtr);
-		}
-
-		@Override
-		public void onSurfaceChanged(GL10 gl, int w, int h) {
-			nativeOnSurfaceChanged(mNativePtr, w, h);
-		}
-
-		@Override
-		public void onDrawFrame(GL10 gl) {
-			synchronized (OpenNIView.this) {
-				nativeOnDraw(mNativePtr);
-			}
-		}
+	
+	protected void draw(GL10 gl) {
+		nativeOnDraw(mNativePtr);
 	}
 
 	private static native long nativeCreate();
