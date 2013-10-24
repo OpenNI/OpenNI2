@@ -5,7 +5,6 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.hardware.usb.UsbDeviceConnection;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -26,7 +25,6 @@ public class SimpleViewerActivity
 	
 	private static final String TAG = "SimplerViewer";
 	private OpenNIHelper mOpenNIHelper;
-	private UsbDeviceConnection mDeviceConnection;
 	private boolean mDeviceOpenPending = false;
 	private Thread mMainLoopThread;
 	private boolean mShouldRun = true;
@@ -217,11 +215,6 @@ public class SimpleViewerActivity
 		if (mDevice != null) {
 			mDevice.close();
 			mDevice = null;
-		}
-
-		if (mDeviceConnection != null) {
-			mDeviceConnection.close();
-			mDeviceConnection = null;
 		}
 	}
 }

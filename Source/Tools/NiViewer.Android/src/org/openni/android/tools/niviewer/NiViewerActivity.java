@@ -10,7 +10,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
-import android.hardware.usb.UsbDeviceConnection;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -34,7 +33,6 @@ public class NiViewerActivity
 	
 	private static final String TAG = "NiViewer";
 	private OpenNIHelper mOpenNIHelper;
-	private UsbDeviceConnection mDeviceConnection;
 	private boolean mDeviceOpenPending = false;
 	private Device mDevice;
 	private Recorder mRecorder;
@@ -317,11 +315,6 @@ public class NiViewerActivity
 		if (mDevice != null) {
 			mDevice.close();
 			mDevice = null;
-		}
-
-		if (mDeviceConnection != null) {
-			mDeviceConnection.close();
-			mDeviceConnection = null;
 		}
 	}
 	
