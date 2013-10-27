@@ -62,7 +62,7 @@ public:
 	
 	void onSurfaceChanged(int w, int h);
 	void onSurfaceCreated();
-	void update(VideoFrameRef& frame);
+	void update(JNIEnv* env, VideoFrameRef& frame);
 	void clear();
 	void onDraw();
 	void setAlpha(unsigned char alpha) { m_alpha = alpha; }
@@ -122,7 +122,7 @@ void YUVtoRGB888(XnUInt8 y, XnUInt8 u, XnUInt8 v, XnUInt8& r, XnUInt8& g, XnUInt
 	b = (XnUInt8)XN_MIN(XN_MAX((nC + 516 * nD           ) >> 8, 0), 255);
 }
 
-void OpenNIView::update(VideoFrameRef& frame)
+void OpenNIView::update(JNIEnv *env, VideoFrameRef& frame)
 {
 	int xres = frame.getVideoMode().getResolutionX();
 	int yres = frame.getVideoMode().getResolutionY();
@@ -269,6 +269,7 @@ void OpenNIView::update(VideoFrameRef& frame)
 
 	default:
 		LOGE("Non-supported pixel format: %d", frame.getVideoMode().getPixelFormat());
+		throwRuntimeException(env, "Non-supported pixel format!");
 	}
 	
 	m_xres = xres;
@@ -433,12 +434,12 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnSurfaceChanged
 	pView->onSurfaceChanged(w, h);
 }
 
-JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate(JNIEnv *, jclass, jlong nativePtr, jlong frameHandle)
+JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate(JNIEnv * env, jclass, jlong nativePtr, jlong frameHandle)
 {
 	OpenNIView* pView = (OpenNIView*)nativePtr;
 	VideoFrameRef frame;
 	frame._setFrame((OniFrame*)frameHandle);
-	pView->update(frame);
+	pView->update(env, frame);
 }
 
 JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeClear(JNIEnv *, jclass, jlong nativePtr)
