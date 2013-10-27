@@ -14,11 +14,12 @@ import org.openni.VideoFrameRef;
  */
 public class OpenNIView extends GLSurfaceView {
 
+	protected int mDrawX = 0;
+	protected int mDrawY = 0;
+	protected int mDrawWidth = 0;
+	protected int mDrawHeight = 0;
+
 	private long mNativePtr = 0;
-	private int mDrawX = 0;
-	private int mDrawY = 0;
-	private int mDrawWidth = 0;
-	private int mDrawHeight = 0;
 	private int mCurrFrameWidth = 0;
 	private int mCurrFrameHeight = 0;
 	private int mSurfaceWidth = 0;
