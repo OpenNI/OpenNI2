@@ -102,7 +102,13 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 		writeIndex = 0;
 		for(int i=0; i < nSupportedModes; ++i)
 		{
+			// add both 1 mm and 100 um formats
 			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
+			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
+			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
+			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
+
+			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_100_UM;
 			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
 			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
 			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
