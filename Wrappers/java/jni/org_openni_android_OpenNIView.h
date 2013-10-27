@@ -131,14 +131,6 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnSurfaceCreated
 
 /*
  * Class:     org_openni_android_OpenNIView
- * Method:    nativeOnSurfaceChanged
- * Signature: (JII)V
- */
-JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnSurfaceChanged
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_openni_android_OpenNIView
  * Method:    nativeUpdate
  * Signature: (JJ)V
  */
@@ -156,10 +148,10 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeClear
 /*
  * Class:     org_openni_android_OpenNIView
  * Method:    nativeOnDraw
- * Signature: (J)V
+ * Signature: (JIIII)V
  */
 JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnDraw
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jlong, jint, jint, jint, jint);
 
 #ifdef __cplusplus
 }

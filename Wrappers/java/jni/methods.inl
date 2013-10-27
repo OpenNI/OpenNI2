@@ -93,10 +93,9 @@ static int register_org_openni_android_OpenNIView(JNIEnv* env)
 		{ "nativeSetAlphaValue", "(JI)V", (void*)&Java_org_openni_android_OpenNIView_nativeSetAlphaValue },
 		{ "nativeGetAlphaValue", "(J)I", (void*)&Java_org_openni_android_OpenNIView_nativeGetAlphaValue },
 		{ "nativeOnSurfaceCreated", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnSurfaceCreated },
-		{ "nativeOnSurfaceChanged", "(JII)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnSurfaceChanged },
 		{ "nativeUpdate", "(JJ)V", (void*)&Java_org_openni_android_OpenNIView_nativeUpdate },
 		{ "nativeClear", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeClear },
-		{ "nativeOnDraw", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnDraw },
+		{ "nativeOnDraw", "(JIIII)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnDraw },
 
     };
     static int methodsCount = sizeof(methods)/sizeof(methods[0]);

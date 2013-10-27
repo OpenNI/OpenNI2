@@ -60,11 +60,10 @@ public:
 	OpenNIView();
 	~OpenNIView();
 	
-	void onSurfaceChanged(int w, int h);
 	void onSurfaceCreated();
 	void update(JNIEnv* env, VideoFrameRef& frame);
 	void clear();
-	void onDraw();
+	void onDraw(int x, int y, int width, int height);
 	void setAlpha(unsigned char alpha) { m_alpha = alpha; }
 	unsigned char getAlpha() const { return m_alpha; }
 
@@ -77,19 +76,17 @@ private:
 	GLuint m_textureId;
 	unsigned char* m_texture;
 	unsigned char m_alpha;
-	int m_viewWidth;
-	int m_viewHeight;
 	int *m_histogram;
 	int m_maxGrayVal;
 	int m_xres;
 	int m_yres;
-	
+		
 	enum { HISTSIZE = 0xFFFF, };
 };
 
 OpenNIView::OpenNIView() :
-	m_textureWidth(0), m_textureHeight(0), m_textureId(0), m_texture(NULL), m_alpha(255), m_viewWidth(0), 
-	m_viewHeight(0), m_histogram(NULL), m_maxGrayVal(0)
+	m_textureWidth(0), m_textureHeight(0), m_textureId(0), m_texture(NULL), m_alpha(255),
+	m_histogram(NULL), m_maxGrayVal(0)
 {
 }
 
@@ -323,28 +320,16 @@ void OpenNIView::calcDepthHist(VideoFrameRef& frame)
 	}
 }
 
-void OpenNIView::onDraw()
+void OpenNIView::onDraw(int x, int y, int width, int height)
 {
-	int startX = 0;
-	int startY = 0;
-	int viewAreaWidth = m_viewWidth;
-	int viewAreaHeight = m_viewHeight;
-
-	// skip if no frame yet
-	if (m_xres == 0 || m_yres == 0)
+	if (width == 0 || height == 0)
 		return;
 
-	// if view ratio is larger than frame ratio, make width smaller. Otherwise, make height smaller
-	if (m_xres * viewAreaHeight > m_yres * viewAreaWidth)
-	{
-		viewAreaHeight = m_yres * viewAreaWidth / m_xres;
-		startY = (m_viewHeight - viewAreaHeight) / 2;
-	}
-	else
-	{
-		viewAreaWidth = m_xres * viewAreaHeight / m_yres;
-		startX = (m_viewWidth - viewAreaWidth) / 2;
-	}
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1.0, 1.0, 1.0, 1.0);
+
+	glEnable(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, m_textureId);
 	int rect[4] = {0, m_yres, m_xres, -m_yres};
@@ -354,7 +339,9 @@ void OpenNIView::onDraw()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_textureWidth, m_textureHeight, 0, GL_RGBA,
 		GL_UNSIGNED_BYTE, m_texture);
 
-	glDrawTexiOES(startX, startY, 0, viewAreaWidth, viewAreaHeight);
+	glDrawTexiOES(x, y, 0, width, height);
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 void OpenNIView::onSurfaceCreated()
@@ -387,12 +374,6 @@ void OpenNIView::onSurfaceCreated()
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glShadeModel(GL_FLAT);
-}
-
-void OpenNIView::onSurfaceChanged(int w, int h)
-{
-	m_viewWidth = w;
-	m_viewHeight = h;
 }
 
 #ifdef __cplusplus
@@ -428,12 +409,6 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnSurfaceCreated
 	pView->onSurfaceCreated();
 }
 
-JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnSurfaceChanged(JNIEnv *, jclass, jlong nativePtr, jint w, jint h)
-{
-	OpenNIView* pView = (OpenNIView*)nativePtr;
-	pView->onSurfaceChanged(w, h);
-}
-
 JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate(JNIEnv * env, jclass, jlong nativePtr, jlong frameHandle)
 {
 	OpenNIView* pView = (OpenNIView*)nativePtr;
@@ -448,10 +423,10 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeClear(JNIEnv *, 
 	pView->clear();
 }
 
-JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnDraw(JNIEnv *, jclass, jlong nativePtr)
+JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeOnDraw(JNIEnv *, jclass, jlong nativePtr, jint x, jint y, jint width, jint height)
 {
 	OpenNIView* pView = (OpenNIView*)nativePtr;
-	pView->onDraw();
+	pView->onDraw(x, y, width, height);
 }
 
 #ifdef __cplusplus

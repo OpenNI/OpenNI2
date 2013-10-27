@@ -15,8 +15,14 @@ import org.openni.VideoFrameRef;
 public class OpenNIView extends GLSurfaceView {
 
 	private long mNativePtr = 0;
-	private int mPrevFrameWidth = 0;
-	private int mPrevFrameHeight = 0;
+	private int mDrawX = 0;
+	private int mDrawY = 0;
+	private int mDrawWidth = 0;
+	private int mDrawHeight = 0;
+	private int mCurrFrameWidth = 0;
+	private int mCurrFrameHeight = 0;
+	private int mSurfaceWidth = 0;
+	private int mSurfaceHeight = 0;
 	
 	public OpenNIView(Context context) {
 		super(context);
@@ -41,7 +47,11 @@ public class OpenNIView extends GLSurfaceView {
 
 			@Override
 			public void onSurfaceChanged(GL10 gl, int w, int h) {
-				nativeOnSurfaceChanged(mNativePtr, w, h);
+				synchronized (OpenNIView.this) {
+					mSurfaceWidth = w;
+					mSurfaceHeight = h;
+					calcDrawArea();
+				}
 			}
 
 			@Override
@@ -79,15 +89,9 @@ public class OpenNIView extends GLSurfaceView {
 	 */
 	synchronized public void update(VideoFrameRef frame) {
 		nativeUpdate(mNativePtr, frame.getHandle());
-		if (mPrevFrameWidth != frame.getVideoMode().getResolutionX() || mPrevFrameHeight != frame.getVideoMode().getResolutionY()) {
-			mPrevFrameWidth = frame.getVideoMode().getResolutionX();
-			mPrevFrameHeight = frame.getVideoMode().getResolutionY();
-			post(new Runnable() {
-		        public void run() {
-		        	requestLayout();
-		        }
-		    });
-		}
+		mCurrFrameWidth = frame.getVideoMode().getResolutionX();
+		mCurrFrameHeight = frame.getVideoMode().getResolutionY();
+		calcDrawArea();
 		requestRender();
 	}
 	
@@ -97,7 +101,32 @@ public class OpenNIView extends GLSurfaceView {
 	}
 	
 	protected void draw(GL10 gl) {
-		nativeOnDraw(mNativePtr);
+		nativeOnDraw(mNativePtr, mDrawX, mDrawY, mDrawWidth, mDrawHeight);
+	}
+	
+	private void calcDrawArea() {
+		if (mCurrFrameWidth == 0 || mCurrFrameHeight == 0 || mSurfaceWidth == 0 || mSurfaceHeight == 0) {
+			mDrawX = mDrawY = mDrawWidth = mDrawHeight = 0;
+			return;
+		}
+		
+		// start with the entire surface
+		mDrawX = 0;
+		mDrawY = 0;
+		mDrawWidth = mSurfaceWidth;
+		mDrawHeight = mSurfaceHeight;
+
+		// if view ratio is larger than frame ratio, make width smaller. Otherwise, make height smaller
+		if (mCurrFrameWidth * mDrawHeight > mCurrFrameHeight * mDrawWidth)
+		{
+			mDrawHeight = mCurrFrameHeight * mDrawWidth / mCurrFrameWidth;
+			mDrawY = (mSurfaceHeight - mDrawHeight) / 2;
+		}
+		else
+		{
+			mDrawWidth = mCurrFrameWidth * mDrawHeight / mCurrFrameHeight;
+			mDrawX = (mSurfaceWidth - mDrawWidth) / 2;
+		}
 	}
 
 	private static native long nativeCreate();
@@ -105,8 +134,7 @@ public class OpenNIView extends GLSurfaceView {
 	private static native void nativeSetAlphaValue(long nativePtr, int alpha);
 	private static native int nativeGetAlphaValue(long nativePtr);
 	private static native void nativeOnSurfaceCreated(long nativePtr);
-	private static native void nativeOnSurfaceChanged(long nativePtr, int w, int h);
 	private static native void nativeUpdate(long nativePtr, long frameRef);
 	private static native void nativeClear(long nativePtr);
-	private static native void nativeOnDraw(long nativePtr);
+	private static native void nativeOnDraw(long nativePtr, int x, int y, int width, int height);
 }
