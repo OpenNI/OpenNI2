@@ -487,12 +487,8 @@ XnBool LinkFrameInputStream::IsOutputFormatSupported(OniPixelFormat format) cons
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
 	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 		return (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS);
-	case ONI_PIXEL_FORMAT_YUV422:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
-	case ONI_PIXEL_FORMAT_RGB888:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_BAYER8);
 	case ONI_PIXEL_FORMAT_GRAY16:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_GRAYSCALE16);
+		return (m_streamType == XN_LINK_STREAM_TYPE_IR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_GRAYSCALE16);
 	default:
 		return LinkInputStream::IsOutputFormatSupported(format);
 	}
