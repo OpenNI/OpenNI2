@@ -164,7 +164,7 @@ char g_csUserMessage[256];
 
 bool g_bFullScreen = true;
 bool g_bFirstTimeNonFull = true;
-IntPair g_NonFullWinSize = { WIN_SIZE_X, WIN_SIZE_Y };
+IntPair g_NonFullWinSize = { g_NonFullWinSize.X, g_NonFullWinSize.Y };
 
 // --------------------------------
 // Textures
@@ -424,8 +424,8 @@ void toggleFullScreen(int)
 	{
 		if (g_bFirstTimeNonFull)
 		{
-			g_NonFullWinSize.X = WIN_SIZE_X/2;
-			g_NonFullWinSize.Y = WIN_SIZE_Y/2;
+			g_NonFullWinSize.X = g_NonFullWinSize.X/2;
+			g_NonFullWinSize.Y = g_NonFullWinSize.Y/2;
 			g_bFirstTimeNonFull = false;
 		}
 
@@ -1255,10 +1255,10 @@ void drawPointerMode(IntPair* pPointer)
 
 		glBegin(GL_QUADS);
 		glColor4f(0, 0, 0, 0.7);
-		glVertex2i(0, WIN_SIZE_Y); // lower left
-		glVertex2i(WIN_SIZE_X, WIN_SIZE_Y);
-		glVertex2i(WIN_SIZE_X, WIN_SIZE_Y - 135);
-		glVertex2i(0, WIN_SIZE_Y - 135);
+		glVertex2i(0, g_NonFullWinSize.Y); // lower left
+		glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y);
+		glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y - 135);
+		glVertex2i(0, g_NonFullWinSize.Y - 135);
 		glEnd();
 
 		glDisable(GL_BLEND);
@@ -1274,7 +1274,7 @@ void drawPointerMode(IntPair* pPointer)
 			if ((fNewColor > 0.004) && (fNewColor < 0.996))
 			{
 				glColor3f(fNewColor, fNewColor, 0);
-				glVertex3f(((i/10)*2), WIN_SIZE_Y - 23, 1);
+				glVertex3f(((i/10)*2), g_NonFullWinSize.Y - 23, 1);
 			}
 		}
 		glEnd();
@@ -1296,7 +1296,7 @@ void drawPointerMode(IntPair* pPointer)
 
 				glBegin(GL_POINTS);
 				glColor3f(1,0,0);
-				glVertex3f(10 + ((nPointerValue/10)*2), WIN_SIZE_Y - 70, 1);
+				glVertex3f(10 + ((nPointerValue/10)*2), g_NonFullWinSize.Y - 70, 1);
 				glEnd();
 			}
 		}
@@ -1309,15 +1309,15 @@ void drawPointerMode(IntPair* pPointer)
 			// draw a small line in this position
 			glBegin(GL_LINES);
 			glColor3f(0, 1, 0);
-			glVertex2i(xPos, WIN_SIZE_Y - 54);
-			glVertex2i(xPos, WIN_SIZE_Y - 62);
+			glVertex2i(xPos, g_NonFullWinSize.Y - 54);
+			glVertex2i(xPos, g_NonFullWinSize.Y - 62);
 			glEnd();
 
 			// place a label under, and in the middle of, that line.
 			XnUInt32 chars;
 			xnOSStrFormat(buf, sizeof(buf), &chars, "%d", i);
 			glColor3f(1,0,0);
-			glRasterPos2i(xPos - chars*nCharWidth/2, WIN_SIZE_Y - 40);
+			glRasterPos2i(xPos - chars*nCharWidth/2, g_NonFullWinSize.Y - 40);
 			glPrintString(GLUT_BITMAP_HELVETICA_18,buf);
 		}
 
@@ -1346,7 +1346,7 @@ void drawPointerMode(IntPair* pPointer)
 		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
 	}
 
-	int nYLocation = WIN_SIZE_Y - 88;
+	int nYLocation = g_NonFullWinSize.Y - 88;
 	glColor3f(1,0,0);
 	glRasterPos2i(10,nYLocation);
 	glPrintString(GLUT_BITMAP_HELVETICA_18, buf);
@@ -1424,7 +1424,7 @@ void drawCenteredMessage(void* font, int y, const char* message, float fRed, flo
 	}
 	
 	XnUInt32 nHeight = 26;
-	int nXLocation = xnl::Math::Max(0, (WIN_SIZE_X - nMaxLineLength) / 2);
+	int nXLocation = xnl::Math::Max(0, (g_NonFullWinSize.X - nMaxLineLength) / 2);
 	int nYLocation = y;
 
 	// Draw black background
@@ -1462,7 +1462,7 @@ void drawUserMessage()
 
 	if (isInKeyboardInputMode())
 	{
-		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, g_NonFullWinSize.Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
 	}
 
 	static XnUInt64 nStartShowMessage = 0;
@@ -1478,7 +1478,7 @@ void drawUserMessage()
 
 	if (nNow - nStartShowMessage < 3000)
 	{
-		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, g_csUserMessage, 
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, g_NonFullWinSize.Y * 4 / 5, g_csUserMessage, 
 							fMessageTypeColors[g_DrawConfig.messageType][0],
 							fMessageTypeColors[g_DrawConfig.messageType][1],
 							fMessageTypeColors[g_DrawConfig.messageType][2]);
@@ -1501,7 +1501,7 @@ void printRecordingInfo()
 		captureGetColorFormatName(), 
 		captureGetIRFormatName());
 
-	drawCenteredMessage(GLUT_BITMAP_HELVETICA_12, WIN_SIZE_Y - 3, csMessage, 0, 1, 0);
+	drawCenteredMessage(GLUT_BITMAP_HELVETICA_12, g_NonFullWinSize.Y - 3, csMessage, 0, 1, 0);
 }
 
 void printHelpGroup(int nXLocation, int* pnYLocation, const char* csGroup)
@@ -1574,13 +1574,13 @@ void drawErrorState()
 	glBegin(GL_QUADS);
 	glColor4f(0, 0, 0, 0.8);
 	glVertex2i(0, 0);
-	glVertex2i(WIN_SIZE_X, 0);
-	glVertex2i(WIN_SIZE_X, WIN_SIZE_Y);
-	glVertex2i(0, WIN_SIZE_Y);
+	glVertex2i(g_NonFullWinSize.X, 0);
+	glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y);
+	glVertex2i(0, g_NonFullWinSize.Y);
 	glEnd();
 	glDisable(GL_BLEND);
 
-	int nYLocation = WIN_SIZE_Y/2 - 30;
+	int nYLocation = g_NonFullWinSize.Y/2 - 30;
 
 	drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, nYLocation, "ERROR!", 1, 0, 0);
 	nYLocation += 40;
@@ -1589,10 +1589,10 @@ void drawErrorState()
 
 void drawHelpScreen()
 {
-	int nXStartLocation = WIN_SIZE_X/8;
-	int nYStartLocation = WIN_SIZE_Y/5;
-	int nXEndLocation = WIN_SIZE_X*7/8;
-	int nYEndLocation = WIN_SIZE_Y*4/5;
+	int nXStartLocation = g_NonFullWinSize.X/8;
+	int nYStartLocation = g_NonFullWinSize.Y/5;
+	int nXEndLocation = g_NonFullWinSize.X*7/8;
+	int nYEndLocation = g_NonFullWinSize.Y*4/5;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		
@@ -1622,7 +1622,7 @@ void drawHelpScreen()
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DISPLAY);
 
 	// print right pane
-	nXLocation = WIN_SIZE_X/2;
+	nXLocation = g_NonFullWinSize.X/2;
 	nYLocation = nYStartLocation;
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DEVICE);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_PLAYER);
@@ -1721,7 +1721,7 @@ void drawPlaybackSpeed()
 // 			width += glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, strSpeed[i]);
 // 
 // 		glColor3f(0, 1, 0);
-// 		glRasterPos2i(WIN_SIZE_X - width - 3, 30);
+// 		glRasterPos2i(g_NonFullWinSize.X - width - 3, 30);
 // 		glPrintString(GLUT_BITMAP_TIMES_ROMAN_24, strSpeed);
 // 	}
 }
@@ -1730,21 +1730,21 @@ void drawFrame()
 {
 	// calculate locations
 	g_DrawConfig.DepthLocation.uBottom = 0;
-	g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y - 1;
+	g_DrawConfig.DepthLocation.uTop = g_NonFullWinSize.Y - 1;
 	g_DrawConfig.DepthLocation.uLeft = 0;
-	g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X - 1;
+	g_DrawConfig.DepthLocation.uRight = g_NonFullWinSize.X - 1;
 
 	g_DrawConfig.ColorLocation.uBottom = 0;
-	g_DrawConfig.ColorLocation.uTop = WIN_SIZE_Y - 1;
+	g_DrawConfig.ColorLocation.uTop = g_NonFullWinSize.Y - 1;
 	g_DrawConfig.ColorLocation.uLeft = 0;
-	g_DrawConfig.ColorLocation.uRight = WIN_SIZE_X - 1;
+	g_DrawConfig.ColorLocation.uRight = g_NonFullWinSize.X - 1;
 
 	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
 	{
-		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
-		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
-		g_DrawConfig.ColorLocation.uTop = WIN_SIZE_Y / 2 - 1;
-		g_DrawConfig.ColorLocation.uLeft = WIN_SIZE_X / 2;
+		g_DrawConfig.DepthLocation.uTop = g_NonFullWinSize.Y / 2 - 1;
+		g_DrawConfig.DepthLocation.uRight = g_NonFullWinSize.X / 2 - 1;
+		g_DrawConfig.ColorLocation.uTop = g_NonFullWinSize.Y / 2 - 1;
+		g_DrawConfig.ColorLocation.uLeft = g_NonFullWinSize.X / 2;
 	}
 
 	// Texture map init
@@ -1821,7 +1821,7 @@ void drawFrame()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+	glOrtho(0,g_NonFullWinSize.X,g_NonFullWinSize.Y,0,-1.0,1.0);
 	glDisable(GL_DEPTH_TEST); 
 
 	if (g_DrawConfig.Streams.Depth.Coloring == CYCLIC_RAINBOW_HISTOGRAM || g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)

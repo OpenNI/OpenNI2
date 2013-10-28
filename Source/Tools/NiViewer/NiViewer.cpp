@@ -104,12 +104,12 @@ IntPair windowSize;
 // --------------------------------
 void motionCallback(int x, int y)
 {
-	mouseInputMotion(int((double)x/windowSize.X*WIN_SIZE_X), int((double)y/windowSize.Y*WIN_SIZE_Y));
+	mouseInputMotion(x, y);
 }
 
 void mouseCallback(int button, int state, int x, int y)
 {
-	mouseInputButton(button, state, int((double)x/windowSize.X*WIN_SIZE_X), int((double)y/windowSize.Y*WIN_SIZE_Y));
+	mouseInputButton(button, state, x, y);
 }
 
 void keyboardCallback(unsigned char key, int /*x*/, int /*y*/)
@@ -683,7 +683,7 @@ int main(int argc, char **argv)
 
 	glutInit(&argc, argv);
 	glutInitDisplayString("stencil double rgb");
-	glutInitWindowSize(WIN_SIZE_X, WIN_SIZE_Y);
+	glutInitWindowSize(1280, 1024);
 	glutCreateWindow("OpenNI Viewer");
 	glutFullScreen();
 	glutSetCursor(GLUT_CURSOR_NONE);
