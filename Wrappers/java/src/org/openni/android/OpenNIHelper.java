@@ -61,7 +61,7 @@ public class OpenNIHelper {
 	private String mActionUsbPermission;
 	private DeviceOpenListener mDeviceOpenListener;
 	private String mUri;
-	private static final String TAG = "OpenNINIHelper";
+	private static final String TAG = "OpenNIHelper";
 	
 	/**
 	 * Used for receiving the result of {@link OpenNIHelper#requestDeviceOpen(String uri, DeviceOpenListener listener)}. 

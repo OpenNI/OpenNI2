@@ -9,6 +9,6 @@ endif
 LOCAL_CFLAGS += -O3 -ftree-vectorize -ffast-math -funroll-loops -fPIC -fvisibility=hidden
 
 ifeq ($(ARCH_ARM_HAVE_NEON),true)
-	LOCAL_CFLAGS += -DHAVE_NEON=1 -flax-vector-conversions
+	LOCAL_CFLAGS += -DHAVE_NEON=1 -DXN_NEON -flax-vector-conversions
 	LOCAL_ARM_NEON := true
 endif

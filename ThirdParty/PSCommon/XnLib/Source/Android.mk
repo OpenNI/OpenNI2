@@ -36,7 +36,8 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 
 # Includes
 LOCAL_C_INCLUDES := \
-    $(LOCAL_PATH)/../Include
+    $(LOCAL_PATH)/../Include \
+    $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/libusb
 
 ifdef PS_NDK_BUILD
     # building from NDK
