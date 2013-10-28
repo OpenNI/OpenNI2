@@ -217,6 +217,7 @@ XnStatus Context::configure()
 	}
 
 	XnChar strRepo[XN_FILE_MAX_PATH];
+	strRepo[0] = '\0';
 
 #if XN_PLATFORM != XN_PLATFORM_ANDROID_ARM
 	xnOSStrCopy(strRepo, ONI_DEFAULT_DRIVERS_REPOSITORY, sizeof(strRepo));
