@@ -164,7 +164,7 @@ char g_csUserMessage[256];
 
 bool g_bFullScreen = true;
 bool g_bFirstTimeNonFull = true;
-IntPair g_NonFullWinSize = { g_NonFullWinSize.X, g_NonFullWinSize.Y };
+IntPair g_NonFullWinSize = { 1280, 1024 };
 
 // --------------------------------
 // Textures
