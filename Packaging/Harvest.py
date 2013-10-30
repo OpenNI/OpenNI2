@@ -359,8 +359,6 @@ $(OUTPUT_FILE): copy-redist
                     libs.append(moduleName)
                     nativeAndroidMk.write('LOCAL_MODULE := ' + moduleName + '\n')
                     nativeAndroidMk.write('LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/' + file + '\n')
-                    if file == 'libOpenNI2.so':
-                        nativeAndroidMk.write('LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include\n')
                     nativeAndroidMk.write('include $(PREBUILT_SHARED_LIBRARY)\n')
                     nativeAndroidMk.write('\n')
         
