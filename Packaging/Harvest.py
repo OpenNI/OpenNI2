@@ -329,7 +329,6 @@ $(OUTPUT_FILE): copy-redist
         os.makedirs(targetDir)
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'src'), os.path.join(targetDir, 'src'))
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'res'), os.path.join(targetDir, 'res'))
-        shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'jni'), os.path.join(targetDir, 'jni'))
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'libs'), os.path.join(targetDir, 'libs'))
         shutil.copy(os.path.join(self.rootDir, 'Wrappers', 'java', '.classpath'), targetDir)
         shutil.copy(os.path.join(self.rootDir, 'Wrappers', 'java', '.project'), targetDir)
