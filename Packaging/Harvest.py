@@ -330,6 +330,7 @@ $(OUTPUT_FILE): copy-redist
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'src'), os.path.join(targetDir, 'src'))
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'res'), os.path.join(targetDir, 'res'))
         shutil.copytree(os.path.join(self.rootDir, 'Wrappers', 'java', 'libs'), os.path.join(targetDir, 'libs'))
+	os.makedirs(os.path.join(targetDir, 'bin'))
         shutil.copy(os.path.join(self.rootDir, 'Wrappers', 'java', 'bin', 'classes.jar'), os.path.join(targetDir, 'bin', 'org.openni.jar'))
         shutil.copy(os.path.join(self.rootDir, 'Wrappers', 'java', '.classpath'), targetDir)
         shutil.copy(os.path.join(self.rootDir, 'Wrappers', 'java', '.project'), targetDir)
