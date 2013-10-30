@@ -9,12 +9,17 @@ OpenNI 2.3:
     - NiViewer application
   - Fix pure-C APIs
   - Allow providing driver list from config file
+  - Auto-recording feature (see OpenNI.ini)
   - Bug Fix: depth/world conversion was wrong when depth is in 100 um format
   - Adding logs for endpoints bandwidth and FPS
   - Better handling of cases where device does not report its FOV
+  - Remove GLH from samples
   - NiViewer: 
     - IR emitter on/off is added for both PS1080 and Kinect.
     - Near mode on/off is added for Kinect (was already there for PS1080)
+    - IR now also uses an histogram
+    - draw textures according to aspect ratio
+    - Cleanup help screen
   - Java APIs
     - Add log APIs
     - Implemented hashCode() and equals() for VideoMode
@@ -33,6 +38,7 @@ OpenNI 2.3:
     - Bug Fix: Disconnect event was fired twice
     - Implement MAX_PIXEL_VALUE for IR stream
     - Bug Fix: Single pixel translation is wrong when image res is 1280x1024
+    - Windows: print USB banndwidth to log
   - Kinect:
     - Add mirror support
     - Rewrite image registration for better performance
@@ -56,9 +62,22 @@ OpenNI 2.3:
     - Bug Fix: no even frame indexes from Capri devices.
     - Properties are now saved in recordings
     - PSLinkConsole: allow running a single command and exit
+    - PresetsAHB property now supports comments in files
+    - Add ReadDebugData command
+    - Support 100um mode
+    - Can turn on firmware log from INI file
+    - Bug Fix: log stream might lose the first packet
+    - PSLinkConsole Bug Fix: FormatZone command did not work.
+    - Capri: don't set USB interface if not doing reset (console mode)
+    - Bug: Couldn't set video mode to IR stream
   - OniFile:
     - Allow calling setVideoMode() as long as it's the same mode (needed by some applications)
     - Properties are now saved in recordings
+    - allow playback of recordings that don't have the cropping property (just assume it's disabled)
+    - Bug Fix: potential crash when playback restarts
+    - Fix a potential deadlock if calling stop() immediately after a repeat occurred
+    - potential crash when closing recorder
+    - Can control playback speed and repeat options from INI file
   - Build:
     - Support gold linker in compilation
     - Add Linux prerequisites to release notes
