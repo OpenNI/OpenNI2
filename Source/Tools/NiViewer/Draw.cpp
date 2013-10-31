@@ -1741,9 +1741,7 @@ void drawFrame()
 
 	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
 	{
-		g_DrawConfig.DepthLocation.uTop = g_NonFullWinSize.Y / 2 - 1;
 		g_DrawConfig.DepthLocation.uRight = g_NonFullWinSize.X / 2 - 1;
-		g_DrawConfig.ColorLocation.uTop = g_NonFullWinSize.Y / 2 - 1;
 		g_DrawConfig.ColorLocation.uLeft = g_NonFullWinSize.X / 2;
 	}
 
