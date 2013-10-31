@@ -283,7 +283,7 @@ $(OUTPUT_FILE): copy-redist
 
         # and executable
         if self.osName == 'Android':
-            apkName = glob.glob(os.path.join(sampleSourceDir, 'bin', '*.apk'))[0]
+            apkName = glob.glob(os.path.join(sampleSourceDir, 'bin', '*-release.apk'))[0]
             realName = os.path.split(sampleTargetDir)[1]
             shutil.copy(apkName, os.path.join(targetBinDir, realName + '.apk'))
         elif isJava:
