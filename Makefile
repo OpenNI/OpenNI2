@@ -156,5 +156,8 @@ release: | all doc $(FINAL_DIR)
 	Packaging/Harvest.py Packaging/$(PRODUCT_STRING) $(PLATFORM)
 	cd Packaging; tar -cjf Final/$(PRODUCT_STRING).tar.bz2 $(PRODUCT_STRING)
 
+install: | release
+	cd Packaging/Final; rm $(PRODUCT_STRING).tar; bunzip2 $(PRODUCT_STRING).tar.bz2; tar xf $(PRODUCT_STRING).tar; sudo rm -rf /opt/OpenNI2; sudo mv $(PRODUCT_STRING) /opt/OpenNI2
+
 # clean is cleaning all projects
 clean: $(ALL_PROJS_CLEAN)

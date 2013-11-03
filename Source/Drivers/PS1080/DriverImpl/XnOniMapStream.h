@@ -52,6 +52,8 @@ public:
 	XnStatus GetCropping(OniCropping &cropping);
 	XnStatus SetCropping(const OniCropping &cropping);
 
+	XnStatus SetEmitter(OniBool* pEnabled);
+
 protected:
 	struct SupportedVideoMode
 	{

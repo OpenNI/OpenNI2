@@ -155,6 +155,19 @@ XnStatus XnOniMapStream::SetPropertyImpl(int propertyId, const void* data, int d
 
 			break;
 		}
+		case ONI_STREAM_PROPERTY_EMITTER:
+		{
+			if (dataSize != sizeof(OniBool))
+			{
+				xnLogError(XN_MASK_DEVICE_SENSOR, "Unexpected size: %d != %d", dataSize, sizeof(OniBool));
+				return XN_STATUS_DEVICE_PROPERTY_BAD_TYPE;
+			}
+
+			nRetVal = SetEmitter((OniBool*)data);
+			XN_IS_STATUS_OK(nRetVal);
+
+			break;
+		}
 		default:
 		{
 			return XnOniStream::SetPropertyImpl(propertyId, data, dataSize);
@@ -170,6 +183,7 @@ OniBool XnOniMapStream::isPropertySupported(int propertyId)
 		propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE ||
 		propertyId == ONI_STREAM_PROPERTY_MIRRORING ||
 		propertyId == ONI_STREAM_PROPERTY_CROPPING ||
+		propertyId == ONI_STREAM_PROPERTY_EMITTER ||
 		XnOniStream::isPropertySupported(propertyId));
 }
 
@@ -363,3 +377,10 @@ XnStatus XnOniMapStream::SetCropping(const OniCropping &cropping)
 	return m_pSensor->SetProperty(m_strType, XN_STREAM_PROPERTY_CROPPING, gbValue);
 }
 
+XnStatus XnOniMapStream::SetEmitter(OniBool* pEnabled)
+{
+  XnStatus nRetVal = m_pSensor->SetEmitterState(*pEnabled);
+	XN_IS_STATUS_OK(nRetVal);
+
+	return (XN_STATUS_OK);
+}

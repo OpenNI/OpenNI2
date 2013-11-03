@@ -90,6 +90,8 @@ public:
 
 	XnStatus SetFrameSyncStreamGroup(XnDeviceStream** ppStreamList, XnUInt32 numStreams);
 
+	XnStatus SetEmitterState(XnBool bActive);
+
 protected:
 	virtual XnStatus CreateStreamImpl(const XnChar* strType, const XnChar* strName, const XnActualPropertiesHash* pInitialSet);
 
@@ -150,7 +152,6 @@ private:
 	XnStatus SetImageCmosRegister(const XnControlProcessingData* pRegister);
 	XnStatus WriteAHB(const XnAHBData* pData);
 	XnStatus SetLedState(XnUInt16 nLedId, XnUInt16 nState);
-	XnStatus SetEmitterState(XnBool bActive);
 	XnStatus SetFirmwareFrameSync(XnBool bOn);
 	XnStatus SetI2C(const XnI2CWriteData* pI2CWriteData);
 	XnStatus SetFirmwareLogFilter(XnUInt32 nFilter);
