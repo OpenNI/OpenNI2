@@ -24,6 +24,9 @@ class NativeMethods {
   static public final int STREAM_PROPERTY_NUMBER_OF_FRAMES = 8; // int
   static public final int STREAM_PROPERTY_AUTO_EXPOSURE = 100;
   static public final int STREAM_PROPERTY_AUTO_WHITE_BALANCE = 101;
+  static public final int STREAM_PROPERTY_EXPOSURE = 102;
+  static public final int STREAM_PROPERTY_GAIN = 103;
+  
 
   static public final int DEVICE_PROPERTY_FIRMWARE_VERSION = 0; // By implementation
   static public final int DEVICE_PROPERTY_DRIVER_VERSION = 1; // OniVersion
