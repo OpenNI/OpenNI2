@@ -124,6 +124,8 @@ class NativeMethods {
 
 	static native void oniDeviceDisableDepthColorSync(long deviceHandle);
 
+	static native boolean oniDeviceGetDepthColorSyncEnabled(long deviceHandle);
+
 	static native int seek(long deviceHandle, long streamHandle, int frameIndex);
 
 	static native boolean isImageRegistrationModeSupported(long deviceHandle, int mode);

@@ -43,6 +43,10 @@ extern "C" {
 #define org_openni_NativeMethods_STREAM_PROPERTY_AUTO_EXPOSURE 100L
 #undef org_openni_NativeMethods_STREAM_PROPERTY_AUTO_WHITE_BALANCE
 #define org_openni_NativeMethods_STREAM_PROPERTY_AUTO_WHITE_BALANCE 101L
+#undef org_openni_NativeMethods_STREAM_PROPERTY_EXPOSURE
+#define org_openni_NativeMethods_STREAM_PROPERTY_EXPOSURE 102L
+#undef org_openni_NativeMethods_STREAM_PROPERTY_GAIN
+#define org_openni_NativeMethods_STREAM_PROPERTY_GAIN 103L
 #undef org_openni_NativeMethods_DEVICE_PROPERTY_FIRMWARE_VERSION
 #define org_openni_NativeMethods_DEVICE_PROPERTY_FIRMWARE_VERSION 0L
 #undef org_openni_NativeMethods_DEVICE_PROPERTY_DRIVER_VERSION
@@ -259,6 +263,14 @@ JNIEXPORT jint JNICALL Java_org_openni_NativeMethods_oniDeviceEnableDepthColorSy
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_org_openni_NativeMethods_oniDeviceDisableDepthColorSync
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_openni_NativeMethods
+ * Method:    oniDeviceGetDepthColorSyncEnabled
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_openni_NativeMethods_oniDeviceGetDepthColorSyncEnabled
   (JNIEnv *, jclass, jlong);
 
 /*

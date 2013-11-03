@@ -449,6 +449,12 @@ JNIEXPORT void JNICALL Java_org_openni_NativeMethods_oniDeviceDisableDepthColorS
 	  return oniDeviceDisableDepthColorSync((OniDeviceHandle)deviceHandle);
   }
 
+JNIEXPORT jboolean JNICALL Java_org_openni_NativeMethods_oniDeviceGetDepthColorSyncEnabled
+	(JNIEnv *, jclass, jlong deviceHandle)
+{
+	return (jboolean)oniDeviceGetDepthColorSyncEnabled((OniDeviceHandle)deviceHandle);
+}
+
 JNIEXPORT jint JNICALL Java_org_openni_NativeMethods_seek
   (JNIEnv *, jclass, jlong deviceHandle, jlong streamHandle, jint frameIndex)
   {

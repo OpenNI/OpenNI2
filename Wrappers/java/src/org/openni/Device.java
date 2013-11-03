@@ -215,6 +215,10 @@ public class Device {
 			NativeMethods.oniDeviceDisableDepthColorSync(getHandle());
 		}
 	}
+	
+	public boolean getDepthColorSyncEnabled() {
+		return NativeMethods.oniDeviceGetDepthColorSyncEnabled(getHandle());
+	}
 
 	private long mDeviceHandle;
 	private PlaybackControl mPlaybackControl;

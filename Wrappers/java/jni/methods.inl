@@ -29,6 +29,7 @@ static int register_org_openni_NativeMethods(JNIEnv* env)
 		{ "oniDeviceGetSensorInfo", "(JI)Lorg/openni/SensorInfo;", (void*)&Java_org_openni_NativeMethods_oniDeviceGetSensorInfo },
 		{ "oniDeviceEnableDepthColorSync", "(J)I", (void*)&Java_org_openni_NativeMethods_oniDeviceEnableDepthColorSync },
 		{ "oniDeviceDisableDepthColorSync", "(J)V", (void*)&Java_org_openni_NativeMethods_oniDeviceDisableDepthColorSync },
+		{ "oniDeviceGetDepthColorSyncEnabled", "(J)Z", (void*)&Java_org_openni_NativeMethods_oniDeviceGetDepthColorSyncEnabled },
 		{ "seek", "(JJI)I", (void*)&Java_org_openni_NativeMethods_seek },
 		{ "isImageRegistrationModeSupported", "(JI)Z", (void*)&Java_org_openni_NativeMethods_isImageRegistrationModeSupported },
 		{ "getImageRegistrationMode", "(JLorg/openni/OutArg;)I", (void*)&Java_org_openni_NativeMethods_getImageRegistrationMode },
