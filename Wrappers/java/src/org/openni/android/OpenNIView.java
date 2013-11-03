@@ -24,7 +24,7 @@ public class OpenNIView extends GLSurfaceView {
 	private int mCurrFrameHeight = 0;
 	private int mSurfaceWidth = 0;
 	private int mSurfaceHeight = 0;
-	
+
 	public OpenNIView(Context context) {
 		super(context);
 	}
@@ -33,14 +33,14 @@ public class OpenNIView extends GLSurfaceView {
 		super(context, attrs);
 		init();
 	}
-	
+
 	private void init() {
 		if(!isInEditMode()) {
 			mNativePtr = nativeCreate();
 		}
 
 		setRenderer(new Renderer() {
-			
+
 			@Override
 			public void onSurfaceCreated(GL10 gl, EGLConfig c) {
 				nativeOnSurfaceCreated(mNativePtr);
@@ -62,7 +62,7 @@ public class OpenNIView extends GLSurfaceView {
 				}
 			}
 		});
-		
+
 		setRenderMode(RENDERMODE_WHEN_DIRTY);
 	}
 
@@ -74,16 +74,16 @@ public class OpenNIView extends GLSurfaceView {
 		}
 		super.finalize();
 	}
-	
+
 	public void setAlphaValue(int alpha) {
 		nativeSetAlphaValue(mNativePtr, alpha);
 		requestRender();
 	}
-	
+
 	public int getAlphaValue() {
 		return nativeGetAlphaValue(mNativePtr);
 	}
-	
+
 	/**
 	 * Requests update of the view with an OpenNI frame.
 	 * @param frame The frame to be drawn
@@ -95,22 +95,22 @@ public class OpenNIView extends GLSurfaceView {
 		calcDrawArea();
 		requestRender();
 	}
-	
+
 	synchronized public void clear() {
 		nativeClear(mNativePtr);
 		requestRender();
 	}
-	
+
 	protected void draw(GL10 gl) {
 		nativeOnDraw(mNativePtr, mDrawX, mDrawY, mDrawWidth, mDrawHeight);
 	}
-	
+
 	private void calcDrawArea() {
 		if (mCurrFrameWidth == 0 || mCurrFrameHeight == 0 || mSurfaceWidth == 0 || mSurfaceHeight == 0) {
 			mDrawX = mDrawY = mDrawWidth = mDrawHeight = 0;
 			return;
 		}
-		
+
 		// start with the entire surface
 		mDrawX = 0;
 		mDrawY = 0;

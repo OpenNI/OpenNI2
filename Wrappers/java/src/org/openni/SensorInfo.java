@@ -28,30 +28,30 @@ import java.util.List;
  * </p>
  */
 public class SensorInfo {
-  /**
-   * Provides the sensor type of the sensor this object is associated with.
-   * 
-   * @return Type of the sensor.
-   */
-  public SensorType getSensorType() {
-    return mSensorType;
-  }
+	/**
+	 * Provides the sensor type of the sensor this object is associated with.
+	 * 
+	 * @return Type of the sensor.
+	 */
+	public SensorType getSensorType() {
+		return mSensorType;
+	}
 
-  /**
-   * Provides a list of video modes that this sensor can support. This function is the recommended
-   * method to be used by applications to obtain {@link VideoMode} objects.
-   * 
-   * @return Reference to an array of {@link VideoMode} objects, one for each supported video mode.
-   */
-  public final List<VideoMode> getSupportedVideoModes() {
-    return mVideoModes;
-  }
+	/**
+	 * Provides a list of video modes that this sensor can support. This function is the recommended
+	 * method to be used by applications to obtain {@link VideoMode} objects.
+	 * 
+	 * @return Reference to an array of {@link VideoMode} objects, one for each supported video mode.
+	 */
+	public final List<VideoMode> getSupportedVideoModes() {
+		return mVideoModes;
+	}
 
-  private SensorInfo(int sensorType, List<VideoMode> videoModes) {
-    this.mSensorType = SensorType.fromNative(sensorType);
-    this.mVideoModes = videoModes;
-  }
+	private SensorInfo(int sensorType, List<VideoMode> videoModes) {
+		this.mSensorType = SensorType.fromNative(sensorType);
+		this.mVideoModes = videoModes;
+	}
 
-  private final SensorType mSensorType;
-  private final List<VideoMode> mVideoModes;
+	private final SensorType mSensorType;
+	private final List<VideoMode> mVideoModes;
 }

@@ -16,68 +16,68 @@ package org.openni;
  * 
  */
 public class Recorder {
-  /**
-   * Initializes a recorder. You can initialize the recorder only once. Attempts to initialize more
-   * than once will result in an error code being returned.
-   * 
-   * Initialization assigns the recorder to an output file that will be used for recording. Before
-   * use, the {@link #addStream(VideoStream, boolean)} function must also be used to assign input
-   * data to the Recorder.
-   * 
-   * @param fileName The name of a file which will contain the recording.
-   */
-  public static Recorder create(String fileName) {
-    Recorder recorder = new Recorder();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCreateRecorder(fileName, recorder));
-    return recorder;
-  }
+	/**
+	 * Initializes a recorder. You can initialize the recorder only once. Attempts to initialize more
+	 * than once will result in an error code being returned.
+	 * 
+	 * Initialization assigns the recorder to an output file that will be used for recording. Before
+	 * use, the {@link #addStream(VideoStream, boolean)} function must also be used to assign input
+	 * data to the Recorder.
+	 * 
+	 * @param fileName The name of a file which will contain the recording.
+	 */
+	public static Recorder create(String fileName) {
+		Recorder recorder = new Recorder();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCreateRecorder(fileName, recorder));
+		return recorder;
+	}
 
-  /**
-   * This function return recorded handle.
-   * 
-   * @return OpenNI recorder handle.
-   */
-  public long getHandle() {
-    return mRecorderHandle;
-  }
+	/**
+	 * This function return recorded handle.
+	 * 
+	 * @return OpenNI recorder handle.
+	 */
+	public long getHandle() {
+		return mRecorderHandle;
+	}
 
-  /**
-   * Attaches a stream to the recorder. Note, this won't start recording, you should explicitly
-   * start it using {@link #start()} method. As soon as the recording process has been started, no
-   * more streams can be attached to the recorder.
-   * 
-   * @param stream The stream to be recorded.
-   * @param allowLossyCompression If this value is true, the recorder might use a lossy compression,
-   *        which means that when the recording will be played-back, there might be small
-   *        differences from the original frame. Default value is false.
-   */
-  public void addStream(VideoStream stream, boolean allowLossyCompression) {
-    NativeMethods.checkReturnStatus(NativeMethods.oniRecorderAttachStream(getHandle(),
-        stream.getHandle(), allowLossyCompression));
-  }
+	/**
+	 * Attaches a stream to the recorder. Note, this won't start recording, you should explicitly
+	 * start it using {@link #start()} method. As soon as the recording process has been started, no
+	 * more streams can be attached to the recorder.
+	 * 
+	 * @param stream The stream to be recorded.
+	 * @param allowLossyCompression If this value is true, the recorder might use a lossy compression,
+	 *        which means that when the recording will be played-back, there might be small
+	 *        differences from the original frame. Default value is false.
+	 */
+	public void addStream(VideoStream stream, boolean allowLossyCompression) {
+		NativeMethods.checkReturnStatus(NativeMethods.oniRecorderAttachStream(getHandle(),
+				stream.getHandle(), allowLossyCompression));
+	}
 
-  /**
-   * Starts recording. Once this method is called, the recorder will take all subsequent frames from
-   * the attached streams and store them in the file. You may not add additional streams once
-   * recording was started.
-   */
-  public void start() {
-    NativeMethods.checkReturnStatus(NativeMethods.oniRecorderStart(getHandle()));
-  }
+	/**
+	 * Starts recording. Once this method is called, the recorder will take all subsequent frames from
+	 * the attached streams and store them in the file. You may not add additional streams once
+	 * recording was started.
+	 */
+	public void start() {
+		NativeMethods.checkReturnStatus(NativeMethods.oniRecorderStart(getHandle()));
+	}
 
-  /**
-   * Stops recording. You may use {@link #start()} to resume the recording.
-   */
-  public void stop() {
-    NativeMethods.oniRecorderStop(getHandle());
-  }
+	/**
+	 * Stops recording. You may use {@link #start()} to resume the recording.
+	 */
+	public void stop() {
+		NativeMethods.oniRecorderStop(getHandle());
+	}
 
-  /**
-   * Destroys a recorder. This will also stop recording.
-   */
-  public void destroy() {
-    NativeMethods.checkReturnStatus(NativeMethods.oniRecorderDestroy(getHandle()));
-  }
+	/**
+	 * Destroys a recorder. This will also stop recording.
+	 */
+	public void destroy() {
+		NativeMethods.checkReturnStatus(NativeMethods.oniRecorderDestroy(getHandle()));
+	}
 
-  private long mRecorderHandle;
+	private long mRecorderHandle;
 }

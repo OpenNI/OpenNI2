@@ -43,144 +43,144 @@ package org.openni;
  * Note that when converting from Depth to World or vice versa, the Z value remains the same.
  */
 public class CoordinateConverter {
-  /**
-   * Converts a single point from the World coordinate system to the Depth coordinate system.
-   * 
-   * @param depthStream Reference to an openni::VideoStream that will be used to determine the
-   *        format of the Depth coordinates
-   * @param worldX The X coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @param worldY The Y coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @param worldZ The Z coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @return Point3D<Integer> Coordinate of the output value, and depth measured in the
-   *         {@link PixelFormat} of depthStream
-   */
-  public static Point3D<Integer> convertWorldToDepthInt(final VideoStream depthStream,
-      float worldX, float worldY, float worldZ) {
-    OutArg<Float> x = new OutArg<Float>();
-    OutArg<Float> y = new OutArg<Float>();
-    OutArg<Float> z = new OutArg<Float>();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterWorldToDepth(
-        depthStream.getHandle(), worldX, worldY, worldZ, x, y, z));
-    int depthX = x.mValue.intValue();
-    int depthY = y.mValue.intValue();
-    int depthZ = z.mValue.intValue();
-    return new Point3D<Integer>(depthX, depthY, depthZ);
-  }
+	/**
+	 * Converts a single point from the World coordinate system to the Depth coordinate system.
+	 * 
+	 * @param depthStream Reference to an openni::VideoStream that will be used to determine the
+	 *        format of the Depth coordinates
+	 * @param worldX The X coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @param worldY The Y coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @param worldZ The Z coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @return Point3D<Integer> Coordinate of the output value, and depth measured in the
+	 *         {@link PixelFormat} of depthStream
+	 */
+	public static Point3D<Integer> convertWorldToDepthInt(final VideoStream depthStream,
+			float worldX, float worldY, float worldZ) {
+		OutArg<Float> x = new OutArg<Float>();
+		OutArg<Float> y = new OutArg<Float>();
+		OutArg<Float> z = new OutArg<Float>();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterWorldToDepth(
+				depthStream.getHandle(), worldX, worldY, worldZ, x, y, z));
+		int depthX = x.mValue.intValue();
+		int depthY = y.mValue.intValue();
+		int depthZ = z.mValue.intValue();
+		return new Point3D<Integer>(depthX, depthY, depthZ);
+	}
 
-  /**
-   * Converts a single point from the World coordinate system to a floating point representation of
-   * the Depth coordinate system
-   * 
-   * @param depthStream Reference to an openni::VideoStream that will be used to determine the
-   *        format of the Depth coordinates
-   * @param worldX The X coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @param worldY The Y coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @param worldZ The Z coordinate of the point to be converted, measured in millimeters in World
-   *        coordinates
-   * @return Point3DPoint to a place to store: the X coordinate of the output value, measured in
-   *         pixels with 0.0 at far left of the image
-   *         <p>
-   *         <t> the Y coordinate of the output value, measured in pixels with 0.0 at the top of the
-   *         image
-   *         <p>
-   *         <t> the Z(depth) coordinate of the output value, measured in millimeters with 0.0 at
-   *         the camera lens
-   */
-  public static Point3D<Float> convertWorldToDepthFloat(final VideoStream depthStream,
-      float worldX, float worldY, float worldZ) {
-    OutArg<Float> x = new OutArg<Float>();
-    OutArg<Float> y = new OutArg<Float>();
-    OutArg<Float> z = new OutArg<Float>();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterWorldToDepth(
-        depthStream.getHandle(), worldX, worldY, worldZ, x, y, z));
-    float depthX = x.mValue;
-    float depthY = y.mValue;
-    float depthZ = z.mValue;
-    return new Point3D<Float>(depthX, depthY, depthZ);
-  }
+	/**
+	 * Converts a single point from the World coordinate system to a floating point representation of
+	 * the Depth coordinate system
+	 * 
+	 * @param depthStream Reference to an openni::VideoStream that will be used to determine the
+	 *        format of the Depth coordinates
+	 * @param worldX The X coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @param worldY The Y coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @param worldZ The Z coordinate of the point to be converted, measured in millimeters in World
+	 *        coordinates
+	 * @return Point3DPoint to a place to store: the X coordinate of the output value, measured in
+	 *         pixels with 0.0 at far left of the image
+	 *         <p>
+	 *         <t> the Y coordinate of the output value, measured in pixels with 0.0 at the top of the
+	 *         image
+	 *         <p>
+	 *         <t> the Z(depth) coordinate of the output value, measured in millimeters with 0.0 at
+	 *         the camera lens
+	 */
+	public static Point3D<Float> convertWorldToDepthFloat(final VideoStream depthStream,
+			float worldX, float worldY, float worldZ) {
+		OutArg<Float> x = new OutArg<Float>();
+		OutArg<Float> y = new OutArg<Float>();
+		OutArg<Float> z = new OutArg<Float>();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterWorldToDepth(
+				depthStream.getHandle(), worldX, worldY, worldZ, x, y, z));
+		float depthX = x.mValue;
+		float depthY = y.mValue;
+		float depthZ = z.mValue;
+		return new Point3D<Float>(depthX, depthY, depthZ);
+	}
 
-  /**
-   * Converts a single point from the Depth coordinate system to the World coordinate system.
-   * 
-   * @param depthStream Reference to an {@link VideoStream} that will be used to determine the
-   *        format of the Depth coordinates
-   * @param depthX The X coordinate of the point to be converted, measured in pixels with 0 at the
-   *        far left of the image
-   * @param depthY The Y coordinate of the point to be converted, measured in pixels with 0 at the
-   *        top of the image
-   * @param depthZ the Z(depth) coordinate of the point to be converted, measured in the
-   *        {@link PixelFormat} of depthStream
-   * @return Point3D<Float> to a place to store the X,Y,Z coordinate of the output value, measured
-   *         in millimeters in World coordinates
-   */
-  public static Point3D<Float> convertDepthToWorld(final VideoStream depthStream, int depthX,
-      int depthY, short depthZ) {
-    OutArg<Float> y = new OutArg<Float>();
-    OutArg<Float> x = new OutArg<Float>();
-    OutArg<Float> z = new OutArg<Float>();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToWorld(
-        depthStream.getHandle(), depthX, depthY, depthZ, x, y, z));
-    float worldX = x.mValue;
-    float worldY = y.mValue;
-    float worldZ = z.mValue;
-    return new Point3D<Float>(worldX, worldY, worldZ);
-  }
+	/**
+	 * Converts a single point from the Depth coordinate system to the World coordinate system.
+	 * 
+	 * @param depthStream Reference to an {@link VideoStream} that will be used to determine the
+	 *        format of the Depth coordinates
+	 * @param depthX The X coordinate of the point to be converted, measured in pixels with 0 at the
+	 *        far left of the image
+	 * @param depthY The Y coordinate of the point to be converted, measured in pixels with 0 at the
+	 *        top of the image
+	 * @param depthZ the Z(depth) coordinate of the point to be converted, measured in the
+	 *        {@link PixelFormat} of depthStream
+	 * @return Point3D<Float> to a place to store the X,Y,Z coordinate of the output value, measured
+	 *         in millimeters in World coordinates
+	 */
+	public static Point3D<Float> convertDepthToWorld(final VideoStream depthStream, int depthX,
+			int depthY, short depthZ) {
+		OutArg<Float> y = new OutArg<Float>();
+		OutArg<Float> x = new OutArg<Float>();
+		OutArg<Float> z = new OutArg<Float>();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToWorld(
+				depthStream.getHandle(), depthX, depthY, depthZ, x, y, z));
+		float worldX = x.mValue;
+		float worldY = y.mValue;
+		float worldZ = z.mValue;
+		return new Point3D<Float>(worldX, worldY, worldZ);
+	}
 
-  /**
-   * Converts a single point from a floating point representation of the Depth coordinate system to
-   * the World coordinate system.
-   * 
-   * @param depthStream Reference to an openni::VideoStream that will be used to determine the
-   *        format of the Depth coordinates
-   * @param depthX The X coordinate of the point to be converted, measured in pixels with 0.0 at the
-   *        far left of the image
-   * @param depthY The Y coordinate of the point to be converted, measured in pixels with 0.0 at the
-   *        top of the image
-   * @param depthZ Z(depth) coordinate of the point to be converted, measured in the
-   *        {@link PixelFormat}of depthStream
-   * @return Point3D<Float> to a place to store the X coordinate of the output value, measured in
-   *         millimeters in World coordinates
-   */
-  public static Point3D<Float> convertDepthToWorld(final VideoStream depthStream, float depthX,
-      float depthY, float depthZ) {
-    OutArg<Float> x = new OutArg<Float>();
-    OutArg<Float> y = new OutArg<Float>();
-    OutArg<Float> z = new OutArg<Float>();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToWorld(
-        depthStream.getHandle(), depthX, depthY, depthZ, x, y, z));
-    float worldX = x.mValue;
-    float worldY = y.mValue;
-    float worldZ = z.mValue;
-    return new Point3D<Float>(worldX, worldY, worldZ);
-  }
+	/**
+	 * Converts a single point from a floating point representation of the Depth coordinate system to
+	 * the World coordinate system.
+	 * 
+	 * @param depthStream Reference to an openni::VideoStream that will be used to determine the
+	 *        format of the Depth coordinates
+	 * @param depthX The X coordinate of the point to be converted, measured in pixels with 0.0 at the
+	 *        far left of the image
+	 * @param depthY The Y coordinate of the point to be converted, measured in pixels with 0.0 at the
+	 *        top of the image
+	 * @param depthZ Z(depth) coordinate of the point to be converted, measured in the
+	 *        {@link PixelFormat}of depthStream
+	 * @return Point3D<Float> to a place to store the X coordinate of the output value, measured in
+	 *         millimeters in World coordinates
+	 */
+	public static Point3D<Float> convertDepthToWorld(final VideoStream depthStream, float depthX,
+			float depthY, float depthZ) {
+		OutArg<Float> x = new OutArg<Float>();
+		OutArg<Float> y = new OutArg<Float>();
+		OutArg<Float> z = new OutArg<Float>();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToWorld(
+				depthStream.getHandle(), depthX, depthY, depthZ, x, y, z));
+		float worldX = x.mValue;
+		float worldY = y.mValue;
+		float worldZ = z.mValue;
+		return new Point3D<Float>(worldX, worldY, worldZ);
+	}
 
-  /**
-   * For a given depth point, provides the coordinates of the corresponding color value. Useful for
-   * superimposing the depth and color images. This operation is the same as turning on
-   * registration, but is performed on a single pixel rather than the whole image.
-   * 
-   * @param depthStream Reference to a openni::VideoStream that produced the depth value
-   * @param colorStream Reference to a openni::VideoStream that we want to find the appropriate
-   *        color pixel in
-   * @param depthX value of the depth point, given in Depth coordinates and measured in pixels
-   * @param depthY value of the depth point, given in Depth coordinates and measured in pixels
-   * @param depthZ value of the depth point, given in the {@link PixelFormat} of depthStream
-   * @return The Point2D with X,Y coordinate of the color pixel that overlaps the given depth pixel,
-   *         measured in pixels
-   */
-  public static Point2D<Integer> convertDepthToColor(final VideoStream depthStream,
-      final VideoStream colorStream, int depthX, int depthY, short depthZ) {
-    OutArg<Integer> x = new OutArg<Integer>();
-    OutArg<Integer> y = new OutArg<Integer>();
-    NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToColor(
-        depthStream.getHandle(), colorStream.getHandle(), depthX, depthY, depthZ, x, y));
-    int colorX = x.mValue;
-    int colorY = y.mValue;
-    return new Point2D<Integer>(colorX, colorY);
-  }
+	/**
+	 * For a given depth point, provides the coordinates of the corresponding color value. Useful for
+	 * superimposing the depth and color images. This operation is the same as turning on
+	 * registration, but is performed on a single pixel rather than the whole image.
+	 * 
+	 * @param depthStream Reference to a openni::VideoStream that produced the depth value
+	 * @param colorStream Reference to a openni::VideoStream that we want to find the appropriate
+	 *        color pixel in
+	 * @param depthX value of the depth point, given in Depth coordinates and measured in pixels
+	 * @param depthY value of the depth point, given in Depth coordinates and measured in pixels
+	 * @param depthZ value of the depth point, given in the {@link PixelFormat} of depthStream
+	 * @return The Point2D with X,Y coordinate of the color pixel that overlaps the given depth pixel,
+	 *         measured in pixels
+	 */
+	public static Point2D<Integer> convertDepthToColor(final VideoStream depthStream,
+			final VideoStream colorStream, int depthX, int depthY, short depthZ) {
+		OutArg<Integer> x = new OutArg<Integer>();
+		OutArg<Integer> y = new OutArg<Integer>();
+		NativeMethods.checkReturnStatus(NativeMethods.oniCoordinateConverterDepthToColor(
+				depthStream.getHandle(), colorStream.getHandle(), depthX, depthY, depthZ, x, y));
+		int colorX = x.mValue;
+		int colorY = y.mValue;
+		return new Point2D<Integer>(colorX, colorY);
+	}
 }

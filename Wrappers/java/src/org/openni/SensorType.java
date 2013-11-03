@@ -8,24 +8,24 @@ import java.util.NoSuchElementException;
  * 
  */
 public enum SensorType {
-  IR(1), COLOR(2), DEPTH(3);
+	IR(1), COLOR(2), DEPTH(3);
 
-  public int toNative() {
-    return this.mValue;
-  }
+	public int toNative() {
+		return this.mValue;
+	}
 
-  public static SensorType fromNative(int value) {
-    for (SensorType type : SensorType.values()) {
-      if (type.mValue == value) return type;
-    }
+	public static SensorType fromNative(int value) {
+		for (SensorType type : SensorType.values()) {
+			if (type.mValue == value) return type;
+		}
 
-    throw new NoSuchElementException();
-  }
+		throw new NoSuchElementException();
+	}
 
-  private final int mValue;
+	private final int mValue;
 
-  private SensorType(int value) {
-    this.mValue = value;
-  }
+	private SensorType(int value) {
+		this.mValue = value;
+	}
 
 }

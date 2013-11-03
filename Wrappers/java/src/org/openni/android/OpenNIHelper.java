@@ -1,23 +1,23 @@
 /*****************************************************************************
-*                                                                            *
-*  OpenNI 2.x Alpha                                                          *
-*  Copyright (C) 2012 PrimeSense Ltd.                                        *
-*                                                                            *
-*  This file is part of OpenNI.                                              *
-*                                                                            *
-*  Licensed under the Apache License, Version 2.0 (the "License");           *
-*  you may not use this file except in compliance with the License.          *
-*  You may obtain a copy of the License at                                   *
-*                                                                            *
-*      http://www.apache.org/licenses/LICENSE-2.0                            *
-*                                                                            *
-*  Unless required by applicable law or agreed to in writing, software       *
-*  distributed under the License is distributed on an "AS IS" BASIS,         *
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
-*  See the License for the specific language governing permissions and       *
-*  limitations under the License.                                            *
-*                                                                            *
-*****************************************************************************/
+ *                                                                            *
+ *  OpenNI 2.x Alpha                                                          *
+ *  Copyright (C) 2012 PrimeSense Ltd.                                        *
+ *                                                                            *
+ *  This file is part of OpenNI.                                              *
+ *                                                                            *
+ *  Licensed under the Apache License, Version 2.0 (the "License");           *
+ *  you may not use this file except in compliance with the License.          *
+ *  You may obtain a copy of the License at                                   *
+ *                                                                            *
+ *      http://www.apache.org/licenses/LICENSE-2.0                            *
+ *                                                                            *
+ *  Unless required by applicable law or agreed to in writing, software       *
+ *  distributed under the License is distributed on an "AS IS" BASIS,         *
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ *  See the License for the specific language governing permissions and       *
+ *  limitations under the License.                                            *
+ *                                                                            *
+ *****************************************************************************/
 package org.openni.android;
 
 import java.io.IOException;
@@ -55,14 +55,14 @@ public class OpenNIHelper {
 		System.loadLibrary("OpenNI2");
 		System.loadLibrary("OpenNI2.jni");
 	}
-	
+
 	private Context mAndroidContext;
 	private static final String OPENNI_ASSETS_DIR = "openni";
 	private String mActionUsbPermission;
 	private DeviceOpenListener mDeviceOpenListener;
 	private String mUri;
 	private static final String TAG = "OpenNIHelper";
-	
+
 	/**
 	 * Used for receiving the result of {@link OpenNIHelper#requestDeviceOpen(String uri, DeviceOpenListener listener)}. 
 	 */
@@ -102,7 +102,7 @@ public class OpenNIHelper {
 		}
 
 		mActionUsbPermission = context.getPackageName() + ".USB_PERMISSION";
-		
+
 		IntentFilter filter = new IntentFilter(mActionUsbPermission);
 		mAndroidContext.registerReceiver(mUsbReceiver, filter);
 	}
@@ -121,10 +121,10 @@ public class OpenNIHelper {
 		// Theoretically, the client may call this method more than once with different listeners.
 		mDeviceOpenListener = listener;
 		mUri = uri;
-		
+
 		// check if this is a USB device
 		UsbDevice usbDevice = getUsbDevice(uri);
-		
+
 		if (usbDevice == null) {
 			// not a USB device, just open it
 			openDevice(uri);
@@ -132,14 +132,14 @@ public class OpenNIHelper {
 			// USB device. request permissions for it
 			PendingIntent permissionIntent = PendingIntent.getBroadcast(mAndroidContext, 0, new Intent(
 					mActionUsbPermission), 0);
-			
+
 			UsbManager manager = (UsbManager) mAndroidContext.getSystemService(Context.USB_SERVICE);
 
 			manager.requestPermission(usbDevice, permissionIntent);
 			// flow will continue in the intent
 		}
 	}
-	
+
 	public UsbDevice getUsbDevice(String uri) {
 		// look for this uri in OpenNI to get its device info
 		List<DeviceInfo> devices = OpenNI.enumerateDevices();
@@ -150,10 +150,10 @@ public class OpenNIHelper {
 				return getUsbDevice(deviceInfo);
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public UsbDevice getUsbDevice(DeviceInfo deviceInfo) {
 		UsbManager manager = (UsbManager) mAndroidContext.getSystemService(Context.USB_SERVICE);
 		HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
@@ -163,12 +163,12 @@ public class OpenNIHelper {
 		// list of USB devices
 		while (iterator.hasNext()) {
 			UsbDevice usbDevice = iterator.next();
-			
+
 			if (usbDevice.getVendorId() == deviceInfo.getUsbVendorId() && usbDevice.getProductId() == deviceInfo.getUsbProductId()) {
 				return usbDevice;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -213,7 +213,7 @@ public class OpenNIHelper {
 			}
 		}
 	};
-	
+
 	private void openDevice(String uri) {
 		Device device = null;
 		try {

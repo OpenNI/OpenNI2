@@ -7,5 +7,5 @@ package org.openni;
  * @param <T> Type of the variable to be wrapped
  */
 class OutArg<T> {
-  public T mValue;
+	public T mValue;
 }
