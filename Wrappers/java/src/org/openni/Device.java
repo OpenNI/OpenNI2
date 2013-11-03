@@ -162,7 +162,10 @@ public class Device {
    */
   public ImageRegistrationMode getImageRegistrationMode() {
     OutArg<Integer> value = new OutArg<Integer>();
-    NativeMethods.checkReturnStatus(NativeMethods.getImageRegistrationMode(getHandle(), value));
+    int rc = NativeMethods.getImageRegistrationMode(getHandle(), value);
+    if (rc != 0) {
+    	return ImageRegistrationMode.OFF;
+    }
     return ImageRegistrationMode.fromNative(value.mValue);
   }
 
