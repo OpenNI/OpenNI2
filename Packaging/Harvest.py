@@ -134,6 +134,8 @@ class Harvest:
             shutil.copytree(os.path.join(sampleSourceDir, 'res'), os.path.join(sampleTargetDir, 'res'))
             if os.path.exists(os.path.join(sampleSourceDir, 'jni')):
                 shutil.copytree(os.path.join(sampleSourceDir, 'jni'), os.path.join(sampleTargetDir, 'jni'))
+            if os.path.exists(os.path.join(sampleSourceDir, 'assets')):
+                shutil.copytree(os.path.join(sampleSourceDir, 'assets'), os.path.join(sampleTargetDir, 'assets'))
         else:
             for root, dirs, files in os.walk(sampleSourceDir):
                 # take dir name without 'root' and append to target
