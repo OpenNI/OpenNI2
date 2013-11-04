@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 1.x Alpha                                                          *
+*  PrimeSense PSCommon Library                                               *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of OpenNI.                                              *
+*  This file is part of PSCommon.                                            *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *

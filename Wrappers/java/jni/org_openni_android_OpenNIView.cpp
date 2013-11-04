@@ -1,6 +1,6 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 1.x Alpha                                                          *
+*  OpenNI 2.x Alpha                                                          *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
 *  This file is part of OpenNI.                                              *
@@ -18,7 +18,6 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-
 #include "org_openni_android_OpenNIView.h"
 #include <OpenNI.h>
 

@@ -1,6 +1,6 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 1.x Alpha                                                          *
+*  OpenNI 2.x Alpha                                                          *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
 *  This file is part of OpenNI.                                              *
