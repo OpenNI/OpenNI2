@@ -25,10 +25,6 @@ MY_SRC_FILES := \
 	$(LOCAL_PATH)/Formats/*.cpp \
 	$(LOCAL_PATH)/XnLibExtensions/*.cpp
 
-ifdef PS_NDK_BUILD
-	MY_SRC_FILES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG/*.c 
-endif
-
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
@@ -36,14 +32,7 @@ LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/. \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/LibJPEG \
 	$(LOCAL_PATH)/Formats
-
-ifdef PS_NDK_BUILD
-	LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG
-else
-	LOCAL_C_INCLUDES += external/jpeg
-endif
 
 # Dependencies
 LOCAL_STATIC_LIBRARIES := XnLib

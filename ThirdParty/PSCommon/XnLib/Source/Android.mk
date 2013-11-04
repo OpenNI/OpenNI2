@@ -28,6 +28,10 @@ MY_SRC_FILES := \
     $(LOCAL_PATH)/*.cpp \
     $(LOCAL_PATH)/Linux/*.cpp
 
+ifdef PS_NDK_BUILD
+    MY_SRC_FILES += $(LOCAL_PATH)/../ThirdParty/LibJPEG/*.c
+endif
+
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
@@ -37,13 +41,15 @@ LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 # Includes
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../Include \
-    $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/libusb
+    $(LOCAL_PATH)/../ThirdParty/libusb-1.0.9-Android/libusb \
+    $(LOCAL_PATH)/../ThirdParty/LibJPEG
 
 ifdef PS_NDK_BUILD
     # building from NDK
     LOCAL_SHARED_LIBRARIES += usb
 else
     LOCAL_C_INCLUDES += external/libusb_aah/libusb 
+    LOCAL_C_INCLUDES += external/jpeg
 endif
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../Include

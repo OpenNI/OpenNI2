@@ -28,10 +28,6 @@ MY_SRC_FILES := \
 	$(LOCAL_PATH)/Include/*.cpp	\
 	$(LOCAL_PATH)/Sensor/*.cpp
 
-ifdef PS_NDK_BUILD
-    MY_SRC_FILES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG/*.c
-endif
-
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
@@ -44,12 +40,6 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/Include \
 	$(LOCAL_PATH)/../../DepthUtils \
 	$(LOCAL_PATH)/../../../Include \
-
-ifdef PS_NDK_BUILD
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG
-else
-    LOCAL_C_INCLUDES += external/jpeg
-endif
 
 # Dependencies	
 LOCAL_STATIC_LIBRARIES := XnLib DepthUtils
