@@ -25,7 +25,7 @@
 // Includes
 //---------------------------------------------------------------------------
 #include "XnCodecBase.h"
-#include "XnStreamCompression.h"
+#include "XnJpeg.h"
 #include "XnCodecIDs.h"
 
 //---------------------------------------------------------------------------
@@ -40,8 +40,8 @@ public:
 
 	~XnJpegCodec()
 	{
-		XnStreamFreeCompressImageJ(&m_CompJPEGContext);
-		XnStreamFreeUncompressImageJ(&m_UncompJPEGContext);
+		XnStreamFreeCompressImageJ(mp_CompJPEGContext);
+		XnStreamFreeUncompressImageJ(mp_UncompJPEGContext);
 	}
 
 	virtual XnCodecID GetCodecID() const { return XN_CODEC_JPEG; }
@@ -50,13 +50,13 @@ public:
 	{
 		XnStatus nRetVal = XN_STATUS_OK;
 
-		nRetVal = XnStreamInitCompressImageJ(&m_CompJPEGContext);
+		nRetVal = XnStreamInitCompressImageJ(&mp_CompJPEGContext);
 		XN_IS_STATUS_OK(nRetVal);
 
-		nRetVal = XnStreamInitUncompressImageJ(&m_UncompJPEGContext);
+		nRetVal = XnStreamInitUncompressImageJ(&mp_UncompJPEGContext);
 		if (nRetVal != XN_STATUS_OK)
 		{
-			XnStreamFreeCompressImageJ(&m_CompJPEGContext);
+			XnStreamFreeCompressImageJ(mp_CompJPEGContext);
 			return (nRetVal);
 		}
 
@@ -74,17 +74,17 @@ protected:
 	{
 		if (m_bRGB)
 		{
-			return XnStreamCompressImage24J(&m_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
+			return XnStreamCompressImage24J(mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
 		}
 		else
 		{
-			return XnStreamCompressImage8J(&m_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
+			return XnStreamCompressImage8J(mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
 		}
 	}
 
 	virtual XnStatus DecompressImpl(const XnUChar* pCompressedData, XnUInt32 nCompressedDataSize, XnUChar* pData, XnUInt32* pnDataSize)
 	{
-		return XnStreamUncompressImageJ(&m_UncompJPEGContext, pCompressedData, nCompressedDataSize, pData, pnDataSize);
+		return XnStreamUncompressImageJ(mp_UncompJPEGContext, pCompressedData, nCompressedDataSize, pData, pnDataSize);
 	}
 
 private:
@@ -92,8 +92,8 @@ private:
 	const XnUInt32 m_nXRes;
 	const XnUInt32 m_nYRes;
 	const XnUInt32 m_nQuality;
-	XnStreamCompJPEGContext m_CompJPEGContext;
-	XnStreamUncompJPEGContext m_UncompJPEGContext;
+	XnStreamCompJPEGContext *mp_CompJPEGContext;
+	XnStreamUncompJPEGContext *mp_UncompJPEGContext;
 };
 
 #endif //__XN_JPEG_CODEC_H__

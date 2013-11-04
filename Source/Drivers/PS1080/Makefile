@@ -7,7 +7,6 @@ INC_DIRS = \
 	Include \
 	../../../Include \
 	../../../ThirdParty/PSCommon/XnLib/Include \
-	../../../ThirdParty/LibJPEG \
 	../../DepthUtils
 
 SRC_FILES = \
@@ -17,7 +16,6 @@ SRC_FILES = \
 	Formats/*.cpp	\
 	Include/*.cpp	\
 	Sensor/*.cpp	\
-	../../../ThirdParty/LibJPEG/*.c
 
 
 ifeq ("$(OSTYPE)","Darwin")

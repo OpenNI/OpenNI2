@@ -6,14 +6,12 @@ INC_DIRS = \
 	. \
 	../../../Include \
 	../../../ThirdParty/PSCommon/XnLib/Include \
-	../../../ThirdParty/LibJPEG \
 	Formats
 
 SRC_FILES = \
 	*.cpp \
 	Formats/*.cpp \
 	XnLibExtensions/*.cpp \
-	../../../ThirdParty/LibJPEG/*.c
 
 
 ifeq ("$(OSTYPE)","Darwin")

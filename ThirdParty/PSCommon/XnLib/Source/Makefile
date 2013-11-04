@@ -3,11 +3,13 @@ include ../../BuildSystem/CommonDefs.mak
 BIN_DIR = ../Bin
 
 INC_DIRS = \
-	../Include
+	../Include \
+	../ThirdParty/LibJPEG
 
 SRC_FILES = \
 	*.cpp \
-	Linux/*.cpp
+	Linux/*.cpp\
+	../ThirdParty/LibJPEG/*.c
 
 ifeq ("$(OSTYPE)","Darwin")
 	INC_DIRS += /opt/local/include

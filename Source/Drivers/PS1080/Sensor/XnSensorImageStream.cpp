@@ -36,6 +36,7 @@
 #include "Bayer.h"
 #include <XnProfiling.h>
 #include <math.h>
+#include <XnFormatsStatus.h>
 
 //---------------------------------------------------------------------------
 // XnSensorImageStream class

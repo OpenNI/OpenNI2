@@ -25,7 +25,7 @@
 // Includes
 //---------------------------------------------------------------------------
 #include "XnImageProcessor.h"
-#include <Formats/XnStreamCompression.h>
+#include <XnJpeg.h>
 
 //---------------------------------------------------------------------------
 // Code

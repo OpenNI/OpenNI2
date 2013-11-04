@@ -24,8 +24,8 @@
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
+#include <XnJpeg.h>
 #include "XnImageProcessor.h"
-#include <Formats/XnStreamCompression.h>
 
 //---------------------------------------------------------------------------
 // Code
@@ -52,7 +52,7 @@ protected:
 	//---------------------------------------------------------------------------
 private:
 	XnBuffer m_RawData;
-	XnStreamUncompJPEGContext m_JPEGContext;
+	XnStreamUncompJPEGContext* mp_JPEGContext;
 };
 
 #endif //__XN_JPEG_TO_RGB_IMAGE_PROCESSOR_H__

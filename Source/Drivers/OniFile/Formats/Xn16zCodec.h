@@ -25,8 +25,9 @@
 // Includes
 //---------------------------------------------------------------------------
 #include "XnCodecBase.h"
-#include "XnStreamCompression.h"
+#include "XnJpeg.h"
 #include "XnCodecIDs.h"
+#include "XnStreamCompression.h"
 
 //---------------------------------------------------------------------------
 // Types
