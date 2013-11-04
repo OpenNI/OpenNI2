@@ -605,7 +605,7 @@ const XnChar* xnLinkPropTypeToStr(XnLinkPropType propType)
 		"General",	//0x0004
 	};
 
-	return (propType < sizeof(PROP_TYPE_STRS) / sizeof(PROP_TYPE_STRS[0])) ? PROP_TYPE_STRS[propType] : "Unknown";
+	return ((size_t)propType < sizeof(PROP_TYPE_STRS) / sizeof(PROP_TYPE_STRS[0])) ? PROP_TYPE_STRS[propType] : "Unknown";
 }
 
 /*XnProductionNodeType xnLinkStreamTypeToNINodeType(XnLinkStreamType streamType)

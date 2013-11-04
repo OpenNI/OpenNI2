@@ -680,12 +680,7 @@ XnStatus LinkControlEndpoint::ExecuteImpl(XnUInt16 nMsgType,
 	m_msgEncoder.EndEncoding(XnLinkFragmentation(fragmentation & XN_LINK_FRAG_END));
 
 	XnUInt32 nBytesLeftToSend = m_msgEncoder.GetEncodedSize();
-	union
-	{
-		const XnUInt8* pRawCommandPacket;
-		XnLinkPacket* pCommandPacket;
-	};
-	pRawCommandPacket = reinterpret_cast<const XnUInt8*>(m_msgEncoder.GetEncodedData());
+	const XnUInt8* pRawCommandPacket = reinterpret_cast<const XnUInt8*>(m_msgEncoder.GetEncodedData());
 
 	/* Second step - Send each packet and get a response for it. */
 	while (nBytesLeftToSend > 0)

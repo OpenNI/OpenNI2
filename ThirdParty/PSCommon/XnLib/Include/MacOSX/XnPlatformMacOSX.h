@@ -31,6 +31,21 @@
 #define XN_PLATFORM XN_PLATFORM_MACOSX
 #define XN_PLATFORM_STRING "MacOSX"
 
+#include "TargetConditionals.h"
+#if (TARGET_IPHONE_SIMULATOR == 1) || (TARGET_OS_IPHONE == 1)
+    #define XN_PLATFORM_IOS
+
+    #undef XN_PLATFORM_STRING
+    #define XN_PLATFORM_STRING "iOS"
+#elif TARGET_OS_MAC
+    #ifdef XN_XCODE_BUILD
+        #define XN_PLATFORM_MACOSX_XCODE
+
+        #undef XN_PLATFORM_STRING
+        #define XN_PLATFORM_STRING "MacOSX-Xcode"
+    #endif
+#endif
+
 #define XN_PLATFORM_HAS_NO_TIMED_OPS
 #define XN_PLATFORM_HAS_NO_CLOCK_GETTIME
 #define XN_PLATFORM_HAS_NO_SCHED_PARAM

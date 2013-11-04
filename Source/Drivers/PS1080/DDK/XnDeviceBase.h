@@ -101,7 +101,7 @@ public:
 	virtual XnStatus UnregisterFromPropertyChange(const XnChar* Module, XnUInt32 propertyId, XnCallbackHandle hCallback);
 
 	typedef xnl::Event<XnNewStreamDataEventArgs> NewStreamDataEvent;
-	NewStreamDataEvent::EventInterface& OnNewStreamDataEvent() { return m_OnNewStreamDataEvent; }
+	NewStreamDataEvent::Interface& OnNewStreamDataEvent() { return m_OnNewStreamDataEvent; }
 
 	/**
 	* Finds a stream (a module which has the IS_STREAM property set to TRUE). 

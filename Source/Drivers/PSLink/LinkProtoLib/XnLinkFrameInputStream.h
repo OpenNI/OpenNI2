@@ -25,7 +25,6 @@
 #include "XnLinkInputStream.h"
 #include <XnEvent.h>
 #include <XnStatus.h>
-#include <OpenNI.h>
 
 #include <Driver/OniDriverAPI.h>
 
@@ -69,7 +68,7 @@ public:
 	virtual XnStreamFragLevel GetStreamFragLevel() const { return XN_LINK_STREAM_FRAG_LEVEL_FRAMES; }
 
 	typedef void (XN_CALLBACK_TYPE* NewFrameEventHandler)(const NewFrameEventArgs& args, void* pCookie);
-	NewFrameEvent::EventInterface& GetNewFrameEvent() { return m_newFrameEvent; }
+	NewFrameEvent::Interface& GetNewFrameEvent() { return m_newFrameEvent; }
 
 	virtual XnBool IsOutputFormatSupported(OniPixelFormat format) const;
 

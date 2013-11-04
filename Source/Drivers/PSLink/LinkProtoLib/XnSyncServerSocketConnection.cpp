@@ -22,7 +22,6 @@
 
 
 #include "XnSyncServerSocketConnection.h"
-#include <OpenNI.h>
 
 namespace xn
 {

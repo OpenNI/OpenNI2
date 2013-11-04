@@ -28,7 +28,6 @@
 #include "XnLinkDefs.h"
 #include "XnLinkProtoLibDefs.h"
 #include <XnBitSet.h>
-#include <OpenNI.h>
 #include <PrimeSense.h>
 
 struct XnShiftToDepthConfig;

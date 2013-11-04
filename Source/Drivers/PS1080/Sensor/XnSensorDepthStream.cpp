@@ -632,7 +632,7 @@ XnStatus XnSensorDepthStream::SetRegistrationType(XnProcessingType type)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	if (type != m_RegistrationType.GetValue())
+	if (type != (XnProcessingType)m_RegistrationType.GetValue())
 	{
 		nRetVal = DecideFirmwareRegistration((XnBool)m_DepthRegistration.GetValue(), type, GetResolution());
 		XN_IS_STATUS_OK(nRetVal);

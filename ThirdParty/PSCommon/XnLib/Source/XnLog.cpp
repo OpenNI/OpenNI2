@@ -646,6 +646,7 @@ XnLogger* xnLogGetLoggerForMask(const XnChar* csLogMask, XnBool bCreate)
 	{
 		XnLogger logger;
 		logger.nMinSeverity = logData.defaultMinSeverity;
+		logger.pInternal = NULL;
 
 		// first of all, add it to the map
 		if (XN_STATUS_OK != logData.pMasksHash->Set(csLogMask, logger))
