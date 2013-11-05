@@ -1,23 +1,3 @@
-/*****************************************************************************
-*                                                                            *
-*  OpenNI 2.x Alpha                                                          *
-*  Copyright (C) 2012 PrimeSense Ltd.                                        *
-*                                                                            *
-*  This file is part of OpenNI.                                              *
-*                                                                            *
-*  Licensed under the Apache License, Version 2.0 (the "License");           *
-*  you may not use this file except in compliance with the License.          *
-*  You may obtain a copy of the License at                                   *
-*                                                                            *
-*      http://www.apache.org/licenses/LICENSE-2.0                            *
-*                                                                            *
-*  Unless required by applicable law or agreed to in writing, software       *
-*  distributed under the License is distributed on an "AS IS" BASIS,         *
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
-*  See the License for the specific language governing permissions and       *
-*  limitations under the License.                                            *
-*                                                                            *
-*****************************************************************************/
 #include "org_openni_NativeMethods.h"
 
 static int register_org_openni_NativeMethods(JNIEnv* env)
@@ -111,12 +91,8 @@ static int register_org_openni_android_OpenNIView(JNIEnv* env)
     {
 		{ "nativeCreate", "()J", (void*)&Java_org_openni_android_OpenNIView_nativeCreate },
 		{ "nativeDestroy", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeDestroy },
-		{ "nativeSetAlphaValue", "(JI)V", (void*)&Java_org_openni_android_OpenNIView_nativeSetAlphaValue },
-		{ "nativeGetAlphaValue", "(J)I", (void*)&Java_org_openni_android_OpenNIView_nativeGetAlphaValue },
-		{ "nativeOnSurfaceCreated", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnSurfaceCreated },
-		{ "nativeUpdate", "(JJ)V", (void*)&Java_org_openni_android_OpenNIView_nativeUpdate },
-		{ "nativeClear", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeClear },
-		{ "nativeOnDraw", "(JIIII)V", (void*)&Java_org_openni_android_OpenNIView_nativeOnDraw },
+		{ "nativeUpdate", "(JLjava/nio/ByteBuffer;IIIJ)V", (void*)&Java_org_openni_android_OpenNIView_nativeUpdate },
+		{ "nativeClear", "(JLjava/nio/ByteBuffer;)V", (void*)&Java_org_openni_android_OpenNIView_nativeClear },
 
     };
     static int methodsCount = sizeof(methods)/sizeof(methods[0]);
