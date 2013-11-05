@@ -400,8 +400,6 @@ XN_C_API XnStatus xnLogInitFromINIFile(const XnChar* cpINIFileName, const XnChar
 	xnLogReadMasksFromINI(cpINIFileName, cpSectionName, "LogMasks", xnLogBCSetMaskState);
 	xnLogReadMasksFromINI(cpINIFileName, cpSectionName, "DumpMasks", xnDumpSetMaskState);
 
-	LogData::GetInstance().SetMinSeverityGlobally(XN_LOG_SEVERITY_NONE);
-
 	//Test if log redirection is needed 
 	XnChar strLogPath[XN_FILE_MAX_PATH] = {0};
 	nRetVal = xnOSReadStringFromINI(cpINIFileName, cpSectionName, "LogPath", strLogPath, XN_FILE_MAX_PATH);
