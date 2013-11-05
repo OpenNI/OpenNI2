@@ -59,7 +59,7 @@ public:
 	OpenNIView();
 	~OpenNIView();
 	
-	void update(JNIEnv* env, uint8_t* texture, int textureWidth, int textureHeight, uint8_t alpha, VideoFrameRef& frame);
+	void update(JNIEnv* env, uint8_t* texture, int textureWidth, int textureHeight, VideoFrameRef& frame);
 
 private:
 	void calcDepthHist(VideoFrameRef& frame);
@@ -93,7 +93,7 @@ void YUVtoRGB888(XnUInt8 y, XnUInt8 u, XnUInt8 v, XnUInt8& r, XnUInt8& g, XnUInt
 	b = (XnUInt8)XN_MIN(XN_MAX((nC + 516 * nD           ) >> 8, 0), 255);
 }
 
-void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int textureHeight, uint8_t alpha, VideoFrameRef& frame)
+void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int textureHeight, VideoFrameRef& frame)
 {
 	int xres = frame.getVideoMode().getResolutionX();
 	int yres = frame.getVideoMode().getResolutionY();
@@ -114,8 +114,8 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 					int val = m_histogram[*pDepth];
 					pTexture[0] = val;
 					pTexture[1] = val;
-					pTexture[2] = 0;
-					pTexture[3] = alpha;
+					pTexture[2] = val;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -144,7 +144,7 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 				for (int x = 0; x < xres; ++x, ++pData)
 				{
 					pTexture[0] = pTexture[1] = pTexture[2] = 255.0 * (*pData) / m_maxGrayVal;
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -161,7 +161,7 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 				for (int x = 0; x < xres; ++x, ++pData)
 				{
 					pTexture[0] = pTexture[1] = pTexture[2] = *pData;
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -180,7 +180,7 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 					pTexture[0] = pData->r;
 					pTexture[1] = pData->g;
 					pTexture[2] = pData->b;
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -197,10 +197,10 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 				for (int x = 0; x < xres/2; ++x, ++pData)
 				{
 					YUVtoRGB888(pData->y1, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 					YUVtoRGB888(pData->y2, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -217,10 +217,10 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 				for (int x = 0; x < xres/2; ++x, ++pData)
 				{
 					YUVtoRGB888(pData->y1, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 					YUVtoRGB888(pData->y2, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
-					pTexture[3] = alpha;
+					pTexture[3] = 255;
 					pTexture += 4;
 				}
 			}
@@ -290,13 +290,13 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeDestroy(JNIEnv *
 	delete pView;
 }
 
-JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate(JNIEnv* env, jclass, jlong nativePtr, jobject textureBuffer, jint textureWidth, jint textureHeight, jint alpha, jlong frameHandle)
+JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate(JNIEnv* env, jclass, jlong nativePtr, jobject textureBuffer, jint textureWidth, jint textureHeight, jlong frameHandle)
 {
 	unsigned char* texture = (unsigned char*)env->GetDirectBufferAddress(textureBuffer);
 	OpenNIView* pView = (OpenNIView*)nativePtr;
 	VideoFrameRef frame;
 	frame._setFrame((OniFrame*)frameHandle);
-	pView->update(env, texture, textureWidth, textureHeight, (uint8_t)alpha, frame);
+	pView->update(env, texture, textureWidth, textureHeight, frame);
 }
 
 JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeClear(JNIEnv* env, jclass, jlong, jobject textureBuffer)

@@ -26,6 +26,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.opengl.GLES10;
 import android.opengl.GLES11;
 import android.opengl.GLES11Ext;
@@ -58,7 +59,7 @@ public class OpenNIView extends GLSurfaceView {
 	private int mCurrFrameWidth = 0;
 	private int mCurrFrameHeight = 0;
 	
-	private int mAlpha = 255;
+	private int mBaseColor = Color.WHITE;
 
 	public OpenNIView(Context context) {
 		super(context);
@@ -138,13 +139,13 @@ public class OpenNIView extends GLSurfaceView {
 		super.finalize();
 	}
 
-	public void setAlphaValue(int alpha) {
-		mAlpha = alpha;
+	public void setBaseColor(int color) {
+		mBaseColor = color;
 		requestRender();
 	}
 
-	public int getAlphaValue() {
-		return mAlpha;
+	public int getBaseColor() {
+		return mBaseColor;
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class OpenNIView extends GLSurfaceView {
 			mTextureHeight = getClosestPowerOfTwo(mCurrFrameHeight);
 			mTexture = ByteBuffer.allocateDirect(mTextureWidth * mTextureHeight * 4);
 		}
-		nativeUpdate(mNativePtr, mTexture, mTextureWidth, mTextureHeight, mAlpha, frame.getHandle());
+		nativeUpdate(mNativePtr, mTexture, mTextureWidth, mTextureHeight, frame.getHandle());
 		calcDrawArea();
 		requestRender();
 	}
@@ -189,7 +190,11 @@ public class OpenNIView extends GLSurfaceView {
 			
 		GLES10.glEnable(GLES10.GL_BLEND);
 		GLES10.glBlendFunc(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE_MINUS_SRC_ALPHA);
-		GLES10.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		int red = Color.red(mBaseColor);
+		int green = Color.green(mBaseColor);
+		int blue = Color.blue(mBaseColor);
+		int alpha = Color.alpha(mBaseColor); 
+		GLES10.glColor4f(red/255.f, green/255.f, blue/255.f, alpha/255.f);
 
 		GLES10.glEnable(GLES10.GL_TEXTURE_2D);
 
@@ -233,6 +238,6 @@ public class OpenNIView extends GLSurfaceView {
 
 	private static native long nativeCreate();
 	private static native void nativeDestroy(long nativePtr);
-	private static native void nativeUpdate(long nativePtr, ByteBuffer texture, int textureWidth, int textureHeight, int alpha, long frameRef);
+	private static native void nativeUpdate(long nativePtr, ByteBuffer texture, int textureWidth, int textureHeight, long frameRef);
 	private static native void nativeClear(long nativePtr, ByteBuffer texture);
 }

@@ -91,7 +91,7 @@ static int register_org_openni_android_OpenNIView(JNIEnv* env)
     {
 		{ "nativeCreate", "()J", (void*)&Java_org_openni_android_OpenNIView_nativeCreate },
 		{ "nativeDestroy", "(J)V", (void*)&Java_org_openni_android_OpenNIView_nativeDestroy },
-		{ "nativeUpdate", "(JLjava/nio/ByteBuffer;IIIJ)V", (void*)&Java_org_openni_android_OpenNIView_nativeUpdate },
+		{ "nativeUpdate", "(JLjava/nio/ByteBuffer;IIJ)V", (void*)&Java_org_openni_android_OpenNIView_nativeUpdate },
 		{ "nativeClear", "(JLjava/nio/ByteBuffer;)V", (void*)&Java_org_openni_android_OpenNIView_nativeClear },
 
     };

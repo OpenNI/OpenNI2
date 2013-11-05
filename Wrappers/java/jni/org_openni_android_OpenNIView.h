@@ -108,10 +108,10 @@ JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeDestroy
 /*
  * Class:     org_openni_android_OpenNIView
  * Method:    nativeUpdate
- * Signature: (JLjava/nio/ByteBuffer;IIIJ)V
+ * Signature: (JLjava/nio/ByteBuffer;IIJ)V
  */
 JNIEXPORT void JNICALL Java_org_openni_android_OpenNIView_nativeUpdate
-  (JNIEnv *, jclass, jlong, jobject, jint, jint, jint, jlong);
+  (JNIEnv *, jclass, jlong, jobject, jint, jint, jlong);
 
 /*
  * Class:     org_openni_android_OpenNIView

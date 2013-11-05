@@ -34,6 +34,7 @@ import org.openni.android.OpenNIView;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -176,7 +177,8 @@ public class StreamView extends RelativeLayout {
 				mStream = null;
 			}
 		
-			mStream = VideoStream.create(mDevice, mDeviceSensors.get(pos));
+			SensorType sensor = mDeviceSensors.get(pos);
+			mStream = VideoStream.create(mDevice, sensor);
 			List<CharSequence> videoModesNames = new ArrayList<CharSequence>();
 	
 			mStreamVideoModes = mStream.getSensorInfo().getSupportedVideoModes();
@@ -203,6 +205,13 @@ public class StreamView extends RelativeLayout {
 			}
 			
 			mVideoModeSpinner.setSelection(selected);
+			
+			if (sensor == SensorType.DEPTH) {
+				mFrameView.setBaseColor(Color.YELLOW);
+			} else {
+				mFrameView.setBaseColor(Color.WHITE);
+			}
+			
 		} catch (RuntimeException e) {
 			showAlert("Failed to switch to stream: " + e.getMessage());
 		}

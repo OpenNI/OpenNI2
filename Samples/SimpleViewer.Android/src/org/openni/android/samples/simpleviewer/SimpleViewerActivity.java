@@ -25,6 +25,7 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -141,12 +142,14 @@ public class SimpleViewerActivity
 			@Override
 			public void run() {
 				while (mShouldRun) {
-					VideoStream[] streams = new VideoStream[] { mStream, mSecondStream };
+					VideoStream[] streams = { mStream, mSecondStream };
+					int[] colors = { Color.YELLOW, Color.WHITE };
 					VideoFrameRef frame = null;
 					
 					try {
 						frame = streams[mViewStream].readFrame();
 						// Request rendering of the current OpenNI frame
+						mFrameView.setBaseColor(colors[mViewStream]);
 						mFrameView.update(frame);
 						updateLabel(String.format("Frame Index: %,d | Timestamp: %.6f seconds", frame.getFrameIndex(), frame.getTimestamp() / 1e6));
 					} catch (Exception e) {
