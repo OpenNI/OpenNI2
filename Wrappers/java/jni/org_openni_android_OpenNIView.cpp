@@ -98,6 +98,14 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 	int xres = frame.getVideoMode().getResolutionX();
 	int yres = frame.getVideoMode().getResolutionY();
 
+	// if the frame is cropped, zero the texture beforehand, so we can write only to the cropped pixels
+	if (frame.getWidth() < xres || frame.getHeight() < yres)
+	{
+		memset(texture, 0, textureWidth * textureHeight * 4);
+	}
+
+	const uint8_t* pFrameData = (const uint8_t*)frame.getData();
+
 	switch (frame.getVideoMode().getPixelFormat())
 	{
 	case PIXEL_FORMAT_DEPTH_1_MM:
@@ -105,18 +113,17 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 		{
 			calcDepthHist(frame);
 			
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const OniDepthPixel* pDepth = (const OniDepthPixel*)frame.getData() + y * xres;
-				for (int x = 0; x < xres; ++x, ++pDepth)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const OniDepthPixel* pDepth = (const OniDepthPixel*)(pFrameData + y * frame.getStrideInBytes());
+				for (int x = 0; x < frame.getWidth(); ++x, ++pDepth, pTexture += 4)
 				{
 					int val = m_histogram[*pDepth];
 					pTexture[0] = val;
 					pTexture[1] = val;
 					pTexture[2] = val;
 					pTexture[3] = 255;
-					pTexture += 4;
 				}
 			}
 		}
@@ -136,16 +143,14 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 			}
 			
 			// and update texture
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const Grayscale16Pixel* pData = (const Grayscale16Pixel*)frame.getData() + y * xres;
-				
-				for (int x = 0; x < xres; ++x, ++pData)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const Grayscale16Pixel* pData = (const Grayscale16Pixel*)(pFrameData + y * frame.getStrideInBytes());
+				for (int x = 0; x < frame.getWidth(); ++x, ++pData, pTexture += 4)
 				{
 					pTexture[0] = pTexture[1] = pTexture[2] = 255.0 * (*pData) / m_maxGrayVal;
 					pTexture[3] = 255;
-					pTexture += 4;
 				}
 			}
 		}
@@ -153,16 +158,14 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 		
 	case PIXEL_FORMAT_GRAY8:
 		{
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const unsigned char* pData = (const unsigned char*)frame.getData() + y * xres;
-				
-				for (int x = 0; x < xres; ++x, ++pData)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const uint8_t* pData = pFrameData + y * frame.getStrideInBytes();
+				for (int x = 0; x < frame.getWidth(); ++x, ++pData, pTexture += 4)
 				{
 					pTexture[0] = pTexture[1] = pTexture[2] = *pData;
 					pTexture[3] = 255;
-					pTexture += 4;
 				}
 			}
 		}
@@ -170,18 +173,16 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 		
 	case PIXEL_FORMAT_RGB888:
 		{
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const RGB888Pixel* pData = (const RGB888Pixel*)frame.getData() + y * xres;
-				
-				for (int x = 0; x < xres; ++x, ++pData)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const RGB888Pixel* pData = (const RGB888Pixel*)(pFrameData + y * frame.getStrideInBytes());
+				for (int x = 0; x < frame.getWidth(); ++x, ++pData, pTexture += 4)
 				{
 					pTexture[0] = pData->r;
 					pTexture[1] = pData->g;
 					pTexture[2] = pData->b;
 					pTexture[3] = 255;
-					pTexture += 4;
 				}
 			}
 		}
@@ -189,12 +190,11 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 
 	case PIXEL_FORMAT_YUV422:
 		{
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const YUV422DoublePixel* pData = (const YUV422DoublePixel*)frame.getData() + y * xres/2;
-
-				for (int x = 0; x < xres/2; ++x, ++pData)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const YUV422DoublePixel* pData = (const YUV422DoublePixel*)(pFrameData + y * frame.getStrideInBytes());
+				for (int x = 0; x < frame.getWidth()/2; ++x, ++pData, pTexture += 4)
 				{
 					YUVtoRGB888(pData->y1, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
 					pTexture[3] = 255;
@@ -209,12 +209,11 @@ void OpenNIView::update(JNIEnv *env, uint8_t* texture, int textureWidth, int tex
 
 	case PIXEL_FORMAT_YUYV:
 		{
-			for (int y = 0; y < yres; ++y)
+			for (int y = 0; y < frame.getHeight(); ++y)
 			{
-				unsigned char* pTexture = texture + y * textureWidth * 4;
-				const YUYVDoublePixel* pData = (const YUYVDoublePixel*)frame.getData() + y * xres/2;
-
-				for (int x = 0; x < xres/2; ++x, ++pData)
+				uint8_t* pTexture = texture + ((frame.getCropOriginY() + y) * textureWidth + frame.getCropOriginX()) * 4;
+				const YUYVDoublePixel* pData = (const YUYVDoublePixel*)(pFrameData + y * frame.getStrideInBytes());
+				for (int x = 0; x < frame.getWidth()/2; ++x, ++pData, pTexture += 4)
 				{
 					YUVtoRGB888(pData->y1, pData->u, pData->v, pTexture[0], pTexture[1], pTexture[2]);
 					pTexture[3] = 255;
