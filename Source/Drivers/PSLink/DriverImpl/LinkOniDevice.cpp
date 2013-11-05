@@ -76,15 +76,35 @@ XnStatus LinkOniDevice::readSupportedModesFromStream(XnFwStreamInfo &info, xnl::
 	return XN_STATUS_OK;
 }
 
+XnStatus AddVideoMode(xnl::Array<OniVideoMode>& modes, XnFwStreamVideoMode fwMode, OniPixelFormat pixelFormat)
+{
+	// make sure it's not in the list already
+	for (XnUInt32 i = 0; i < modes.GetSize(); ++i)
+	{
+		if (modes[i].resolutionX == (int)fwMode.m_nXRes &&
+			modes[i].resolutionY == (int)fwMode.m_nYRes &&
+			modes[i].fps == (int)fwMode.m_nFPS &&
+			modes[i].pixelFormat == pixelFormat)
+		{
+			return XN_STATUS_OK;
+		}
+	}
+
+	OniVideoMode mode;
+	mode.resolutionX = fwMode.m_nXRes;
+	mode.resolutionY = fwMode.m_nYRes;
+	mode.fps = fwMode.m_nFPS;
+	mode.pixelFormat = pixelFormat;
+	return modes.AddLast(mode);
+}
+
 XnStatus LinkOniDevice::FillSupportedVideoModes()
 {
-	int                           nSupportedModes = 0;
 	xnl::Array<XnFwStreamVideoMode> aSupportedModes;
-	
 	xnl::Array<XnFwStreamInfo> aEnumerated;
+	xnl::Array<OniVideoMode> aVideoModes;
 
 	int s = -1;
-	int writeIndex;
 
 	// Depth
 	m_pSensor->EnumerateStreams((XnStreamType)XN_LINK_STREAM_TYPE_SHIFTS, aEnumerated);
@@ -93,48 +113,24 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 		XnStatus nRetVal = readSupportedModesFromStream(aEnumerated[c], aSupportedModes);
 		XN_IS_STATUS_OK(nRetVal);
 
-		++s;
-		m_sensors[s].sensorType             = ONI_SENSOR_DEPTH;
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aSupportedModes.GetSize());
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		nSupportedModes = aSupportedModes.GetSize();
-
-		writeIndex = 0;
-		for(int i=0; i < nSupportedModes; ++i)
+		for (XnUInt32 i = 0; i < aSupportedModes.GetSize(); ++i)
 		{
-			// add both 1 mm and 100 um formats
-			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
-			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
-
-			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_100_UM;
-			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
-
-			bool foundMatch = false;
-			for (int j = 0; j < writeIndex; ++j)
-			{
-				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].fps         == m_sensors[s].pSupportedVideoModes[j].fps         &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
-				{
-					// Already know this configuration
-					foundMatch = true;
-					break;
-				}
-			}
-			if (!foundMatch)
-			{
-				++writeIndex;
-			}
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_DEPTH_1_MM);
+			XN_IS_STATUS_OK(nRetVal);
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_DEPTH_100_UM);
+			XN_IS_STATUS_OK(nRetVal);
 		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-		m_numSensors = s+1;
 	}
+	++s;
+	m_sensors[s].sensorType             = ONI_SENSOR_DEPTH;
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aVideoModes.GetSize());
+	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
+	xnOSMemCopy(m_sensors[s].pSupportedVideoModes, aVideoModes.GetData(), aVideoModes.GetSize() * sizeof(OniVideoMode));
+	m_sensors[s].numSupportedVideoModes = aVideoModes.GetSize();
+
+	m_numSensors = s+1;
 	aEnumerated.Clear();
+	aVideoModes.Clear();
 
 	// IR
 	m_pSensor->EnumerateStreams((XnStreamType)XN_LINK_STREAM_TYPE_IR, aEnumerated);
@@ -143,102 +139,23 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 		XnStatus nRetVal = readSupportedModesFromStream(aEnumerated[c], aSupportedModes);
 		XN_IS_STATUS_OK(nRetVal);
 
-		++s;
-		m_sensors[s].sensorType             = ONI_SENSOR_IR;
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aSupportedModes.GetSize());
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		nSupportedModes = aSupportedModes.GetSize();
-	
-		writeIndex = 0;
-		for(int i=0; i < nSupportedModes; ++i)
+		for (XnUInt32 i = 0; i < aSupportedModes.GetSize(); ++i)
 		{
-			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_GRAY16;
-			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
-			
-			bool foundMatch = false;
-			for (int j = 0; j < writeIndex; ++j)
-			{
-				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].fps         == m_sensors[s].pSupportedVideoModes[j].fps         &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
-				{
-					// Already know this configuration
-					foundMatch = true;
-					break;
-				}
-			}
-			if (!foundMatch)
-			{
-				++writeIndex;
-			}
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_GRAY16);
+			XN_IS_STATUS_OK(nRetVal);
 		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-		m_numSensors = s+1;
 	}
+	++s;
+	m_sensors[s].sensorType             = ONI_SENSOR_IR;
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aVideoModes.GetSize());
+	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
+	xnOSMemCopy(m_sensors[s].pSupportedVideoModes, aVideoModes.GetData(), aVideoModes.GetSize() * sizeof(OniVideoMode));
+	m_sensors[s].numSupportedVideoModes = aVideoModes.GetSize();
+
+	m_numSensors = s+1;
 	aEnumerated.Clear();
+	aVideoModes.Clear();
 
-/*	// Color
-
-	// first, make sure that our sensor actually supports Image
-	XnUInt64 nImageSupported = FALSE;
-	XnStatus nRetVal = m_sensor.GetProperty(XN_MASK_DEVICE, XN_MODULE_PROPERTY_IMAGE_SUPPORTED, &nImageSupported);
-	XN_IS_STATUS_OK(nRetVal);
-	if (nImageSupported)
-	{
-		++s;
-		nSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.imageModes.GetSize();
-		pSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.imageModes.GetData();
-
-		m_sensors[s].sensorType             = ONI_SENSOR_COLOR;
-		m_sensors[s].numSupportedVideoModes = 0; // to be changed later..
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes * 10);
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		
-		writeIndex = 0;
-		for(XnUInt32 j=0; j < nSupportedModes; ++j)
-		{
-			// make an OniVideoMode for each OniFormat supported by the input format
-			OniPixelFormat aOniFormats[10];
-			int       nOniFormats = 0;
-			LinkOniColorStream::GetAllowedOniOutputFormatForInputFormat((XnIOImageFormats)pSupportedModes[j].nFormat, aOniFormats, &nOniFormats);
-			for(int curOni=0; curOni<nOniFormats; ++curOni)
-			{
-				m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = aOniFormats[curOni];
-			
-				m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[j].nFPS;
-				XnBool bOK = XnDDKGetXYFromResolution(
-					(XnResolutions)pSupportedModes[j].nResolution,
-					(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
-					(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
-					);
-				XN_ASSERT(bOK);
-				XN_REFERENCE_VARIABLE(bOK);
-
-				bool foundMatch = false;
-				for (int i = 0; i < writeIndex; ++i)
-				{
-					if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[i].pixelFormat &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[i].fps &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[i].resolutionX &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[i].resolutionY)
-					{
-						// Already know this configuration
-						foundMatch = true;
-						break;
-					}
-				}
-				if (!foundMatch)
-				{
-					++writeIndex;
-				}
-			}
-		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-	}
-*/
 	return XN_STATUS_OK;
 }
 
