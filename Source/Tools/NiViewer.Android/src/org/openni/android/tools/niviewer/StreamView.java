@@ -250,6 +250,9 @@ public class StreamView extends RelativeLayout {
 			public void run() {
 				List<VideoStream> streams = new ArrayList<VideoStream>();
 				streams.add(mStream);
+				long lastTime = System.nanoTime();
+				long frameCount = 0;	
+				int fps = 0;
 				
 				while (mShouldRun) {
 					VideoFrameRef frame = null;
@@ -260,7 +263,17 @@ public class StreamView extends RelativeLayout {
 						
 						// Request rendering of the current OpenNI frame
 						mFrameView.update(frame);
-						updateLabel(String.format("Frame Index: %,d | Timestamp: %,d", frame.getFrameIndex(), frame.getTimestamp()));
+						
+						++frameCount;
+						if (frameCount == 30) {
+							long now = System.nanoTime();
+							long diff = now - lastTime;
+							fps = (int)(1e9 * 30 / diff);
+							frameCount = 0;
+							lastTime = now;
+						}
+						
+						updateLabel(String.format("Frame Index: %,d | Timestamp: %,d | FPS: %d", frame.getFrameIndex(), frame.getTimestamp(), fps));
 						
 					} catch (TimeoutException e) {
 					} catch (Exception e) {
