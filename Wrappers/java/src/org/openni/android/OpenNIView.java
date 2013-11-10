@@ -107,7 +107,7 @@ public class OpenNIView extends GLSurfaceView {
 
 				GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_LINEAR);
 				GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_LINEAR);
-				GLES10.glShadeModel(GLES10.GL_FLAT);			
+				GLES10.glShadeModel(GLES10.GL_FLAT);
 			}
 
 			@Override
@@ -122,7 +122,7 @@ public class OpenNIView extends GLSurfaceView {
 			@Override
 			public void onDrawFrame(GL10 gl) {
 				synchronized (OpenNIView.this) {
-					draw();
+					onDrawGL();
 				}
 			}
 		});
@@ -183,7 +183,7 @@ public class OpenNIView extends GLSurfaceView {
 		}
 	}
 
-	protected void draw() {
+	protected void onDrawGL() {
 		if (mTexture == null || mDrawWidth == 0 || mDrawHeight == 0) {
 			return;
 		}
@@ -235,7 +235,7 @@ public class OpenNIView extends GLSurfaceView {
 			mDrawX = (mSurfaceWidth - mDrawWidth) / 2;
 		}
 	}
-
+	
 	private static native long nativeCreate();
 	private static native void nativeDestroy(long nativePtr);
 	private static native void nativeUpdate(long nativePtr, ByteBuffer texture, int textureWidth, int textureHeight, long frameRef);
