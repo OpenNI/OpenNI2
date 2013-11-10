@@ -125,7 +125,7 @@ def build_android():
     print 'Cleaning...'
     for proj in android_projects:
         logFile.write('**** Cleaning ' + proj + "...****\n")
-        #build_android_project(os.path.join('..', proj), outputFile=logFile, target='clean')
+        build_android_project(os.path.join('..', proj), outputFile=logFile, target='clean')
     # and build all
     for proj in android_projects:
         logFile.write('**** Building ' + proj + "...****\n")
