@@ -30,7 +30,7 @@ from datetime import date
 VERSION_MAJOR = 2
 VERSION_MINOR = 3
 VERSION_MAINTENANCE = 0
-VERSION_BUILD = 14
+VERSION_BUILD = 15
 
 def getVersionString():
     return str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_MAINTENANCE) + "." + str(VERSION_BUILD)
