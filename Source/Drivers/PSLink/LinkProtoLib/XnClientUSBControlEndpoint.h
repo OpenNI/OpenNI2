@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNUSBCONTROLENDPOINT_H__
-#define __XNUSBCONTROLENDPOINT_H__
+#ifndef XNCLIENTUSBCONTROLENDPOINT_H
+#define XNCLIENTUSBCONTROLENDPOINT_H
 
 #include "ISyncIOConnection.h"
 
@@ -62,4 +62,4 @@ private:
 
 }
 
-#endif // __XNUSBCONTROLENDPOINT_H__
+#endif // XNCLIENTUSBCONTROLENDPOINT_H

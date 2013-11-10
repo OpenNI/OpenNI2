@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_FORMATS_H_
-#define _XN_FORMATS_H_
+#ifndef XNFORMATS_H
+#define XNFORMATS_H
 
 //---------------------------------------------------------------------------
 // Types
@@ -48,4 +48,4 @@
 */
 XnStatus XnFormatsMirrorPixelData(OniPixelFormat nOutputFormat, XnUChar* pBuffer, XnUInt32 nBufferSize, XnUInt32 nXRes);
 
-#endif //_XN_FORMATS_H_
+#endif // XNFORMATS_H

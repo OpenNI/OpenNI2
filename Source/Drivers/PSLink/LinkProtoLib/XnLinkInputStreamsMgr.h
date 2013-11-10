@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINKINPUTSTREAMSMGR_H__
-#define __LINKINPUTSTREAMSMGR_H__
+#ifndef XNLINKINPUTSTREAMSMGR_H
+#define XNLINKINPUTSTREAMSMGR_H
 
 #include "XnLinkDefs.h"
 #include "XnLinkProtoLibDefs.h"
@@ -86,4 +86,4 @@ private:
 
 }
 
-#endif // __LINKINPUTSTREAMSMGR_H__
+#endif // XNLINKINPUTSTREAMSMGR_H

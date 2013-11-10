@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __MENU_H__
-#define __MENU_H__
+#ifndef MENU_H
+#define MENU_H
 
 // --------------------------------
 // Includes
@@ -35,4 +35,4 @@ void createMenuEntry(const char* csName, ActionFunc func, int arg);
 void endSubMenu();
 void endMenu();
 
-#endif //__MENU_H__
+#endif // MENU_H

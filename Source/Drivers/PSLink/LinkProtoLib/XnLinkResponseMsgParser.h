@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKRESPONSEMSGPARSER_H__
-#define __XNLINKRESPONSEMSGPARSER_H__
+#ifndef XNLINKRESPONSEMSGPARSER_H
+#define XNLINKRESPONSEMSGPARSER_H
 
 #include "XnLinkMsgParser.h"
 
@@ -38,5 +38,5 @@ protected:
 
 }
 
-#endif // __XNLINKRESPONSEMSGPARSER_H__
+#endif // XNLINKRESPONSEMSGPARSER_H
 

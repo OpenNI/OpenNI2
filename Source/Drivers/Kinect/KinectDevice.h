@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _KINECT_DEVICE_H_
-#define _KINECT_DEVICE_H_
+#ifndef KINECTDEVICE_H
+#define KINECTDEVICE_H
 
 #include "Driver\OniDriverAPI.h"
 #include "KinectStreamImpl.h"
@@ -58,4 +58,4 @@ private:
 	OniSensorInfo m_sensors[10];	
 };
 } // namespace kinect_device
-#endif //_KINECT_DRIVER_H_
+#endif // KINECTDEVICE_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_DEPTH_STREAM_H__
-#define __XN_SENSOR_DEPTH_STREAM_H__
+#ifndef XNSENSORDEPTHSTREAM_H
+#define XNSENSORDEPTHSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -189,4 +189,4 @@ private:
 	XnCallbackHandle m_hReferenceSizeChangedCallback;
 };
 
-#endif //__XN_SENSOR_DEPTH_STREAM_H__
+#endif // XNSENSORDEPTHSTREAM_H

@@ -18,6 +18,9 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef XNSERVERUSBLINUXCONTROLENDPOINT_H
+#define XNSERVERUSBLINUXCONTROLENDPOINT_H
+
 #include "ISyncIOConnection.h"
 #include <XnOS.h>
 
@@ -55,3 +58,4 @@ private:
 };
 
 }
+#endif // XNSERVERUSBLINUXCONTROLENDPOINT_H

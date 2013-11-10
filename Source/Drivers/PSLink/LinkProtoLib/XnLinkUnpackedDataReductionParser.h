@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKUNPACKEDDATAREDUCTIONPARSER_H__
-#define __XNLINKUNPACKEDDATAREDUCTIONPARSER_H__
+#ifndef XNLINKUNPACKEDDATAREDUCTIONPARSER_H
+#define XNLINKUNPACKEDDATAREDUCTIONPARSER_H
 
 #include <XnStatus.h>
 #include "XnLinkDefs.h"
@@ -49,4 +49,4 @@ protected:
 
 }
 
-#endif // __XNLINKUNPACKEDDATAREDUCTIONPARSER_H__
+#endif // XNLINKUNPACKEDDATAREDUCTIONPARSER_H

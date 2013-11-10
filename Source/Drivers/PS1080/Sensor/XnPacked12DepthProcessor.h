@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PACKED_12_DEPTH_PROCESSOR_H__
-#define __XN_PACKED_12_DEPTH_PROCESSOR_H__
+#ifndef XNPACKED12DEPTHPROCESSOR_H
+#define XNPACKED12DEPTHPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -59,4 +59,4 @@ private:
 	XnBuffer m_ContinuousBuffer;
 };
 
-#endif //__XN_PACKED_12_DEPTH_PROCESSOR_H__
+#endif // XNPACKED12DEPTHPROCESSOR_H

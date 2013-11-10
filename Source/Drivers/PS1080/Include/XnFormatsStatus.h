@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_FORMATS_STATUS_H_
-#define _XN_FORMATS_STATUS_H_
+#ifndef XNFORMATSSTATUS_H
+#define XNFORMATSSTATUS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -60,4 +60,4 @@ XN_STATUS_MESSAGE(XN_STATUS_IO_INVALID_STREAM_AUDIO_BUFFER_SIZE, "Invalid Xiron 
 XN_STATUS_MESSAGE(XN_STATUS_INVALID_OUTPUT_FORMAT_FOR_RESOLUTION, "Pixel format is not supported for this resolution!")
 XN_PS_STATUS_MESSAGE_MAP_END(XN_ERROR_GROUP_FORMATS)
 
-#endif //_XN_FORMATS_STATUS_H_
+#endif // XNFORMATSSTATUS_H

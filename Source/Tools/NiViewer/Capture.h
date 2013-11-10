@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __CAPTURE_H__
-#define __CAPTURE_H__
+#ifndef CAPTURE_H
+#define CAPTURE_H
 
 // --------------------------------
 // Includes
@@ -55,4 +55,4 @@ void captureSingleFrame(int);
 
 void getCaptureMessage(char* pMessage);
 
-#endif //__CAPTURE_H__
+#endif // CAPTURE_H

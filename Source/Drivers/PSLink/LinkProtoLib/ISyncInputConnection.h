@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __ISYNCINPUTCONNECTION_H__
-#define __ISYNCINPUTCONNECTION_H__
+#ifndef ISYNCINPUTCONNECTION_H
+#define ISYNCINPUTCONNECTION_H
 
 #include <XnPlatform.h>
 #include "IConnection.h"
@@ -36,4 +36,4 @@ public:
 
 }
 
-#endif // __ISYNCINPUTCONNECTION_H__
+#endif // ISYNCINPUTCONNECTION_H

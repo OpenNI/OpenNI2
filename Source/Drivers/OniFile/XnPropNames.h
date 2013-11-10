@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PROP_NAMES_H__
-#define __XN_PROP_NAMES_H__
+#ifndef XNPROPNAMES_H
+#define XNPROPNAMES_H
 
 //ProductionNode
 #define XN_PROP_STATE_READY "xnStateReady" // int. Meant only for mock nodes.
@@ -64,4 +64,4 @@
 
 #define XN_PROP_ORIGINAL_DEVICE "oniOriginalDevice"
 
-#endif //__XN_PROP_NAMES_H__
+#endif // XNPROPNAMES_H

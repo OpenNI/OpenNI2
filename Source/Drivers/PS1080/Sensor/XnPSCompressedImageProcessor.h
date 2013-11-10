@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PS_COMPRESSED_IMAGE_PROCESSOR_H__
-#define __XN_PS_COMPRESSED_IMAGE_PROCESSOR_H__
+#ifndef XNPSCOMPRESSEDIMAGEPROCESSOR_H
+#define XNPSCOMPRESSEDIMAGEPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -54,4 +54,4 @@ private:
 	XnBuffer m_UncompressedYUVBuffer;
 };
 
-#endif //__XN_PS_COMPRESSED_IMAGE_PROCESSOR_H__
+#endif // XNPSCOMPRESSEDIMAGEPROCESSOR_H

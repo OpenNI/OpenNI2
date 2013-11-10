@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_STREAMING_STREAM_H__
-#define __XN_STREAMING_STREAM_H__
+#ifndef XNSTREAMINGSTREAM_H
+#define XNSTREAMINGSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -68,4 +68,4 @@ private:
 	XnActualIntProperty m_ReadChunkSize;
 };
 
-#endif //__XN_STREAMING_STREAM_H__
+#endif // XNSTREAMINGSTREAM_H

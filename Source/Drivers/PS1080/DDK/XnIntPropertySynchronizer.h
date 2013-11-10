@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_INT_PROPERTY_SYNCHRONIZER_H__
-#define __XN_INT_PROPERTY_SYNCHRONIZER_H__
+#ifndef XNINTPROPERTYSYNCHRONIZER_H
+#define XNINTPROPERTYSYNCHRONIZER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -47,4 +47,4 @@ private:
 	CookiesList m_Cookies;
 };
 
-#endif //__XN_INT_PROPERTY_SYNCHRONIZER_H__
+#endif // XNINTPROPERTYSYNCHRONIZER_H

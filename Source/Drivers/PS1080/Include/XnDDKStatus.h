@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DDK_STATUS_H_
-#define _XN_DDK_STATUS_H_
+#ifndef XNDDKSTATUS_H
+#define XNDDKSTATUS_H
 
 #include <XnStatus.h>
 #include <XnCommon.h>
@@ -159,4 +159,4 @@ XN_STATUS_MESSAGE(XN_STATUS_IO_DEVICE_ROM_IO_ERROR, "The device ROM I/O command 
 XN_STATUS_MESSAGE(XN_STATUS_IO_DEVICE_ROM_ERASE_ERROR, "Failed to delete a file from the device ROM!")
 XN_PS_STATUS_MESSAGE_MAP_END(XN_ERROR_GROUP_DDK)
 
-#endif //_XN_DDK_STATUS_H_
+#endif // XNDDKSTATUS_H

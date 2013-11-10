@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_GENERAL_PROPERTY_H__
-#define __XN_GENERAL_PROPERTY_H__
+#ifndef XNGENERALPROPERTY_H
+#define XNGENERALPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -85,4 +85,4 @@ private:
 	ReadValueFromFileFuncPtr m_pReadFromFileFunc;
 };
 
-#endif //__XN_GENERAL_PROPERTY_H__
+#endif // XNGENERALPROPERTY_H

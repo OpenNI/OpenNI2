@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEVICE_STREAM_H__
-#define __XN_DEVICE_STREAM_H__
+#ifndef XNDEVICESTREAM_H
+#define XNDEVICESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -139,4 +139,4 @@ private:
 	XN_CRITICAL_SECTION_HANDLE m_hOpenLock;
 };
 
-#endif //__XN_DEVICE_STREAM_H__
+#endif // XNDEVICESTREAM_H

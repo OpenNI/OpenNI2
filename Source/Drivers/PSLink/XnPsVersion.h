@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_PS_VERSION_H_
-#define _XN_PS_VERSION_H_
+#ifndef XNPSVERSION_H
+#define XNPSVERSION_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -53,4 +53,4 @@
 		XN_PS_BRIEF_VERSION_STRING  "-" \
 		XN_PLATFORM_STRING " (" XN_TIMESTAMP ")"
 
-#endif //_XN_VERSION_H_
+#endif // XNPSVERSION_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_UNCOMP_H_
-#define _XN_UNCOMP_H_
+#ifndef UNCOMP_H
+#define UNCOMP_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -40,4 +40,4 @@ XnStatus XnStreamUncompressYUVImagePS(const XnUInt8* pInput, const XnUInt32 nInp
 									   XnUInt8* pOutput, XnUInt32* pnOutputSize, XnUInt16 nLineSize,
 									   XnUInt32* pnActualRead, XnBool bLastPart);
 
-#endif //_XN_UNCOMP_H_
+#endif // UNCOMP_H

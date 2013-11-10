@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKOUTPUTDATAENDPOINT_H__
-#define __XNLINKOUTPUTDATAENDPOINT_H__
+#ifndef XNLINKOUTPUTDATAENDPOINT_H
+#define XNLINKOUTPUTDATAENDPOINT_H
 
 #include <XnPlatform.h>
 #include <XnStatus.h>
@@ -57,4 +57,4 @@ private:
 
 }
 
-#endif // __XNLINKOUTPUTDATAENDPOINT_H__
+#endif // XNLINKOUTPUTDATAENDPOINT_H

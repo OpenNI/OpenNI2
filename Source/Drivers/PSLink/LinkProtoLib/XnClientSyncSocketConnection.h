@@ -18,6 +18,9 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef XNCLIENTSYNCSOCKETCONNECTION_H
+#define XNCLIENTSYNCSOCKETCONNECTION_H
+
 #include "XnSyncSocketConnection.h"
 
 namespace xn
@@ -29,3 +32,5 @@ class ClientSyncSocketConnection : public SyncSocketConnection
 };
 
 }
+
+#endif // XNCLIENTSYNCSOCKETCONNECTION_H

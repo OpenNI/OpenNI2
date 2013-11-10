@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _OPENNI_H_
-#define _OPENNI_H_
+#ifndef OPENNI_H
+#define OPENNI_H
 
 #include "OniPlatform.h"
 #include "OniProperties.h"
@@ -2762,4 +2762,4 @@ void Device::close()
 
 }
 
-#endif // _OPEN_NI_HPP_
+#endif // OPENNI_H

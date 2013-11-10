@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_C_ENUMS_H_
-#define _ONI_C_ENUMS_H_
+#ifndef ONICENUMS_H
+#define ONICENUMS_H
 
 /** Possible failure values */
 typedef enum
@@ -81,4 +81,4 @@ enum
 	ONI_TIMEOUT_FOREVER = -1,
 };
 
-#endif // _ONI_C_ENUMS_H_
+#endif // ONICENUMS_H

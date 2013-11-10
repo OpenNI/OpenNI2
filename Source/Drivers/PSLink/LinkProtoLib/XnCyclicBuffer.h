@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNCYCLICBUFFER_H__
-#define __XNCYCLICBUFFER_H__
+#ifndef XNCYCLICBUFFER_H
+#define XNCYCLICBUFFER_H
 
 #include <XnOS.h>
 
@@ -140,4 +140,4 @@ private:
 
 }
 
-#endif // __XNCYCLICBUFFER_H__
+#endif // XNCYCLICBUFFER_H

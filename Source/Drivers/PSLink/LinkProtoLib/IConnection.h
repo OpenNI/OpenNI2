@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __ICONNECTION_H__
-#define __ICONNECTION_H__
+#ifndef ICONNECTION_H
+#define ICONNECTION_H
 
 #include <XnStatus.h>
 
@@ -37,4 +37,4 @@ public:
 
 }
 
-#endif // __ICONNECTION_H__
+#endif // ICONNECTION_H

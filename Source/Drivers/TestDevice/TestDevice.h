@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _TEST_DEVICE_H_
-#define _TEST_DEVICE_H_
+#ifndef TESTDEVICE_H
+#define TESTDEVICE_H
 
 #include <Driver\OniDriverAPI.h>
 #include "TestStream.h"
@@ -48,4 +48,4 @@ private:
 	oni::driver::DriverServices& m_driverServices;
 };
 
-#endif //_TEST_DEVICE_H_
+#endif // TESTDEVICE_H

@@ -19,8 +19,8 @@
 *                                                                            *
 *****************************************************************************/
 
-#ifndef _XNSERVERSOCKETINCONNECTION_H_
-#define _XNSERVERSOCKETINCONNECTION_H_
+#ifndef XNSERVERSOCKETINCONNECTION_H
+#define XNSERVERSOCKETINCONNECTION_H
 
 #include "XnSocketInConnection.h"
 
@@ -41,4 +41,4 @@ protected:
 }
 
 
-#endif
+#endif // XNSERVERSOCKETINCONNECTION_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_IMPL_STREAM_H_
-#define _ONI_IMPL_STREAM_H_
+#ifndef ONISTREAM_H
+#define ONISTREAM_H
 
 #include "OniDriverHandler.h"
 #include "OniCommon.h"
@@ -155,4 +155,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // _ONI_IMPL_STREAM_H_
+#endif // ONISTREAM_H

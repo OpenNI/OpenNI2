@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef OPENNI_ONIRECORDER_H_
-#define OPENNI_ONIRECORDER_H_ 1
+#ifndef ONIRECORDER_H
+#define ONIRECORDER_H 1
 
 #include "OniStream.h"
 
@@ -107,4 +107,4 @@ protected:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // OPENNI_ONIRECORDER_H_
+#endif // ONIRECORDER_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __ISYNCIOCONNECTION_H__
-#define __ISYNCIOCONNECTION_H__
+#ifndef ISYNCIOCONNECTION_H
+#define ISYNCIOCONNECTION_H
 
 #include <XnPlatform.h>
 #include <XnStatus.h>
@@ -55,4 +55,4 @@ public:
 
 }
 
-#endif // __ISYNCIOCONNECTION_H__
+#endif // ISYNCIOCONNECTION_H

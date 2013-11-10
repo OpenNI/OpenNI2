@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PROPERTY_SET_H__
-#define __XN_PROPERTY_SET_H__
+#ifndef XNPROPERTYSET_H
+#define XNPROPERTYSET_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -247,4 +247,4 @@ XnStatus XnPropertySetEnumeratorGetStringValue(const XnPropertySetEnumerator* pE
 */
 XnStatus XnPropertySetEnumeratorGetGeneralValue(const XnPropertySetEnumerator* pEnumerator, OniGeneralBuffer* pgbValue);
 
-#endif //__XN_PROPERTY_SET_H__
+#endif // XNPROPERTYSET_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINKPROTOLIBVERSION_H__
-#define __LINKPROTOLIBVERSION_H__
+#ifndef LINKPROTOLIBVERSION_H
+#define LINKPROTOLIBVERSION_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -42,4 +42,4 @@
 	LINK_PROTO_LIB_BRIEF_VERSION_STRING  "-" \
 	XN_PLATFORM_STRING " (" XN_TIMESTAMP ")"
 
-#endif // __LINKPROTOLIBVERSION_H__
+#endif // LINKPROTOLIBVERSION_H

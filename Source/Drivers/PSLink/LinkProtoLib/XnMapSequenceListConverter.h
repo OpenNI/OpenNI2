@@ -20,8 +20,8 @@
 *****************************************************************************/
 // XnMapSequenceListConverter.h
 
-#ifndef _XNMAPSEQUENCELISTCONVERTER_H_
-#define _XNMAPSEQUENCELISTCONVERTER_H_
+#ifndef XNMAPSEQUENCELISTCONVERTER_H
+#define XNMAPSEQUENCELISTCONVERTER_H
 
 
 namespace xn
@@ -223,4 +223,4 @@ public:
 
 }
 
-#endif 
+#endif // XNMAPSEQUENCELISTCONVERTER_H

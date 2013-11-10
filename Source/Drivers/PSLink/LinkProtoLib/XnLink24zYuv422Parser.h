@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_LINK_24Z_YUV422_PARSER_H_
-#define _XN_LINK_24Z_YUV422_PARSER_H_
+#ifndef XNLINK24ZYUV422PARSER_H
+#define XNLINK24ZYUV422PARSER_H
 
 #include "XnLinkMsgParser.h"
 
@@ -61,4 +61,4 @@ private:
 }
 
 
-#endif //_XN_LINK_24Z_YUV422_PARSER_H_
+#endif // XNLINK24ZYUV422PARSER_H

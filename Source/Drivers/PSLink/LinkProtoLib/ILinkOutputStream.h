@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __ILINKOUTPUTSTREAM_H__
-#define __ILINKOUTPUTSTREAM_H__
+#ifndef ILINKOUTPUTSTREAM_H
+#define ILINKOUTPUTSTREAM_H
 
 #include "XnLinkProtoLibDefs.h"
 #include "XnLinkProtoUtils.h"
@@ -57,4 +57,4 @@ public:
 
 }
 
-#endif // __ILINKOUTPUTSTREAM_H__
+#endif // ILINKOUTPUTSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_AUDIO_STREAM_H__
-#define __XN_AUDIO_STREAM_H__
+#ifndef XNAUDIOSTREAM_H
+#define XNAUDIOSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -80,4 +80,4 @@ private:
 	XnUInt32 m_nMaxNumberOfChannels;
 };
 
-#endif //__XN_AUDIO_STREAM_H__
+#endif // XNAUDIOSTREAM_H

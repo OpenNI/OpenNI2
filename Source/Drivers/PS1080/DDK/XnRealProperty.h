@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_REAL_PROPERTY_H__
-#define __XN_REAL_PROPERTY_H__
+#ifndef XNREALPROPERTY_H
+#define XNREALPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -82,4 +82,4 @@ protected:
 	virtual XnBool ConvertValueToString(XnChar* csValue, const void* pValue) const;
 };
 
-#endif //__XN_REAL_PROPERTY_H__
+#endif // XNREALPROPERTY_H

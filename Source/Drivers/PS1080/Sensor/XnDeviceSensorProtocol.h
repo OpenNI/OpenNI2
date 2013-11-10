@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICESENSORPROTOCOL_H_
-#define _XN_DEVICESENSORPROTOCOL_H_
+#ifndef XNDEVICESENSORPROTOCOL_H
+#define XNDEVICESENSORPROTOCOL_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -131,4 +131,4 @@ XnStatus XnDeviceSensorProtocolUpdateImageProcessor(XnDevicePrivateData* pDevice
 
 XN_THREAD_PROC XnDeviceSensorProtocolScriptThread(XN_THREAD_PARAM pThreadParam);
 
-#endif //_XN_DEVICESENSORPROTOCOL_H_
+#endif // XNDEVICESENSORPROTOCOL_H

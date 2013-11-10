@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _PS1080_H_
-#define _PS1080_H_
+#ifndef PS1080_H
+#define PS1080_H
 
 #include <OniCTypes.h>
 
@@ -635,4 +635,4 @@ typedef struct XnBist
 
 #pragma pack (pop)
 
-#endif //_PS1080_H_
+#endif // PS1080_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICESENSOR_H_
-#define _XN_DEVICESENSOR_H_
+#ifndef XNDEVICESENSOR_H
+#define XNDEVICESENSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -501,4 +501,4 @@ typedef struct XnAudioSharedBuffer
 
 XnStatus XnDeviceSensorSetParam(XnDevicePrivateData* pDevicePrivateData, const XnChar* cpParamName, const XnInt32 nValue);
 
-#endif 	
+#endif // XNDEVICESENSOR_H

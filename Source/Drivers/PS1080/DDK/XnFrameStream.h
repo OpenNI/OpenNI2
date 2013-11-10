@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FRAME_STREAM_H__
-#define __XN_FRAME_STREAM_H__
+#ifndef XNFRAMESTREAM_H
+#define XNFRAMESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -90,4 +90,4 @@ private:
 	XnActualIntProperty m_FPS;
 };
 
-#endif //__XN_FRAME_STREAM_H__
+#endif // XNFRAMESTREAM_H

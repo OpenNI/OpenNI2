@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _KINECT_PROPERTIES_H_
-#define _KINECT_PROPERTIES_H_
+#ifndef KINECTPROPERTIES_H
+#define KINECTPROPERTIES_H
 
 #include <OniCTypes.h>
 
@@ -101,4 +101,4 @@ typedef struct
 	float z;
 } KinectVector3f;
 
-#endif // _KINECT_PROPERTIES_H_
+#endif // KINECTPROPERTIES_H

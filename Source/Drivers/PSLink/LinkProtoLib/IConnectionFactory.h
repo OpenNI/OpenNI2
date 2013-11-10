@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __ICONNECTIONFACTORY_H__
-#define __ICONNECTIONFACTORY_H__
+#ifndef ICONNECTIONFACTORY_H
+#define ICONNECTIONFACTORY_H
 
 #include <XnStatus.h>
 #include <XnPlatform.h>
@@ -51,4 +51,4 @@ public:
 
 }
 
-#endif // __ICONNECTIONFACTORY_H__
+#endif // ICONNECTIONFACTORY_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_DEVICE_H__
-#define __XN_ONI_DEVICE_H__
+#ifndef XNONIDEVICE_H
+#define XNONIDEVICE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -85,4 +85,4 @@ private:
 	XnOniDriver* m_pDriver;
 };
 
-#endif // __XN_ONI_DEVICE_H__
+#endif // XNONIDEVICE_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _JAVASOFT_JNI_MD_H_
-#define _JAVASOFT_JNI_MD_H_
+#ifndef JNI_MD_H
+#define JNI_MD_H
 
 #include "XnPlatform.h"
 
@@ -31,4 +31,4 @@ typedef XnInt32 jint;
 typedef XnInt64 jlong;
 typedef XnInt8 jbyte;
 
-#endif /* !_JAVASOFT_JNI_MD_H_ */
+#endif // JNI_MD_H

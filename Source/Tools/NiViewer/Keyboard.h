@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __KEYBOARD_H__
-#define __KEYBOARD_H__
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 // --------------------------------
 // Defines
@@ -58,4 +58,4 @@ bool isInKeyboardInputMode();
 const char* getCurrentKeyboardInputMessage();
 
 
-#endif //__KEYBOARD_H__
+#endif // KEYBOARD_H

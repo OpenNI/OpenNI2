@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKDEFS_H__
-#define __XNLINKDEFS_H__
+#ifndef XNLINKDEFS_H
+#define XNLINKDEFS_H
 
 /* Version */
 #define XN_LINK_PROTOCOL_MAJOR_VERSION				0
@@ -484,4 +484,4 @@ typedef enum XnLinkBootErrorCode
     XN_LINK_BOOT_FW_LOAD_FAILED                 = 0x0003,
 } XnLinkBootErrorCode;
 
-#endif // __XNLINKDEFS_H__
+#endif // XNLINKDEFS_H

@@ -22,6 +22,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by OpenNI.rc
 //
+#ifndef RESOURCE_OPENNI_H
+#define RESOURCE_OPENNI_H
+
 #define IDI_MAINICON                    110
 
 // Next default values for new objects
@@ -34,3 +37,5 @@
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
+
+#endif // RESOURCE_OPENNI_H

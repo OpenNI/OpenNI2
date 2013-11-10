@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_FPS_H__
-#define __XN_SENSOR_FPS_H__
+#ifndef XNSENSORFPS_H
+#define XNSENSORFPS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -55,4 +55,4 @@ private:
 	XnDumpFile* m_FramesDump;
 };
 
-#endif //__XN_SENSOR_FPS_H__
+#endif // XNSENSORFPS_H

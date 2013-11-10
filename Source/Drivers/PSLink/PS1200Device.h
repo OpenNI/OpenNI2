@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PS1200DEVICE_H__
-#define __PS1200DEVICE_H__
+#ifndef PS1200DEVICE_H
+#define PS1200DEVICE_H
 
 #include "PrimeClient.h"
 #include <XnUSB.h>
@@ -70,4 +70,4 @@ private:
 
 }
 
-#endif // __PS1200DEVICE_H__
+#endif // PS1200DEVICE_H

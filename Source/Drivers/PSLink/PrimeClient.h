@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PRIMECLIENT_H__
-#define __PRIMECLIENT_H__
+#ifndef PRIMECLIENT_H
+#define PRIMECLIENT_H
 
 #include "XnLinkProtoLibDefs.h"
 #include "XnLinkControlEndpoint.h"
@@ -159,4 +159,4 @@ private:
 
 }
 
-#endif // __PRIMECLIENT_H__
+#endif // PRIMECLIENT_H

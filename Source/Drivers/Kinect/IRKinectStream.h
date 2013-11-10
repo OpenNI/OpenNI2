@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _IR_KINECT_STREAM_H_
-#define _IR_KINECT_STREAM_H_
+#ifndef IRKINECTSTREAM_H
+#define IRKINECTSTREAM_H
 
 #include "BaseKinectStream.h"
 
@@ -38,4 +38,4 @@ public:
 
 };
 } // namespace kinect_device
-#endif //_IR_KINECT_STREAM_H_
+#endif // IRKINECTSTREAM_H

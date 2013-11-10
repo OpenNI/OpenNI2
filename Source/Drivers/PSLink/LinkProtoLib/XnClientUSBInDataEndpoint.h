@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNUSBINDATAENDPOINT_H__
-#define __XNUSBINDATAENDPOINT_H__
+#ifndef XNCLIENTUSBINDATAENDPOINT_H
+#define XNCLIENTUSBINDATAENDPOINT_H
 
 #include "IAsyncInputConnection.h"
 #include <XnUSB.h>
@@ -74,4 +74,4 @@ private:
 
 }
 
-#endif // __XNUSBINDATAENDPOINT_H__
+#endif // XNCLIENTUSBINDATAENDPOINT_H

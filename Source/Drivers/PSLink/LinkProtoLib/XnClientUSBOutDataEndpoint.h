@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNUSBOUTDATAENDPOINT_H__
-#define __XNUSBOUTDATAENDPOINT_H__
+#ifndef XNCLIENTUSBOUTDATAENDPOINT_H
+#define XNCLIENTUSBOUTDATAENDPOINT_H
 
 #include "IOutputConnection.h"
 #include <XnUSB.h>
@@ -60,4 +60,4 @@ private:
 
 }
 
-#endif // __XNUSBOUTDATAENDPOINT_H__
+#endif // XNCLIENTUSBOUTDATAENDPOINT_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ACTUAL_REAL_PROPERTY_H__
-#define __XN_ACTUAL_REAL_PROPERTY_H__
+#ifndef XNACTUALREALPROPERTY_H
+#define XNACTUALREALPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -65,4 +65,4 @@ private:
 	XnDouble m_dValue;
 };
 
-#endif //__XN_ACTUAL_REAL_PROPERTY_H__
+#endif // XNACTUALREALPROPERTY_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PLAYER_TYPES_H__
-#define __XN_PLAYER_TYPES_H__
+#ifndef XNPLAYERTYPES_H
+#define XNPLAYERTYPES_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -362,4 +362,4 @@ typedef struct XnNodeNotifications
 
 } XnNodeNotifications;
 
-#endif //__XN_PLAYER_TYPES_H__
+#endif // XNPLAYERTYPES_H

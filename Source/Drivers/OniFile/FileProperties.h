@@ -18,11 +18,11 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __FILE_PROPERTIES_H__
-#define __FILE_PROPERTIES_H__
+#ifndef FILEPROPERTIES_H
+#define FILEPROPERTIES_H
 
 enum {
 	ONI_FILE_PROPERTY_ORIGINAL_DEVICE = 0x00010001
 };
 
-#endif // __FILE_PROPERTIES_H__
+#endif // FILEPROPERTIES_H

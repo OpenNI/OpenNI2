@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _KINECT_STREAM_IMPL_H_
-#define _KINECT_STREAM_IMPL_H_
+#ifndef KINECTSTREAMIMPL_H
+#define KINECTSTREAMIMPL_H
 
 #include "BaseKinectStream.h"
 #include <Shlobj.h>
@@ -229,4 +229,4 @@ struct FrameCopier {
 
 } // namespace kinect_device
 
-#endif //_KINECT_STREAM_IMPL_H_
+#endif // KINECTSTREAMIMPL_H

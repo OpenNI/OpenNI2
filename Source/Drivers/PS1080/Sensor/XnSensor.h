@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_H__
-#define __XN_SENSOR_H__
+#ifndef XNSENSOR_H
+#define XNSENSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -307,4 +307,4 @@ private:
 	XnChar m_strGlobalConfigFile[XN_FILE_MAX_PATH];
 };
 
-#endif //__XN_SENSOR_H__
+#endif // XNSENSOR_H

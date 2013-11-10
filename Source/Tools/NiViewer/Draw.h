@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __DRAW_H__
-#define __DRAW_H__
+#ifndef DRAW_H
+#define DRAW_H
 
 // --------------------------------
 // Includes
@@ -103,4 +103,4 @@ void setColorDrawing(int nColoring);
 void setErrorState(const char* strFormat, ...);
 void resetIRHistogram(int /*dummy*/);
 
-#endif //__DRAW_H__
+#endif // DRAW_H

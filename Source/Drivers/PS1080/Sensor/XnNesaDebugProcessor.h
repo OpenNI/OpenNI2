@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_NESA_DEBUG_PROCESSOR_H__
-#define __XN_NESA_DEBUG_PROCESSOR_H__
+#ifndef XNNESADEBUGPROCESSOR_H
+#define XNNESADEBUGPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -49,4 +49,4 @@ private:
 	XnDumpFile* m_Dump;
 };
 
-#endif //__XN_NESA_DEBUG_PROCESSOR_H__
+#endif // XNNESADEBUGPROCESSOR_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _BASE_KINECT_STREAM_H_
-#define _BASE_KINECT_STREAM_H_
+#ifndef BASEKINECTSTREAM_H
+#define BASEKINECTSTREAM_H
 
 #include "Driver\OniDriverAPI.h"
 #include "XnLib.h"
@@ -94,4 +94,4 @@ private:
 		return ONI_STATUS_ERROR; \
 	}
 
-#endif //_BASE_KINECT_STREAM_H_
+#endif // BASEKINECTSTREAM_H

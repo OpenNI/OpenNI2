@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __SYNCSOCKETCONNECTION_H__
-#define __SYNCSOCKETCONNECTION_H__
+#ifndef XNSYNCSOCKETCONNECTION_H
+#define XNSYNCSOCKETCONNECTION_H
 
 #include "ISyncIOConnection.h"
 #include "XnLinkProtoLibDefs.h"
@@ -67,4 +67,4 @@ protected:
 
 }
 
-#endif // __SYNCSOCKETCONNECTION_H__
+#endif // XNSYNCSOCKETCONNECTION_H

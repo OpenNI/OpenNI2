@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_AUDIO_STREAM_H__
-#define __XN_SENSOR_AUDIO_STREAM_H__
+#ifndef XNSENSORAUDIOSTREAM_H
+#define XNSENSORAUDIOSTREAM_H
 
 #if 0 // Audio support
 
@@ -119,4 +119,4 @@ private:
 };
 
 #endif // Audio support
-#endif //__XN_SENSOR_AUDIO_STREAM_H__
+#endif // XNSENSORAUDIOSTREAM_H

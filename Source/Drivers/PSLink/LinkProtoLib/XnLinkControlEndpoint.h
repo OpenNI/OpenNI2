@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKCONTROLENDPOINT_H__
-#define __XNLINKCONTROLENDPOINT_H__
+#ifndef XNLINKCONTROLENDPOINT_H
+#define XNLINKCONTROLENDPOINT_H
 
 #include "ISyncIOConnection.h"
 #include "XnLinkMsgEncoder.h"
@@ -196,4 +196,4 @@ private:
 };
 
 }
-#endif // __XNLINKCONTROLENDPOINT_H__
+#endif // XNLINKCONTROLENDPOINT_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_FIRMWARE_H__
-#define __XN_SENSOR_FIRMWARE_H__
+#ifndef XNSENSORFIRMWARE_H
+#define XNSENSORFIRMWARE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -56,4 +56,4 @@ private:
 	XnDevicePrivateData* m_pDevicePrivateData;
 };
 
-#endif //__XN_SENSOR_FIRMWARE_H__
+#endif // XNSENSORFIRMWARE_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKPROTOLIBDEFS_H__
-#define __XNLINKPROTOLIBDEFS_H__
+#ifndef XNLINKPROTOLIBDEFS_H
+#define XNLINKPROTOLIBDEFS_H
 
 #include <XnPlatform.h>
 #include <XnLinkDefs.h>
@@ -86,4 +86,4 @@ typedef struct XnComponentVersion
 	XnChar m_strVersion[XN_MAX_VERSION_LENGTH];
 } XnComponentVersion;
 
-#endif // __XNLINKPROTOLIBDEFS_H__
+#endif // XNLINKPROTOLIBDEFS_H

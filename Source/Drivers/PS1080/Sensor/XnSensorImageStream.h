@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_IMAGE_STREAM_H__
-#define __XN_SENSOR_IMAGE_STREAM_H__
+#ifndef XNSENSORIMAGESTREAM_H
+#define XNSENSORIMAGESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -159,4 +159,4 @@ private:
 	XnActualRealProperty m_VerticalFOV;
 };
 
-#endif //__XN_SENSOR_IMAGE_STREAM_H__
+#endif // XNSENSORIMAGESTREAM_H

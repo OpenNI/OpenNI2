@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_JPEG_CODEC_H__
-#define __XN_JPEG_CODEC_H__
+#ifndef XNJPEGCODEC_H
+#define XNJPEGCODEC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -96,4 +96,4 @@ private:
 	XnStreamUncompJPEGContext *mp_UncompJPEGContext;
 };
 
-#endif //__XN_JPEG_CODEC_H__
+#endif // XNJPEGCODEC_H

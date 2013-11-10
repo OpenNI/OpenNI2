@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_GENERAL_DEBUG_PROCESSOR_H__
-#define __XN_GENERAL_DEBUG_PROCESSOR_H__
+#ifndef XNGENERALDEBUGPROCESSOR_H
+#define XNGENERALDEBUGPROCESSOR_H
 
 #include "XnDataProcessor.h"
 
@@ -36,4 +36,4 @@ private:
 	XnDumpFile* m_pDump;
 };
 
-#endif // __XN_GENERAL_DEBUG_PROCESSOR_H__
+#endif // XNGENERALDEBUGPROCESSOR_H

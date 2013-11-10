@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XNLINK6BITPARSER_H_
-#define _XNLINK6BITPARSER_H_
+#ifndef XNLINK6BITPARSER_H
+#define XNLINK6BITPARSER_H
 
 #include "XnLinkMsgParser.h"
 
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif // _XNLINK6BITPARSER_H_
+#endif // XNLINK6BITPARSER_H

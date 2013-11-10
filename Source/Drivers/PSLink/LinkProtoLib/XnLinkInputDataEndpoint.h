@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKINPUTDATAENDPOINT_H__
-#define __XNLINKINPUTDATAENDPOINT_H__
+#ifndef XNLINKINPUTDATAENDPOINT_H
+#define XNLINKINPUTDATAENDPOINT_H
 
 #include "IAsyncInputConnection.h"
 #include "IConnection.h"
@@ -75,4 +75,4 @@ private:
 
 }
 
-#endif // __XNLINKINPUTDATAENDPOINT_H__
+#endif // XNLINKINPUTDATAENDPOINT_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKPROTOUTILS_H__
-#define __XNLINKPROTOUTILS_H__
+#ifndef XNLINKPROTOUTILS_H
+#define XNLINKPROTOUTILS_H
 
 #include "XnLinkDefs.h"
 #include "XnLinkProto.h"
@@ -177,4 +177,4 @@ void xnLinkParseBootStatus(XnBootStatus& bootStatus, const XnLinkBootStatus& lin
 XnUInt32 xnLinkGetPixelSizeByStreamType(XnLinkStreamType streamType);
 
 void xnLinkVideoModeToString(XnFwStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize);
-#endif // __XNLINKPROTOUTILS_H__
+#endif // XNLINKPROTOUTILS_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PROPERTY_SET_INTERNAL_H__
-#define __XN_PROPERTY_SET_INTERNAL_H__
+#ifndef XNPROPERTYSETINTERNAL_H
+#define XNPROPERTYSETINTERNAL_H
 
 #include <XnPropertySet.h>
 #include "XnActualPropertiesHash.h"
@@ -55,4 +55,4 @@ XnStatus XnPropertySetDataAttachModule(XnPropertySetData* pSetData, const XnChar
 XnStatus XnPropertySetDataDetachModule(XnPropertySetData* pSetData, const XnChar* strModuleName, XnActualPropertiesHash** ppModule);
 XnStatus XnPropertySetCloneModule(const XnPropertySet* pSource, XnPropertySet* pDest, const XnChar* strModule, const XnChar* strNewName);
 
-#endif //__XN_PROPERTY_SET_INTERNAL_H__
+#endif // XNPROPERTYSETINTERNAL_H

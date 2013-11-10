@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _DEPTH_UTILS_H_
-#define _DEPTH_UTILS_H_
+#ifndef DEPTHUTILS_H
+#define DEPTHUTILS_H
 
 #include "OniCTypes.h"
 
@@ -114,4 +114,4 @@ extern "C"
 	int DepthUtilsSetColorResolution(DepthUtilsHandle handle, int xres, int yres);
 }
 
-#endif // _DEPTH_UTILS_H_
+#endif // DEPTHUTILS_H

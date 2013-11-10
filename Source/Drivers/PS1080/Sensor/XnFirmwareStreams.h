@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FIRMWARE_STREAMS_H__
-#define __XN_FIRMWARE_STREAMS_H__
+#ifndef XNFIRMWARESTREAMS_H
+#define XNFIRMWARESTREAMS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -83,4 +83,4 @@ private:
 	XnDataProcessorHolder m_GeneralDebugProcessor2;
 };
 
-#endif //__XN_FIRMWARE_STREAMS_H__
+#endif // XNFIRMWARESTREAMS_H

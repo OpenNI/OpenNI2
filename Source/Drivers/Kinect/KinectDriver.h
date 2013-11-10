@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _KINECT_DRIVER_H_
-#define _KINECT_DRIVER_H_
+#ifndef KINECTDRIVER_H
+#define KINECTDRIVER_H
 
 #include "Driver\OniDriverAPI.h"
 #include "XnHash.h"
@@ -53,4 +53,4 @@ private:
 	xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*> m_devices;
 };
 } // namespace kinect_device
-#endif //_KINECT_DRIVER_H_
+#endif // KINECTDRIVER_H

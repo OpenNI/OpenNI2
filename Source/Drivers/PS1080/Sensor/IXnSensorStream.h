@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __I_XN_SENSOR_STREAM_H__
-#define __I_XN_SENSOR_STREAM_H__
+#ifndef IXNSENSORSTREAM_H
+#define IXNSENSORSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -48,4 +48,4 @@ public:
 	virtual XnStatus MapPropertiesToFirmware() = 0;
 };
 
-#endif //__I_XN_SENSOR_STREAM_H__
+#endif // IXNSENSORSTREAM_H

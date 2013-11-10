@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_TEST_H_
-#define _ONI_TEST_H_
+#ifndef ONITEST_H
+#define ONITEST_H
 
 #define TEST_DEVICE_NAME "Test" // use with device.open() to create a test device
 
@@ -37,4 +37,4 @@ typedef struct TestCommandIssueFrame
 	void* data;
 } TestCommandIssueFrame;
 
-#endif //_ONI_TEST_H_
+#endif // ONITEST_H

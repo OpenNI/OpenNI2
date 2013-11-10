@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_STREAM_FORMATS_H__
-#define __XN_STREAM_FORMATS_H__
+#ifndef XNSTREAMFORMATS_H
+#define XNSTREAMFORMATS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -47,4 +47,4 @@ typedef enum
 	XN_COMPRESSION_10BIT_PACKED = 5,
 } XnCompressionFormats;
 
-#endif //__XN_STREAM_FORMATS_H__
+#endif // XNSTREAMFORMATS_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PLAYER_PROPERTIES_H__
-#define __PLAYER_PROPERTIES_H__
+#ifndef PLAYERPROPERTIES_H
+#define PLAYERPROPERTIES_H
 
 #include <XnHash.h>
 #include <XnOSCpp.h>
@@ -128,4 +128,4 @@ private:
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_PROPERTIES_H__
+#endif // PLAYERPROPERTIES_H

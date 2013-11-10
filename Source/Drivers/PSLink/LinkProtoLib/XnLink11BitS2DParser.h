@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINK11BITS2DPARSER_H__
-#define __XNLINK11BITS2DPARSER_H__
+#ifndef XNLINK11BITS2DPARSER_H
+#define XNLINK11BITS2DPARSER_H
 
 #include "XnLinkMsgParser.h"
 #include "XnShiftToDepth.h"
@@ -48,4 +48,4 @@ private:
 
 }
 
-#endif // __XNLINK11BITS2DPARSER_H__
+#endif // XNLINK11BITS2DPARSER_H

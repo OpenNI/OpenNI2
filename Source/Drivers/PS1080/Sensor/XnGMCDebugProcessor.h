@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_GMC_DEBUG_PROCESSOR_H__
-#define __XN_GMC_DEBUG_PROCESSOR_H__
+#ifndef XNGMCDEBUGPROCESSOR_H
+#define XNGMCDEBUGPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -51,4 +51,4 @@ private:
 	XnUInt32 m_nGMCTime;
 };
 
-#endif //__XN_GMC_DEBUG_PROCESSOR_H__
+#endif // XNGMCDEBUGPROCESSOR_H

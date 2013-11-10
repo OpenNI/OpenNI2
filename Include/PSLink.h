@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PRIME_CLIENT_PROPS_H__
-#define __XN_PRIME_CLIENT_PROPS_H__
+#ifndef PSLINK_H
+#define PSLINK_H
 
 #include <PrimeSense.h>
 
@@ -236,4 +236,4 @@ typedef struct XnCommandSetProjectorPulse
 
 #pragma pack (pop)
 
-#endif //__XN_PRIME_CLIENT_PROPS_H__
+#endif // PSLINK_H

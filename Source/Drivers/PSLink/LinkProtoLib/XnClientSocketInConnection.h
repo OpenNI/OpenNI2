@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNCLIENTSOCKETINCONNECTION_H__
-#define __XNCLIENTSOCKETINCONNECTION_H__
+#ifndef XNCLIENTSOCKETINCONNECTION_H
+#define XNCLIENTSOCKETINCONNECTION_H
 
 #include "XnSocketInConnection.h"
 
@@ -37,4 +37,4 @@ protected:
 
 }
 
-#endif // __XNCLIENTSOCKETINCONNECTION_H__
+#endif // XNCLIENTSOCKETINCONNECTION_H

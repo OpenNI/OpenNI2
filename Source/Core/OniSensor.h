@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_SENSOR_H_
-#define _ONI_SENSOR_H_
+#ifndef ONISENSOR_H
+#define ONISENSOR_H
 
 #include "OniCommon.h"
 #include "OniFrameManager.h"
@@ -99,4 +99,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif //_ONI_SENSOR_H_
+#endif // ONISENSOR_H

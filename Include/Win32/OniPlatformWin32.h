@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_WIN32_H_
-#define _ONI_PLATFORM_WIN32_H_
+#ifndef ONIPLATFORMWIN32_H
+#define ONIPLATFORMWIN32_H
 
 //---------------------------------------------------------------------------
 // Prerequisites
@@ -136,4 +136,4 @@ typedef unsigned __int64 uint64_t;
 	#define ONI_API_DEPRECATED(msg) __declspec(deprecated(msg))
 #endif
 
-#endif //_ONI_PLATFORM_WIN32_H_
+#endif // ONIPLATFORMWIN32_H

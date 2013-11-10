@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DDK_H_
-#define _XN_DDK_H_
+#ifndef XNDDK_H
+#define XNDDK_H
 
 #include <XnPlatform.h>
 #include <XnStatus.h>
@@ -50,4 +50,4 @@ XnResolutions XnDDKGetResolutionFromXY(XnUInt32 nXRes, XnUInt32 nYRes);
 XnBool XnDDKGetXYFromResolution(XnResolutions res, XnUInt32* pnXRes, XnUInt32* pnYRes);
 const XnChar*  XnDDKGetResolutionName(XnResolutions res);
 
-#endif //_XN_DDK_H_
+#endif // XNDDK_H

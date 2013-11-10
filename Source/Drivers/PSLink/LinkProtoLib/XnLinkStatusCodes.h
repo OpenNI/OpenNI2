@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKSTATUSCODES_H__
-#define __XNLINKSTATUSCODES_H__
+#ifndef XNLINKSTATUSCODES_H
+#define XNLINKSTATUSCODES_H
 
 #include <XnStatus.h>
 #include "XnLinkProtoLibDefs.h"
@@ -135,4 +135,4 @@ XN_STATUS_MESSAGE(XN_STATUS_LINK_BAD_PROP_SIZE, "Bad property size")
 
 XN_PS_STATUS_MESSAGE_MAP_END(XN_ERROR_GROUP_LINKPROTOLIB)
 
-#endif // __XNEESTATUSCODES_H__
+#endif // XNLINKSTATUSCODES_H

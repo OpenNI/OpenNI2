@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _TEST_DRIVER_H_
-#define _TEST_DRIVER_H_
+#ifndef TESTDRIVER_H
+#define TESTDRIVER_H
 
 #include <Driver\OniDriverAPI.h>
 #include <XnLib.h>
@@ -41,5 +41,5 @@ protected:
 	xnl::Hash<OniDeviceInfo*, oni::driver::DeviceBase*> m_devices;
 };
 
-#endif //_TEST_DRIVER_H_
+#endif // TESTDRIVER_H
 

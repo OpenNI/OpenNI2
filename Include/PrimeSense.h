@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _PRIME_SENSE_H_
-#define _PRIME_SENSE_H_
+#ifndef PRIMESENSE_H
+#define PRIMESENSE_H
 
 #include <OniCTypes.h>
 
@@ -257,4 +257,4 @@ typedef struct XnCommandDebugData
 
 #pragma pack (pop)
 
-#endif //_PRIME_SENSE_H_
+#endif // PRIMESENSE_H

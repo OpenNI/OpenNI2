@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_UNCOMPRESSED_DEPTH_PROCESSOR_H__
-#define __XN_UNCOMPRESSED_DEPTH_PROCESSOR_H__
+#ifndef XNUNCOMPRESSEDDEPTHPROCESSOR_H
+#define XNUNCOMPRESSEDDEPTHPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -43,4 +43,4 @@ protected:
 	virtual void ProcessFramePacketChunk(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData, XnUInt32 nDataOffset, XnUInt32 nDataSize);
 };
 
-#endif //__XN_UNCOMPRESSED_DEPTH_PROCESSOR_H__
+#endif // XNUNCOMPRESSEDDEPTHPROCESSOR_H

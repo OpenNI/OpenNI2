@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_CORE_H_
-#define _XN_CORE_H_
+#ifndef XNCORE_H
+#define XNCORE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -104,4 +104,4 @@ XnUInt32	XnGetVersion(void);
  */
 const XnChar*	XnGetVersionString(void);
 
-#endif //_XN_CORE_H_
+#endif // XNCORE_H

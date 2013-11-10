@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKINPUTSTREAM_H__
-#define __XNLINKINPUTSTREAM_H__
+#ifndef XNLINKINPUTSTREAM_H
+#define XNLINKINPUTSTREAM_H
 
 #include "XnBitSet.h"
 #include "XnLinkProtoLibDefs.h"
@@ -93,4 +93,4 @@ protected:
 
 }
 
-#endif // __XNLINKINPUTSTREAM_H__
+#endif // XNLINKINPUTSTREAM_H

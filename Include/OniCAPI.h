@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_C_API_H_
-#define _ONI_C_API_H_
+#ifndef ONICAPI_H
+#define ONICAPI_H
 
 #include "OniPlatform.h"
 #include "OniCTypes.h"
@@ -256,4 +256,4 @@ ONI_C_API OniStatus oniSetLogFileOutput(OniBool bFileOutput);
  */
 ONI_C_API OniStatus oniSetLogAndroidOutput(OniBool bAndroidOutput);
 #endif
-#endif // _ONI_C_API_H_
+#endif // ONICAPI_H

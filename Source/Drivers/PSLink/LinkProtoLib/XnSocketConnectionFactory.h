@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __SOCKETCONNECTIONFACTORY_H__
-#define __SOCKETCONNECTIONFACTORY_H__
+#ifndef XNSOCKETCONNECTIONFACTORY_H
+#define XNSOCKETCONNECTIONFACTORY_H
 
 #include "IConnectionFactory.h"
 #include "XnSyncSocketConnection.h"
@@ -94,5 +94,5 @@ private:
 
 }
 
-#endif // __SOCKETCONNECTIONFACTORY_H__
+#endif // XNSOCKETCONNECTIONFACTORY_H
 

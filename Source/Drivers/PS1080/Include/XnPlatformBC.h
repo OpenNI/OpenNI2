@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PS_PLATFORM_H__
-#define __XN_PS_PLATFORM_H__
+#ifndef XNPLATFORMBC_H
+#define XNPLATFORMBC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,4 +52,4 @@ _XN_DEPRECATED_TYPE(XnUInt, XN_ULONG)
 XN_API_DEPRECATED("Please use OniDepthPixel instead") typedef XnUInt16 XN_DEPTH_TYPE; 
 XN_API_DEPRECATED("Please use XnRGB24Pixel instead") typedef XnUChar XN_IMAGE_TYPE; 
 
-#endif // __XN_PS_PLATFORM_H__
+#endif // XNPLATFORMBC_H

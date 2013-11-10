@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_CODEC_BASE_H__
-#define __XN_CODEC_BASE_H__
+#ifndef XNCODECBASE_H
+#define XNCODECBASE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -83,4 +83,4 @@ protected:
 	virtual XnStatus DecompressImpl(const XnUChar* pCompressedData, XnUInt32 nCompressedDataSize, XnUChar* pData, XnUInt32* pnDataSize) = 0;
 };
 
-#endif // __XN_CODEC_BASE_H__
+#endif // XNCODECBASE_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ACTUAL_GENERAL_PROPERTY_H__
-#define __XN_ACTUAL_GENERAL_PROPERTY_H__
+#ifndef XNACTUALGENERALPROPERTY_H
+#define XNACTUALGENERALPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -78,4 +78,4 @@ private:
 	XnBool m_bOwner;
 };
 
-#endif //__XN_ACTUAL_GENERAL_PROPERTY_H__
+#endif // XNACTUALGENERALPROPERTY_H

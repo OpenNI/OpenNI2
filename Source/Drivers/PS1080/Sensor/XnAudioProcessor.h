@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_AUDIO_PROCESSOR_H__
-#define __XN_AUDIO_PROCESSOR_H__
+#ifndef XNAUDIOPROCESSOR_H
+#define XNAUDIOPROCESSOR_H
 
 #if 0 // Audio support
 
@@ -70,4 +70,4 @@ private:
 };
 
 #endif // Audio support
-#endif //__XN_AUDIO_PROCESSOR_H__
+#endif // XNAUDIOPROCESSOR_H

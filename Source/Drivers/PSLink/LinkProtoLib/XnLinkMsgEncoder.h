@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKENCODEDDATAUNIT_H__
-#define __XNLINKENCODEDDATAUNIT_H__
+#ifndef XNLINKMSGENCODER_H
+#define XNLINKMSGENCODER_H
 
 #include "XnLinkDefs.h"
 #include "XnLinkProto.h"
@@ -80,4 +80,4 @@ private:
 }
 
 
-#endif // __XNLINKENCODEDDATAUNIT_H__
+#endif // XNLINKMSGENCODER_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_FIXED_PARAMS_H__
-#define __XN_SENSOR_FIXED_PARAMS_H__
+#ifndef XNSENSORFIXEDPARAMS_H
+#define XNSENSORFIXEDPARAMS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -84,4 +84,4 @@ private:
 	XnChar m_strPlatformString[XN_DEVICE_MAX_STRING_LENGTH];
 };
 
-#endif //__XN_SENSOR_FIXED_PARAMS_H__
+#endif // XNSENSORFIXEDPARAMS_H

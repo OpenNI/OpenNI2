@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _COLOR_KINECT_STREAM_H_
-#define _COLOR_KINECT_STREAM_H_
+#ifndef COLORKINECTSTREAM_H
+#define COLORKINECTSTREAM_H
 
 #include "BaseKinectStream.h"
 
@@ -48,4 +48,4 @@ private:
 };
 } // namespace kinect_device
 
-#endif //_COLOR_KINECT_STREAM_H_
+#endif // COLORKINECTSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_16Z_EMB_TABLES_CODEC_H__
-#define __XN_16Z_EMB_TABLES_CODEC_H__
+#ifndef XN16ZEMBTABLESCODEC_H
+#define XN16ZEMBTABLESCODEC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -58,4 +58,4 @@ private:
 	XnUInt16 m_nMaxValue;
 };
 
-#endif //__XN_16Z_EMB_TABLES_CODEC_H__
+#endif // XN16ZEMBTABLESCODEC_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __DATA_RECORDS_H__
-#define __DATA_RECORDS_H__
+#ifndef DATARECORDS_H
+#define DATARECORDS_H
 
 #include "XnPlatform.h"
 #include "XnStatus.h"
@@ -386,4 +386,4 @@ public:
 };
 #pragma pack(pop)
 
-#endif //__DATA_RECORDS_H__
+#endif // DATARECORDS_H

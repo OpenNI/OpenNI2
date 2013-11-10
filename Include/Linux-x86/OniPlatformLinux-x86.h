@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_LINUX_X86_H_
-#define _ONI_PLATFORM_LINUX_X86_H_
+#ifndef ONIPLATFORMLINUX_X86_H
+#define ONIPLATFORMLINUX_X86_H
 
 //---------------------------------------------------------------------------
 // Prerequisites
@@ -98,5 +98,5 @@
 /** Indicates a deprecated function */
 #define ONI_API_DEPRECATED(msg) __attribute__((warning("This function is deprecated: " msg)))
 
-#endif //_ONI_PLATFORM_LINUX_X86_H_
+#endif // ONIPLATFORMLINUX_X86_H
 

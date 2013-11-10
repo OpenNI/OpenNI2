@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _DEPTH_KINECT_STREAM_H_
-#define _DEPTH_KINECT_STREAM_H_
+#ifndef DEPTHKINECTSTREAM_H
+#define DEPTHKINECTSTREAM_H
 
 #include "BaseKinectStream.h"
 #include "XnArray.h"
@@ -55,4 +55,4 @@ private:
 	OniStatus getNearMode(OniBool* pValue);
 };
 } // namespace kinect_device
-#endif //_DEPTH_KINECT_STREAM_H_
+#endif // DEPTHKINECTSTREAM_H

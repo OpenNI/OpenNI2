@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEVICE_PROXY_H__
-#define __XN_DEVICE_PROXY_H__
+#ifndef XNDEVICEPROXY_H
+#define XNDEVICEPROXY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -95,4 +95,4 @@ XN_DDK_API XnStatus XnDeviceProxyDestroyStreamOutputByName(const XnChar* csDevic
 */
 XN_DDK_API XnStatus XnDeviceProxyGetDeviceName(XnDeviceHandle DeviceHandle, XnChar* csDeviceName);
 
-#endif //__XN_DEVICE_PROXY_H__
+#endif // XNDEVICEPROXY_H

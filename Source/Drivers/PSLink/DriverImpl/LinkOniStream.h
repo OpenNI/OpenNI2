@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_STREAM_H__
-#define __LINK_ONI_STREAM_H__
+#ifndef LINKONISTREAM_H
+#define LINKONISTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -81,4 +81,4 @@ private:
 	static void XN_CALLBACK_TYPE OnNewStreamDataEventHandler(const xn::NewFrameEventArgs& args, void* pCookie);
 };
 
-#endif // __LINK_ONI_STREAM_H__
+#endif // LINKONISTREAM_H

@@ -18,6 +18,9 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef ONIVERSION_H
+#define ONIVERSION_H
+
 #include "OniPlatform.h"
 
 #define ONI_VERSION_MAJOR	2
@@ -41,3 +44,5 @@
 #define ONI_VERSION_STRING \
 	ONI_BRIEF_VERSION_STRING  "-" \
 	ONI_PLATFORM_STRING " (" ONI_TIMESTAMP ")"
+
+#endif // ONIVERSION_H

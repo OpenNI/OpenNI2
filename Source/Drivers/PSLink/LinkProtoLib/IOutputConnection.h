@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __IOUTPUTCONNECTION_H__
-#define __IOUTPUTCONNECTION_H__
+#ifndef IOUTPUTCONNECTION_H
+#define IOUTPUTCONNECTION_H
 
 #include "IConnection.h"
 
@@ -42,4 +42,4 @@ public:
 
 }
 
-#endif // __IOUTPUTCONNECTION_H__
+#endif // IOUTPUTCONNECTION_H

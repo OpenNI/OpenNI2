@@ -22,8 +22,8 @@
 /// Contains the declaration of Stream class that implements a stream from 
 /// a virtual OpenNI device.
 
-#ifndef __PLAYER_STREAM_H__
-#define __PLAYER_STREAM_H__
+#ifndef PLAYERSTREAM_H
+#define PLAYERSTREAM_H
 
 #include "Driver/OniDriverAPI.h"
 #include "PlayerProperties.h"
@@ -141,4 +141,4 @@ private:
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_STREAM_H__
+#endif // PLAYERSTREAM_H

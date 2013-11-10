@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNSERVERUSBLINUXOUTDATAENDPOINT_H__
-#define __XNSERVERUSBLINUXOUTDATAENDPOINT_H__
+#ifndef XNSERVERUSBLINUXOUTDATAENDPOINT_H
+#define XNSERVERUSBLINUXOUTDATAENDPOINT_H
 
 #include "IOutputConnection.h"
 
@@ -50,4 +50,4 @@ private:
 
 }
 
-#endif // __XNSERVERUSBLINUXOUTDATAENDPOINT_H__
+#endif // XNSERVERUSBLINUXOUTDATAENDPOINT_H

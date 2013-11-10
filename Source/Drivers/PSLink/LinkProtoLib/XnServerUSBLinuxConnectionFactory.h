@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNSERVERLINUXUSBCONNECTIONFACTORY_H__
-#define __XNSERVERLINUXUSBCONNECTIONFACTORY_H__
+#ifndef XNSERVERUSBLINUXCONNECTIONFACTORY_H
+#define XNSERVERUSBLINUXCONNECTIONFACTORY_H
 
 #include "IConnectionFactory.h"
 #include "XnServerUSBLinuxControlEndpoint.h"
@@ -57,4 +57,4 @@ private:
 
 }
 
-#endif // __XNSERVERLINUXUSBCONNECTIONFACTORY_H__
+#endif // XNSERVERUSBLINUXCONNECTIONFACTORY_H

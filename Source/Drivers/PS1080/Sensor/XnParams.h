@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef XN_PARAMS_H
-#define XN_PARAMS_H
+#ifndef XNPARAMS_H
+#define XNPARAMS_H
 
 typedef enum 
 {
@@ -132,4 +132,4 @@ typedef enum XnExecuter
 	XN_EXECUTER_HOST = 2,
 } XnExecuter;
 
-#endif
+#endif // XNPARAMS_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_LINK_YUV_422_TO_RGB_888_PARSER_H_
-#define _XN_LINK_YUV_422_TO_RGB_888_PARSER_H_
+#ifndef XNLINKYUV422TORGB888PARSER_H
+#define XNLINKYUV422TORGB888PARSER_H
 
 #include "XnLinkMsgParser.h"
 
@@ -43,4 +43,4 @@ protected:
 
 }
 
-#endif //_XN_LINK_YUV_422_TO_RGB_888_PARSER_H_
+#endif // XNLINKYUV422TORGB888PARSER_H

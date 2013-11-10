@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FIRMWARE_TYPES_H__
-#define __XN_FIRMWARE_TYPES_H__
+#ifndef XNFIRMWARETYPES_H
+#define XNFIRMWARETYPES_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -35,4 +35,4 @@ typedef struct
 	XnUInt32 nTimeInMicroSeconds;
 } XnTaskCPUInfo;
 
-#endif //__XN_FIRMWARE_TYPES_H__
+#endif // XNFIRMWARETYPES_H

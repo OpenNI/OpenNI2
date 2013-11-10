@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_STREAM_PARAMS_H_
-#define _XN_STREAM_PARAMS_H_
+#ifndef XNSTREAMPARAMS_H
+#define XNSTREAMPARAMS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -263,4 +263,4 @@ typedef struct XnCmosPreset
 
 #pragma pack (pop)
 
-#endif // _XN_STREAM_PARAMS_H_
+#endif // XNSTREAMPARAMS_H

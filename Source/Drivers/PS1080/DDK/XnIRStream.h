@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IR_STREAM_H__
-#define __XN_IR_STREAM_H__
+#ifndef XNIRSTREAM_H
+#define XNIRSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -56,4 +56,4 @@ private:
     XnActualIntProperty m_DeviceMaxIR;
 };
 
-#endif //__XN_IR_STREAM_H__
+#endif // XNIRSTREAM_H

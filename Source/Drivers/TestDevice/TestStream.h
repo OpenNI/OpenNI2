@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _TEST_STREAM_H_
-#define _TEST_STREAM_H_
+#ifndef TESTSTREAM_H
+#define TESTSTREAM_H
 
 #include <Driver\OniDriverAPI.h>
 #include <XnLib.h>
@@ -57,4 +57,4 @@ protected:
 	xnl::OSEvent m_osEvent;
 };
 
-#endif //_TEST_STREAM_H_
+#endif // TESTSTREAM_H

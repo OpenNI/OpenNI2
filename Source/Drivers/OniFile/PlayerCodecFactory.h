@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PLAYER_CODEC_FACTORY_H__
-#define __PLAYER_CODEC_FACTORY_H__
+#ifndef PLAYERCODECFACTORY_H
+#define PLAYERCODECFACTORY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -41,4 +41,4 @@ public:
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_CODEC_FACTORY_H__
+#endif // PLAYERCODECFACTORY_H

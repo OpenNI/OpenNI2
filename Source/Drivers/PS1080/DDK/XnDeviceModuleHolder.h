@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEVICE_MODULE_HOLDER_H__
-#define __XN_DEVICE_MODULE_HOLDER_H__
+#ifndef XNDEVICEMODULEHOLDER_H
+#define XNDEVICEMODULEHOLDER_H
 
 #include "XnActualPropertiesHash.h"
 #include "XnDeviceModule.h"
@@ -51,4 +51,4 @@ private:
 typedef xnl::List<XnDeviceModuleHolder*> XnDeviceModuleHolderList;
 
 
-#endif //__XN_DEVICE_MODULE_HOLDER_H__
+#endif // XNDEVICEMODULEHOLDER_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_IMPL_FRAME_HOLDER_H_
-#define _ONI_IMPL_FRAME_HOLDER_H_
+#ifndef ONIFRAMEHOLDER_H
+#define ONIFRAMEHOLDER_H
 
 #include "OniCommon.h"
 #include "OniFrameManager.h"
@@ -83,4 +83,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // _ONI_IMPL_FRAME_HOLDER_H_
+#endif // ONIFRAMEHOLDER_H

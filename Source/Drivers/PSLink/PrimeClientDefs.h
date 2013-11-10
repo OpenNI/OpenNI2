@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PRIMECLIENTDEFS_H__
-#define __PRIMECLIENTDEFS_H__
+#ifndef PRIMECLIENTDEFS_H
+#define PRIMECLIENTDEFS_H
 
 #ifdef PRIMECLIENT_EXPORTS
 #define XN_PRIME_CLIENT_CPP_API XN_API_EXPORT
@@ -57,4 +57,4 @@
 	else if (dataSize == 1) dest = (int)*(int8_t*)data;		\
 	else return ONI_STATUS_BAD_PARAMETER;
 
-#endif // __PRIMECLIENTDEFS_H__
+#endif // PRIMECLIENTDEFS_H

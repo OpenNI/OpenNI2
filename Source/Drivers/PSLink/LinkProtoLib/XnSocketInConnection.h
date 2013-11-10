@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNSOCKETINCONNECTION_H__
-#define __XNSOCKETINCONNECTION_H__
+#ifndef XNSOCKETINCONNECTION_H
+#define XNSOCKETINCONNECTION_H
 
 #include "IAsyncInputConnection.h"
 #include "XnLinkProtoLibDefs.h"
@@ -72,4 +72,4 @@ protected:
 
 }
 
-#endif // __XNSOCKETINCONNECTION_H__
+#endif // XNSOCKETINCONNECTION_H

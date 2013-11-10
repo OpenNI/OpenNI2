@@ -18,6 +18,9 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef XNLINK16ZPARSER_H
+#define XNLINK16ZPARSER_H
+
 #include "XnLinkMsgParser.h"
 
 struct XnShiftToDepthTables;
@@ -62,3 +65,5 @@ private:
 };
 
 }
+
+#endif // XNLINK16ZPARSER_H

@@ -18,6 +18,9 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef ONICONTEXT_H
+#define ONICONTEXT_H
+
 #include "OniStream.h"
 #include "OniDevice.h"
 #include "OniSyncedStreamsFrameHolder.h"
@@ -154,3 +157,5 @@ private:
 };
 
 ONI_NAMESPACE_IMPLEMENTATION_END
+
+#endif // ONICONTEXT_H

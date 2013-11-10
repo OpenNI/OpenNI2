@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_8Z_CODEC_H__
-#define __XN_8Z_CODEC_H__
+#ifndef XN8ZCODEC_H
+#define XN8ZCODEC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -51,4 +51,4 @@ protected:
 	}
 };
 
-#endif //__XN_8Z_CODEC_H__
+#endif // XN8ZCODEC_H

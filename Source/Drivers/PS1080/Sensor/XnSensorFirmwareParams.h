@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_FIRMWARE_PARAMS_H__
-#define __XN_SENSOR_FIRMWARE_PARAMS_H__
+#ifndef XNSENSORFIRMWAREPARAMS_H
+#define XNSENSORFIRMWAREPARAMS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -159,4 +159,4 @@ private:
 	XnPropertyToValueHash m_Transaction; // maps a property to its new value
 };
 
-#endif //__XN_SENSOR_FIRMWARE_PARAMS_H__
+#endif // XNSENSORFIRMWAREPARAMS_H

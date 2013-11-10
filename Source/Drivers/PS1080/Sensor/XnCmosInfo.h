@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_CMOS_INFO_H__
-#define __XN_CMOS_INFO_H__
+#ifndef XNCMOSINFO_H
+#define XNCMOSINFO_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -57,4 +57,4 @@ private:
 	XnCmosBlankingCoefficients* m_pCurrCmosBlankingInfo[XN_CMOS_COUNT];
 };
 
-#endif //__XN_CMOS_INFO_H__
+#endif // XNCMOSINFO_H

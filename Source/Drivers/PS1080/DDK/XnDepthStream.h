@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEPTH_STREAM_H__
-#define __XN_DEPTH_STREAM_H__
+#ifndef XNDEPTHSTREAM_H
+#define XNDEPTHSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -116,4 +116,4 @@ private:
 	XnShiftToDepthStreamHelper m_S2DHelper;
 };
 
-#endif //__XN_DEPTH_STREAM_H__
+#endif // XNDEPTHSTREAM_H

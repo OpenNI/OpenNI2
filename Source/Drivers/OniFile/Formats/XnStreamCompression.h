@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_STREAMCOMPRESSION_H_
-#define _XN_STREAMCOMPRESSION_H_
+#ifndef XNSTREAMCOMPRESSION_H
+#define XNSTREAMCOMPRESSION_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -42,4 +42,4 @@ XnStatus XnStreamCompressImage8Z(const XnUInt8* pInput, const XnUInt32 nInputSiz
 
 XnStatus XnStreamUncompressImage8Z(const XnUInt8* pInput, const XnUInt32 nInputSize, XnUInt8* pOutput, XnUInt32* pnOutputSize);
 
-#endif //_XN_STREAMCOMPRESSION_H_
+#endif // XNSTREAMCOMPRESSION_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKPROTO_H__
-#define __XNLINKPROTO_H__
+#ifndef XNLINKPROTO_H
+#define XNLINKPROTO_H
 
 #include <XnPlatform.h>
 #include "XnLinkDefs.h"
@@ -844,4 +844,4 @@ typedef struct XnLinkBootStatus
 #pragma pack (pop)
 #endif
 
-#endif // __XNLINKPROTO_H__
+#endif // XNLINKPROTO_H

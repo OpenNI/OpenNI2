@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNUSBCONNECTIONFACTORY_H__
-#define __XNUSBCONNECTIONFACTORY_H__
+#ifndef XNCLIENTUSBCONNECTIONFACTORY_H
+#define XNCLIENTUSBCONNECTIONFACTORY_H
 
 #include "IConnectionFactory.h"
 #include "XnLinkProtoLibDefs.h"
@@ -74,4 +74,4 @@ private:
 
 }
 
-#endif // __XNUSBCONNECTIONFACTORY_H__
+#endif // XNCLIENTUSBCONNECTIONFACTORY_H

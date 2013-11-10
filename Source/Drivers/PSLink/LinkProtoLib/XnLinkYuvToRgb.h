@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_LINK_YUV_TO_RGB_H_
-#define _XN_LINK_YUV_TO_RGB_H_
+#ifndef XNLINKYUVTORGB_H
+#define XNLINKYUVTORGB_H
 
 namespace xn
 {
@@ -37,4 +37,4 @@ public:
 
 }
 
-#endif //_XN_LINK_YUV_TO_RGB_H_
+#endif // XNLINKYUVTORGB_H

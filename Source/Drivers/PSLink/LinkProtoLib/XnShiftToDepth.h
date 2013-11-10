@@ -19,8 +19,8 @@
 *                                                                            *
 *****************************************************************************/
 
-#ifndef _XN_SHIFT_TO_DEPTH_H_
-#define _XN_SHIFT_TO_DEPTH_H_
+#ifndef XNSHIFTTODEPTH_H
+#define XNSHIFTTODEPTH_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -84,4 +84,4 @@ XnStatus XnShiftToDepthConvert(const XnShiftToDepthTables* pShiftToDepth,
 
 XnStatus XnShiftToDepthFree(XnShiftToDepthTables* pShiftToDepth);
 
-#endif //_XN_SHIFT_TO_DEPTH_H_
+#endif // XNSHIFTTODEPTH_H

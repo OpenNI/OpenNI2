@@ -20,8 +20,8 @@
 *****************************************************************************/
 // XnSyncServerSocketConnection.h
 
-#ifndef _XNSYNCSERVERSOCKETCONNECTION_H_
-#define _XNSYNCSERVERSOCKETCONNECTION_H_
+#ifndef XNSYNCSERVERSOCKETCONNECTION_H
+#define XNSYNCSERVERSOCKETCONNECTION_H
 
 #include "XnSyncSocketConnection.h"
 #include "XnStatusCodes.h"
@@ -119,4 +119,4 @@ protected:
 
 }
 
-#endif //_XNSYNCSERVERSOCKETCONNECTION_H_
+#endif // XNSYNCSERVERSOCKETCONNECTION_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IO_FILE_STREAM_H__
-#define __XN_IO_FILE_STREAM_H__
+#ifndef XNIOFILESTREAM_H
+#define XNIOFILESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -50,4 +50,4 @@ private:
 	XN_FILE_HANDLE m_hFile;
 };
 
-#endif //__XN_IO_FILE_STREAM_H__
+#endif // XNIOFILESTREAM_H

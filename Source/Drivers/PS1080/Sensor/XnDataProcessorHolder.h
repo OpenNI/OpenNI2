@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_STREAM_PROCESSOR_HOLDER_H__
-#define __XN_STREAM_PROCESSOR_HOLDER_H__
+#ifndef XNDATAPROCESSORHOLDER_H
+#define XNDATAPROCESSORHOLDER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -50,4 +50,4 @@ private:
 	XnDataProcessor* m_pProcessor;
 };
 
-#endif //__XN_STREAM_PROCESSOR_HOLDER_H__
+#endif // XNDATAPROCESSORHOLDER_H

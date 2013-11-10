@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XNLINKLOGPARSER_H_
-#define _XNLINKLOGPARSER_H_
+#ifndef XNLINKLOGPARSER_H
+#define XNLINKLOGPARSER_H
 
 #include "XnLinkMsgParser.h"
 #include <XnHash.h>
@@ -52,4 +52,4 @@ private:
 
 }
 
-#endif // _XNLINKLOGPARSER_H_
+#endif // XNLINKLOGPARSER_H

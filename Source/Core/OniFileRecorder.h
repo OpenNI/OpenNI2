@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef OPENNI_ONIFILERECORDER_H_
-#define OPENNI_ONIFILERECORDER_H_ 1
+#ifndef ONIFILERECORDER_H
+#define ONIFILERECORDER_H 1
 
 #include "XnString.h"
 #include "XnPriorityQueue.h"
@@ -186,4 +186,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // OPENNI_ONIFILERECORDER_H_
+#endif // ONIFILERECORDER_H

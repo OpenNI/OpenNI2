@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_MACOSX_H_
-#define _ONI_PLATFORM_MACOSX_H_
+#ifndef ONIPLATFORMMACOSX_H
+#define ONIPLATFORMMACOSX_H
 
 // Start with Linux-x86, and override what's different
 #include "../Linux-x86/OniPlatformLinux-x86.h"
@@ -54,4 +54,4 @@
 #undef ONI_THREAD_STATIC
 #define ONI_THREAD_STATIC 
  
-#endif //_ONI_PLATFORM_MACOSX_H_
+#endif // ONIPLATFORMMACOSX_H

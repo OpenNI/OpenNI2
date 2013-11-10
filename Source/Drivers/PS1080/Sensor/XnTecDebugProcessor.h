@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_TEC_DEBUG_PROCESSOR_H__
-#define __XN_TEC_DEBUG_PROCESSOR_H__
+#ifndef XNTECDEBUGPROCESSOR_H
+#define XNTECDEBUGPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -49,4 +49,4 @@ private:
 	XnDumpFile* m_Dump;
 };
 
-#endif //__XN_TEC_DEBUG_PROCESSOR_H__
+#endif // XNTECDEBUGPROCESSOR_H

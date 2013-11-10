@@ -22,8 +22,8 @@
 /// Contains the declaration of Device class that implements a virtual OpenNI
 /// device, capable of reading data from a *.ONI file.
 
-#ifndef __PLAYER_DEVICE_H__
-#define __PLAYER_DEVICE_H__
+#ifndef PLAYERDEVICE_H
+#define PLAYERDEVICE_H
 
 #include "Driver/OniDriverAPI.h"
 #include "XnString.h"
@@ -201,4 +201,4 @@ private:
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_DEVICE_H__
+#endif // PLAYERDEVICE_H

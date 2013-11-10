@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_JPEG_TO_RGB_IMAGE_PROCESSOR_H__
-#define __XN_JPEG_TO_RGB_IMAGE_PROCESSOR_H__
+#ifndef XNJPEGTORGBIMAGEPROCESSOR_H
+#define XNJPEGTORGBIMAGEPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -55,4 +55,4 @@ private:
 	XnStreamUncompJPEGContext* mp_JPEGContext;
 };
 
-#endif //__XN_JPEG_TO_RGB_IMAGE_PROCESSOR_H__
+#endif // XNJPEGTORGBIMAGEPROCESSOR_H

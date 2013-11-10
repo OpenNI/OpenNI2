@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_TYPES_H_
-#define _ONI_TYPES_H_
+#ifndef ONICTYPES_H
+#define ONICTYPES_H
 
 #include "OniPlatform.h"
 #include "OniCEnums.h"
@@ -208,4 +208,4 @@ typedef struct
 	OniStreamHandle stream;
 } OniSeek;
 
-#endif // _ONI_TYPES_H_
+#endif // ONICTYPES_H

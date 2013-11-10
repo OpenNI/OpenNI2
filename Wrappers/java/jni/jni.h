@@ -35,8 +35,8 @@
  * Copyright (c) 1996 Netscape Communications Corporation. All rights reserved.
  *****************************************************************************/
 
-#ifndef _JAVASOFT_JNI_H_
-#define _JAVASOFT_JNI_H_
+#ifndef JNI_H
+#define JNI_H
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -1958,7 +1958,7 @@ JNI_OnUnload(JavaVM *vm, void *reserved);
 } /* extern "C" */
 #endif /* __cplusplus */
 
-#endif /* !_JAVASOFT_JNI_H_ */
+#endif // JNI_H
 
 
 

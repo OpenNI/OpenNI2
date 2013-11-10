@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XNLINKCONTINPUTSTREAM_H__
-#define __XNLINKCONTINPUTSTREAM_H__
+#ifndef XNLINKCONTINPUTSTREAM_H
+#define XNLINKCONTINPUTSTREAM_H
 
 #include "XnLinkMsgParser.h"
 #include "XnLinkInputStream.h"
@@ -96,4 +96,4 @@ private:
 
 }
 
-#endif // __XNLINKCONTINPUTSTREAM_H__
+#endif // XNLINKCONTINPUTSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_COMMON_H_
-#define _ONI_COMMON_H_
+#ifndef ONICOMMON_H
+#define ONICOMMON_H
 
 #define ONI_NAMESPACE_IMPLEMENTATION_BEGIN	namespace oni { namespace implementation {
 #define ONI_NAMESPACE_IMPLEMENTATION_END }}
@@ -29,4 +29,4 @@
 struct _OniFrameSync;
 typedef _OniFrameSync* OniFrameSyncHandle;
 
-#endif // _ONI_COMMON_H_
+#endif // ONICOMMON_H

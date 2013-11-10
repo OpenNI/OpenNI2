@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_FRAME_MANAGER_H_
-#define _ONI_FRAME_MANAGER_H_
+#ifndef ONIFRAMEMANAGER_H
+#define ONIFRAMEMANAGER_H
 
 #include <OniCTypes.h>
 #include "OniCommon.h"
@@ -57,4 +57,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif //_ONI_FRAME_MANAGER_H_
+#endif // ONIFRAMEMANAGER_H

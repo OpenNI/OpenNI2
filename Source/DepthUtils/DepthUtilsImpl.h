@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _DEPTH_UTILS_IMPL_H_
-#define _DEPTH_UTILS_IMPL_H_
+#ifndef DEPTHUTILSIMPL_H
+#define DEPTHUTILSIMPL_H
 
 #include <XnLib.h>
 #include "DepthUtils.h"
@@ -94,4 +94,4 @@ private:
 };
 
 
-#endif
+#endif // DEPTHUTILSIMPL_H
