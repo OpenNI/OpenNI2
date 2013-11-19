@@ -151,7 +151,13 @@ XnStatus Context::loadLibraries(const char* directoryName)
 	typedef XnChar FileName[XN_FILE_MAX_PATH];
 	FileName* acsFileList = NULL;
 
-#if (ONI_PLATFORM != ONI_PLATFORM_ANDROID_ARM)
+
+#if (ONI_PLATFORM == ONI_PLATFORM_MACOSX)
+    // Mac
+	nFileCount = 1;
+	acsFileList = XN_NEW_ARR(FileName, nFileCount);
+	strcpy(acsFileList[0], "libPS1080.dylib");
+#elif (ONI_PLATFORM != ONI_PLATFORM_ANDROID_ARM)
 	XnChar cpSearchString[XN_FILE_MAX_PATH] = "";
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "Looking for drivers in drivers repository '%s'", directoryName);
