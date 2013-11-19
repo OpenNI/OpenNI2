@@ -512,8 +512,6 @@
 		BE54733F175FD38000AC9FB1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE54733C175FD37E00AC9FB1 /* main.cpp */; };
 		BE547342175FD3AE00AC9FB1 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547341175FD3AD00AC9FB1 /* OpenGL.framework */; };
 		BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE547343175FD3C200AC9FB1 /* GLUT.framework */; };
-		BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
-		BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -596,7 +594,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				BE547346175FD45700AC9FB1 /* libusb-1.0.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -683,7 +680,6 @@
 		BE2A2F39174EED82006B0ADF /* XnUSB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XnUSB.h; path = ../ThirdParty/PSCommon/XnLib/Include/XnUSB.h; sourceTree = "<group>"; };
 		BE2A2F3A174EED82006B0ADF /* XnUSBDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XnUSBDevice.h; path = ../ThirdParty/PSCommon/XnLib/Include/XnUSBDevice.h; sourceTree = "<group>"; };
 		BE2A2F3B174EED82006B0ADF /* XnVector3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XnVector3D.h; path = ../ThirdParty/PSCommon/XnLib/Include/XnVector3D.h; sourceTree = "<group>"; };
-		BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libusb-1.0.0.dylib"; path = "../../OpenNI2-libs/libusb-1.0.0.dylib"; sourceTree = "<group>"; };
 		BE2A2F88174EEFBA006B0ADF /* OniCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OniCommon.h; sourceTree = "<group>"; };
 		BE2A2F89174EEFBA006B0ADF /* OniContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OniContext.cpp; sourceTree = "<group>"; };
 		BE2A2F8A174EEFBA006B0ADF /* OniContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OniContext.h; sourceTree = "<group>"; };
@@ -1054,7 +1050,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE547345175FD40200AC9FB1 /* libusb-1.0.0.dylib in Frameworks */,
 				BE547344175FD3C300AC9FB1 /* GLUT.framework in Frameworks */,
 				BE547342175FD3AE00AC9FB1 /* OpenGL.framework in Frameworks */,
 				BE547338175FD25B00AC9FB1 /* libOpenNI2.dylib in Frameworks */,
@@ -1086,7 +1081,6 @@
 				BE547340175FD39400AC9FB1 /* NiViewer */,
 				BE2A33CA174EF2CA006B0ADF /* LibJPEG */,
 				BE2A2F83174EEFBA006B0ADF /* Source */,
-				BE2A2F71174EEF10006B0ADF /* libusb-1.0.0.dylib */,
 				BE2A2F73174EEF35006B0ADF /* XnLib */,
 				BE2A2E97174EEBB6006B0ADF /* Products */,
 			);
