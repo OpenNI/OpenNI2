@@ -158,7 +158,7 @@ void SampleViewer::display()
 
 			for (int x = 0; x < width; ++x, ++pDepth, ++pTex)
 			{
-				if (*pDepth != 0)
+				if ((*pDepth != 0) && (*pDepth < 10000))
 				{
 					if (*pDepth == closest.Z)
 					{

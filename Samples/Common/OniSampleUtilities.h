@@ -93,7 +93,7 @@ void calculateHistogram(float* pHistogram, int histogramSize, const openni::Vide
 	{
 		for (int x = 0; x < width; ++x, ++pDepth)
 		{
-			if (*pDepth != 0)
+			if ((*pDepth != 0) && ((*pDepth) < histogramSize))
 			{
 				pHistogram[*pDepth]++;
 				nNumberOfPoints++;

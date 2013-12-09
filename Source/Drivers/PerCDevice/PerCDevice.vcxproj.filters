@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="PerCDepthStream.cpp" />
+    <ClCompile Include="PerCDevice.cpp" />
+    <ClCompile Include="PerCDeviceEnumerator.cpp" />
+    <ClCompile Include="PerCBaseStream.cpp" />
+    <ClCompile Include="PerCColorStream.cpp" />
+    <ClCompile Include="PerCDriver.cpp" />
+    <ClCompile Include="PerCIRStream.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PerCDepthStream.h" />
+    <ClInclude Include="PerCDevice.h" />
+    <ClInclude Include="PerCDeviceEnumerator.h" />
+    <ClInclude Include="PerCBaseStream.h" />
+    <ClInclude Include="PerCColorStream.h" />
+    <ClInclude Include="PerCDriver.h" />
+    <ClInclude Include="PerCIRStream.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\Resources\OpenNI.rc" />
+  </ItemGroup>
+</Project>
