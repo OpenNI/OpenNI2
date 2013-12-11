@@ -42,6 +42,7 @@ XnUInt16 XnDeviceEnumeration::ms_supportedProducts[] =
 	0x0500,
 	0x0600,
 	0x0601,
+    0x0609
 };
 XnUInt16 XnDeviceEnumeration::ms_supportedProductsKinect[] =
 {
