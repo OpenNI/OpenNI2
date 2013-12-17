@@ -152,8 +152,7 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	m_pSensorHandle->DepthConnection.bIsISO = FALSE;
 
 	xnLogVerbose(XN_MASK_DEVICE_IO, "Opening endpoint 0x81 for depth...");
-	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_ISOCHRONOUS, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
-	m_pSensorHandle->DepthConnection.bIsISO = TRUE;
+	nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
 	if (nRetVal == XN_STATUS_USB_ENDPOINT_NOT_FOUND)
 	{
 		bNewUSB = FALSE;
@@ -165,9 +164,9 @@ XnStatus XnSensorIO::OpenDataEndPoints(XnSensorUsbInterface nInterface, const Xn
 	{
 		if (nRetVal == XN_STATUS_USB_WRONG_ENDPOINT_TYPE)
 		{
-			nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_BULK, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
+			nRetVal = xnUSBOpenEndPoint(m_pSensorHandle->USBDevice, 0x81, XN_USB_EP_ISOCHRONOUS, XN_USB_DIRECTION_IN, &m_pSensorHandle->DepthConnection.UsbEp);
 
-			m_pSensorHandle->DepthConnection.bIsISO = FALSE;
+			m_pSensorHandle->DepthConnection.bIsISO = TRUE;
 		}
 
 		bNewUSB = TRUE;

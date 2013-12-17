@@ -48,7 +48,7 @@
 #else
 	// on weak platforms (Arm), we prefer to use BULK
 	// BULK seems to be more stable on linux
-	#define XN_SENSOR_DEFAULT_USB_INTERFACE				XN_SENSOR_USB_INTERFACE_DEFAULT
+	#define XN_SENSOR_DEFAULT_USB_INTERFACE				XN_SENSOR_USB_INTERFACE_BULK_ENDPOINTS
 #endif
 
 //---------------------------------------------------------------------------
