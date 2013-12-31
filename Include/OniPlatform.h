@@ -37,7 +37,7 @@
 #	include "Win32/OniPlatformWin32.h"
 #elif defined (ANDROID) && defined (__arm__)
 #	include "Android-Arm/OniPlatformAndroid-Arm.h"
-#elif (__linux__ && (i386 || __x86_64__))
+#elif (__linux__ && (__i386__ || __x86_64__))
 #	include "Linux-x86/OniPlatformLinux-x86.h"
 #elif (__linux__ && __arm__)
 #	include "Linux-Arm/OniPlatformLinux-Arm.h"
