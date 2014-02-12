@@ -118,7 +118,7 @@ OniStatus Context::initialize()
 	}
 
 	xnLogVerbose(XN_LOG_MASK_ALL, "Using '%s' as driver path", ONI_DEFAULT_DRIVERS_REPOSITORY);
-	// Use default path
+	
 	rc = loadLibraries(ONI_DEFAULT_DRIVERS_REPOSITORY);
 	if (rc != XN_STATUS_OK)
 	{

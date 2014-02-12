@@ -127,4 +127,9 @@ set_target_properties(PS1080
       DEBUG_POSTFIX ""
   )
 
-target_link_libraries(PS1080 JPEG usbx XnLib)
+if(WIN32)
+    target_link_libraries(PS1080 JPEG XnLib)
+elseif(APPLE)
+    target_link_libraries(PS1080 JPEG usbx XnLib)
+endif()
+
