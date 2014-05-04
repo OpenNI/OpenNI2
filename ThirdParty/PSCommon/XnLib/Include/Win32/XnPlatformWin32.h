@@ -47,6 +47,9 @@
 // Includes
 //---------------------------------------------------------------------------
 #include <windows.h>
+#if _MSC_VER >= 1800
+#include <versionhelpers.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
