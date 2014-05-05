@@ -2070,7 +2070,7 @@ XnStatus XnHostProtocolInitUpload(XnDevicePrivateData* pDevicePrivateData, XnUIn
 	XnHostProtocolInitHeader(pDevicePrivateData, buffer, nHeaderSize+nReadFromFile, pDevicePrivateData->FWInfo.nOpcodeInitFileUpload);
 
 	XnUInt16 nDataSize;
-	XnUInt32* pValue;
+	XnUInt32* pValue = 0;
 	
 	XnHostProtocolExecute(pDevicePrivateData, 
 						  buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + nHeaderSize + (XnUInt16)nReadFromFile,

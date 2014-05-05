@@ -142,6 +142,7 @@
       <AdditionalDependencies>Comdlg32.lib;OpenNI2.lib;XnLib.lib;glut32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\..\ThirdParty\GL</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\..\Include</AdditionalIncludeDirectories>

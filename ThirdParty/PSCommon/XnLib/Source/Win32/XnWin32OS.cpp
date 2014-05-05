@@ -64,27 +64,6 @@ static XnStatus GetOSName(xnOSInfo* pOSInfo)
 
 #else
 
-static XnStatus GetOSName(xnOSInfo* pOSInfo)
-{
-	// Get OS Info
-	OSVERSIONINFOEX osVersionInfo;
-	osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-	if (0 == GetVersionEx((LPOSVERSIONINFO)&osVersionInfo))
-	{
-		DWORD nErr = GetLastError();
-		xnLogWarning(XN_MASK_OS, "Failed getting OS version information. Error code: %d", nErr);
-		return XN_STATUS_ERROR;
-	}
-
-	sprintf(pOSInfo->csOSName, "%s", GetOSName(osVersionInfo));
-	if (osVersionInfo.szCSDVersion[0] != '\0')
-	{
-		strcat(pOSInfo->csOSName, " ");
-		strcat(pOSInfo->csOSName, osVersionInfo.szCSDVersion);
-	}
-}
-
 static const XnChar* GetOSName(OSVERSIONINFOEX& osVersionInfo)
 {
 	if (osVersionInfo.dwMajorVersion == 4)
@@ -188,6 +167,30 @@ static const XnChar* GetOSName(OSVERSIONINFOEX& osVersionInfo)
 
 	return "Unknown Windows Version";
 }
+
+static XnStatus GetOSName(xnOSInfo* pOSInfo)
+{
+	// Get OS Info
+	OSVERSIONINFOEX osVersionInfo;
+	osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+	if (0 == GetVersionEx((LPOSVERSIONINFO)&osVersionInfo))
+	{
+		DWORD nErr = GetLastError();
+		xnLogWarning(XN_MASK_OS, "Failed getting OS version information. Error code: %d", nErr);
+		return XN_STATUS_ERROR;
+	}
+
+	sprintf(pOSInfo->csOSName, "%s", GetOSName(osVersionInfo));
+	if (osVersionInfo.szCSDVersion[0] != '\0')
+	{
+		strcat(pOSInfo->csOSName, " ");
+		strcat(pOSInfo->csOSName, osVersionInfo.szCSDVersion);
+	}
+
+	return XN_STATUS_OK;
+}
+
 #endif
 
 static void GetCPUName(XnChar* csName)

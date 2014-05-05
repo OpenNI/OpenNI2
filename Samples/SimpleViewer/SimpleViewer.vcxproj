@@ -136,6 +136,7 @@
       <AdditionalDependencies>glut32.lib;OpenNI2.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\ThirdParty\GL</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

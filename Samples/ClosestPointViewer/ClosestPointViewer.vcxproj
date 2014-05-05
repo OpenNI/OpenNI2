@@ -142,6 +142,7 @@
       <AdditionalDependencies>glut32.lib;OpenNI2.lib;MWClosestPoint.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);..\..\ThirdParty\GL</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\..\Include</AdditionalIncludeDirectories>
