@@ -12,6 +12,7 @@
 #   make FORCE_BUILD_CLR=1
 #
 #############################################################################
+export ALLOW_WARNINGS = 1
 
 include ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
 
