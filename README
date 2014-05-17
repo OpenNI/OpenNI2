@@ -5,6 +5,13 @@ Website: http://structure.io/openni
 
 Building Prerequisites
 ======================
+
+OS X
+----
+- Libusb 1.0
+    First, install Homebrew: ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+    brew install libusb --universal
+
 Windows
 -------
 - Microsoft Visual Studio 2010
@@ -87,7 +94,7 @@ Building
 Building on Windows:
   Open the solution OpenNI.sln
   
-Building on Linux:
+Building on Linux / OS X:
   Run:
   $ make
 
