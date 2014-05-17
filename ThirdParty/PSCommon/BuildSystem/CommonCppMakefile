@@ -74,6 +74,9 @@ CFLAGS += -fPIC -fvisibility=hidden
 
 ifneq "$(ALLOW_WARNINGS)" "1"
 	CFLAGS += -Werror
+ifeq ("$(OSTYPE)","Darwin")
+	CFLAGS += -Wno-unused-private-field -Wno-unused-const-variable
+endif
 endif
 
 LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
