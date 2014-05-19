@@ -145,6 +145,7 @@ $(FINAL_DIR):
 
 $(CORE): $(XNLIB)
 
+Wrappers/java:                        Wrappers/java/jni
 Wrappers/java/jni:                    $(CORE)
 
 Source/Drivers/DummyDevice:           $(CORE)
