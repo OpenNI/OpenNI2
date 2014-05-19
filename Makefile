@@ -1,5 +1,4 @@
-#############################################################################
-# OpenNI makefile.
+# OpenNI 2 Makefile.
 # 
 # default configuration is Release. for a debug version use:
 # 	make CFG=Debug
@@ -7,13 +6,16 @@
 # default compiler is g++. for another one use:
 #   make CXX=<comp>
 #
-# By default, CLR projects will only be build if mono is installed.
-# To force CLR projects use:
-#   make FORCE_BUILD_CLR=1
-#
-#############################################################################
+# Java-dependent build rules are disabled by default. To enable them, use:
+#   make HAS_JAVA=1
+
+#-------------------------------------------------------------------------------
 
 include ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
+
+#-------------------------------------------------------------------------------
+
+# HAS_JAVA=0 # Uncomment this to force the value.
 
 MAJOR_VERSION = $(shell grep "define ONI_VERSION_MAJOR" Include/OniVersion.h | cut -f 2)
 MINOR_VERSION = $(shell grep "define ONI_VERSION_MINOR" Include/OniVersion.h | cut -f 2)
@@ -24,81 +26,95 @@ ifeq ("$(OSTYPE)","Darwin")
 else
 	OS_NAME = Linux
 endif
+
 PRODUCT_STRING = OpenNI-$(OS_NAME)-$(PLATFORM)-$(shell cd Packaging && python2 -c "import UpdateVersion; print UpdateVersion.getVersionName()" && cd ..)
+
 FINAL_DIR = Packaging/Final
 
-OPENNI = Source/Core
-XNLIB  = ThirdParty/PSCommon/XnLib/Source
+CORE = Source/Core
+XNLIB = ThirdParty/PSCommon/XnLib/Source
 DEPTH_UTILS = Source/DepthUtils
 
-# list all drivers
-ALL_DRIVERS = \
+#-------------------------------------------------------------------------------
+# C++ targets
+
+CXX_MAIN_SUBDIRS = \
+	$(CORE) \
+	ThirdParty/PSCommon/XnLib/Source \
+	Source/DepthUtils \
 	Source/Drivers/DummyDevice   \
 	Source/Drivers/PS1080 \
 	Source/Drivers/PSLink \
-	Source/Drivers/OniFile
-
-# list all wrappers
-ALL_WRAPPERS = \
-	Wrappers/java \
-	Wrappers/java/jni
-
-# list all tools
-ALL_TOOLS = \
+	Source/Drivers/OniFile \
 	Source/Drivers/PS1080/PS1080Console \
 	Source/Drivers/PSLink/PSLinkConsole
-	
-# list all core projects
-ALL_CORE_PROJS = \
-	$(XNLIB)  \
-	$(OPENNI) \
-	$(DEPTH_UTILS) \
-	$(ALL_DRIVERS) \
-	$(ALL_WRAPPERS) \
-	$(ALL_TOOLS)
 
-# list all samples
-CORE_SAMPLES = \
+CXX_SAMPLES_SUBDIRS = \
 	Samples/SimpleRead \
 	Samples/EventBasedRead \
 	Samples/MultipleStreamRead \
 	Samples/MWClosestPoint \
 	Samples/MWClosestPointApp 
 
-# list all java samples
-JAVA_SAMPLES = \
+#-------------------------------------------------------------------------------
+# Java targets
+
+JAVA_MAIN_SUBDIRS = \
+	Wrappers/java \
+	Wrappers/java/jni
+
+JAVA_SAMPLES_SUBDIRS = \
 	Samples/SimpleViewer.java	
 
+#-------------------------------------------------------------------------------
+# GLUT targets
+
 ifeq "$(GLUT_SUPPORTED)" "1"
-	ALL_TOOLS += \
+	CXX_MAIN_SUBDIRS += \
 		Source/Tools/NiViewer
 
-	CORE_SAMPLES += \
+	CXX_SAMPLES_SUBDIRS += \
 		Samples/SimpleViewer \
 		Samples/MultiDepthViewer \
 		Samples/ClosestPointViewer
-else
-	ifeq "$(GLES_SUPPORTED)" "1"
-		CORE_SAMPLES += 
-	endif
 endif
 
-ALL_SAMPLES = \
-	$(CORE_SAMPLES) \
-	$(JAVA_SAMPLES)
+#-------------------------------------------------------------------------------
+# Target groups
 
-# list all projects that are build
-ALL_BUILD_PROJS = \
-	$(ALL_CORE_PROJS) \
-	$(ALL_SAMPLES)
+ALL_CXX_SUBDIRS = \
+	$(CXX_MAIN_SUBDIRS) \
+	$(CXX_SAMPLES_SUBDIRS) \
 
-ALL_PROJS = \
-	$(ALL_BUILD_PROJS)
+ALL_JAVA_SUBDIRS = \
+	$(JAVA_MAIN_SUBDIRS) \
+	$(JAVA_SAMPLES_SUBDIRS)
 
-ALL_PROJS_CLEAN = $(foreach proj,$(ALL_PROJS),$(proj)-clean)
+ALL_MAIN_SUBDIRS = \
+	$(CXX_MAIN_SUBDIRS) \
+	$(JAVA_MAIN_SUBDIRS)
 
-# define a function which creates a target for each proj
-define CREATE_PROJ_TARGET
+ALL_SAMPLES_SUBDIRS = \
+	$(CXX_SAMPLES_SUBDIRS) \
+	$(JAVA_SAMPLES_SUBDIRS)
+
+ALL_SUBDIRS = \
+	$(ALL_MAIN_SUBDIRS) \
+	$(ALL_SAMPLES_SUBDIRS)
+
+# Add an unconditional shorthand for java targets
+java: $(ALL_JAVA_SUBDIRS)
+
+.PHONY: java
+
+#-------------------------------------------------------------------------------
+# Recursive make machinery
+
+# Compute the list of cleaning targets.
+CLEAN_SUBDIRS = $(foreach target,$(ALL_SUBDIRS),$(target)-clean)
+
+# Define a function for creating per-subdirectory target rules.
+define CREATE_SUBDIR
 $1: 
 	$$(MAKE) -C $1
 
@@ -106,55 +122,87 @@ $1-clean:
 	$$(MAKE) -C $1 clean
 endef
 
-################ TARGETS ##################
+# Create all per-subdirectory targets.
+$(foreach target,$(ALL_SUBDIRS),$(eval $(call CREATE_SUBDIR,$(target))))
 
-.PHONY: all $(ALL_PROJS) $(ALL_PROJS_CLEAN) install uninstall clean release
+# Declare all per-subdirectory rules as phony, so that they're always built.
+# See: http://www.gnu.org/software/make/manual/make.html#Recursion
+.PHONY: \
+	$(ALL_SUBDIRS) \
+	$(CLEAN_SUBDIRS)
 
-# make all makefiles
-all: $(ALL_PROJS)
+# Set 'all' as the default target, since it is not the first target defined in this Makefile.
+.DEFAULT_GOAL = all
 
-core: $(ALL_CORE_PROJS)
-
-samples: $(ALL_SAMPLES)
-
-# create projects targets
-$(foreach proj,$(ALL_PROJS),$(eval $(call CREATE_PROJ_TARGET,$(proj))))
-
-# additional dependencies
-$(OPENNI):                                      $(XNLIB)
-Wrappers/java/jni:                    $(OPENNI) $(XNLIB)
-
-Source/Drivers/DummyDevice:           $(OPENNI) $(XNLIB)
-Source/Drivers/RawDevice:             $(OPENNI) $(XNLIB)
-Source/Drivers/PS1080:                $(OPENNI) $(XNLIB) $(DEPTH_UTILS)
-Source/Drivers/PS1080/PS1080Console:  $(OPENNI) $(XNLIB)
-Source/Drivers/PSLink:                $(OPENNI) $(XNLIB)
-Source/Drivers/PSLink/PSLinkConsole:  $(OPENNI) $(XNLIB)
-Source/Drivers/OniFile:               $(OPENNI) $(XNLIB)
-
-Source/Tools/NiViewer:                $(OPENNI) $(XNLIB)
-
-Samples/SimpleRead:                   $(OPENNI)
-Samples/EventBasedRead:               $(OPENNI)
-Samples/MultipleStreamRead:           $(OPENNI)
-Samples/MWClosestPoint:               $(OPENNI)
-Samples/MWClosestPointApp:            $(OPENNI) Samples/MWClosestPoint
-
-Samples/SimpleViewer:                 $(OPENNI)
-Samples/MultiDepthViewer:             $(OPENNI)
-Samples/ClosestPointViewer:           $(OPENNI) Samples/MWClosestPoint
-Samples/SimpleViewer.java:            Wrappers/java
+#-------------------------------------------------------------------------------
+# Additional rules
 
 $(FINAL_DIR):
 	mkdir -p $(FINAL_DIR)
 
+#-------------------------------------------------------------------------------
+# Additional dependencies
+
+$(CORE): $(XNLIB)
+
+Wrappers/java/jni:                    $(CORE)
+
+Source/Drivers/DummyDevice:           $(CORE)
+Source/Drivers/RawDevice:             $(CORE)
+Source/Drivers/PS1080:                $(CORE) $(DEPTH_UTILS)
+Source/Drivers/PS1080/PS1080Console:  $(CORE)
+Source/Drivers/PSLink:                $(CORE)
+Source/Drivers/PSLink/PSLinkConsole:  $(CORE)
+Source/Drivers/OniFile:               $(CORE)
+
+Source/Tools/NiViewer:                $(CORE)
+
+Samples/SimpleRead:                   $(CORE)
+Samples/EventBasedRead:               $(CORE)
+Samples/MultipleStreamRead:           $(CORE)
+Samples/MWClosestPoint:               $(CORE)
+Samples/MWClosestPointApp:            $(CORE) Samples/MWClosestPoint
+
+Samples/SimpleViewer:                 $(CORE)
+Samples/MultiDepthViewer:             $(CORE)
+Samples/ClosestPointViewer:           $(CORE) Samples/MWClosestPoint
+Samples/SimpleViewer.java:            Wrappers/java
+
+#-------------------------------------------------------------------------------
+# Top-level targets
+
+MAIN_SUBDIRS = \
+	$(CXX_MAIN_SUBDIRS)
+
+SAMPLES_SUBDIRS = \
+	$(CXX_SAMPLES_SUBDIRS)
+
+# Add java targets to the default build, depending on the HAS_JAVA variable.
+ifeq ($(HAS_JAVA), 1)
+	MAIN_SUBDIRS += $(JAVA_MAIN_SUBDIRS)
+	SAMPLES_SUBDIRS += $(JAVA_SAMPLES_SUBDIRS)
+endif
+
+all: main samples
+
+main: $(MAIN_SUBDIRS)
+
+samples: $(SAMPLES_SUBDIRS)
+
 doc:
 	Source/Documentation/Runme.py
 	rm -f Source/Documentation/html/*.md5
-	
+
 release: | all doc $(FINAL_DIR)
 	Packaging/Harvest.py Packaging/$(PRODUCT_STRING) $(PLATFORM)
 	cd Packaging; tar -cjf Final/$(PRODUCT_STRING).tar.bz2 $(PRODUCT_STRING)
 
-# clean is cleaning all projects
-clean: $(ALL_PROJS_CLEAN)
+clean: $(CLEAN_SUBDIRS)
+
+.PHONY: \
+	all \
+	doc \
+	main \
+	samples \
+	release \
+	clean
