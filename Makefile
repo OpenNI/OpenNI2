@@ -1,9 +1,9 @@
-# OpenNI 2 Makefile.
+# OpenNI 2 Makefile
 # 
-# default configuration is Release. for a debug version use:
+# Default configuration is Release. for a debug version use:
 # 	make CFG=Debug
 #
-# default compiler is g++. for another one use:
+# Default compiler is g++. for another one use:
 #   make CXX=<comp>
 #
 # Java-dependent build rules are disabled by default. To enable them, use:
@@ -36,7 +36,7 @@ XNLIB = ThirdParty/PSCommon/XnLib/Source
 DEPTH_UTILS = Source/DepthUtils
 
 #-------------------------------------------------------------------------------
-# C++ targets
+# C++
 
 CXX_MAIN_SUBDIRS = \
 	$(CORE) \
@@ -57,7 +57,7 @@ CXX_SAMPLES_SUBDIRS = \
 	Samples/MWClosestPointApp 
 
 #-------------------------------------------------------------------------------
-# Java targets
+# Java
 
 JAVA_MAIN_SUBDIRS = \
 	Wrappers/java \
@@ -67,7 +67,7 @@ JAVA_SAMPLES_SUBDIRS = \
 	Samples/SimpleViewer.java	
 
 #-------------------------------------------------------------------------------
-# GLUT targets
+# GLUT
 
 ifeq "$(GLUT_SUPPORTED)" "1"
 	CXX_MAIN_SUBDIRS += \
@@ -141,7 +141,7 @@ $(FINAL_DIR):
 	mkdir -p $(FINAL_DIR)
 
 #-------------------------------------------------------------------------------
-# Additional dependencies
+# Target dependencies
 
 $(CORE): $(XNLIB)
 
@@ -162,11 +162,12 @@ Samples/SimpleRead:                   $(CORE)
 Samples/EventBasedRead:               $(CORE)
 Samples/MultipleStreamRead:           $(CORE)
 Samples/MWClosestPoint:               $(CORE)
-Samples/MWClosestPointApp:            $(CORE) Samples/MWClosestPoint
-
 Samples/SimpleViewer:                 $(CORE)
 Samples/MultiDepthViewer:             $(CORE)
+
+Samples/MWClosestPointApp:            $(CORE) Samples/MWClosestPoint
 Samples/ClosestPointViewer:           $(CORE) Samples/MWClosestPoint
+
 Samples/SimpleViewer.java:            Wrappers/java
 
 #-------------------------------------------------------------------------------
