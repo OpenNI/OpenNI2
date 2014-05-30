@@ -442,6 +442,10 @@ void DepthKinectStream::notifyAllProperties()
 	getProperty(XN_STREAM_PROPERTY_D2S_TABLE, nBuff, &size);
 	raisePropertyChanged(XN_STREAM_PROPERTY_D2S_TABLE, nBuff, size);
 
+	size = sizeof(PARAM_COEFF_VAL);
+	getProperty(XN_STREAM_PROPERTY_PARAM_COEFF, nBuff, &size);
+	raisePropertyChanged(XN_STREAM_PROPERTY_PARAM_COEFF, nBuff, size);
+
 	// Is this really necessary to save? Just in case.
 	OniBool nearMode;
 	size = sizeof(nearMode);
