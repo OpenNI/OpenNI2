@@ -28,15 +28,16 @@
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-XnJpegToRGBImageProcessor::XnJpegToRGBImageProcessor(XnSensorImageStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager) :
-	XnImageProcessor(pStream, pHelper, pBufferManager)
+XnJpegToRGBImageProcessor::XnJpegToRGBImageProcessor(XnSensorImageStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager)
+: XnImageProcessor(pStream, pHelper, pBufferManager)
+, mp_JPEGContext(NULL)
 {
 	SetAllowDoubleSOFPackets(TRUE);
 }
 
 XnJpegToRGBImageProcessor::~XnJpegToRGBImageProcessor()
 {
-	XnStreamFreeUncompressImageJ(mp_JPEGContext);
+    XnStreamFreeUncompressImageJ(&mp_JPEGContext);
 }
 
 XnStatus XnJpegToRGBImageProcessor::Init()
@@ -88,7 +89,7 @@ void XnJpegToRGBImageProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeade
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
 
 	XnUInt32 nOutputSize = pWriteBuffer->GetMaxSize();
-	XnStatus nRetVal = XnStreamUncompressImageJ(mp_JPEGContext, m_RawData.GetData(), m_RawData.GetSize(), pWriteBuffer->GetUnsafeWritePointer(), &nOutputSize);
+    XnStatus nRetVal = XnStreamUncompressImageJ(&mp_JPEGContext, m_RawData.GetData(), m_RawData.GetSize(), pWriteBuffer->GetUnsafeWritePointer(), &nOutputSize);
 	if (nRetVal != XN_STATUS_OK)
 	{
 		xnLogWarning(XN_MASK_SENSOR_PROTOCOL_IMAGE, "Failed to uncompress JPEG for frame %d: %s (%d)\n", GetCurrentFrameID(), xnGetStatusString(nRetVal), pWriteBuffer->GetSize());

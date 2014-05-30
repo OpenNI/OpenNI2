@@ -40,8 +40,8 @@ public:
 
 	~XnJpegCodec()
 	{
-		XnStreamFreeCompressImageJ(mp_CompJPEGContext);
-		XnStreamFreeUncompressImageJ(mp_UncompJPEGContext);
+        XnStreamFreeCompressImageJ(&mp_CompJPEGContext);
+        XnStreamFreeUncompressImageJ(&mp_UncompJPEGContext);
 	}
 
 	virtual XnCodecID GetCodecID() const { return XN_CODEC_JPEG; }
@@ -56,7 +56,7 @@ public:
 		nRetVal = XnStreamInitUncompressImageJ(&mp_UncompJPEGContext);
 		if (nRetVal != XN_STATUS_OK)
 		{
-			XnStreamFreeCompressImageJ(mp_CompJPEGContext);
+            XnStreamFreeCompressImageJ(&mp_CompJPEGContext);
 			return (nRetVal);
 		}
 
@@ -74,17 +74,17 @@ protected:
 	{
 		if (m_bRGB)
 		{
-			return XnStreamCompressImage24J(mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
+            return XnStreamCompressImage24J(&mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
 		}
 		else
 		{
-			return XnStreamCompressImage8J(mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
+            return XnStreamCompressImage8J(&mp_CompJPEGContext, pData, pCompressedData, pnCompressedDataSize, m_nXRes, m_nYRes, m_nQuality);
 		}
 	}
 
 	virtual XnStatus DecompressImpl(const XnUChar* pCompressedData, XnUInt32 nCompressedDataSize, XnUChar* pData, XnUInt32* pnDataSize)
 	{
-		return XnStreamUncompressImageJ(mp_UncompJPEGContext, pCompressedData, nCompressedDataSize, pData, pnDataSize);
+        return XnStreamUncompressImageJ(&mp_UncompJPEGContext, pCompressedData, nCompressedDataSize, pData, pnDataSize);
 	}
 
 private:

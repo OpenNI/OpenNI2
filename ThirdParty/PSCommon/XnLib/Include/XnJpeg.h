@@ -48,13 +48,13 @@ typedef XnStreamUncompJPEGContext XnStreamUncompJPEGContext;
 //---------------------------------------------------------------------------
 // Functions Declaration
 //---------------------------------------------------------------------------
-XnStatus XnStreamInitCompressImageJ(XnStreamCompJPEGContext** ppStreamCompJPEGContext);
-XnStatus XnStreamCompressImage8J(XnStreamCompJPEGContext* pStreamCompJPEGContext, const XnUInt8* pInput, XnUInt8* pOutput, XnUInt32* pnOutputSize, const XnUInt32 nXRes, const XnUInt32 nYRes, const XnUInt32 nQuality);
-XnStatus XnStreamCompressImage24J(XnStreamCompJPEGContext* pStreamCompJPEGContext, const XnUInt8* pInput, XnUInt8* pOutput, XnUInt32* pnOutputSize, const XnUInt32 nXRes, const XnUInt32 nYRes, const XnUInt32 nQuality);
-XnStatus XnStreamFreeCompressImageJ(XnStreamCompJPEGContext* pStreamCompJPEGContext);
+XnStatus XnStreamInitCompressImageJ(  XnStreamCompJPEGContext** ppStreamCompJPEGContext);
+XnStatus XnStreamCompressImage8J(     XnStreamCompJPEGContext** ppStreamCompJPEGContext, const XnUInt8* pInput, XnUInt8* pOutput, XnUInt32* pnOutputSize, const XnUInt32 nXRes, const XnUInt32 nYRes, const XnUInt32 nQuality);
+XnStatus XnStreamCompressImage24J(    XnStreamCompJPEGContext** ppStreamCompJPEGContext, const XnUInt8* pInput, XnUInt8* pOutput, XnUInt32* pnOutputSize, const XnUInt32 nXRes, const XnUInt32 nYRes, const XnUInt32 nQuality);
+XnStatus XnStreamFreeCompressImageJ(  XnStreamCompJPEGContext** ppStreamCompJPEGContext);
 
 XnStatus XnStreamInitUncompressImageJ(XnStreamUncompJPEGContext** ppStreamUncompJPEGContext);
-XnStatus XnStreamUncompressImageJ(XnStreamUncompJPEGContext* pStreamUncompJPEGContext, const XnUInt8* pInput, const XnUInt32 nInputSize, XnUInt8* pOutput, XnUInt32* pnOutputSize);
-XnStatus XnStreamFreeUncompressImageJ(XnStreamUncompJPEGContext* pStreamUncompJPEGContext);
+XnStatus XnStreamUncompressImageJ(    XnStreamUncompJPEGContext** ppStreamUncompJPEGContext, const XnUInt8* pInput, const XnUInt32 nInputSize, XnUInt8* pOutput, XnUInt32* pnOutputSize);
+XnStatus XnStreamFreeUncompressImageJ(XnStreamUncompJPEGContext** ppStreamUncompJPEGContext);
 
 #endif // _XN_JPEG_H_
