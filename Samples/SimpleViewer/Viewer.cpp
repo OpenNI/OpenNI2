@@ -218,7 +218,7 @@ void SampleViewer::display()
 
 			for (int x = 0; x < m_depthFrame.getWidth(); ++x, ++pDepth, ++pTex)
 			{
-				if (*pDepth != 0)
+				if ((*pDepth != 0) && (*pDepth < MAX_DEPTH))
 				{
 					int nHistValue = m_pDepthHist[*pDepth];
 					pTex->r = nHistValue;
