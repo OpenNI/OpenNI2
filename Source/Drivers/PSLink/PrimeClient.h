@@ -111,7 +111,7 @@ private:
 	XnBool m_bInitialized;
     volatile XnBool m_bConnected;
 	xnl::Array<LinkInputDataEndpoint> m_inputDataEndpoints;
-	XnBool m_bAnyDataEndpointConnected;
+	//XnBool m_bAnyDataEndpointConnected; //private field is not used, clashes with clang due to [-Werror,-Wunused-private-field]
     XnUInt16 m_nFWLogStreamID;
 	XnChar m_strConnectionString[XN_FILE_MAX_PATH];
 

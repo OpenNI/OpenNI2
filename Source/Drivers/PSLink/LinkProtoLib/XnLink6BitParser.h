@@ -21,7 +21,8 @@ protected:
 
 private:
 	XnUInt32 m_nState;
-	XnUInt16 m_nShift;
+protected:
+	XnUInt16 m_nShift; //if private and field not used, it clashes with clang due to [-Werror,-Wunused-private-field]
 };
 
 }

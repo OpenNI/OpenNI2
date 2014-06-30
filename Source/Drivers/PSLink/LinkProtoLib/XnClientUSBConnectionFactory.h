@@ -41,7 +41,9 @@ public:
 private:
 	XnUInt16 m_nInputConnections;
 	XnUInt16 m_nOutputConnections;
-	XnUInt32 m_nPreControlReceiveSleep;
+protected:
+	XnUInt32 m_nPreControlReceiveSleep; //if private and field not used, it clashes with clang due to [-Werror,-Wunused-private-field]
+private:
 	XnUInt8 m_nAltInterface;
 
 	ClientUSBControlEndpoint m_controlEndpoint;
