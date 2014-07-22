@@ -46,13 +46,6 @@
 // Convenience methods for using glh_linear objects
 // with opengl...
 
-
-
-// debugging hack...
-#include <iostream>
-
-using namespace std;
-
 #ifdef MACOS
 #include <OpenGL/gl.h>
 #else
