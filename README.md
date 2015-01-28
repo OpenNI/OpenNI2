@@ -1,7 +1,12 @@
 # OpenNI
 
+http://structure.io/openni
 
-Website: http://structure.io/openni
+## Contributing ##
+
+Pull requests that do not apply cleanly on top of the [`develop` branch head](http://github.com/occipital/OpenNI2/tree/develop) will be rejected.
+
+Other than that, sensible and meaningful contributions are very welcome!
 
 ## Building Prerequisites
 
