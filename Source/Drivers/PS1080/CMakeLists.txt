@@ -122,6 +122,9 @@ add_library(PS1080 SHARED ${PS1080_SRC})
 set_target_properties(PS1080
       PROPERTIES
       LINK_INTERFACE_LIBRARIES ""
+      # OpenNI expects the PS1080 DLL to be named "libPS1080.dylib", so the "d"
+      # postfix will break things here.
+      DEBUG_POSTFIX ""
   )
 
 target_link_libraries(PS1080 JPEG usbx XnLib)
