@@ -2,6 +2,10 @@
 
 http://structure.io/openni
 
+## Develop branch ##
+
+The latest ongoing development is currently being done in the develop branch.  Refer to README and ReleasesNotes in the develop branch for build instructions.
+
 ## Contributing ##
 
 Pull requests that do not apply cleanly on top of the [`develop` branch head](http://github.com/occipital/OpenNI2/tree/develop) will be rejected.
