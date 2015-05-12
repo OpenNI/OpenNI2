@@ -4,7 +4,7 @@ http://structure.io/openni
 
 ## Develop branch ##
 
-The latest ongoing development is currently being done in the develop branch.  Refer to README and ReleasesNotes in the develop branch for build instructions.
+The latest ongoing development is currently being done in the develop branch.  Refer to README and ReleasesNotes in the develop branch for up to date build instructions.
 
 ## Contributing ##
 
