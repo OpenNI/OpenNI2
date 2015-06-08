@@ -283,7 +283,14 @@ void createKeyboardMap()
 			registerKey('y', "Frame sync on/off", toggleFrameSync, 0);
  			registerKey('m', "Mirror on/off", toggleMirror, 0);
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
-			registerKey('a', "CMOS Auto Loops", toggleCMOSAutoLoops, 0);
+
+			registerKey('a', "toggle Auto Exposure", toggleImageAutoExposure, 0);
+			registerKey('q', "toggle Auto Balance", toggleImageAutoWhiteBalance, 0);
+			registerKey('e', "Increase Exposure", changeImageExposure, 1);
+			registerKey('E', "Decrease Exposure", changeImageExposure, -1);
+			registerKey('g', "Increase Gain", changeImageGain, 10);
+			registerKey('G', "Decrease Gain", changeImageGain, -10);
+
 			registerKey('x', "Close Range", toggleCloseRange, 0);
 			registerKey('i', "Toggle Image Registration", toggleImageRegistration, 0);
  		}

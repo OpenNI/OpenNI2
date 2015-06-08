@@ -5,12 +5,13 @@ project(XnLib)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/.. ${CMAKE_MODULE_PATH})
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/Include)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../libusbx)
 
 if(APPLE)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../libusbx)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/Include/MacOSX)
 elseif(WIN32)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/Include/Win32)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/Driver/Win32/Build/sys)
 endif()
 
 set (XNLIB_CORE_SRC
@@ -91,3 +92,6 @@ set (XNLIB_SRC_OS
     )
 endif()
 add_library(XnLib STATIC ${XNLIB_CORE_SRC} ${XNLIB_LOG_SRC} ${XNLIB_COMMON_OS_SRC} ${XNLIB_SRC_OS})
+if(WIN32)
+    target_link_libraries(XnLib ws2_32.lib Setupapi.lib)
+endif(WIN32)

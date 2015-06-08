@@ -93,7 +93,8 @@ void toggleIRMirror(int);
 
 void toggleImageAutoExposure(int);
 void toggleImageAutoWhiteBalance(int);
-void toggleCMOSAutoLoops(int);
+void changeImageExposure(int);
+void changeImageGain(int);
 
 void toggleCloseRange(int);
 void toggleImageRegistration(int);
