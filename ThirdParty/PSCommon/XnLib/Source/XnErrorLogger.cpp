@@ -42,6 +42,7 @@ namespace xnl
 
 	void ErrorLogger::Append(const XnChar* cpFormat, ...)
 	{
+#if XN_PLATFORM != XN_PLATFORM_WIN32
 		SingleBuffer* pBuffer = getBuffer();
 
 		if (pBuffer->m_currentEnd > ms_bufferSize)
@@ -58,11 +59,13 @@ namespace xnl
 		pBuffer->m_currentEnd += charsWritten;
 		pBuffer->m_errorBuffer[pBuffer->m_currentEnd++] = '\n';
 		pBuffer->m_errorBuffer[pBuffer->m_currentEnd] = '\0';
+#endif
 
 	}
 
 	void ErrorLogger::AppendV(const XnChar* cpFormat, va_list args)
 	{
+#if XN_PLATFORM != XN_PLATFORM_WIN32
 		SingleBuffer* pBuffer = getBuffer();
 
 		if (pBuffer->m_currentEnd > ms_bufferSize)
@@ -75,6 +78,7 @@ namespace xnl
 		pBuffer->m_currentEnd += charsWritten;
 		pBuffer->m_errorBuffer[pBuffer->m_currentEnd++] = '\n';
 		pBuffer->m_errorBuffer[pBuffer->m_currentEnd] = '\0';
+#endif
 
 	}
 
