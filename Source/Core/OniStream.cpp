@@ -399,9 +399,15 @@ OniStatus VideoStream::convertDepthToWorldCoordinates(float depthX, float depthY
 	float normalizedX = depthX / m_worldConvertCache.resolutionX - .5f;
 	float normalizedY = .5f - depthY / m_worldConvertCache.resolutionY;
 
-	*pWorldX = normalizedX * depthZ * m_worldConvertCache.xzFactor;
-	*pWorldY = normalizedY * depthZ * m_worldConvertCache.yzFactor;
-	*pWorldZ = depthZ;
+	OniVideoMode videoMode;
+	int size = sizeof(videoMode);
+	getProperty(ONI_STREAM_PROPERTY_VIDEO_MODE, &videoMode, &size);
+
+	float const convertToMillimeters = (videoMode.pixelFormat == ONI_PIXEL_FORMAT_DEPTH_100_UM) ? 10.f : 1.f;
+	*pWorldX = (normalizedX * depthZ * m_worldConvertCache.xzFactor) / convertToMillimeters;
+	*pWorldY = (normalizedY * depthZ * m_worldConvertCache.yzFactor) / convertToMillimeters;
+	*pWorldZ = depthZ / convertToMillimeters;
+
 	return ONI_STATUS_OK;
 }
 
