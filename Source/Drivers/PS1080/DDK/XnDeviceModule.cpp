@@ -231,7 +231,7 @@ XnStatus XnDeviceModule::GetProperty(XnUInt32 propertyId, void* data, int* pData
 			nRetVal = GetProperty(propertyId, &nValue);
 			if (nRetVal != XN_STATUS_OK)
 			{
-				XN_ASSERT(FALSE);
+				// XN_ASSERT(FALSE); // This could happen when the property was write only
 				return XN_STATUS_ERROR;
 			}
 

@@ -7,12 +7,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{5710a645-adf6-4ec5-b5a9-4577058dde9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\API">
-      <UniqueIdentifier>{3c2daeb7-efe8-4592-9c4b-53f6050a62b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\API\Win32">
-      <UniqueIdentifier>{b1c6bd21-c7d1-4224-9c93-543f80fe4356}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Win32">
       <UniqueIdentifier>{52fcd458-35f3-46c5-ad33-77edb75712c1}</UniqueIdentifier>
     </Filter>
@@ -22,85 +16,34 @@
     <Filter Include="Source Files\Log">
       <UniqueIdentifier>{e9f8515c-cbb9-40ee-9bc2-54d170e75d4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\OS">
+      <UniqueIdentifier>{51878d15-3fa4-4ae9-b538-c09734990ae2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OS\Win32">
+      <UniqueIdentifier>{b1c6bd21-c7d1-4224-9c93-543f80fe4356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DataContainers">
+      <UniqueIdentifier>{fdb1b249-609a-4759-a68e-717bd3a6dc49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Infrastructures">
+      <UniqueIdentifier>{3c2daeb7-efe8-4592-9c4b-53f6050a62b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LibJPEG">
+      <UniqueIdentifier>{c5ca9f8e-d267-412a-87d8-bee46f606072}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\XnLib.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnBox3D.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnCriticalSection.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnDataStructures.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnHash.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnList.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMath.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMemory.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnOS.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnOSCpp.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnQueue.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSmartPointer.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnVector3D.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnMatrix3x3.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnString.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnArray.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPlatform.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Win32\XnPlatformWin32.h">
-      <Filter>Header Files\API\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPair.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLog.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnProperty.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPool.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnStatus.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnStatusCodes.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnStatusRegister.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="Win32\XnWin32Internal.h">
       <Filter>Source Files\Win32</Filter>
@@ -127,46 +70,154 @@
       <Filter>Source Files\Win32</Filter>
     </ClInclude>
     <ClInclude Include="XnEnum.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnUSB.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnUSBDevice.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnErrorLogger.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnCallStackLogger.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLockable.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\XnLockGuard.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnPriorityQueue.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-Neon.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-None.h">
-      <Filter>Header Files\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\XnSIMD-SSE.h">
-      <Filter>Header Files\API</Filter>
+      <Filter>Header Files\Infrastructures</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Win32\usb100.h">
-      <Filter>Header Files\API\Win32</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Win32\XnOSWin32.h">
-      <Filter>Header Files\API\Win32</Filter>
+      <Filter>Header Files\OS\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnCriticalSection.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnArray.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnBox3D.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnDataStructures.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnHash.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnList.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMatrix3x3.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPair.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPool.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPriorityQueue.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnProperty.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnQueue.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSmartPointer.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnString.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnVector3D.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSB.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnUSBDevice.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSymmetricMatrix3x3.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMath.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOS.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnOSCpp.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnMemory.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnPlatform.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-Neon.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-None.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSIMD-SSE.h">
+      <Filter>Header Files\OS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnStatusCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnSimpleString.h">
+      <Filter>Header Files\DataContainers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\XnJpeg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\cderror.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jchuff.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jconfig.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jdct.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jdhuff.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jerror.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jinclude.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jmemsys.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jmorecfg.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jpegint.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jpeglib.h">
+      <Filter>LibJPEG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\LibJPEG\jversion.h">
+      <Filter>LibJPEG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -281,5 +332,160 @@
     <ClCompile Include="XnErrorLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcapimin.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcapistd.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jccoefct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jccolor.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcdctmgr.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jchuff.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcinit.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcmainct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcmarker.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcmaster.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcomapi.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcparam.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcphuff.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcprepct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jcsample.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jctrans.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdapimin.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdapistd.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdatadst.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdatasrc.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdcoefct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdcolor.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jddctmgr.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdhuff.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdinput.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdmainct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdmarker.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdmaster.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdmerge.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdphuff.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdpostct.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdsample.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jdtrans.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jerror.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jfdctflt.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jfdctfst.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jfdctint.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jidctflt.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jidctfst.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jidctint.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jidctred.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jmemmgr.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jmemnobs.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jquant1.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jquant2.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\LibJPEG\jutils.c">
+      <Filter>LibJPEG</Filter>
+    </ClCompile>
+    <ClCompile Include="XnJpeg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\LibJPEG\README">
+      <Filter>LibJPEG</Filter>
+    </None>
+    <None Include="..\ThirdParty\LibJPEG\jconfig.vc">
+      <Filter>LibJPEG</Filter>
+    </None>
+    <None Include="..\ThirdParty\LibJPEG\jconfig.ps3">
+      <Filter>LibJPEG</Filter>
+    </None>
+    <None Include="..\ThirdParty\LibJPEG\jconfig.lnx86">
+      <Filter>LibJPEG</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PROPERTY_H__
-#define __XN_PROPERTY_H__
+#ifndef XNPROPERTY_H
+#define XNPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -141,4 +141,4 @@ typedef xnl::List<XnProperty*> XnPropertiesList;
 /** A hash table, mapping property name to the property */
 typedef xnl::Hash<XnUInt32, XnProperty*> XnPropertiesHash;
 
-#endif //__XN_PROPERTY_H__
+#endif // XNPROPERTY_H

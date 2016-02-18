@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_SAMPLE_VIEWER_H_
-#define _ONI_SAMPLE_VIEWER_H_
+#ifndef VIEWER_H
+#define VIEWER_H
 
 #include <OpenNI.h>
 
@@ -79,4 +79,4 @@ private:
 };
 
 
-#endif // _ONI_SAMPLE_VIEWER_H_
+#endif // VIEWER_H

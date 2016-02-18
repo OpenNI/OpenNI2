@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_UNCOMPRESSED_BAYER_PROCESSOR_H__
-#define __XN_UNCOMPRESSED_BAYER_PROCESSOR_H__
+#ifndef XNUNCOMPRESSEDBAYERPROCESSOR_H
+#define XNUNCOMPRESSEDBAYERPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,4 +52,4 @@ private:
 	XnBuffer m_UncompressedBayerBuffer;
 };
 
-#endif //__XN_UNCOMPRESSED_BAYER_PROCESSOR_H__
+#endif // XNUNCOMPRESSEDBAYERPROCESSOR_H

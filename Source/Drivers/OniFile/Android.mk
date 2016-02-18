@@ -17,47 +17,34 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/BuildSystem/CommonAndroid.mk
+
 # Sources
 MY_SRC_FILES := \
 	$(LOCAL_PATH)/*.cpp \
 	$(LOCAL_PATH)/Formats/*.cpp \
 	$(LOCAL_PATH)/XnLibExtensions/*.cpp
 
-ifdef OPENNI2_ANDROID_NDK_BUILD
-    MY_SRC_FILES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG/*.c 
-endif	
-	
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
-
-# C/CPP Flags
-LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
 
 # Includes
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/. \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include \
-	$(LOCAL_PATH)/../../../ThirdParty/LibJPEG \
 	$(LOCAL_PATH)/Formats
-
-ifdef OPENNI2_ANDROID_NDK_BUILD
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../ThirdParty/LibJPEG
-else
-    LOCAL_C_INCLUDES += external/jpeg
-endif	
 
 # Dependencies
 LOCAL_STATIC_LIBRARIES := XnLib
-LOCAL_SHARED_LIBRARIES := liblog
 
-ifdef OPENNI2_ANDROID_OS_BUILD
-    LOCAL_SHARED_LIBRARIES += libjpeg
-else
-	LOCAL_LDLIBS += -llog
+ifdef PS_OS_BUILD
+	LOCAL_SHARED_LIBRARIES += libjpeg
 endif
 
 # Output
 LOCAL_MODULE:= libOniFile
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Source/Android.mk

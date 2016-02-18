@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PROPERTIES_H_
-#define _ONI_PROPERTIES_H_
+#ifndef ONIPROPERTIES_H
+#define ONIPROPERTIES_H
 
 namespace openni
 {
@@ -70,4 +70,4 @@ enum
 };
 
 } // namespace openni
-#endif // _ONI_PROPERTIES_H_
+#endif // ONIPROPERTIES_H

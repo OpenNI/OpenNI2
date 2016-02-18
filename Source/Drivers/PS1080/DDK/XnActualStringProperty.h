@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ACTUAL_STRING_PROPERTY_H__
-#define __XN_ACTUAL_STRING_PROPERTY_H__
+#ifndef XNACTUALSTRINGPROPERTY_H
+#define XNACTUALSTRINGPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -65,4 +65,4 @@ private:
 	XnChar m_strValue[XN_DEVICE_MAX_STRING_LENGTH];
 };
 
-#endif //__XN_ACTUAL_STRING_PROPERTY_H__
+#endif // XNACTUALSTRINGPROPERTY_H

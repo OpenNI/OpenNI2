@@ -14,26 +14,5 @@
 # limitations under the License. 
 
 
-# Check if we're building from OS or NDK
-ifdef TARGET_BUILD_VARIANT
-	OPENNI2_ANDROID_OS_BUILD := true
-else
-	OPENNI2_ANDROID_NDK_BUILD := true
-endif
-
-# Setup OpenNI2 local variables
-OPENNI2_CFLAGS := -O3 -ftree-vectorize -ffast-math -funroll-loops -fPIC -fvisibility=hidden
-
-ifeq ($(ARCH_ARM_HAVE_ARMV7A),true) 
-	OPENNI2_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfpu=vfp
-endif
-
-ifeq ($(ARCH_ARM_HAVE_NEON),true)
-	OPENNI2_CFLAGS += -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
-endif
-
 # Recurse through all subdirs
 include $(call all-subdir-makefiles)
-
-# Cleanup the local variables
-OPENNI2_CFLAGS := 

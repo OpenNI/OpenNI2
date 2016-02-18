@@ -1,5 +1,25 @@
-#ifndef __XN_PRIME_CLIENT_PROPS_H__
-#define __XN_PRIME_CLIENT_PROPS_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef PSLINK_H
+#define PSLINK_H
 
 #include <PrimeSense.h>
 
@@ -14,11 +34,20 @@ enum
 	/* General - array - XnComponentVersion * count elements, get only */
 	LINK_PROP_VERSIONS_INFO = 0x12000003, // "VersionsInfo"
 	/* Int - 0 means off, 1 means on. */
-	LINK_PROP_EMITTER_ACTIVE = 0x12000008, // "EmitterActive"
+	LINK_PROP_PROJECTOR_ACTIVE = 0x12000008, // "ProjectorActive"
 	/* String. Set only */
 	LINK_PROP_PRESET_FILE = 0x1200000a, // "PresetFile"
 	/* Get only */
 	LINK_PROP_BOOT_STATUS = 0x1200000b,
+	/* Int - system specific units */
+    LINK_PROP_PROJECTOR_POWER = 0x1200000c,
+    /* SetAccActive*/   
+    LINK_PROP_ACC_ENABLED = 0x1200000d, 
+    /* SetAccActive*/   
+    LINK_PROP_VDD_ENABLED = 0x1200000e, 
+    /* SetAccActive*/   
+    LINK_PROP_PERIODIC_BIST_ENABLED = 0x1200000f, 
+
 
 	/**** Device commands ****/
 	/* XnCommandGetFwStreams */
@@ -37,6 +66,10 @@ enum
 	LINK_COMMAND_SET_FW_STREAM_VIDEO_MODE = 0x1200F007,
 	/* XnCommandGetFwStreamVideoMode */
 	LINK_COMMAND_GET_FW_STREAM_VIDEO_MODE = 0x1200F008,
+	/* XnCommandSetProjectorPulse */
+	LINK_COMMAND_SET_PROJECTOR_PULSE = 0x1200F009,
+	/* No args */
+    LINK_COMMAND_DISABLE_PROJECTOR_PULSE = 0x1200F00a,
 
 	/**** Stream properties ****/
 	/* Int. 1 - Shifts 9.3, 2 - Grayscale16, 3 - YUV422, 4 - Bayer8 */
@@ -194,6 +227,13 @@ typedef struct XnCommandGetFwStreamVideoMode
 	XnFwStreamVideoMode videoMode; // out
 } XnCommandGetFwStreamVideoMode;
 
+typedef struct XnCommandSetProjectorPulse
+{
+	float delay; //start delay - delay time before start pulse
+	float width; //DC - duty cycle - the percentage of the pulse out of total cycle
+	float cycle;
+} XnCommandSetProjectorPulse;
+
 #pragma pack (pop)
 
-#endif //__XN_PRIME_CLIENT_PROPS_H__
+#endif // PSLINK_H

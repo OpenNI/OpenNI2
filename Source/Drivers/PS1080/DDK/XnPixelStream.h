@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PIXEL_STREAM_H__
-#define __XN_PIXEL_STREAM_H__
+#ifndef XNPIXELSTREAM_H
+#define XNPIXELSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -135,4 +135,4 @@ private:
 	XnBool m_bAllowCustomResolutions;
 };
 
-#endif //__XN_PIXEL_STREAM_H__
+#endif // XNPIXELSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_BAYER_H_
-#define _XN_BAYER_H_
+#ifndef BAYER_H
+#define BAYER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -39,4 +39,4 @@
 //---------------------------------------------------------------------------
 void Bayer2RGB888(const XnUInt8* pBayerImage, XnUInt8* pRGBImage, XnUInt32 nXRes, XnUInt32 nYRes, XnUInt32 nDownSampleStep);
 
-#endif //_XN_BAYER_H_
+#endif // BAYER_H

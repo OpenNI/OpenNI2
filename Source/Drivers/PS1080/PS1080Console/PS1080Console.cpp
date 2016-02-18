@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  PrimeSense Sensor 5.x Alpha                                               *
+*  OpenNI 2.x Alpha                                                          *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of PrimeSense Sensor                                    *
+*  This file is part of OpenNI.                                              *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -137,7 +137,7 @@ bool byebye(openni::Device& /*Device*/, vector<string>& /*Command*/)
 	return false;
 }
 
-bool Version(openni::Device& Device, vector<string>& /*Command*/)
+bool PrintVersion(openni::Device& Device, vector<string>& /*Command*/)
 {
 	openni::Status rc = Device.getProperty(XN_MODULE_PROPERTY_VERSION, &g_DeviceVersion);
 	if (rc != openni::STATUS_OK)
@@ -218,6 +218,14 @@ bool Version(openni::Device& Device, vector<string>& /*Command*/)
 	else if (g_DeviceVersion.FWVer == XN_SENSOR_FW_VER_5_7)
 	{
 		printf ("V5.7");
+	}
+	else if (g_DeviceVersion.FWVer == XN_SENSOR_FW_VER_5_8)
+	{
+		printf ("V5.8");
+	}
+	else if (g_DeviceVersion.FWVer == XN_SENSOR_FW_VER_5_9)
+	{
+		printf ("V5.9");
 	}
 	else if (g_DeviceVersion.FWVer == XN_SENSOR_FW_VER_UNKNOWN)
 	{
@@ -1616,7 +1624,7 @@ bool StartReadData(openni::Device& Device, vector<string>& Command)
 
 	if (!g_colorStream.isValid())
 	{
-		rc = g_depthStream.create(Device, openni::SENSOR_COLOR);
+		rc = g_colorStream.create(Device, openni::SENSOR_COLOR);
 		if (rc != openni::STATUS_OK)
 		{
 			printf("Can't create image stream: %s\n", openni::OpenNI::getExtendedError());
@@ -1673,7 +1681,7 @@ int main(int argc, char **argv)
 	}
 
 	vector<string> DummyCommand;
-	Version(Device, DummyCommand);
+	PrintVersion(Device, DummyCommand);
 
 	RegisterCB("exit", &byebye, "Exit interactive mode");
 	RegisterMnemonic("bye", "exit");
@@ -1694,7 +1702,7 @@ int main(int argc, char **argv)
 	RegisterCB("script", &Script, "Run in batch mode");
 	RegisterMnemonic("-s", "script");
 
-	RegisterCB("Version", &Version, "Get version");
+	RegisterCB("Version", &PrintVersion, "Get version");
 
 	RegisterCB("FileList", &FileList, "Get File List");
 	RegisterMnemonic("dir", "FileList");

@@ -82,7 +82,11 @@ inline XnInt32 CompareVersion(XnUInt8 nMajor1, XnUInt8 nMinor1, XnUInt16 nBuild1
 
 static XnFWVer GetFWVersion(XnUInt8 nMajor, XnUInt8 nMinor, XnUInt16 nBuild)
 {
-	if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 0) >= 0)
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 9, 0) >= 0)
+	{
+		return XN_SENSOR_FW_VER_5_9;
+	}
+	else if (CompareVersion(nMajor, nMinor, nBuild, 5, 8, 0) >= 0)
 	{
 		return XN_SENSOR_FW_VER_5_8;
 	}
@@ -667,9 +671,9 @@ XnStatus XnHostProtocolInitFWParams(XnDevicePrivateData* pDevicePrivateData, XnU
 		pDevicePrivateData->FWInfo.nISOLowDepthAlternativeInterface = 2;
 	}
 
-	if (CompareVersion(nMajor, nMinor, nBuild, 5, 9, 0) >= 0)
+	if (CompareVersion(nMajor, nMinor, nBuild, 5, 10, 0) >= 0)
 	{
-		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Sensor version %d.%d.%x is newer than latest known. Trying to use 5.8 protocol...", nMajor, nMinor, nBuild);
+		xnLogWarning(XN_MASK_SENSOR_PROTOCOL, "Sensor version %d.%d.%x is newer than latest known. Trying to use 5.9 protocol...", nMajor, nMinor, nBuild);
 	}
 
 	// If FW is already known, update image modes
@@ -2066,7 +2070,7 @@ XnStatus XnHostProtocolInitUpload(XnDevicePrivateData* pDevicePrivateData, XnUIn
 	XnHostProtocolInitHeader(pDevicePrivateData, buffer, nHeaderSize+nReadFromFile, pDevicePrivateData->FWInfo.nOpcodeInitFileUpload);
 
 	XnUInt16 nDataSize;
-	XnUInt32* pValue;
+	XnUInt32* pValue = 0;
 	
 	XnHostProtocolExecute(pDevicePrivateData, 
 						  buffer, pDevicePrivateData->FWInfo.nProtocolHeaderSize + nHeaderSize + (XnUInt16)nReadFromFile,

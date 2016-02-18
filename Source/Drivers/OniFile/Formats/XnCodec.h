@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_CODEC_H__
-#define __XN_CODEC_H__
+#ifndef XNCODEC_H
+#define XNCODEC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,4 +52,4 @@ public:
 	static XnCodecID GetCodecIDFromCompressionFormat(XnCompressionFormats format);
 };
 
-#endif //__XN_CODEC_H__
+#endif // XNCODEC_H

@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  PrimeSense Sensor 5.x Alpha                                               *
+*  OpenNI 2.x Alpha                                                          *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of PrimeSense Sensor                                    *
+*  This file is part of OpenNI.                                              *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_GENERAL_DEBUG_PROCESSOR_H__
-#define __XN_GENERAL_DEBUG_PROCESSOR_H__
+#ifndef XNGENERALDEBUGPROCESSOR_H
+#define XNGENERALDEBUGPROCESSOR_H
 
 #include "XnDataProcessor.h"
 
@@ -36,4 +36,4 @@ private:
 	XnDumpFile* m_pDump;
 };
 
-#endif // __XN_GENERAL_DEBUG_PROCESSOR_H__
+#endif // XNGENERALDEBUGPROCESSOR_H

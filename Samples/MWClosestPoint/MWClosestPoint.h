@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _MW_CLOSEST_POINT_H_
-#define _MW_CLOSEST_POINT_H_
+#ifndef MWCLOSESTPOINT_H
+#define MWCLOSESTPOINT_H
 
 #include <OpenNI.h>
 
@@ -79,4 +79,4 @@ private:
 
 
 
-#endif // _MW_CLOSEST_POINT_H_
+#endif // MWCLOSESTPOINT_H

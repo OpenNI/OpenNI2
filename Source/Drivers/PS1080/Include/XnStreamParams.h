@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_STREAM_PARAMS_H_
-#define _XN_STREAM_PARAMS_H_
+#ifndef XNSTREAMPARAMS_H
+#define XNSTREAMPARAMS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -115,6 +115,12 @@ enum
 	XN_STREAM_PROPERTY_REGISTRATION							= 0x1080FF42, // "Registration"
 	/** Integer */
 	XN_STREAM_PROPERTY_DEVICE_MAX_DEPTH						= 0x1080FF43, // "DeviceMaxDepth"
+
+    //---------------------------------------------------------------------------
+    // IR Specific Properties
+    //---------------------------------------------------------------------------
+    /** Integer */
+    XN_STREAM_PROPERTY_DEVICE_MAX_IR					= 0x1080FF48, // "DeviceMaxIR"
 
 	//---------------------------------------------------------------------------
 	// Image Specific Properties
@@ -257,4 +263,4 @@ typedef struct XnCmosPreset
 
 #pragma pack (pop)
 
-#endif // _XN_STREAM_PARAMS_H_
+#endif // XNSTREAMPARAMS_H

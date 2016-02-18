@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_H__
-#define __XN_SENSOR_H__
+#ifndef XNSENSOR_H
+#define XNSENSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -165,6 +165,7 @@ private:
 	XnStatus WriteFlashFile(const XnParamFileData* pFile);
 	XnStatus SetProjectorFault(XnProjectorFaultData* pProjectorFaultData);
 	XnStatus RunBIST(XnUInt32 nTestsMask, XnUInt32* pnFailures);
+	XnStatus SetReadAllEndpoints(XnBool bEnabled);
 
 	//---------------------------------------------------------------------------
 	// Callbacks
@@ -202,6 +203,7 @@ private:
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogIntervalCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareLogPrintCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetFirmwareCPUIntervalCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetReadAllEndpointsCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetAPCEnabledCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetI2CCallback(XnGeneralProperty* pSender, const OniGeneralBuffer& gbValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE DeleteFileCallback(XnIntProperty* pSender, XnUInt64 nValue, void* pCookie);
@@ -259,6 +261,7 @@ private:
 	XnActualIntProperty m_FirmwareCPUInterval;
 	XnActualIntProperty m_APCEnabled;
 	XnActualIntProperty m_FirmwareTecDebugPrint;
+	XnActualIntProperty m_ReadAllEndpoints;
 	XnGeneralProperty m_I2C;
 	XnIntProperty m_DeleteFile;
 	XnIntProperty m_TecSetPoint;
@@ -304,4 +307,4 @@ private:
 	XnChar m_strGlobalConfigFile[XN_FILE_MAX_PATH];
 };
 
-#endif //__XN_SENSOR_H__
+#endif // XNSENSOR_H

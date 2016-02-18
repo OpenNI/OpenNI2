@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_COMMON_H__
-#define __XN_COMMON_H__
+#ifndef XNCOMMON_H
+#define XNCOMMON_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,4 +52,4 @@ typedef enum XnPrimeSenseErrorModules
 #define XN_PS_STATUS_MESSAGE_MAP_END(module)								\
 	XN_STATUS_MESSAGE_MAP_END_FROM(XN_ERROR_GROUP_PRIMESENSE, module)
 
-#endif // __XN_COMMON_H__
+#endif // XNCOMMON_H

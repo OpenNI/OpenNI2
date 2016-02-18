@@ -152,7 +152,8 @@ XnStatus XnFirmwareStreams::CheckClaimStream(const XnChar* strType, XnResolution
 		if (pIRStreamData->pOwner != NULL)
 		{
 			// check res
-			if (pIRStreamData->nRes != nRes && (pIRStreamData->nRes != XN_RESOLUTION_SXGA || nRes != XN_RESOLUTION_VGA))
+			if (pIRStreamData->nRes != nRes && 
+				!(pIRStreamData->nRes == XN_RESOLUTION_SXGA && nRes == XN_RESOLUTION_VGA))
 			{
 				XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Cannot set depth stream to resolution %d when IR is set to resolution %d!", nRes, pIRStreamData->nRes);
 			}
@@ -184,7 +185,8 @@ XnStatus XnFirmwareStreams::CheckClaimStream(const XnChar* strType, XnResolution
 		if (pDepthStreamData->pOwner != NULL)
 		{
 			// check res
-			if (pDepthStreamData->nRes != nRes && (nRes != XN_RESOLUTION_SXGA || pDepthStreamData->nRes != XN_RESOLUTION_VGA))
+			if (pDepthStreamData->nRes != nRes &&
+				!(nRes == XN_RESOLUTION_SXGA && pDepthStreamData->nRes == XN_RESOLUTION_VGA))
 			{
 				if (m_pDevicePrivateData->FWInfo.nFWVer < XN_SENSOR_FW_VER_5_6) 
 				{

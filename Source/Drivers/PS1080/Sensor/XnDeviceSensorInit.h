@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICESENSORINIT_H_
-#define _XN_DEVICESENSORINIT_H_
+#ifndef XNDEVICESENSORINIT_H
+#define XNDEVICESENSORINIT_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -94,4 +94,4 @@ XnStatus XnDeviceSensorConfigure(XnDevicePrivateData* pDevicePrivateData);
 
 XnStatus XnDeviceSensorInitCmosData(XnDevicePrivateData* pDevicePrivateData);
 
-#endif //_XN_DEVICESENSORINIT_H_
+#endif // XNDEVICESENSORINIT_H

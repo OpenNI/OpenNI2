@@ -19,8 +19,8 @@
     <Filter Include="Source Files\Formats">
       <UniqueIdentifier>{2b5f0f3a-dcdb-4faa-9b5f-d6b2d0c24222}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Formats\LibJPEG">
-      <UniqueIdentifier>{8505174a-1146-4871-8927-07bbe186c5e5}</UniqueIdentifier>
+    <Filter Include="Config">
+      <UniqueIdentifier>{61985e27-6425-4e2a-9e4d-b944a16c8db4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,148 +81,13 @@
     <ClInclude Include="XnPlayerTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FileProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Formats\XnStreamCompression.cpp">
       <Filter>Source Files\Formats</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcapimin.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcapistd.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jccoefct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jccolor.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcdctmgr.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jchuff.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcinit.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmainct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmarker.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcmaster.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcomapi.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcparam.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcprepct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcsample.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jctrans.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdapimin.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdapistd.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdatadst.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdatasrc.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdcoefct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdcolor.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jddctmgr.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdhuff.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdinput.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmainct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmarker.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmaster.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdmerge.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdphuff.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdpostct.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdsample.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jdtrans.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jerror.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctflt.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctfst.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jfdctint.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctflt.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctfst.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctint.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jidctred.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jmemmgr.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jmemnobs.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jquant1.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jquant2.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jutils.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ThirdParty\LibJPEG\jcphuff.c">
-      <Filter>Source Files\Formats\LibJPEG</Filter>
     </ClCompile>
     <ClCompile Include="PlayerNode.cpp">
       <Filter>Source Files</Filter>
@@ -253,5 +118,10 @@
     <ResourceCompile Include="..\..\Resources\OpenNI.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Config\OpenNI2\Drivers\OniFile.ini">
+      <Filter>Config</Filter>
+    </None>
   </ItemGroup>
 </Project>

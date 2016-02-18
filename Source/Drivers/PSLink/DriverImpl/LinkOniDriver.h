@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DRIVER_H__
-#define __LINK_ONI_DRIVER_H__
+#ifndef LINKONIDRIVER_H
+#define LINKONIDRIVER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -88,4 +88,4 @@ private:
 	char m_configFilePath[XN_FILE_MAX_PATH];
 };
 
-#endif // __LINK_ONI_DRIVER_H__
+#endif // LINKONIDRIVER_H

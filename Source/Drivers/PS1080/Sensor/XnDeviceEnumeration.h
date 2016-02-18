@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICE_ENUMERATION_H_
-#define _XN_DEVICE_ENUMERATION_H_
+#ifndef XNDEVICEENUMERATION_H
+#define XNDEVICEENUMERATION_H
 
 #include <XnStringsHash.h>
 #include <XnEvent.h>
@@ -66,4 +66,4 @@ private:
 	static XN_CRITICAL_SECTION_HANDLE ms_lock;
 };
 
-#endif
+#endif // XNDEVICEENUMERATION_H

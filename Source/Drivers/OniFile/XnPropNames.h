@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PROP_NAMES_H__
-#define __XN_PROP_NAMES_H__
+#ifndef XNPROPNAMES_H
+#define XNPROPNAMES_H
 
 //ProductionNode
 #define XN_PROP_STATE_READY "xnStateReady" // int. Meant only for mock nodes.
@@ -62,4 +62,6 @@
 #define XN_PROP_ONI_PIXEL_FORMAT "oniPixelFormat"
 #define XN_PROP_ONI_REQUIRED_FRAME_SIZE "oniRequiredFrameSize"
 
-#endif //__XN_PROP_NAMES_H__
+#define XN_PROP_ORIGINAL_DEVICE "oniOriginalDevice"
+
+#endif // XNPROPNAMES_H

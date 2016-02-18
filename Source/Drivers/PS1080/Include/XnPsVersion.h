@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_PS_VERSION_H_
-#define _XN_PS_VERSION_H_
+#ifndef XNPSVERSION_H
+#define XNPSVERSION_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -32,11 +32,11 @@
 /** Xiron major version. */ 
 #define XN_PS_MAJOR_VERSION 5
 /** Xiron minor version. */ 
-#define XN_PS_MINOR_VERSION 1
+#define XN_PS_MINOR_VERSION 2
 /** Xiron maintenance version. */ 
-#define XN_PS_MAINTENANCE_VERSION 4
+#define XN_PS_MAINTENANCE_VERSION 0
 /** Xiron build version. */ 
-#define XN_PS_BUILD_VERSION 1
+#define XN_PS_BUILD_VERSION 0
 
 /** Xiron version (in brief string format): "Major.Minor.Maintenance (Build)" */ 
 #define XN_PS_BRIEF_VERSION_STRING \
@@ -53,5 +53,5 @@
 		XN_PS_BRIEF_VERSION_STRING  "-" \
 		XN_PLATFORM_STRING " (" XN_TIMESTAMP ")"
 
-#endif //_XN_VERSION_H_
+#endif // XNPSVERSION_H
 

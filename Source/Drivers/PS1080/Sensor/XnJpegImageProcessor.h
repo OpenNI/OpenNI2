@@ -18,14 +18,14 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_JPEG_IMAGE_PROCESSOR_H__
-#define __XN_JPEG_IMAGE_PROCESSOR_H__
+#ifndef XNJPEGIMAGEPROCESSOR_H
+#define XNJPEGIMAGEPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
 #include "XnImageProcessor.h"
-#include <Formats/XnStreamCompression.h>
+#include <XnJpeg.h>
 
 //---------------------------------------------------------------------------
 // Code
@@ -41,4 +41,4 @@ protected:
 	virtual void ProcessFramePacketChunk(const XnSensorProtocolResponseHeader* pHeader, const XnUChar* pData, XnUInt32 nDataOffset, XnUInt32 nDataSize);
 };
 
-#endif // __XN_JPEG_IMAGE_PROCESSOR_H__
+#endif // XNJPEGIMAGEPROCESSOR_H

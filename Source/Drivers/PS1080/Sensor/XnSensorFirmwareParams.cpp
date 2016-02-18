@@ -82,6 +82,7 @@ XnSensorFirmwareParams::XnSensorFirmwareParams(XnFirmwareInfo* pInfo, XnFirmware
 	m_ImageLowLightCompensation(0, "ImageLowLightCompensation"),
 	m_ImageGain(0, "ImageGain"),
 	m_DepthCloseRange(0, "CloseRange"),
+	m_FastZoomCrop(0, "FastZoomCrop"),
 	m_LogFilter(0, "LogFilter"),
 	m_GMCDebug(0, "GMCDebug"),
 	m_APCEnabled(0, "APCEnabled"),
@@ -208,6 +209,8 @@ XnStatus XnSensorFirmwareParams::Init()
 	nRetVal = AddFirmwareParam(		m_ImageGain,				PARAM_IMAGE_AGC,							XN_SENSOR_FW_VER_5_4,	XN_SENSOR_FW_VER_UNKNOWN,	0);
 	XN_IS_STATUS_OK(nRetVal);
 	nRetVal = AddFirmwareParam(		m_DepthCloseRange,			PARAM_DEPTH_CLOSE_RANGE,					XN_SENSOR_FW_VER_5_6,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
+	XN_IS_STATUS_OK(nRetVal);
+	nRetVal = AddFirmwareParam(		m_FastZoomCrop,				PARAM_FAST_ZOOM_CROP,						XN_SENSOR_FW_VER_5_9,	XN_SENSOR_FW_VER_UNKNOWN,	FALSE);
 	XN_IS_STATUS_OK(nRetVal);
 	nRetVal = AddFirmwareParam(		m_LogFilter,				PARAM_MISC_LOG_FILTER);
 	XN_IS_STATUS_OK(nRetVal);

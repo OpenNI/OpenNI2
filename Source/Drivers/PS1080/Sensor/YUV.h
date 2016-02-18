@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_YUV_H_
-#define _XN_YUV_H_
+#ifndef YUV_H
+#define YUV_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -66,4 +66,4 @@ void YUV422ToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVS
 void YUYVToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32* pnActualRead, XnUInt32* pnRGBSize);
 void YUV420ToRGB888(const XnUInt8* pYUVImage, XnUInt8* pRGBImage, XnUInt32 nYUVSize, XnUInt32 nRGBSize);
 
-#endif //_XN_BAYER_H_
+#endif // YUV_H

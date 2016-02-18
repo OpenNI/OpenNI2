@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IO_NETWORK_STREAM_H__
-#define __XN_IO_NETWORK_STREAM_H__
+#ifndef XNIONETWORKSTREAM_H
+#define XNIONETWORKSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -50,4 +50,4 @@ private:
 
 };
 
-#endif //__XN_IO_NETWORK_STREAM_H__
+#endif // XNIONETWORKSTREAM_H

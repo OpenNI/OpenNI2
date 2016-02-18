@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_IMPL_DATA_RECORDS_H_
-#define _ONI_IMPL_DATA_RECORDS_H_ 1
+#ifndef ONIDATARECORDS_H
+#define ONIDATARECORDS_H 1
 
 #include "XnOS.h"
 #include "XnList.h"
@@ -244,4 +244,4 @@ private:
 #endif
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // _ONI_IMPL_DATA_RECORDS_H_
+#endif // ONIDATARECORDS_H

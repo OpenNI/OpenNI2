@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/device" android:title="@string/select_device"></item><item
+        android:id="@+id/add_stream"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/add_stream"/>
+    
+    <item
+        android:id="@+id/record"
+        android:orderInCategory="101"
+        android:showAsAction="always"
+        android:title="@string/start_record"/>
+    
+    
+</menu>

@@ -56,25 +56,29 @@ XnStatus LinkOniMapStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 	// read video mode
-	XnChar section[255];
-	sprintf(section, "%s.VideoMode", m_configSection);
+	XnChar videoModeSection[255];
+	sprintf(videoModeSection, "%s.VideoMode", m_configSection);
 	OniVideoMode videoMode;
 	GetVideoMode(&videoMode);
 
+	// override with streams default values
+	GetDefaultVideoMode(&videoMode);
+
+	// override with INI config
 	XnInt32 temp32;
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "XResolution", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "XResolution", &temp32))
 	{
 		videoMode.resolutionX = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "YResolution", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "YResolution", &temp32))
 	{
 		videoMode.resolutionY = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "FPS", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "FPS", &temp32))
 	{
 		videoMode.fps = (int)temp32;
 	}
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "PixelFormat", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, videoModeSection, "PixelFormat", &temp32))
 	{
 		videoMode.pixelFormat = (OniPixelFormat)temp32;
 	}
@@ -89,7 +93,7 @@ XnStatus LinkOniMapStream::Init()
 	XN_IS_STATUS_OK(nRetVal);
 
 	OniBool bMirror = TRUE;
-	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, section, "Mirror", &temp32))
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, m_configSection, "Mirror", &temp32))
 	{
 		bMirror = (temp32 == 1);
 	}
@@ -132,6 +136,16 @@ OniStatus LinkOniMapStream::getProperty(int propertyId, void* data, int* pDataSi
 		case LINK_PROP_COMPRESSION:
 			ENSURE_PROP_SIZE(*pDataSize, XnLinkCompressionType);
 			ASSIGN_PROP_VALUE_INT(data, *pDataSize, m_pInputStream->GetVideoMode().m_nCompression);
+			break;
+
+		case PS_PROPERTY_GAIN:
+			{
+				ENSURE_PROP_SIZE(*pDataSize, XnUInt16);
+				XnUInt16 gain;
+				nRetVal = m_pInputStream->GetGain(gain);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+				ASSIGN_PROP_VALUE_INT(data, *pDataSize, gain);
+			}
 			break;
 
 		default:
@@ -183,6 +197,14 @@ OniStatus LinkOniMapStream::setProperty(int propertyId, const void* data, int da
 				XnFwStreamVideoMode mode = m_pInputStream->GetVideoMode();
 				mode.m_nCompression = *(XnFwCompressionType*)data;
 				nRetVal = m_pInputStream->SetVideoMode(mode);
+				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+				break;
+			}
+
+		case PS_PROPERTY_GAIN:
+			{
+				ENSURE_PROP_SIZE(dataSize, XnUInt16);
+				nRetVal = m_pInputStream->SetGain(*(XnUInt16*)data);
 				XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 				break;
 			}
@@ -242,10 +264,12 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 
-	OniVideoMode current;
-	GetVideoMode(&current);
+	XnFwStreamVideoMode currFwMode = m_pInputStream->GetVideoMode();
 
-	if (!xnOSMemCmp(&current, pVideoMode, sizeof(OniVideoMode)))
+	if ((int)currFwMode.m_nXRes == pVideoMode->resolutionX &&
+		(int)currFwMode.m_nYRes == pVideoMode->resolutionY &&
+		(int)currFwMode.m_nFPS == pVideoMode->fps &&
+		m_pInputStream->GetOutputFormat() == pVideoMode->pixelFormat)
 	{
 		// nothing to do here
 		return (ONI_STATUS_OK);
@@ -260,8 +284,17 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 			pVideoMode->resolutionY == (int)supportedModes[i].m_nYRes &&
 			pVideoMode->fps         == (int)supportedModes[i].m_nFPS)
 		{
-			selectedIndex = i;
-			break;
+			// prefer the one that also keeps on other parameters. If no such mode exists, switch to the first one on the list
+			if (supportedModes[i].m_nPixelFormat == currFwMode.m_nPixelFormat &&
+				supportedModes[i].m_nCompression == currFwMode.m_nCompression)
+			{
+				selectedIndex = i;
+				break;
+			}
+			else if (selectedIndex == -1)
+			{
+				selectedIndex = i;
+			}		
 		}
 	}
 
@@ -273,12 +306,13 @@ XnStatus LinkOniMapStream::SetVideoMode(OniVideoMode* pVideoMode)
 		return XN_STATUS_BAD_PARAM;
 	}
 
-	nRetVal = m_pInputStream->SetVideoMode(supportedModes[selectedIndex]);
-	XN_IS_STATUS_OK_LOG_ERROR("Set video mode", nRetVal);
-
 	nRetVal = m_pInputStream->SetOutputFormat(pVideoMode->pixelFormat);
 	XN_IS_STATUS_OK_LOG_ERROR("Set output format", nRetVal);
 
+	nRetVal = m_pInputStream->SetVideoMode(supportedModes[selectedIndex]);
+	XN_IS_STATUS_OK_LOG_ERROR("Set video mode", nRetVal);
+
+	xnLogVerbose(XN_MASK_LINK,"Set video mode to  %ux%u@%u fps & pixel format: %u", pVideoMode->resolutionX, pVideoMode->resolutionY, pVideoMode->fps, pVideoMode->pixelFormat);
 	return XN_STATUS_OK;
 }
 
@@ -327,5 +361,10 @@ XnStatus LinkOniMapStream::GetCropping(OniCropping &cropping)
 XnStatus LinkOniMapStream::SetCropping(const OniCropping &cropping)
 {
 	return m_pInputStream->SetCropping(cropping);
+}
+
+XnStatus LinkOniMapStream::GetDefaultVideoMode( OniVideoMode* /*pVideoMode*/ )
+{
+	return XN_STATUS_IS_EMPTY;
 }
 

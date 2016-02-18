@@ -34,6 +34,15 @@
 #define XN_MASK_LINK_DEVICE "LinkDevice"
 #define CONFIG_DEVICE_SECTION "Device"
 
+#if XN_PLATFORM == XN_PLATFORM_WIN32
+	#define XN_DEFAULT_USB_INTERFACE	PS_USB_INTERFACE_ISO_ENDPOINTS;
+#elif XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_MACOSX || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
+	#define XN_DEFAULT_USB_INTERFACE	PS_USB_INTERFACE_BULK_ENDPOINTS;
+#else
+	#error Unsupported platform!
+#endif
+
+
 LinkOniDevice::LinkOniDevice(const char* configFile, const XnChar* uri, oni::driver::DriverServices& driverServices, LinkOniDriver* pDriver) :
 	m_configFile(configFile), m_pSensor(NULL), m_driverServices(driverServices), m_pDriver(pDriver)
 {
@@ -67,15 +76,35 @@ XnStatus LinkOniDevice::readSupportedModesFromStream(XnFwStreamInfo &info, xnl::
 	return XN_STATUS_OK;
 }
 
+XnStatus AddVideoMode(xnl::Array<OniVideoMode>& modes, XnFwStreamVideoMode fwMode, OniPixelFormat pixelFormat)
+{
+	// make sure it's not in the list already
+	for (XnUInt32 i = 0; i < modes.GetSize(); ++i)
+	{
+		if (modes[i].resolutionX == (int)fwMode.m_nXRes &&
+			modes[i].resolutionY == (int)fwMode.m_nYRes &&
+			modes[i].fps == (int)fwMode.m_nFPS &&
+			modes[i].pixelFormat == pixelFormat)
+		{
+			return XN_STATUS_OK;
+		}
+	}
+
+	OniVideoMode mode;
+	mode.resolutionX = fwMode.m_nXRes;
+	mode.resolutionY = fwMode.m_nYRes;
+	mode.fps = fwMode.m_nFPS;
+	mode.pixelFormat = pixelFormat;
+	return modes.AddLast(mode);
+}
+
 XnStatus LinkOniDevice::FillSupportedVideoModes()
 {
-	int                           nSupportedModes = 0;
 	xnl::Array<XnFwStreamVideoMode> aSupportedModes;
-	
 	xnl::Array<XnFwStreamInfo> aEnumerated;
+	xnl::Array<OniVideoMode> aVideoModes;
 
 	int s = -1;
-	int writeIndex;
 
 	// Depth
 	m_pSensor->EnumerateStreams((XnStreamType)XN_LINK_STREAM_TYPE_SHIFTS, aEnumerated);
@@ -84,42 +113,24 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 		XnStatus nRetVal = readSupportedModesFromStream(aEnumerated[c], aSupportedModes);
 		XN_IS_STATUS_OK(nRetVal);
 
-		++s;
-		m_sensors[s].sensorType             = ONI_SENSOR_DEPTH;
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aSupportedModes.GetSize());
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		nSupportedModes = aSupportedModes.GetSize();
-
-		writeIndex = 0;
-		for(int i=0; i < nSupportedModes; ++i)
+		for (XnUInt32 i = 0; i < aSupportedModes.GetSize(); ++i)
 		{
-			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_DEPTH_1_MM;
-			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
-
-			bool foundMatch = false;
-			for (int j = 0; j < writeIndex; ++j)
-			{
-				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].fps         == m_sensors[s].pSupportedVideoModes[j].fps         &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
-				{
-					// Already know this configuration
-					foundMatch = true;
-					break;
-				}
-			}
-			if (!foundMatch)
-			{
-				++writeIndex;
-			}
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_DEPTH_1_MM);
+			XN_IS_STATUS_OK(nRetVal);
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_DEPTH_100_UM);
+			XN_IS_STATUS_OK(nRetVal);
 		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-		m_numSensors = s+1;
 	}
+	++s;
+	m_sensors[s].sensorType             = ONI_SENSOR_DEPTH;
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aVideoModes.GetSize());
+	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
+	xnOSMemCopy(m_sensors[s].pSupportedVideoModes, aVideoModes.GetData(), aVideoModes.GetSize() * sizeof(OniVideoMode));
+	m_sensors[s].numSupportedVideoModes = aVideoModes.GetSize();
+
+	m_numSensors = s+1;
 	aEnumerated.Clear();
+	aVideoModes.Clear();
 
 	// IR
 	m_pSensor->EnumerateStreams((XnStreamType)XN_LINK_STREAM_TYPE_IR, aEnumerated);
@@ -128,102 +139,23 @@ XnStatus LinkOniDevice::FillSupportedVideoModes()
 		XnStatus nRetVal = readSupportedModesFromStream(aEnumerated[c], aSupportedModes);
 		XN_IS_STATUS_OK(nRetVal);
 
-		++s;
-		m_sensors[s].sensorType             = ONI_SENSOR_IR;
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aSupportedModes.GetSize());
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		nSupportedModes = aSupportedModes.GetSize();
-	
-		writeIndex = 0;
-		for(int i=0; i < nSupportedModes; ++i)
+		for (XnUInt32 i = 0; i < aSupportedModes.GetSize(); ++i)
 		{
-			m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = ONI_PIXEL_FORMAT_GRAY16;
-			m_sensors[s].pSupportedVideoModes[writeIndex].fps         = aSupportedModes[i].m_nFPS;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX = aSupportedModes[i].m_nXRes;
-			m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY = aSupportedModes[i].m_nYRes;
-			
-			bool foundMatch = false;
-			for (int j = 0; j < writeIndex; ++j)
-			{
-				if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[j].pixelFormat &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].fps         == m_sensors[s].pSupportedVideoModes[j].fps         &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[j].resolutionX &&
-					m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[j].resolutionY)
-				{
-					// Already know this configuration
-					foundMatch = true;
-					break;
-				}
-			}
-			if (!foundMatch)
-			{
-				++writeIndex;
-			}
+			nRetVal = AddVideoMode(aVideoModes, aSupportedModes[i], ONI_PIXEL_FORMAT_GRAY16);
+			XN_IS_STATUS_OK(nRetVal);
 		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-		m_numSensors = s+1;
 	}
+	++s;
+	m_sensors[s].sensorType             = ONI_SENSOR_IR;
+	m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, aVideoModes.GetSize());
+	XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
+	xnOSMemCopy(m_sensors[s].pSupportedVideoModes, aVideoModes.GetData(), aVideoModes.GetSize() * sizeof(OniVideoMode));
+	m_sensors[s].numSupportedVideoModes = aVideoModes.GetSize();
+
+	m_numSensors = s+1;
 	aEnumerated.Clear();
+	aVideoModes.Clear();
 
-/*	// Color
-
-	// first, make sure that our sensor actually supports Image
-	XnUInt64 nImageSupported = FALSE;
-	XnStatus nRetVal = m_sensor.GetProperty(XN_MASK_DEVICE, XN_MODULE_PROPERTY_IMAGE_SUPPORTED, &nImageSupported);
-	XN_IS_STATUS_OK(nRetVal);
-	if (nImageSupported)
-	{
-		++s;
-		nSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.imageModes.GetSize();
-		pSupportedModes = m_sensor.GetDevicePrivateData()->FWInfo.imageModes.GetData();
-
-		m_sensors[s].sensorType             = ONI_SENSOR_COLOR;
-		m_sensors[s].numSupportedVideoModes = 0; // to be changed later..
-		m_sensors[s].pSupportedVideoModes   = XN_NEW_ARR(OniVideoMode, nSupportedModes * 10);
-		XN_VALIDATE_ALLOC_PTR(m_sensors[s].pSupportedVideoModes);
-		
-		writeIndex = 0;
-		for(XnUInt32 j=0; j < nSupportedModes; ++j)
-		{
-			// make an OniVideoMode for each OniFormat supported by the input format
-			OniPixelFormat aOniFormats[10];
-			int       nOniFormats = 0;
-			LinkOniColorStream::GetAllowedOniOutputFormatForInputFormat((XnIOImageFormats)pSupportedModes[j].nFormat, aOniFormats, &nOniFormats);
-			for(int curOni=0; curOni<nOniFormats; ++curOni)
-			{
-				m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat = aOniFormats[curOni];
-			
-				m_sensors[s].pSupportedVideoModes[writeIndex].fps = pSupportedModes[j].nFPS;
-				XnBool bOK = XnDDKGetXYFromResolution(
-					(XnResolutions)pSupportedModes[j].nResolution,
-					(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX,
-					(XnUInt32*)&m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY
-					);
-				XN_ASSERT(bOK);
-				XN_REFERENCE_VARIABLE(bOK);
-
-				bool foundMatch = false;
-				for (int i = 0; i < writeIndex; ++i)
-				{
-					if (m_sensors[s].pSupportedVideoModes[writeIndex].pixelFormat == m_sensors[s].pSupportedVideoModes[i].pixelFormat &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].fps == m_sensors[s].pSupportedVideoModes[i].fps &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].resolutionX == m_sensors[s].pSupportedVideoModes[i].resolutionX &&
-						m_sensors[s].pSupportedVideoModes[writeIndex].resolutionY == m_sensors[s].pSupportedVideoModes[i].resolutionY)
-					{
-						// Already know this configuration
-						foundMatch = true;
-						break;
-					}
-				}
-				if (!foundMatch)
-				{
-					++writeIndex;
-				}
-			}
-		}
-		m_sensors[s].numSupportedVideoModes = writeIndex;
-	}
-*/
 	return XN_STATUS_OK;
 }
 
@@ -286,10 +218,32 @@ XnStatus LinkOniDevice::Init(const char* mode)
 
 	m_pSensor = pPrimeClient;
 
+	XnUsbInterfaceType usbType = PS_USB_INTERFACE_DONT_CARE;
+	if (performReset)
+	{
+		usbType = XN_DEFAULT_USB_INTERFACE;
+	}
+
 	XnInt32 value32;
 	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "UsbInterface", &value32))
 	{
-		retVal = setProperty(PS_PROPERTY_USB_INTERFACE, &value32, sizeof(value32));
+		usbType = (XnUsbInterfaceType)value32;
+	}
+
+	retVal = setProperty(PS_PROPERTY_USB_INTERFACE, &usbType, sizeof(usbType));
+	if (retVal != XN_STATUS_OK)
+	{
+		XN_DELETE(pPrimeClient);
+		return retVal;
+	}
+
+	if (XN_STATUS_OK == xnOSReadIntFromINI(m_configFile, CONFIG_DEVICE_SECTION, "FirmwareLog", &value32))
+	{
+		if (value32 == TRUE)
+		{
+			retVal = m_pSensor->StartFWLog();
+		}
+
 		if (retVal != XN_STATUS_OK)
 		{
 			XN_DELETE(pPrimeClient);
@@ -540,6 +494,54 @@ OniStatus LinkOniDevice::getProperty(int propertyId, void* data, int* pDataSize)
 			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
 		}
 		break;
+    case LINK_PROP_ACC_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetAccActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
+    case LINK_PROP_VDD_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetVDDActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
+        {
+            ENSURE_PROP_SIZE(*pDataSize, XnBool);
+
+            XnBool bActive;
+            nRetVal = m_pSensor->GetPeriodicBistActive(bActive);
+            XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+            ASSIGN_PROP_VALUE_INT(data, *pDataSize, bActive)
+        }
+        break;
+
+
+	case LINK_PROP_PROJECTOR_POWER:
+		{
+			ENSURE_PROP_SIZE(*pDataSize, XnUInt16);
+
+			XnUInt16 power;
+			nRetVal = m_pSensor->GetProjectorPower(power);
+			XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+
+			ASSIGN_PROP_VALUE_INT(data, *pDataSize, power)
+		}
+		break;
 
 	default:
 		return ONI_STATUS_BAD_PARAMETER;
@@ -587,10 +589,28 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 
 	// Internal Link Properties
 	// int props
-	case LINK_PROP_EMITTER_ACTIVE:
-		nRetVal = m_pSensor->SetEmitterActive(*(XnBool*)data);
-		XN_IS_STATUS_OK_LOG_ERROR_RET("Set emitter active", nRetVal, ONI_STATUS_ERROR);
+	case LINK_PROP_PROJECTOR_ACTIVE:
+		nRetVal = m_pSensor->SetProjectorActive(*(XnBool*)data);
+		XN_IS_STATUS_OK_LOG_ERROR_RET("Set Projector active", nRetVal, ONI_STATUS_ERROR);
 		break;
+
+    //controls if the firmware runs all its control loops (BIST)
+    case LINK_PROP_ACC_ENABLED:
+        nRetVal = m_pSensor->SetAccActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set Acc active", nRetVal, ONI_STATUS_ERROR);
+        break;
+
+        //
+    case LINK_PROP_VDD_ENABLED:
+        nRetVal = m_pSensor->SetVDDActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set VDD active", nRetVal, ONI_STATUS_ERROR);
+        break;
+
+        //
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
+        nRetVal = m_pSensor->SetPeriodicBistActive(*(XnBool*)data);
+        XN_IS_STATUS_OK_LOG_ERROR_RET("Set PeriodicBist active", nRetVal, ONI_STATUS_ERROR);
+        break;
 
 		// string props
 	case LINK_PROP_PRESET_FILE:
@@ -619,6 +639,12 @@ OniStatus LinkOniDevice::setProperty(int propertyId, const void* data, int dataS
 		}
 		break;
 
+	case LINK_PROP_PROJECTOR_POWER:
+		ENSURE_PROP_SIZE(dataSize, XnUInt16);
+		nRetVal = m_pSensor->SetProjectorPower(*(XnUInt16*)data);
+		XN_IS_STATUS_OK_RET(nRetVal, ONI_STATUS_ERROR);
+		break;
+
 	default:
 			return ONI_STATUS_BAD_PARAMETER;
 	}
@@ -640,10 +666,14 @@ OniBool LinkOniDevice::isPropertySupported(int propertyId)
 	case LINK_PROP_FW_VERSION:
 	case LINK_PROP_VERSIONS_INFO_COUNT:
 	case LINK_PROP_VERSIONS_INFO:
-	case LINK_PROP_EMITTER_ACTIVE:
+	case LINK_PROP_PROJECTOR_ACTIVE:
+    case LINK_PROP_ACC_ENABLED:
+    case LINK_PROP_VDD_ENABLED:
+    case LINK_PROP_PERIODIC_BIST_ENABLED:
 	case LINK_PROP_PRESET_FILE:
 	case PS_PROPERTY_USB_INTERFACE:
 	case LINK_PROP_BOOT_STATUS:
+	case LINK_PROP_PROJECTOR_POWER:
 		return true;
 	default:
 		return false;
@@ -754,7 +784,20 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		nRetVal = m_pSensor->HardReset();
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Power reset", nRetVal, ONI_STATUS_ERROR);
 		break;
+    case PS_COMMAND_READ_DEBUG_DATA:
+        {
+            EXACT_PROP_SIZE_DO(dataSize, XnCommandDebugData)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandDebugData));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
 
+            XnCommandDebugData* pArgs = reinterpret_cast<XnCommandDebugData*>(data);
+            nRetVal = m_pSensor->ReadDebugData(*pArgs);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Reading Debug Data", nRetVal, ONI_STATUS_ERROR);
+        }
+        break;
 	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
 		nRetVal = m_pSensor->BeginUploadFileOnControlEP();
 		XN_IS_STATUS_OK_LOG_ERROR_RET("Begin update", nRetVal, ONI_STATUS_ERROR);
@@ -890,6 +933,8 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 
 			for (int i = 0; i < (int)devices.GetSize(); ++i)
 			{
+                pArgs->devices[i].masterId = devices[i].m_nMasterID;
+                pArgs->devices[i].slaveId = devices[i].m_nSlaveID;
 				pArgs->devices[i].id = devices[i].m_nID;
 				xnOSStrCopy(pArgs->devices[i].name, devices[i].m_strName, sizeof(pArgs->devices[i].name));
 			}
@@ -933,6 +978,55 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		}
 		break;
 
+    case PS_COMMAND_GET_TEMP_LIST:
+        {
+            EXACT_PROP_SIZE_DO(dataSize, XnCommandGetTempList)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandGetTempList));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            XnCommandGetTempList* pArgs = reinterpret_cast<XnCommandGetTempList*>(data);
+            if (pArgs->pTempInfos == NULL)
+            {
+                m_driverServices.errorLoggerAppend("Temp array must point to valid memory: \n");
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            xnl::Array<XnTempInfo> tempInfos;
+            nRetVal = m_pSensor->GetSupportedTempList(tempInfos);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Get Temp list", nRetVal, ONI_STATUS_ERROR);
+
+            if (pArgs->count < tempInfos.GetSize())
+            {
+                m_driverServices.errorLoggerAppend("Insufficient memory for Temperature list. available: %d, required: %d\n", pArgs->pTempInfos, tempInfos.GetSize());
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+
+            for (int i = 0; i < (int)tempInfos.GetSize(); ++i)
+            {
+                pArgs->pTempInfos[i] = tempInfos[i];
+            }
+            pArgs->count = tempInfos.GetSize();
+        }
+        break;
+    case PS_COMMAND_READ_TEMPERATURE:
+        {
+            XnCommandTemperatureResponse* pArg;
+            EXACT_PROP_SIZE_DO(dataSize,XnCommandTemperatureResponse)
+            {
+                m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandTemperatureResponse));
+                XN_ASSERT(FALSE);
+                return ONI_STATUS_BAD_PARAMETER;
+            }
+            pArg = reinterpret_cast<XnCommandTemperatureResponse*>(data);
+            nRetVal = m_pSensor->GetTemperature(*pArg);
+            XN_IS_STATUS_OK_LOG_ERROR_RET("Get Temperature", nRetVal, ONI_STATUS_ERROR);
+        }
+        break;
 	case PS_COMMAND_EXECUTE_BIST:
 		{
 			EXACT_PROP_SIZE_DO(dataSize, XnCommandExecuteBist)
@@ -1276,6 +1370,28 @@ OniStatus LinkOniDevice::invoke(int commandId, void* data, int dataSize)
 		}
 		break;
 
+	case LINK_COMMAND_SET_PROJECTOR_PULSE:
+		{
+			EXACT_PROP_SIZE_DO(dataSize, XnCommandSetProjectorPulse)
+			{
+				m_driverServices.errorLoggerAppend("Unexpected size: %d != %d\n", dataSize, sizeof(XnCommandSetProjectorPulse));
+				XN_ASSERT(FALSE);
+				return ONI_STATUS_BAD_PARAMETER;
+			}
+
+			XnCommandSetProjectorPulse* pArgs = reinterpret_cast<XnCommandSetProjectorPulse*>(data);
+			nRetVal = m_pSensor->EnableProjectorPulse((XnFloat)pArgs->delay, (XnFloat)pArgs->width, (XnFloat)pArgs->cycle);
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Enable projector pulse", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
+	case LINK_COMMAND_DISABLE_PROJECTOR_PULSE:
+		{
+			nRetVal = m_pSensor->DisableProjectorPulse();
+			XN_IS_STATUS_OK_LOG_ERROR_RET("Disable projector pulse", nRetVal, ONI_STATUS_ERROR);
+		}
+		break;
+
 	default:
 		return DeviceBase::invoke(commandId, data, dataSize);
 	}
@@ -1293,6 +1409,7 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_I2C_WRITE:
 	case PS_COMMAND_SOFT_RESET:
 	case PS_COMMAND_POWER_RESET:
+    case PS_COMMAND_READ_DEBUG_DATA:
 	case PS_COMMAND_BEGIN_FIRMWARE_UPDATE:
 	case PS_COMMAND_END_FIRMWARE_UPDATE:
 	case PS_COMMAND_UPLOAD_FILE:
@@ -1302,6 +1419,8 @@ OniBool LinkOniDevice::isCommandSupported(int commandId)
 	case PS_COMMAND_DUMP_ENDPOINT:
 	case PS_COMMAND_GET_I2C_DEVICE_LIST:
 	case PS_COMMAND_GET_BIST_LIST:
+    case PS_COMMAND_GET_TEMP_LIST:
+    case PS_COMMAND_READ_TEMPERATURE:
 	case PS_COMMAND_EXECUTE_BIST:
 	case PS_COMMAND_USB_TEST:
 	case PS_COMMAND_GET_LOG_MASK_LIST:

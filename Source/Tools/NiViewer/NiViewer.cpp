@@ -43,20 +43,6 @@
 // R - Increase the maximum depth cutoff by 50.
 // ESC - exit.
 
-// --------------------------------
-// Includes
-// --------------------------------
-// #include <XnCppWrapper.h>
-// 
-// #if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
-// 	#define UNIX
-// 	#define GLX_GLXEXT_LEGACY
-// #endif
-// 
-// #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
-// 	#define MACOS
-// #endif
-
 // Undeprecate CRT functions
 #ifndef _CRT_SECURE_NO_DEPRECATE 
 	#define _CRT_SECURE_NO_DEPRECATE 1
@@ -67,19 +53,12 @@
 #include "OpenNI.h"
 #include "XnLib.h"
 
-#define GLH_EXT_SINGLE_FILE
-#if (ONI_PLATFORM == ONI_PLATFORM_WIN32)
-#pragma warning(push, 3)
-#endif
-#include <glh/glh_obs.h>
-#include <glh/glh_glut2.h>
-#if (ONI_PLATFORM == ONI_PLATFORM_WIN32)
-#pragma warning(pop)
+#ifdef MACOS
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
 #endif
 
-using namespace glh;
-
-// #include <XnLog.h>
 #include "Capture.h"
 #include "Draw.h"
 #include "Keyboard.h"
@@ -117,9 +96,6 @@ bool g_bPause = false;
 bool g_bStep = false;
 bool g_bShutdown = false;
 
-glut_perspective_reshaper reshaper;
-glut_callbacks cb;
-
 IntPair mouseLocation;
 IntPair windowSize;
 
@@ -128,12 +104,12 @@ IntPair windowSize;
 // --------------------------------
 void motionCallback(int x, int y)
 {
-	mouseInputMotion(int((double)x/windowSize.X*WIN_SIZE_X), int((double)y/windowSize.Y*WIN_SIZE_Y));
+	mouseInputMotion(x, y);
 }
 
 void mouseCallback(int button, int state, int x, int y)
 {
-	mouseInputButton(button, state, int((double)x/windowSize.X*WIN_SIZE_X), int((double)y/windowSize.Y*WIN_SIZE_Y));
+	mouseInputButton(button, state, x, y);
 }
 
 void keyboardCallback(unsigned char key, int /*x*/, int /*y*/)
@@ -166,6 +142,14 @@ void keyboardSpecialCallback(int key, int /*x*/, int /*y*/)
 
 void reshapeCallback(int width, int height)
 {
+	glViewport(0, 0, width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(20, (GLdouble)width / height, 1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
+
 	windowSize.X = width;
 	windowSize.Y = height;
 	windowReshaped(width, height);
@@ -302,18 +286,21 @@ void createKeyboardMap()
  		startKeyboardGroup(KEYBOARD_GROUP_DEVICE);
  		{
 			registerKey('y', "Frame sync on/off", toggleFrameSync, 0);
+			registerKey('z', "Zoom crop on/off", toggleZoomCrop, 0);
+
  			registerKey('m', "Mirror on/off", toggleMirror, 0);
  			registerKey('/', "Reset all croppings", resetAllCropping, 0);
 
-			registerKey('a', "toggle Auto Exposure", toggleImageAutoExposure, 0);
-			registerKey('q', "toggle AWB", toggleImageAutoWhiteBalance, 0);
+			registerKey('a', "Toggle Auto Exposure", toggleImageAutoExposure, 0);
+			registerKey('q', "Toggle AWB", toggleImageAutoWhiteBalance, 0);
 			registerKey('e', "Increase Exposure", changeImageExposure, 1);
 			registerKey('E', "Decrease Exposure", changeImageExposure, -1);
 			registerKey('g', "Increase Gain", changeImageGain, 10);
 			registerKey('G', "Decrease Gain", changeImageGain, -10);
 
-			registerKey('x', "Close Range", toggleCloseRange, 0);
+			registerKey('x', "Toggle Close Range", toggleCloseRange, 0);
 			registerKey('i', "Toggle Image Registration", toggleImageRegistration, 0);
+			registerKey('t', "IR Emitter on/off", toggleEmitterState, 0);
  		}
  		endKeyboardGroup();
  		startKeyboardGroup(KEYBOARD_GROUP_CAPTURE);
@@ -328,6 +315,7 @@ void createKeyboardMap()
 		{
 			registerKey('p', "Pointer Mode On/Off", togglePointerMode, 0);
 			registerKey('f', "Full Screen On/Off", toggleFullScreen, 0);
+			registerKey('h', "Reset IR histogram", resetIRHistogram, 0);
 			registerKey('?', "Show/Hide Help screen", toggleHelpScreen, 0);
 		}
 		endKeyboardGroup();
@@ -398,6 +386,7 @@ void createMenu()
 				}
 			}
 			endSubMenu();
+			createMenuEntry("Reset IR histogram", resetIRHistogram, 0);
 			createMenuEntry("Pointer Mode On/Off", togglePointerMode, 0);
 			createMenuEntry("Show/Hide Help Screen", toggleHelpScreen, 0);
 		}
@@ -692,28 +681,21 @@ int main(int argc, char **argv)
 // 	audioInit();
  	captureInit();
 
-	reshaper.zNear = 1;
-	reshaper.zFar = 100;
-	glut_add_interactor(&reshaper);
-
-	cb.mouse_function = mouseCallback;
-	cb.motion_function = motionCallback;
-	cb.passive_motion_function = motionCallback;
-	cb.keyboard_function = keyboardCallback;
-	cb.special_function  = keyboardSpecialCallback;
-	cb.reshape_function = reshapeCallback;
-	glut_add_interactor(&cb);
-
 	glutInit(&argc, argv);
 	glutInitDisplayString("stencil double rgb");
-	glutInitWindowSize(WIN_SIZE_X, WIN_SIZE_Y);
+	glutInitWindowSize(1280, 1024);
 	glutCreateWindow("OpenNI Viewer");
 	glutFullScreen();
 	glutSetCursor(GLUT_CURSOR_NONE);
 
 	init_opengl();
 
-	glut_helpers_initialize();
+	glutMouseFunc(mouseCallback);
+	glutMotionFunc(motionCallback);
+	glutPassiveMotionFunc(motionCallback);
+	glutKeyboardFunc(keyboardCallback);
+	glutSpecialFunc(keyboardSpecialCallback);
+	glutReshapeFunc(reshapeCallback);
 
 	glutIdleFunc(idleCallback);
 	glutDisplayFunc(drawFrame);

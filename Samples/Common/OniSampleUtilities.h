@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_SAMPLE_UTILITIES_H_
-#define _ONI_SAMPLE_UTILITIES_H_
+#ifndef ONISAMPLEUTILITIES_H
+#define ONISAMPLEUTILITIES_H
 
 #include <stdio.h>
 #include <OpenNI.h>
@@ -116,4 +116,4 @@ void calculateHistogram(float* pHistogram, int histogramSize, const openni::Vide
 
 
 
-#endif // _ONI_SAMPLE_UTILITIES_H_
+#endif // ONISAMPLEUTILITIES_H

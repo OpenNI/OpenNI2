@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_DRIVER_SERVICES_H_
-#define _ONI_DRIVER_SERVICES_H_
+#ifndef ONIDRIVERSERVICES_H
+#define ONIDRIVERSERVICES_H
 
 #include "XnErrorLogger.h"
 
@@ -40,4 +40,4 @@ private:
 
 ONI_NAMESPACE_IMPLEMENTATION_END
 
-#endif // _ONI_DRIVER_SERVICES_H_
+#endif // ONIDRIVERSERVICES_H

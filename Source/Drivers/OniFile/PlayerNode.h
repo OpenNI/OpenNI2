@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PLAYER_H__
-#define __PLAYER_H__
+#ifndef PLAYERNODE_H
+#define PLAYERNODE_H
 
 #include "DataRecords.h"
 #include "XnPlayerTypes.h"
@@ -192,4 +192,4 @@ private:
 
 }
 
-#endif //__PLAYER_H__
+#endif // PLAYERNODE_H

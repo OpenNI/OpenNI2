@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DATA_PROCESSOR_H__
-#define __XN_DATA_PROCESSOR_H__
+#ifndef XNDATAPROCESSOR_H
+#define XNDATAPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -99,4 +99,4 @@ private:
 	XnBool m_bUseHostTimestamps;
 };
 
-#endif //__XN_DATA_PROCESSOR_H__
+#endif // XNDATAPROCESSOR_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __AUDIO_H__
-#define __AUDIO_H__
+#ifndef AUDIO_H
+#define AUDIO_H
 
 // --------------------------------
 // Includes
@@ -33,4 +33,4 @@ void audioInit();
 void audioPlay();
 void audioShutdown(void);
 
-#endif //__AUDIO_H__
+#endif // AUDIO_H

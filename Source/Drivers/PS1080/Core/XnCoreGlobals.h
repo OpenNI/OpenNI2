@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_COREGLOBALS_H_
-#define _XN_COREGLOBALS_H_
+#ifndef XNCOREGLOBALS_H
+#define XNCOREGLOBALS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -55,4 +55,4 @@ extern XnBool g_bXnCoreWasInit;
 		return (XN_STATUS_ALREADY_INIT);	\
 	}
 
-#endif //_XN_COREGLOBALS_H_
+#endif // XNCOREGLOBALS_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_STREAM_H__
-#define __XN_ONI_STREAM_H__
+#ifndef XNONISTREAM_H
+#define XNONISTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -74,4 +74,4 @@ private:
 	static void XN_CALLBACK_TYPE OnNewStreamDataEventHandler(const XnNewStreamDataEventArgs& args, void* pCookie);
 };
 
-#endif // __XN_ONI_STREAM_H__
+#endif // XNONISTREAM_H

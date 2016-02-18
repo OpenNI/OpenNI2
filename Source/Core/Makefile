@@ -6,6 +6,7 @@ INC_DIRS = \
 	../../Include \
 	../../ThirdParty/PSCommon/XnLib/Include \
 	../Drivers/OniFile/Formats \
+	../Drivers/OniFile \
 	../../ThirdParty/LibJPEG
 
 SRC_FILES = \
@@ -15,9 +16,15 @@ SRC_FILES = \
 	../../ThirdParty/LibJPEG/*.c \
 
 ifeq ("$(OSTYPE)","Darwin")
-	INC_DIRS += /opt/local/include
-	LIB_DIRS += /opt/local/lib
-	LDFLAGS += -framework CoreFoundation -framework IOKit
+	INC_DIRS += \
+		/usr/local/include \
+		/opt/local/include
+	LIB_DIRS += \
+		/usr/local/lib \
+		/opt/local/lib
+	LDFLAGS += \
+		-framework CoreFoundation \
+		-framework IOKit
 endif
 
 LIB_NAME = OpenNI2

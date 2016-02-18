@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_IR_STREAM_H__
-#define __XN_ONI_IR_STREAM_H__
+#ifndef XNONIIRSTREAM_H
+#define XNONIIRSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -34,7 +34,9 @@ class XnOniIRStream :
 	public XnOniMapStream
 {
 public:
-	XnOniIRStream(XnSensor* pSensor, XnOniDevice* pDevice);
+    XnOniIRStream(XnSensor* pSensor, XnOniDevice* pDevice);
+    virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
+    virtual OniBool isPropertySupported(int propertyId);
 };
 
-#endif // __XN_ONI_IR_STREAM_H__
+#endif // XNONIIRSTREAM_H

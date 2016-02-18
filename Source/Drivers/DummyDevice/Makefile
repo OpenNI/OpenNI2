@@ -10,9 +10,15 @@ SRC_FILES = \
 	*.cpp
 
 ifeq ("$(OSTYPE)","Darwin")
-	INC_DIRS += /opt/local/include
-	LIB_DIRS += /opt/local/lib
-	LDFLAGS += -framework CoreFoundation -framework IOKit
+	INC_DIRS += \
+		/usr/local/include \
+		/opt/local/include
+	LIB_DIRS += \
+		/usr/local/lib \
+		/opt/local/lib
+	LDFLAGS += \
+		-framework CoreFoundation \
+		-framework IOKit
 endif
 
 LIB_NAME = DummyDevice

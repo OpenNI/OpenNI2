@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_UNCOMPRESSED_YUV422_TO_RGB_IMAGE_PROCESSOR_H__
-#define __XN_UNCOMPRESSED_YUV422_TO_RGB_IMAGE_PROCESSOR_H__
+#ifndef XNUNCOMPRESSEDYUV422TORGBIMAGEPROCESSOR_H
+#define XNUNCOMPRESSEDYUV422TORGBIMAGEPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -50,4 +50,4 @@ private:
 	XnBuffer m_ContinuousBuffer;
 };
 
-#endif //__XN_UNCOMPRESSED_YUV422_TO_RGB_IMAGE_PROCESSOR_H__
+#endif // XNUNCOMPRESSEDYUV422TORGBIMAGEPROCESSOR_H

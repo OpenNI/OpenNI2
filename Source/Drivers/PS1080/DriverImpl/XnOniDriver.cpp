@@ -233,11 +233,8 @@ void XN_CALLBACK_TYPE XnOniDriver::OnDevicePropertyChanged(const XnChar* ModuleN
 		XnStatus nRetVal = pSensor->GetProperty(ModuleName, XN_MODULE_PROPERTY_ERROR_STATE, &errorState);
 		if (nRetVal == XN_STATUS_OK)
 		{
-			if (errorState == XN_STATUS_DEVICE_NOT_CONNECTED)
-			{
-				pThis->deviceDisconnected(pDevice->GetInfo());
-			}
-			else
+			// ignore NOT_CONNECTED state. It's already handled by the DeviceEnumeration class
+			if (errorState != XN_STATUS_DEVICE_NOT_CONNECTED)
 			{
 				int errorStateValue = XN_ERROR_STATE_OK;
 				switch (errorState)

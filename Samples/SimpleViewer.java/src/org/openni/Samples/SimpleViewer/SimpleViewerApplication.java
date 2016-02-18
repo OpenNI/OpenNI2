@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 package org.openni.Samples.SimpleViewer;
 
 import org.openni.*;
@@ -76,6 +96,11 @@ public class SimpleViewerApplication implements ItemListener {
             mComboBoxStreams.addItem("Depth");
         }
         
+        if (device.getSensorInfo(SensorType.IR) != null) {
+            mDeviceSensors.add(SensorType.IR);
+            mComboBoxStreams.addItem("IR");
+        }
+        
         mComboBoxStreams.addItemListener(this);
         mComboBoxVideoModes.addItemListener(this);
         mViewer.setSize(800,600);
@@ -128,6 +153,8 @@ public class SimpleViewerApplication implements ItemListener {
                 case SHIFT_9_2:
                 case SHIFT_9_3:
                 case RGB888:
+                case GRAY8:
+                case GRAY16:
                     mSupportedModes.add(mode);
                     break;
             }
@@ -154,6 +181,8 @@ public class SimpleViewerApplication implements ItemListener {
             case SHIFT_9_2:     return "9.2";
             case SHIFT_9_3:     return "9.3";
             case RGB888:        return "RGB";
+            case GRAY8:         return "Gray8";
+            case GRAY16:        return "Gray16";
             default:            return "UNKNOWN";
         }
     }
@@ -188,14 +217,21 @@ public class SimpleViewerApplication implements ItemListener {
     public static void main(String s[]) {
         // initialize OpenNI
         OpenNI.initialize();
+
+        String uri;
         
-        List<DeviceInfo> devicesInfo = OpenNI.enumerateDevices();
-        if (devicesInfo.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No device is connected", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (s.length > 0) {
+            uri = s[0];
+        } else {
+            List<DeviceInfo> devicesInfo = OpenNI.enumerateDevices();
+            if (devicesInfo.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No device is connected", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            uri = devicesInfo.get(0).getUri();
         }
         
-        Device device = Device.open(devicesInfo.get(0).getUri());
+        Device device = Device.open(uri);
 
         final SimpleViewerApplication app = new SimpleViewerApplication(device);
         app.run();

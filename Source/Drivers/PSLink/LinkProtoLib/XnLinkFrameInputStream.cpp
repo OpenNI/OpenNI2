@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "XnLinkFrameInputStream.h"
 #include "XnLinkProtoUtils.h"
 #include "XnLinkControlEndpoint.h"
@@ -196,14 +216,14 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 		header.SetSize(header.GetSize() - sizeof(XnUInt64));
 
         // TEMP: inject the host's timestamp. Firmware can't produce timestamps yet
-	XnUInt64 nTimestamp;
+		XnUInt64 nTimestamp;
         nRetVal = xnOSGetHighResTimeStamp(&nTimestamp);
         if (nRetVal != XN_STATUS_OK)
         {
             xnLogWarning(XN_MASK_LINK, "Failed to get timestamp from os: %s", xnGetStatusString(nRetVal));
             XN_ASSERT(FALSE);
         }
-	m_pCurrFrame->timestamp = nTimestamp;
+		m_pCurrFrame->timestamp = nTimestamp;
 
 		// begin parsing frame
 		nRetVal = m_pLinkMsgParser->BeginParsing(m_pCurrFrame->data, m_nBufferSize);
@@ -248,9 +268,7 @@ XnStatus LinkFrameInputStream::HandlePacket(const LinkPacketHeader& origHeader, 
 		{
 			//Save actual size of data in working buffer info
 			m_pCurrFrame->dataSize = m_pLinkMsgParser->GetParsedSize();
-			m_pCurrFrame->frameIndex = m_frameIndex++;
-
-			m_pCurrFrame->frameIndex            = m_frameIndex++;
+			m_pCurrFrame->frameIndex            = ++m_frameIndex;
 			m_pCurrFrame->croppingEnabled       = m_cropping.enabled;
 			if (m_cropping.enabled)
 			{
@@ -409,6 +427,7 @@ XnUInt32 LinkFrameInputStream::GetOutputBytesPerPixel() const
 	switch (m_outputFormat)
 	{
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 		return sizeof(OniDepthPixel);
 	case ONI_PIXEL_FORMAT_YUV422:
 		return sizeof(OniYUV422DoublePixel)/2;
@@ -486,13 +505,10 @@ XnBool LinkFrameInputStream::IsOutputFormatSupported(OniPixelFormat format) cons
 	switch (format)
 	{
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 		return (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS);
-	case ONI_PIXEL_FORMAT_YUV422:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
-	case ONI_PIXEL_FORMAT_RGB888:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_BAYER8);
 	case ONI_PIXEL_FORMAT_GRAY16:
-		return (m_streamType == XN_LINK_STREAM_TYPE_COLOR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_GRAYSCALE16);
+		return (m_streamType == XN_LINK_STREAM_TYPE_IR) && (m_videoMode.m_nPixelFormat == XN_FW_PIXEL_FORMAT_GRAYSCALE16);
 	default:
 		return LinkInputStream::IsOutputFormatSupported(format);
 	}
@@ -541,11 +557,22 @@ XnStatus LinkFrameInputStream::SetVideoMode(const XnFwStreamVideoMode& videoMode
 
 	nRetVal = UpdateCameraIntrinsics();
 	XN_IS_STATUS_OK_LOG_ERROR("Update Camera Intrinsics", nRetVal);
-
+	
 	// if needed, build shift-to-depth tables
 	if (m_streamType == XN_LINK_STREAM_TYPE_SHIFTS)
 	{
 		nRetVal = m_pLinkControlEndpoint->GetShiftToDepthConfig(m_nStreamID, m_shiftToDepthConfig);
+		
+		if (m_outputFormat == ONI_PIXEL_FORMAT_DEPTH_100_UM)
+		{
+			m_shiftToDepthConfig.nDeviceMaxDepthValue = XN_MIN(m_shiftToDepthConfig.nDeviceMaxDepthValue * 10, XN_MAX_UINT16);
+			m_shiftToDepthConfig.nDepthMaxCutOff = XN_MIN(m_shiftToDepthConfig.nDepthMaxCutOff * 10, XN_MAX_UINT16);
+			m_shiftToDepthConfig.dDepthScale = 10.0;
+
+			nRetVal = XnShiftToDepthInit(&m_shiftToDepthTables, &m_shiftToDepthConfig);
+			XN_IS_STATUS_OK_LOG_ERROR("Init shift to depth tables", nRetVal);
+		}
+
 		XN_IS_STATUS_OK(nRetVal);
 
 		// construct tables
@@ -572,34 +599,6 @@ XnStatus LinkFrameInputStream::GetShiftToDepthTables(const XnShiftToDepthTables*
 	pTables = &m_shiftToDepthTables;
 
 	return XN_STATUS_OK;
-}
-
-XnStatus LinkFrameInputStream::SetDepthScale(XnDouble dDepthScale)
-{
-	XnStatus nRetVal = XN_STATUS_OK;
-
-	XnDouble dPrevScale = m_shiftToDepthConfig.dDepthScale;
-
-	if (dDepthScale != dPrevScale)
-	{
-		XnDouble dNewMaxCutOff = m_shiftToDepthConfig.nDepthMaxCutOff / dPrevScale * dDepthScale;
-		if (dNewMaxCutOff > m_shiftToDepthConfig.nDeviceMaxDepthValue)
-		{
-			xnLogError(XN_MASK_LINK, "Can't set depth scale to %f: this will create a cut off larger than max depth (%u > %u)", 
-				dDepthScale, (XnUInt32)dNewMaxCutOff, m_shiftToDepthConfig.nDeviceMaxDepthValue);
-			XN_ASSERT(FALSE);
-			return XN_STATUS_BAD_PARAM;
-		}
-
-		m_shiftToDepthConfig.dDepthScale = dDepthScale;
-		m_shiftToDepthConfig.nDepthMaxCutOff = (OniDepthPixel)(m_shiftToDepthConfig.nDepthMaxCutOff / dPrevScale * dDepthScale);
-		m_shiftToDepthConfig.nDepthMinCutOff = (OniDepthPixel)(m_shiftToDepthConfig.nDepthMinCutOff / dPrevScale * dDepthScale);
-
-		nRetVal = XnShiftToDepthUpdate(&m_shiftToDepthTables, &m_shiftToDepthConfig);
-		XN_IS_STATUS_OK(nRetVal);
-	}
-
-	return (XN_STATUS_OK);
 }
 
 const OniCropping& LinkFrameInputStream::GetCropping() const
@@ -659,12 +658,13 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 	}
 	switch (outputFormat)
 	{
+	case ONI_PIXEL_FORMAT_DEPTH_100_UM:
 	case ONI_PIXEL_FORMAT_DEPTH_1_MM:
 		{
 			if (pixelFormat != XN_FW_PIXEL_FORMAT_SHIFTS_9_3)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to depth!", pixelFormat);
-				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_SHIFTS_9_3);
+				XN_ASSERT(pixelFormat == XN_FW_PIXEL_FORMAT_SHIFTS_9_3);
 				return NULL;
 			}
 
@@ -689,7 +689,7 @@ LinkMsgParser* LinkFrameInputStream::CreateLinkMsgParser()
 			if (pixelFormat != XN_FW_PIXEL_FORMAT_YUV422)
 			{
 				xnLogError(XN_MASK_LINK, "Cannot convert from pixel format %d to YUV422!", pixelFormat);
-				XN_ASSERT(pixelFormat == XN_LINK_PIXEL_FORMAT_YUV422);
+				XN_ASSERT(pixelFormat == XN_FW_PIXEL_FORMAT_YUV422);
 				return NULL;
 			}
 

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_IMAGE_STREAM_H__
-#define __XN_SENSOR_IMAGE_STREAM_H__
+#ifndef XNSENSORIMAGESTREAM_H
+#define XNSENSORIMAGESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -112,6 +112,7 @@ protected:
 	virtual XnStatus SetAutoWhiteBalance(XnBool bAutoWhiteBalance);
 	virtual XnStatus SetExposure(XnUInt64 nValue);
 	virtual XnStatus SetGain(XnUInt64 nValue);
+	virtual XnStatus SetFastZoomCrop(XnBool bFastZoomCrop);
 private:
 	XnStatus ValidateMode();
 	XnStatus SetCroppingImpl(const OniCropping* pCropping, XnCroppingMode mode);
@@ -127,6 +128,7 @@ private:
 	static XnStatus XN_CALLBACK_TYPE SetAutoWhiteBalanceCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetExposureCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE SetGainCallback(XnActualIntProperty* pSender, XnUInt64 nValue, void* pCookie);
+	static XnStatus XN_CALLBACK_TYPE SetFastZoomCropCallback(XnActualIntProperty* pSendoer, XnUInt64 nValue, void* pCookie);
 
 	//---------------------------------------------------------------------------
 	// Members
@@ -149,6 +151,7 @@ private:
 	XnActualIntProperty m_AutoWhiteBalance;
 	XnActualIntProperty m_Exposure;
 	XnActualIntProperty m_Gain;
+	XnActualIntProperty m_FastZoomCrop;
 
 	XnActualIntProperty m_ActualRead;
 
@@ -156,4 +159,4 @@ private:
 	XnActualRealProperty m_VerticalFOV;
 };
 
-#endif //__XN_SENSOR_IMAGE_STREAM_H__
+#endif // XNSENSORIMAGESTREAM_H

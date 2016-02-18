@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FRAME_STREAM_PROCESSOR_H__
-#define __XN_FRAME_STREAM_PROCESSOR_H__
+#ifndef XNFRAMESTREAMPROCESSOR_H
+#define XNFRAMESTREAMPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -180,4 +180,4 @@ private:
 	XnUInt64 m_nFirstPacketTimestamp;
 };
 
-#endif //__XN_FRAME_STREAM_PROCESSOR_H__
+#endif // XNFRAMESTREAMPROCESSOR_H

@@ -1,0 +1,406 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>
+      Getting Started
+    </title>
+  </head>
+  <body>
+    <h1>
+      Introduction
+    </h1>
+    <h2>
+      About this Document
+    </h2>
+    <p>
+      This document provides step by step instructions on how to compile and run the OpenNI for Android sample applications.
+    </p>
+    <h2>
+      Audience
+    </h2>
+    <ul>
+      <li>
+        OpenNI Android Developers
+      </li>
+    </ul>
+    
+    
+    <h2>
+      Support
+    </h2>
+    <p>
+      If you have any questions or require further assistance, contact 
+      <a href="mailto:support@primesense.com">
+        Support@primesense.com
+      </a>
+      .
+    </p>
+    <h1>
+      Overview
+    </h1>
+    <p>
+      The OpenNI for Android distribution consists of a set of libraries
+      needed to access the PrimeSense sensor on an Android device, as well as
+      four samples illustrating the capabilities of the SDK on this
+      platform.
+    </p>
+    <p>
+      This document provides detailed instructions on how to load the sample
+      projects into an Eclipse environment, compile them, and install the
+      resulting binaries on an Android device.
+    </p>
+    <p>
+      No setup procedure is required for the Android tablet that will be
+      used. This version of OpenNI for Android does not require root access
+      on the device, or any sort of driver install outside of the libraries
+      packed with each app that uses the sensor.
+    </p>
+    <p>
+      <strong>
+        NOTE: Previous proof-of-concept Android SDK's released by
+        PrimeSense are known to conflict with this release. If you have an
+        older version of the SDK installed (ie, one that required you to root
+        the device and place shared libraries into the Android system folder)
+        It is important to remove that release from your tablet before
+        continuing. The simplest way to do this is to reinstall the tablet OS
+        to bring the "factory new" configuration back, or to start with a
+        tablet that has never had PrimeSense software installed on it.
+      </strong>
+      &nbsp;
+    </p>
+    <p>
+      This tutorial assumes that you have a current version of Eclipse, as
+      well as the Android ADT plug-in for Eclipse, and a current installation
+      of the Android SDK. For instructions on setting up these tools see:
+      For the Android SDK: 
+      <a href="http://developer.android.com/sdk/installing/index.html">
+        http://developer.android.com/sdk/installing/index.html
+      </a>
+      For Eclipse: 
+      <a href="http://www.eclipse.org/downloads/">
+        http://www.eclipse.org/downloads/
+      </a>
+      For the Android ADT Plugin for Eclipse: 
+      <a href="http://developer.android.com/sdk/installing/installing-adt.html">
+        http://developer.android.com/sdk/installing/installing-adt.html
+      </a>
+      &nbsp;
+    </p>
+    <p>
+      This
+      tutorial also assumes that you have an Android based tablet that
+      includes USB host capabilities and a PrimeSense Carmine or Capri
+      sensor, as well as the required drivers to connect the tablet to the
+      Eclipse debug environment.&nbsp;
+    </p>
+    <p>
+      This tutorial was tested on Windows 7, with ADT Bundle version 22.2.0
+      and Android SDK Platform Tools Rev. 18. Hardware used was an ASUS Transformer Prime.
+      <br>
+    </p>
+    <h1>
+      Structure of the SDK
+    </h1>
+    <h2>
+      SDK Setup Procedures
+    </h2>
+    <p>
+      The SDK is provided as a single Android library. Enabling support
+      for the sensor is a simple matter of including the
+      "OpenNIAndroidLibrary" as a library dependency in the project for your
+      Android app. The contents of the distribution must be available
+      somewhere on the development machine so that the Android Tools can find
+      them, but no additional SDK installation procedure is necessary on the
+      host side.&nbsp;
+    </p>
+    <p>
+      When an Android project is built to use the sensor, the required
+      libraries are included in the .apk file that is created. The required
+      configuration files are also included in the project as assets.
+    </p>
+    <p>
+      Once you can build and install the sample applications that come with
+      the SDK, you are ready to begin development of Android applications
+      using OpenNI. The chapter in this document entitled "Building the
+      Samples in Eclipse" gives detailed instructions on how to do this.
+      <br class="atl-forced-newline">
+    </p>
+    <h2>
+      How the SDK Communicates with the Sensor
+    </h2>
+    <p>
+      A major design goal of this SDK was to enable communication with a
+      PrimeSense device without need for root permissions in Android. This
+      was accomplished by using the Android USB Host API which first became
+      available at Android API level 12 (ie Android Honeycomb 3.1).&nbsp;
+    </p>
+    <p>
+      As part of the Android security infrastructure, application access to
+      the USB port will require active user approval. This takes the form of
+      a dialogue box that a user must click "okay" on. This interaction is a
+      design feature of the Android operating system, not of the OpenNI SDK.
+      It is not possible to avoid this interaction in an application if that
+      application is to run on a non-rooted tablet.
+    </p>
+    <p>
+      All code necessary to obtain the user permissions, and use them to open
+      up the sensor is encapsulated in the OpenNIHelper class. 
+    </p>
+    <h2>
+      Major SDK Components
+    </h2>
+    <p>
+      The OpenNIAndroidLibrary contains two major classes that are
+      directly useful to developers, as well as a set of configuration files.
+      <br class="atl-forced-newline">
+    </p>
+    <ul>
+      <li>
+        <strong>
+          OpenNIHelper
+        </strong>
+        - This class encapsulates all
+        code needed to load the static libraries used by OpenNI, obtain
+        permissions to the USB port, and initiate communication with the
+        sensor. It interfaces with the native code that makes up the OpenNI
+        libraries, and generally makes communication with the PrimeSense device
+        possible from an Android App.
+      </li>
+      <li>
+        <strong>
+          OpenNIView
+        </strong>
+        -
+        This class is an extension of the Android GLSurface class (itself an
+        extension of the basic Android view class). It is used to display a
+        depthmap to the screen in an efficient manner. Since passing the entire
+        depth stream to the screen entirely in Java code is not computationally
+        feasible on current tablets, it is necessary to use native code to
+        accomplish this. The OpenNIView class provides the means of doing this
+        so that developers can see the depthmap without having to develop any
+        native code.
+      </li>
+    </ul>
+    <h1>
+      Building the Samples in Eclipse
+    </h1>
+    <h2>
+      Unpack the OpenNI Android Package
+    </h2>
+    <p>
+      The OpenNI Android package is distributed as a single .tgz
+      archive. Unzip this distribution to any convenient location. This
+      tutorial shows the package unzipped to the root of the C drive, but any
+      location that you have read and write access to should work.
+      <br class="atl-forced-newline">
+      Once unzipped, you should have a single
+      top level folder called "OpenNI-Android-&lt;version&gt;". This folder
+      should contain the following subfolders: Assets, Documentation, Native
+      OpenNIAndroidLibrary, Samples and Tools. Make note of the location
+      of the top level "OpenNI-Android" folder, as it will be referenced
+      later in the tutorial.
+    </p>
+    <h2>
+      Create an empty workspace in Eclipse
+    </h2>
+    <p>
+      In order to avoid any conflict with existing open projects in
+      Eclipse, we recommend that you create a new workspace for working with
+      the samples. Experienced users of Eclipse may choose to skip this step
+      based upon personal preference.
+      <br class="atl-forced-newline">
+      To create an empty workspace, start Eclipse, and select File-&gt;Switch Workspace -&gt; Other (see Figure).
+      <br class="atl-forced-newline">
+      <img src="./images/switch-workspace.png">
+      <strong>
+      </strong>
+      <br class="atl-forced-newline">
+      <br class="atl-forced-newline">
+      From
+      here, provide a unique directory name to store the workspace, and
+      select "OK". The path to your workspace directory will not match the
+      one in the figure, since you will have a different user name and
+      directory name.
+      <br class="atl-forced-newline">
+      <img src="./images/select-workspace.png">
+      <strong>
+        <br>
+      </strong>
+    </p>
+    <p>
+      After creating the new workspace, your screen should look like the figure below:
+      <br class="atl-forced-newline">
+      <img src="./images/welcome.png">
+      <strong>
+        <br>
+      </strong>
+    </p>
+    <h2>
+      Import the Sample and Library Packages into Eclipse
+    </h2>
+    <p>
+      The samples are provided with Eclipse project files, so they simply
+      need to be imported. There are four samples, plus the support library.
+      <br class="atl-forced-newline">
+      To import the projects, select File-&gt;Import:
+      <br class="atl-forced-newline">
+      <img src="./images/start-import.png">
+      <strong>
+      </strong>
+    </p>
+    <p>
+      In the resulting dialogue box, select "Existing Projects Into Workspace" from the "General" category, and click "Next".
+      <br>
+      <img src="./images/import-existing-projects.png">
+      <strong>
+      </strong>
+      <br>
+    </p>
+    <p>
+      In
+      the next dialogue, enter the path to the top level OpenNI-Android
+      folder that you created in the first step. Four projects should appear
+      in the "Projects" box, as shown in the figure. You can now click
+      "Finish".
+      <br class="atl-forced-newline">
+      <img src="./images/import-projects.png">
+      <strong>
+      </strong>
+      <br>
+    </p>
+    <h2>
+      Compile and Run Samples
+      <br class="atl-forced-newline">
+    </h2>
+    <p>
+      The simplest way to create an APK that you can install on the device is
+      to simply run the samples once in the Eclipse debugger. To do this:
+      <br class="atl-forced-newline">
+    </p>
+    <ol>
+    </ol>
+    <ol>
+      <li>
+        On the tablet, go to Settings-&gt;Developer Options, and
+        enable "USB Debugging".
+        <br class="atl-forced-newline">
+        <img src="./images/enable-USB-debugging.png">
+      </li>
+      <li>
+        You
+        will also need to allow installation of applications from non-market
+        sources. This setting can be found in Settings-&gt;Security.
+        <br class="atl-forced-newline">
+        <img src="./images/enable-unknown-sources.png">
+      </li>
+      <li>
+        Plug the tablet into a USB port on the development PC.
+      </li>
+      <li>
+        Plug a PrimeSense device into the USB port on the tablet.
+      </li>
+      <li>
+        Verify
+        connectivity by opening a command shell on the host PC, and typing "adb
+        devices" (if the adb command is not found, ensure that the Android
+        Platform Tools bin directory is in your path). 
+        <img src="./images/adb-devices.png">
+      </li>
+        If the device is correctly connected for USB debugging, the device serial
+        number should apear as the output of the "adb devices" command as shown in 
+        the figure. Note that you can check you device serial number at your device 
+        settings, under About -> Status -> Serial number.
+      <li>
+        In Eclipse, left click on "Simple Viewer" under the "Package explorer" to select the project.
+        <br>
+        <strong>
+          NOTE:
+          Previous proof-of-concept Android SDK's released by PrimeSense are
+          known to conflict with this release. If you have an older version of
+          the SDK installed (ie, one that required you to root the device and
+          place shared libraries into the Android system folder) It is important
+          to remove that release from your tablet before continuing. The simplest
+          way to do this is to reinstall the tablet OS to bring the "factory new"
+          configuration back, or to start with a tablet that has never had
+          PrimeSense software installed on it.
+        </strong>
+        <br class="atl-forced-newline">
+        <img src="./images/select-simple-viewer.png">
+      </li>
+      <li>
+        Select the dropdown menu next to the run symbol, select "Run As", and choose "Android Application" (See figure)
+        <br>
+        <img src="./images/eclipse-run-app.png">
+      </li>
+      <li>
+        The application will request access to the USB device
+        <br>
+        <img src="./images/allow-USB-access.png">
+      </li>
+      <li>
+        Once the App exits, you will have a .apk file that was created as part of
+        the debug process. This file will be located at (assuming you unzipped
+        the OpenNI package to the root of the C drive) 
+        <strong>
+          C:\OpenNI-v2.3\Samples\SimpleViewer\bin
+        </strong>
+      </li>
+      <li>
+        Repeat steps 6-10 on the SimpleRead and NiViewer samples to generate apk files for them.
+      </li>
+      <li>
+        Apk files can also be installed using ADB. To install the SimpleViewer apk
+        file, open a command prompt, and change to the directory containing the
+        APK. Make sure your tablet is connected to the computer USB port, and
+        type "adb install SimpleViewer.apk". The application will now be
+        installed on the tablet, and can be run like any other Android
+        application.
+        <br>
+        &nbsp;
+        <img src="./images/install-apk.png">
+        <br>
+      </li>
+    </ol>
+    
+    
+    <h1>
+      Sample 1: Simple Viewer
+    </h1>
+    <p>
+      This sample simply renders the depth map and the color video output 
+      (or IR if color is not available) to the screen. Tap the screen to 
+      switch between the two streams.
+      <br class="atl-forced-newline">
+      The purpose of this sample is to show
+      basic operation of the sensor with the tablet, and to provide a simple
+      source code example of how to open the camera, read a depth frame, and
+      render it to the screen.
+      <br class="atl-forced-newline">
+      <img src="./images/simple-viewer.png">
+      <strong>
+      </strong>
+      <br class="atl-forced-newline">
+    </p>
+    <h1>
+      Sample 2: Simple Read
+    </h1>
+    <p>
+      This sample shows how to start a depth stream, read frames from it and access
+      a specific pixel in the frame.
+      <br class="atl-forced-newline">
+      <img src="./images/simple-read.png">
+      <br class="atl-forced-newline">
+    </p>
+    <h1>
+      NiViewer
+    </h1>
+    <p>
+      NiViewer is intended to show capabilities of OpenNI. It allows choosing the stream
+      to view, choosing a video mode out of the list of supported ones, and recording.
+      <br class="atl-forced-newline">
+      <img src="./images/niviewer.png">
+      <br class="atl-forced-newline">
+    </p>
+  </body>
+</html>
+

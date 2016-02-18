@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef HOST_PROTOCOL_H
-#define HOST_PROTOCOL_H
+#ifndef XNHOSTPROTOCOL_H
+#define XNHOSTPROTOCOL_H
 
 #include <XnStreamParams.h>
 #include "XnParams.h"
@@ -373,4 +373,4 @@ XnStatus XnHostProtocolWriteI2C(XnDevicePrivateData* pDevicePrivateData, const X
 XnStatus XnHostProtocolReadI2C(XnDevicePrivateData* pDevicePrivateData, XnI2CReadData* pI2CReadData);
 XnStatus XnHostProtocolSetFileAttributes(XnDevicePrivateData* pDevicePrivateData, XnUInt16 nFileId, XnUInt16 nAttributes);
 
-#endif
+#endif // XNHOSTPROTOCOL_H

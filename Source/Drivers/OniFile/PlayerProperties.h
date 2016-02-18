@@ -18,10 +18,11 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __PLAYER_PROPERTIES_H__
-#define __PLAYER_PROPERTIES_H__
+#ifndef PLAYERPROPERTIES_H
+#define PLAYERPROPERTIES_H
 
-#include "XnHash.h"
+#include <XnHash.h>
+#include <XnOSCpp.h>
 #include "Driver/OniDriverTypes.h"
 
 namespace oni_file {
@@ -43,6 +44,7 @@ public:
 
 	OniBool Exists(int propertyId)
 	{
+		xnl::AutoCSLocker lock(m_cs);
 		if (m_properties.Find(propertyId) != m_properties.End())
 		{
 			return TRUE;
@@ -52,6 +54,8 @@ public:
 
 	OniStatus GetProperty(int propertyId, void* data, int* pDataSize) const
 	{
+		xnl::AutoCSLocker lock(m_cs);
+
 		// Get the property and make sure it exists.
 		PropertiesHash::ConstIterator iter = m_properties.Find(propertyId);
 		if (iter == m_properties.End())
@@ -69,6 +73,8 @@ public:
 
 	OniStatus SetProperty(int propertyId, const void* data, int dataSize)
 	{
+		xnl::AutoCSLocker lock(m_cs);
+
 		// Check if property exists.
 		PropertiesHash::Iterator iter = m_properties.Find(propertyId);
 		if (iter != m_properties.End())
@@ -84,6 +90,9 @@ public:
 		return ONI_STATUS_OK;
 	}
 
+	typedef xnl::Hash<int, OniGeneralBuffer*> PropertiesHash;
+	PropertiesHash::ConstIterator Begin() const {return m_properties.Begin();}
+	PropertiesHash::ConstIterator End() const {return m_properties.End();}
 private:
 
 	OniGeneralBuffer* CreateBuffer(const void* data, int dataSize)
@@ -113,10 +122,10 @@ private:
 		XN_DELETE(pBuffer);
 	}
 
-	typedef xnl::Hash<int, OniGeneralBuffer*> PropertiesHash;
+	xnl::CriticalSection m_cs;
 	PropertiesHash m_properties;
 };
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_PROPERTIES_H__
+#endif // PLAYERPROPERTIES_H

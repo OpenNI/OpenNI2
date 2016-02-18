@@ -17,10 +17,17 @@
 # *** Note: This module will only get built if compiled via the NDK! ***
 # *** 
 
-ifdef OPENNI2_ANDROID_NDK_BUILD
-
 LOCAL_PATH:= $(call my-dir)
+
 include $(CLEAR_VARS)
+
+include $(LOCAL_PATH)/../../../BuildSystem/CommonAndroid.mk
+
+ifdef PS_OS_BUILD
+	$(info Skipping libusb in OS build...)
+else
+
+ifndef PS_NO_USB
 
 # Sources
 LOCAL_SRC_FILES:= \
@@ -31,9 +38,6 @@ LOCAL_SRC_FILES:= \
                   libusb/os/linux_usbfs.c \
                   libusb/os/threads_posix.c
 
-# C/CPP Flags
-LOCAL_CFLAGS += $(OPENNI2_CFLAGS) -DOPENNI2_EXPORT -fvisibility=default
-				  
 # Includes				  
 LOCAL_C_INCLUDES += \
                     $(LOCAL_PATH)/libusb/ \
@@ -45,8 +49,9 @@ LOCAL_LDLIBS += -llog
 # Output
 LOCAL_MODULE := libusb
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/libusb
+
 include $(BUILD_SHARED_LIBRARY)
 
-else
-    $(info OpenNI2: Skipping libusb in OS build...)
-endif
+endif #NO_USB
+endif #OS_BUILD

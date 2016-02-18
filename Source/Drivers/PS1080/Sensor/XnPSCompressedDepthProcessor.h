@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_PS_COMPRESSED_DEPTH_PROCESSOR_H__
-#define __XN_PS_COMPRESSED_DEPTH_PROCESSOR_H__
+#ifndef XNPSCOMPRESSEDDEPTHPROCESSOR_H
+#define XNPSCOMPRESSEDDEPTHPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -63,4 +63,4 @@ private:
 	static void XN_CALLBACK_TYPE OnRequiredSizeChanged();
 };
 
-#endif //__XN_PS_COMPRESSED_DEPTH_PROCESSOR_H__
+#endif // XNPSCOMPRESSEDDEPTHPROCESSOR_H

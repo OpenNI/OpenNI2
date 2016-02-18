@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __NICODECIDS_H__
-#define __NICODECIDS_H__
+#ifndef XNCODECIDS_H
+#define XNCODECIDS_H
 
 /** Define a Codec ID by 4 characters, e.g. XN_CODEC_ID('J','P','E','G') **/
 #define XN_CODEC_ID(c1, c2, c3, c4) (XnCodecID)((c4 << 24) | (c3 << 16) | (c2 << 8) | c1)
@@ -31,4 +31,4 @@
 #define XN_CODEC_16Z_EMB_TABLES		XN_CODEC_ID('1','6','z','T')
 #define XN_CODEC_8Z					XN_CODEC_ID('I','m','8','z')
 
-#endif // __NICODECIDS_H__
+#endif // XNCODECIDS_H

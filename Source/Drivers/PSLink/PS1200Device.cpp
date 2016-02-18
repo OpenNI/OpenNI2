@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "PS1200Device.h"
 #include "XnClientUSBConnectionFactory.h"
 #include "XnSocketConnectionFactory.h"
@@ -38,18 +58,6 @@ XnStatus PS1200Device::Init(const XnChar* strConnString, XnTransportType transpo
 
 	nRetVal = PrimeClient::Init(strConnString, XN_TRANSPORT_TYPE_USB);
 	XN_IS_STATUS_OK_LOG_ERROR("Init EE Device", nRetVal);
-
-#if (XN_PLATFORM == XN_PLATFORM_WIN32)
-	// On all platforms other than Windows, prefer BULK
-	nRetVal = SetUsbAltInterface(0);
-	XN_IS_STATUS_OK_LOG_ERROR("Switch to ISO", nRetVal);
-#elif (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_MACOSX || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
-	// On all platforms other than Windows, prefer BULK
-	nRetVal = SetUsbAltInterface(1);
-	XN_IS_STATUS_OK_LOG_ERROR("Switch to BULK", nRetVal);
-#else
-	#error "Unsupported platform"
-#endif
 
 	m_bInitialized = TRUE;
 	return XN_STATUS_OK;	

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">NiViewer</string>
+    <string name="sensor_type">Sensor Type</string>
+    <string name="video_mode">Video Mode</string>
+    <string name="waiting_for_frames">Waiting for frames&#8230;</string>
+    <string name="start_record">Start Recording</string>
+    <string name="stop_record">Stop Recording</string>
+    <string name="add_stream">Add Stream</string>
+    <string name="remove">X</string>
+    <string name="select_device">Select device</string>
+    
+</resources>

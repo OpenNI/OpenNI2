@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_H_
-#define _ONI_PLATFORM_H_
+#ifndef ONIPLATFORM_H
+#define ONIPLATFORM_H
 
 // Supported platforms
 #define ONI_PLATFORM_WIN32 1
@@ -69,4 +69,4 @@
 #endif // OPENNI2_EXPORT
 
 
-#endif // _ONI_PLATFORM_H_
+#endif // ONIPLATFORM_H

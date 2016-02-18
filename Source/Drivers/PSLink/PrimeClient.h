@@ -1,5 +1,25 @@
-#ifndef __PRIMECLIENT_H__
-#define __PRIMECLIENT_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef PRIMECLIENT_H
+#define PRIMECLIENT_H
 
 #include "XnLinkProtoLibDefs.h"
 #include "XnLinkControlEndpoint.h"
@@ -53,7 +73,14 @@ public:
     virtual XnStatus ReadAHB(XnUInt32 nAddress, XnUInt8 nBitOffset, XnUInt8 nBitWidth, XnUInt32& nValue);
 	virtual XnStatus SoftReset();
 	virtual XnStatus HardReset();
-    virtual XnStatus SetEmitterActive(XnBool bActive);
+    virtual XnStatus ReadDebugData(XnCommandDebugData& commandDebugData);
+    virtual XnStatus SetProjectorActive(XnBool bActive);
+    virtual XnStatus SetAccActive(XnBool bActive);
+    virtual XnStatus GetAccActive(XnBool& bActive); 
+    virtual XnStatus SetVDDActive(XnBool bActive);  
+    virtual XnStatus GetVDDActive(XnBool& bActive); 
+    virtual XnStatus SetPeriodicBistActive(XnBool bActive);  
+    virtual XnStatus GetPeriodicBistActive(XnBool& bActive);   
     virtual XnStatus StartFWLog();
     virtual XnStatus StopFWLog();
 	virtual XnStatus OpenFWLogFile(XnUInt8 logID);
@@ -62,6 +89,8 @@ public:
 
 	virtual XnStatus RunPresetFile(const XnChar* strFileName);
 	virtual XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
+    virtual XnStatus GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTempList);
+    virtual XnStatus GetTemperature(XnCommandTemperatureResponse& temp);
 	virtual XnStatus ExecuteBist(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	virtual XnStatus FormatZone(XnUInt8 nZone);
     //TODO: Implement Get emitter active
@@ -89,6 +118,12 @@ public:
 	virtual XnStatus GetFileList(xnl::Array<XnFwFileEntry>& files);
 	virtual XnStatus DownloadFile(XnUInt16 zone, const XnChar* strFirmwareFileName, const XnChar* strTargetFile);
 	
+	virtual XnStatus EnableProjectorPulse(XnFloat delay, XnFloat width, XnFloat cycle);
+	virtual XnStatus DisableProjectorPulse();
+	virtual XnStatus GetProjectorPulse(XnBool& enabled, XnFloat& delay, XnFloat& width, XnFloat& framesToskip);
+	virtual XnStatus SetProjectorPower(XnUInt16 power);
+	virtual XnStatus GetProjectorPower(XnUInt16& power);
+
 	virtual void HandleLinkDataEndpointDisconnection(XnUInt16 nEndpointID);
 
 protected:
@@ -124,4 +159,4 @@ private:
 
 }
 
-#endif // __PRIMECLIENT_H__
+#endif // PRIMECLIENT_H

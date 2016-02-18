@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_BUFFER_H__
-#define __XN_BUFFER_H__
+#ifndef XNBUFFER_H
+#define XNBUFFER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -186,4 +186,4 @@ private:
 		XN_IS_STATUS_OK(rc);								\
 	}
 
-#endif //__XN_BUFFER_H__
+#endif // XNBUFFER_H

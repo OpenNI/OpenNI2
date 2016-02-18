@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_STREAM_PROCESSOR_H__
-#define __XN_STREAM_PROCESSOR_H__
+#ifndef XNSTREAMPROCESSOR_H
+#define XNSTREAMPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -54,4 +54,4 @@ private:
 	XnSensorStreamHelper* m_pHelper;
 };
 
-#endif //__XN_STREAM_PROCESSOR_H__
+#endif // XNSTREAMPROCESSOR_H

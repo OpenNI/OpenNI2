@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FIRMWARE_INFO_H__
-#define __XN_FIRMWARE_INFO_H__
+#ifndef XNFIRMWAREINFO_H
+#define XNFIRMWAREINFO_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -122,4 +122,4 @@ public:
 	xnl::Array<XnCmosPreset> irModes;
 };
 
-#endif //__XN_FIRMWARE_INFO_H__
+#endif // XNFIRMWAREINFO_H

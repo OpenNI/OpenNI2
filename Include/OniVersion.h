@@ -18,12 +18,15 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
+#ifndef ONIVERSION_H
+#define ONIVERSION_H
+
 #include "OniPlatform.h"
 
 #define ONI_VERSION_MAJOR	2
-#define ONI_VERSION_MINOR	2
+#define ONI_VERSION_MINOR	3
 #define ONI_VERSION_MAINTENANCE	0
-#define ONI_VERSION_BUILD	33
+#define ONI_VERSION_BUILD	15
 
 /** OpenNI version (in brief string format): "Major.Minor.Maintenance (Build)" */ 
 #define ONI_BRIEF_VERSION_STRING \
@@ -41,3 +44,5 @@
 #define ONI_VERSION_STRING \
 	ONI_BRIEF_VERSION_STRING  "-" \
 	ONI_PLATFORM_STRING " (" ONI_TIMESTAMP ")"
+
+#endif // ONIVERSION_H

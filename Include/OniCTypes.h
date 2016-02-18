@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_TYPES_H_
-#define _ONI_TYPES_H_
+#ifndef ONICTYPES_H
+#define ONICTYPES_H
 
 #include "OniPlatform.h"
 #include "OniCEnums.h"
@@ -83,13 +83,13 @@ typedef struct
 } OniDeviceInfo;
 
 struct _OniDevice;
-typedef _OniDevice* OniDeviceHandle;
+typedef struct _OniDevice* OniDeviceHandle;
 
 struct _OniStream;
-typedef _OniStream* OniStreamHandle;
+typedef struct _OniStream* OniStreamHandle;
 
 struct _OniRecorder;
-typedef _OniRecorder* OniRecorderHandle;
+typedef struct _OniRecorder* OniRecorderHandle;
 
 /** All information of the current frame */
 typedef struct
@@ -141,6 +141,7 @@ typedef struct
 Pixel type used to store depth images.
 */
 typedef uint16_t OniDepthPixel;
+typedef uint16_t OniIRPixel;
 
 /**
 Pixel type used to store 16-bit grayscale images
@@ -182,6 +183,23 @@ typedef struct
 	uint8_t y2;
 } OniYUV422DoublePixel;
 
+/**
+ Holds the value of two pixels in YUV422 format (Luminance/Chrominance,16-bits/pixel).
+ The first pixel has the values y1, u, v.
+ The second pixel has the values y2, u, v.
+*/
+typedef struct
+{
+	/** Overall luminance value of first pixel. */
+	uint8_t y1;
+	/** First chrominance value for two pixels, stored as blue luminance difference signal. */
+	uint8_t u;
+	/** Overall luminance value of second pixel. */
+	uint8_t y2;
+	/** Second chrominance value for two pixels, stored as red luminance difference signal. */
+	uint8_t v;
+} OniYUYVDoublePixel;
+
 #pragma pack (pop)
 
 typedef struct
@@ -190,4 +208,4 @@ typedef struct
 	OniStreamHandle stream;
 } OniSeek;
 
-#endif // _ONI_TYPES_H_
+#endif // ONICTYPES_H

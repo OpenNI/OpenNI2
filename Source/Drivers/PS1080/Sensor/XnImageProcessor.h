@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IMAGE_PROCESSOR_H__
-#define __XN_IMAGE_PROCESSOR_H__
+#ifndef XNIMAGEPROCESSOR_H
+#define XNIMAGEPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -73,4 +73,4 @@ private:
 	XnBool m_bCompressedOutput;
 };
 
-#endif //__XN_IMAGE_PROCESSOR_H__
+#endif // XNIMAGEPROCESSOR_H

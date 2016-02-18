@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEVICE_MODULE_H__
-#define __XN_DEVICE_MODULE_H__
+#ifndef XNDEVICEMODULE_H
+#define XNDEVICEMODULE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -114,4 +114,4 @@ private:
 	}
 
 
-#endif //__XN_DEVICE_MODULE_H__
+#endif // XNDEVICEMODULE_H

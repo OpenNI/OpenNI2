@@ -23,7 +23,7 @@
 //---------------------------------------------------------------------------
 #include <XnUSB.h>
 
-#if (XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
+#if (XN_PLATFORM == XN_PLATFORM_ANDROID_ARM) || defined(XN_PLATFORM_MACOSX_XCODE) || defined(XN_PLATFORM_IOS)
 #include <libusb.h>
 #else
 #include <libusb-1.0/libusb.h>

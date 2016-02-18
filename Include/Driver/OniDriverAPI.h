@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_DRIVER_API_H_
-#define _ONI_DRIVER_API_H_
+#ifndef ONIDRIVERAPI_H
+#define ONIDRIVERAPI_H
 
 #include "OniPlatform.h"
 #include "OniCTypes.h"
@@ -375,4 +375,4 @@ ONI_C_API_EXPORT void oniDriverDisableFrameSync(void* frameSyncGroup)											
 	return g_pDriver->disableFrameSync(frameSyncGroup);																		\
 }																															\
 
-#endif // _ONI_DRIVER_API_H_
+#endif // ONIDRIVERAPI_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_MAP_STREAM_H__
-#define __XN_ONI_MAP_STREAM_H__
+#ifndef XNONIMAPSTREAM_H
+#define XNONIMAPSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -66,4 +66,4 @@ private:
 	XnStatus FillSupportedVideoModes();
 };
 
-#endif // __XN_ONI_MAP_STREAM_H__
+#endif // XNONIMAPSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef XN_PARAMS_H
-#define XN_PARAMS_H
+#ifndef XNPARAMS_H
+#define XNPARAMS_H
 
 typedef enum 
 {
@@ -122,6 +122,7 @@ typedef enum
 	PARAM_IMAGE_LOW_LIGHT_COMPENSATION_MODE = 82,
 	PARAM_DEPTH_CLOSE_RANGE = 84,
 	PARAM_FILE_SYSTEM_LOCK = 85,
+	PARAM_FAST_ZOOM_CROP = 86,
 } EConfig_Params;
 
 typedef enum XnExecuter
@@ -131,4 +132,4 @@ typedef enum XnExecuter
 	XN_EXECUTER_HOST = 2,
 } XnExecuter;
 
-#endif
+#endif // XNPARAMS_H

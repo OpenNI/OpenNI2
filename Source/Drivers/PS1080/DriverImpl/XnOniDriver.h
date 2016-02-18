@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_DRIVER_H__
-#define __XN_ONI_DRIVER_H__
+#ifndef XNONIDRIVER_H
+#define XNONIDRIVER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -81,4 +81,4 @@ private:
 	XnCallbackHandle m_disconnectedEventHandle;
 };
 
-#endif // __XN_ONI_DRIVER_H__
+#endif // XNONIDRIVER_H

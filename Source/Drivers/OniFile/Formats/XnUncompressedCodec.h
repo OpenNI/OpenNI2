@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_UNCOMPRESSED_CODEC_H__
-#define __XN_UNCOMPRESSED_CODEC_H__
+#ifndef XNUNCOMPRESSEDCODEC_H
+#define XNUNCOMPRESSEDCODEC_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -68,4 +68,4 @@ protected:
 	}
 };
 
-#endif //__XN_UNCOMPRESSED_CODEC_H__
+#endif // XNUNCOMPRESSEDCODEC_H

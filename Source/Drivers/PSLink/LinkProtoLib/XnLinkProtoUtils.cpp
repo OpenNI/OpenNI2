@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "XnLinkProtoUtils.h"
 #include "XnLinkProto.h"
 #include "XnLinkDefs.h"
@@ -64,6 +84,14 @@ XnStatus xnLinkResponseCodeToStatus(XnUInt16 nResponseCode)
 			return XN_STATUS_LINK_RESP_BAD_PARAMETERS;
 		case XN_LINK_RESPONSE_CORRUPT_PACKET:
 			return XN_STATUS_LINK_RESP_CORRUPT_PACKET;
+		case XN_LINK_RESPONSE_FILE_CORRUPT:
+			return XN_STATUS_LINK_RESP_CORRUPT_FILE;
+		case XN_LINK_RESPONSE_BAD_CRC:
+			return XN_STATUS_LINK_RESP_BAD_CRC;
+		case XN_LINK_RESPONSE_INCORRECT_SIZE:
+			return XN_STATUS_LINK_RESP_INCORRECT_SIZE;
+		case XN_LINK_RESPONSE_INPUT_BUFFER_OVERFLOW:
+			return XN_STATUS_LINK_RESP_INPUT_BUFFER_OVERFLOW;
 		default:
 			return XN_STATUS_LINK_RESP_UNKNOWN;
 	}
@@ -577,7 +605,7 @@ const XnChar* xnLinkPropTypeToStr(XnLinkPropType propType)
 		"General",	//0x0004
 	};
 
-	return (propType < sizeof(PROP_TYPE_STRS) / sizeof(PROP_TYPE_STRS[0])) ? PROP_TYPE_STRS[propType] : "Unknown";
+	return ((size_t)propType < sizeof(PROP_TYPE_STRS) / sizeof(PROP_TYPE_STRS[0])) ? PROP_TYPE_STRS[propType] : "Unknown";
 }
 
 /*XnProductionNodeType xnLinkStreamTypeToNINodeType(XnLinkStreamType streamType)
@@ -940,6 +968,24 @@ XnUInt32 xnLinkGetPixelSizeByStreamType(XnLinkStreamType streamType)
         return 0;
     }
 }
+XnStatus xnLinkReadDebugData(XnCommandDebugData& commandDebugData, XnLinkDebugDataResponse* pDebugDataResponse)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+
+    if(commandDebugData.dataSize < pDebugDataResponse->m_header.m_nValueSize)
+    {
+        xnLogError(XN_MASK_LINK, "Size of retrieved data was larger than requested: %u bytes, must be at least %u.", pDebugDataResponse->m_header.m_nValueSize, 
+            commandDebugData.dataSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+    commandDebugData.dataSize = pDebugDataResponse->m_header.m_nValueSize; //if the sized received is smaller than expected
+    for(int i = 0; i < commandDebugData.dataSize; i++)
+    {
+        commandDebugData.data[i] = pDebugDataResponse->m_data[i];
+    }
+    return nRetVal;
+}
 
 XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pDevicesList, XnUInt32 nBufferSize, xnl::Array<XnLinkI2CDevice>& supportedDevices)
 {
@@ -975,6 +1021,8 @@ XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pDevice
 		supportedDevices[i].m_nID = XN_PREPARE_VAR32_IN_BUFFER(pDevicesList->m_aI2CDevices[i].m_nID);
 		nRetVal = xnOSStrCopy(supportedDevices[i].m_strName, pDevicesList->m_aI2CDevices[i].m_strName, sizeof(supportedDevices[i].m_strName));
 		XN_IS_STATUS_OK_LOG_ERROR("Copy I2C device name", nRetVal);
+        supportedDevices[i].m_nMasterID = pDevicesList->m_aI2CDevices[i].m_nMasterID;
+        supportedDevices[i].m_nSlaveID = pDevicesList->m_aI2CDevices[i].m_nSlaveID;
 	}
 
 	return XN_STATUS_OK;
@@ -1058,6 +1106,73 @@ XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupporte
 	return XN_STATUS_OK;
 }
 
+XnStatus xnLinkParseSupportedTempList(const XnLinkTemperatureSensorsList* pSupportedList, XnUInt32 nBufferSize, xnl::Array<XnTempInfo>& supportedTempList)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnUInt32 nTemp = 0;
+    XnUInt32 nExpectedSize = 0;
+
+    XN_VALIDATE_INPUT_PTR(pSupportedList);
+
+    if (nBufferSize < sizeof(pSupportedList->m_nCount))
+    {
+        xnLogError(XN_MASK_LINK, "Size of link supported Temperature list was only %u bytes, must be at least %u.", nBufferSize, 
+            sizeof(pSupportedList->m_nCount));
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+
+    nTemp = XN_PREPARE_VAR32_IN_BUFFER(pSupportedList->m_nCount);
+    nExpectedSize = (sizeof(pSupportedList->m_nCount) + 
+        (sizeof(pSupportedList->m_aSensors[0]) * nTemp));
+    if (nBufferSize != nExpectedSize)
+    {
+        xnLogError(XN_MASK_LINK, "Got bad size of 'supported Temperature list' property: %u instead of %u", nBufferSize, nExpectedSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_RESPONSE_SIZE;
+    }
+
+    nRetVal = supportedTempList.SetSize(nTemp);
+    XN_IS_STATUS_OK_LOG_ERROR("Set size of output supported Temperature list array", nRetVal);
+
+    for (XnUInt32 i = 0; i < nTemp; i++)
+    {
+        supportedTempList[i].id = XN_PREPARE_VAR32_IN_BUFFER(pSupportedList->m_aSensors[i].m_nID);
+        nRetVal = xnOSStrCopy(supportedTempList[i].name, (const XnChar*) pSupportedList->m_aSensors[i].m_strName, sizeof(supportedTempList[i].name));
+        XN_IS_STATUS_OK_LOG_ERROR("Copy Temperature list name", nRetVal);
+    }
+
+    return XN_STATUS_OK;
+}
+
+XnStatus xnLinkParseGetTemperature(const XnLinkTemperatureResponse* tempResponse, XnUInt32 nBufferSize, XnCommandTemperatureResponse& tempData)
+{
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnUInt32 nExpectedSize = 0;
+
+    XN_VALIDATE_INPUT_PTR(tempResponse);
+
+    if (nBufferSize < sizeof(tempData.temperature))
+    {
+        xnLogError(XN_MASK_LINK, "Size of link Get Temperature was only %u bytes, must be at least %u.", nBufferSize, 
+            sizeof(tempData.temperature));
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_PROP_SIZE;
+    }
+
+    nExpectedSize = (sizeof(tempResponse));
+    if (nBufferSize != nExpectedSize)
+    {
+        xnLogError(XN_MASK_LINK, "Got bad size of 'Temperature struct' property: %u instead of %u", nBufferSize, nExpectedSize);
+        XN_ASSERT(FALSE);
+        return XN_STATUS_LINK_BAD_RESPONSE_SIZE;
+    }
+    tempData.id = XN_PREPARE_VAR32_IN_BUFFER(tempResponse->m_nID);
+    tempData.temperature = XN_PREPARE_VAR_FLOAT_IN_BUFFER(tempResponse->value);
+    XN_IS_STATUS_OK_LOG_ERROR("Copy Temperature value", nRetVal);
+
+    return XN_STATUS_OK;
+}
 const XnChar* xnLinkPixelFormatToName(XnFwPixelFormat pixelFormat)
 {
 	switch (pixelFormat)

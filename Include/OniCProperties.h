@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_C_PROPERTIES_H_
-#define _ONI_C_PROPERTIES_H_
+#ifndef ONICPROPERTIES_H
+#define ONICPROPERTIES_H
 
 // Device properties
 enum
@@ -65,4 +65,4 @@ enum
 	ONI_DEVICE_COMMAND_SEEK				= 1, // OniSeek
 };
 
-#endif // _ONI_C_PROPERTIES_H_
+#endif // ONICPROPERTIES_H

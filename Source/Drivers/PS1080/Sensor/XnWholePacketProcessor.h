@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_WHOLE_PACKET_PROCESSOR_H__
-#define __XN_WHOLE_PACKET_PROCESSOR_H__
+#ifndef XNWHOLEPACKETPROCESSOR_H
+#define XNWHOLEPACKETPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -56,4 +56,4 @@ private:
 	XnBuffer m_WholePacket;
 };
 
-#endif //__XN_WHOLE_PACKET_PROCESSOR_H__
+#endif // XNWHOLEPACKETPROCESSOR_H

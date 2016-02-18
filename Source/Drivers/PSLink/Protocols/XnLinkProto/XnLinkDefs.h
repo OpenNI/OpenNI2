@@ -1,5 +1,25 @@
-#ifndef __XNLINKDEFS_H__
-#define __XNLINKDEFS_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef XNLINKDEFS_H
+#define XNLINKDEFS_H
 
 /* Version */
 #define XN_LINK_PROTOCOL_MAJOR_VERSION				0
@@ -22,6 +42,8 @@
 #define XN_LINK_MAX_VERSION_LENGTH					32
 #define XN_LINK_MAX_I2C_DEVICE_NAME_LENGTH			32
 #define XN_LINK_MAX_LOG_FILE_NAME_LENGTH			32
+#define XN_LINK_MAX_SENSOR_NAME_LENGTH				16
+#define XN_LINK_MAX_TEMPERATURE_SENSORS				2
 
 /* Interface ID's */
 typedef enum XnLinkInterfaceID
@@ -108,6 +130,8 @@ typedef enum XnLinkMsgType
 	XN_LINK_MSG_STOP_USB_TEST					= 0x020B, 
 	XN_LINK_MSG_START_LOG_FILE					= 0x020C,
 	XN_LINK_MSG_STOP_LOG_FILE					= 0x020D,
+	XN_LINK_MSG_READ_TEMPERATURE				= 0x020E,
+
 
 //XN_LINK_INTERFACE_DATA_STREAMING - Data streaming messages - group 0x03
 	XN_LINK_MSG_START_STREAMING					= 0x0300,
@@ -130,6 +154,7 @@ typedef enum XnLinkMsgType
 	XN_LINK_MSG_GET_PROP						= 0x0701,
 	XN_LINK_MSG_SET_PROP						= 0x0702,
 	XN_LINK_MSG_SET_MULTI_PROPS					= 0x0703,
+	XN_LINK_MSG_GET_DEBUG_DATA	                = 0x0704,
 
 //XN_LINK_INTERFACE_HANDS_GENERATOR - HandGenerator messages - group 0x09
 	XN_LINK_MSG_START_TARCKING_HAND				= 0x0901,
@@ -324,10 +349,10 @@ typedef enum XnLinkPropID
 	XN_LINK_PROP_ID_SUPPORTED_PROPS				= 0x0005, //General property, holds XnLinkIDSet (read only property)
     XN_LINK_PROP_ID_HW_VERSION                  = 0x0006, //Int property (read only property)
     XN_LINK_PROP_ID_SERIAL_NUMBER				= 0x0007, //General property, holds XnLinkSerialNumber (read only property)
-    XN_LINK_PROP_ID_EMITTER_ACTIVE              = 0x0008, //Int property, 1/0 for emitter on/off
+    XN_LINK_PROP_ID_RESERVED					= 0x0008,
 	XN_LINK_PROP_ID_COMPONENT_VERSIONS			= 0x0009, //General property, holds XnLinkComponentVersionsList (read only property)
 	XN_LINK_PROP_ID_BOOT_STATUS					= 0x000A, //General property, holds XnLinkBootStatus (read only property)
-
+	XN_LINK_PROP_ID_VDD_STATUS			    	= 0x000B,
 	//System management properties - group 0x02 (All of these are global, not related to specific stream)
 	XN_LINK_PROP_ID_SUPPORTED_BIST_TESTS		= 0x0201, //General property, holds XnLinkSupportedBistTests
 	XN_LINK_PROP_ID_SUPPORTED_I2C_DEVICES       = 0x0202, //General property, holds XnLinkSupportedI2CDevices
@@ -366,7 +391,12 @@ typedef enum XnLinkPropID
 	// PROJECTOR_MGMT messages - group 0x2B
 	XN_LINK_PROP_ID_PROJECTOR_PULSE				= 0x2B01, //General property, holds XnLinkProjectorPulse
 	XN_LINK_PROP_ID_PROJECTOR_POWER				= 0x2B02, //Int property
-
+	XN_LINK_PROP_ID_ACC_ENABLED                 = 0x2B03, //Int property ACC, 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_VDD_ENABLED					= 0x2B04, //Int property vdd sampling , 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_PROJECTOR_ENABLED			= 0x2B05, //Int property projector, 0 = OFF, 1 = ON
+	XN_LINK_PROP_ID_PERIODIC_BIST_ENABLED		= 0x2B06, //Int property voltage sampling , 0 = disabled, 1 = enabled
+	XN_LINK_PROP_ID_TEMPERATURE_LIST			= 0x2B07,
+	//INVALID
 	XN_LINK_PROP_ID_INVALID						= 0xFFFF, //Indicates invalid property ID
 } XnLinkPropID;
 
@@ -454,4 +484,4 @@ typedef enum XnLinkBootErrorCode
     XN_LINK_BOOT_FW_LOAD_FAILED                 = 0x0003,
 } XnLinkBootErrorCode;
 
-#endif // __XNLINKDEFS_H__
+#endif // XNLINKDEFS_H

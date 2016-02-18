@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 // PSLinkConsole.cpp : Defines the entry point for the console application.
 //
 
@@ -268,20 +288,8 @@ const char* fwVideoModeToString(XnFwStreamVideoMode videoMode)
 //---------------------------------------------------------------------------
 // Framework
 //---------------------------------------------------------------------------
-void RunCommand(XnChar* strCmdLine)
+void RunCommand(int argc, const char* argv[])
 {
-	enum {CMD_MAX_ARGS = 256};
-	const char* argv[CMD_MAX_ARGS] = {NULL};
-	int argc = CMD_MAX_ARGS;
-
-	SplitStr(strCmdLine, argv, &argc);
-
-	if (argc == 0)
-	{
-		//Ignore empty lines
-		return;
-	}
-
 	char commandName[XN_FILE_MAX_PATH];
 	xnOSStrCopy(commandName, argv[0], sizeof(commandName));
 
@@ -301,6 +309,23 @@ void RunCommand(XnChar* strCmdLine)
 	}
 
 	command.handler(argc, argv);
+}
+
+void RunCommand(XnChar* strCmdLine)
+{
+	enum {CMD_MAX_ARGS = 256};
+	const char* argv[CMD_MAX_ARGS] = {NULL};
+	int argc = CMD_MAX_ARGS;
+
+	SplitStr(strCmdLine, argv, &argc);
+
+	if (argc == 0)
+	{
+		//Ignore empty lines
+		return;
+	}
+
+	RunCommand(argc, argv);
 }
 
 void ExecuteCommandsFromStream(FILE* pStream, XnBool bPrompt)
@@ -1042,30 +1067,164 @@ int HardReset(int /*argc*/, const char* /*argv*/[])
 
 	return nRetVal;
 }
-
-int Emitter(int argc, const char* argv[])
+// Retrieve data from firmware according to the command number received from user
+int ReadDebugData(int argc, const char* argv[])
 {
-	if ((argc < 2) || 
-		((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0)))
-	{
-		printf("Usage: %s <on|off>\n\n", argv[0]);
-		return -1;
-	}
-	const XnChar* strEmitterActive = argv[1];
-	XnBool bEmitterActive = (xnOSStrCaseCmp(strEmitterActive, "on") == 0);
-	Status nRetVal = g_device.setProperty(LINK_PROP_EMITTER_ACTIVE, bEmitterActive);
+
+    XnStatus nRetVal = XN_STATUS_OK;
+    XnCommandDebugData commandDebugData = {0};
+    if (argc < 2)
+    {
+        printf("\nUsage: %s <Command ID> \n\n", argv[0]);
+        return -1;
+    }
+    
+    XnUInt8 debugData[1024];
+    commandDebugData.dataID = (uint16_t)MyAtoi(argv[1]);
+    commandDebugData.dataSize = sizeof(debugData);
+    commandDebugData.data = debugData;
+
+    nRetVal = g_device.invoke(PS_COMMAND_READ_DEBUG_DATA, &commandDebugData, sizeof(commandDebugData));
+    if (nRetVal == STATUS_OK)
+    {
+        printf("\nCommand: %x Data size: %d \nData:" ,commandDebugData.dataID, commandDebugData.dataSize);
+        for(int i = 0; i < commandDebugData.dataSize; i++)
+        {
+            if(i % 8 == 0)
+            {
+                printf("\n");
+            }
+            printf("%02x ",commandDebugData.data[i]);
+        }
+        printf("\n\n");
+    }
+    else
+    {
+        printf("Failed to retrieve data: %s\n\n", OpenNI::getExtendedError());
+    }
+
+    return nRetVal;
+}
+
+// Enables/Disables the BIST (XN_LINK_PROP_ID_ACC_ENABLED)
+int Acc(int argc, const char* argv[])
+{
+    XnBool bAccEnabled;
+    Status nRetVal;
+    if(argc == 1)
+    {
+        nRetVal = g_device.getProperty(LINK_PROP_ACC_ENABLED, &bAccEnabled);
+        if (nRetVal == STATUS_OK)
+        {
+            printf("Acc is %s.\n\n", (bAccEnabled ? "on" : "off"));
+        }
+        else
+        {
+            printf("Failed to get Acc: %s\n\n", OpenNI::getExtendedError());
+        }
+
+        return nRetVal;
+    }
+
+    if((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0))
+    {
+        printf("Usage: %s <on|off>\n\n", argv[0]);
+        return -1;
+    }
+	const XnChar* strAccActive = argv[1];
+	bAccEnabled = (xnOSStrCaseCmp(strAccActive, "on") == 0);
+	nRetVal = g_device.setProperty(LINK_PROP_ACC_ENABLED, bAccEnabled);
 	if (nRetVal == STATUS_OK)
 	{
-		printf("Emitter is now %s.\n\n", strEmitterActive);
+		printf("Acc is now %s.\n\n", strAccActive);
 	}
 	else
 	{
-		printf("Failed to set emitter %s: %s\n\n", strEmitterActive, OpenNI::getExtendedError());
+		printf("Failed to set Acc %s: %s\n\n", strAccActive, OpenNI::getExtendedError());
+	}
+
+	return nRetVal;
+}
+// Enables/Disables the VDD - Valid Depth Detect (XN_LINK_PROP_ID_VDD_ENABLED) 
+//on - Safety mechanism is on | off - reduce power
+int VDD(int argc, const char* argv[])
+{
+    XnBool bAccEnabled;
+    Status nRetVal;
+    if(argc == 1)
+    {
+        nRetVal = g_device.getProperty(LINK_PROP_VDD_ENABLED, &bAccEnabled);
+        if (nRetVal == STATUS_OK)
+        {
+            printf("VDD is %s.\n\n", (bAccEnabled ? "on" : "off"));
+        }
+        else
+        {
+            printf("Failed to get VDD: %s\n\n", OpenNI::getExtendedError());
+        }
+
+        return nRetVal;
+    }
+
+    if((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0))
+    {
+        printf("Usage: %s <on|off>\n\n", argv[0]);
+        return -1;
+    }
+	const XnChar* strAccActive = argv[1];
+	bAccEnabled = (xnOSStrCaseCmp(strAccActive, "on") == 0);
+	nRetVal = g_device.setProperty(LINK_PROP_VDD_ENABLED, bAccEnabled);
+	if (nRetVal == STATUS_OK)
+	{
+		printf("VDD is now %s.\n\n", strAccActive);
+	}
+	else
+	{
+		printf("Failed to set VDD %s: %s\n\n", strAccActive, OpenNI::getExtendedError());
 	}
 
 	return nRetVal;
 }
 
+// Enables/Disables the Periodic BIST (XN_LINK_PROP_ID_PERIODIC_BIST_ENABLED)
+int PeriodicBist(int argc, const char* argv[])
+{
+    XnBool bAccEnabled;
+    Status nRetVal;
+    if(argc == 1)
+    {
+        nRetVal = g_device.getProperty(LINK_PROP_PERIODIC_BIST_ENABLED, &bAccEnabled);
+        if (nRetVal == STATUS_OK)
+        {
+            printf("Periodic BIST is %s.\n\n", (bAccEnabled ? "on" : "off"));
+        }
+        else
+        {
+            printf("Failed to get Periodic BIST: %s\n\n", OpenNI::getExtendedError());
+        }
+
+        return nRetVal;
+    }
+
+    if((xnOSStrCaseCmp(argv[1], "on") != 0) && (xnOSStrCaseCmp(argv[1], "off") != 0))
+    {
+        printf("Usage: %s <on|off>\n\n", argv[0]);
+        return -1;
+    }
+	const XnChar* strAccActive = argv[1];
+	bAccEnabled = (xnOSStrCaseCmp(strAccActive, "on") == 0);
+	nRetVal = g_device.setProperty(LINK_PROP_PERIODIC_BIST_ENABLED, bAccEnabled);
+	if (nRetVal == STATUS_OK)
+	{
+		printf("Periodic BIST is now %s.\n\n", strAccActive);
+	}
+	else
+	{
+		printf("Failed to set Periodic BIST %s: %s\n\n", strAccActive, OpenNI::getExtendedError());
+	}
+
+	return nRetVal;
+}
 xnl::Array<XnFwLogMask>& GetLogMaskList()
 {
 	static xnl::Array<XnFwLogMask> s_masks;
@@ -1248,9 +1407,13 @@ int PrintLogFilesList(int /*argc*/, const char* /*argv*/[])
 int PrintI2CList(int /*argc*/, const char* /*argv*/[])
 {
 	xnl::Array<XnI2CDeviceInfo>& deviceList = GetI2CDeviceList();
+    
+    printf("%2s %32s %9s %8s", "ID", "NAME", "MASTER-ID", "SLAVE-ID\n");
+    printf("%2s %32s %9s %8s", "==", "====", "=========", "========\n");
+
 	for (XnUInt32 i = 0; i < deviceList.GetSize(); ++i)
 	{
-		printf("%4u %s\n", deviceList[i].id, deviceList[i].name);
+        printf("%2u %32s %9u %8u\n", deviceList[i].id, deviceList[i].name, deviceList[i].masterId, deviceList[i].slaveId);
 	}
 
 	return 0;
@@ -1280,95 +1443,196 @@ int PrintBistList(int /*argc*/, const char* /*argv*/[])
 
 	return 0;
 }
-
 int RunBist(int argc, const char* argv[])
+{
+    Status nRetVal = STATUS_OK;
+
+    if (argc < 2)
+    {
+        printf("Usage: %s ALL | <Test>...\n\n", argv[0]);
+        return -1;
+    }
+
+    XnBistInfo bistInfos[20];
+    XnCommandGetBistList supportedTests;
+    supportedTests.tests = bistInfos;
+    supportedTests.count = sizeof(bistInfos)/sizeof(bistInfos[0]);
+
+    if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, supportedTests))
+    {
+        printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
+        return -2;
+    }
+
+    xnl::BitSet requestedTests;
+
+    if (xnOSStrCaseCmp(argv[1], "ALL") == 0)
+    {
+        for (XnUInt32 i = 0; i < supportedTests.count; ++i)
+        {
+            requestedTests.Set(supportedTests.tests[i].id, TRUE);
+        }
+    }
+    else
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            requestedTests.Set(MyAtoi(argv[i]), TRUE);
+        }
+    }
+
+    XnUInt8 response[512];
+    XnCommandExecuteBist args;
+    args.extraData = response;
+
+    for (XnUInt32 i = 0; i < requestedTests.GetSize(); ++i)
+    {
+        if (!requestedTests.IsSet(i))
+        {
+            continue;
+        }
+
+        // search for test in list (for its name)
+        const XnChar* testName = "Unknown";
+        for (XnUInt32 j = 0; j < supportedTests.count; ++j)
+        {
+            if (supportedTests.tests[j].id == i)
+            {
+                testName = supportedTests.tests[j].name;
+                break;
+            }
+        }
+
+        printf("Executing test %u (%s)...\n", i, testName);
+
+        args.id = i;
+        args.extraDataSize = sizeof(response);
+        nRetVal = g_device.invoke(PS_COMMAND_EXECUTE_BIST, args);
+        if (nRetVal != STATUS_OK)
+        {
+            printf("\nFailed to execute: %s\n\n", OpenNI::getExtendedError());
+            return nRetVal;
+        }
+
+        printf("Test %u (%s) ", i, testName);
+
+        if (args.errorCode != 0)
+        {
+            printf("Failed (error code 0x%04X).", args.errorCode);
+        }
+        else
+        {
+            printf("Passed.");
+        }
+
+        printf("\n");
+
+        // extra data
+        if (args.extraDataSize > 0)
+        {
+            printf("Extra Data: ");
+            for (XnUInt32 j = 0; j < args.extraDataSize; ++j)
+            {
+                printf("%02X ", args.extraData[j]);
+            }
+            printf("\n");
+        }
+    }
+
+    printf("\n");
+
+    return (XN_STATUS_OK);
+}
+//Prints option list in which the user can choose to get the temperature
+int PrintTempList(int /*argc*/, const char* /*argv*/[])
+{
+    XnTempInfo tempInfo[20];
+    XnCommandGetTempList args;
+    args.pTempInfos = tempInfo;
+    args.count = sizeof(tempInfo)/sizeof(tempInfo[0]);
+
+    if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_TEMP_LIST, args)) 
+    {
+        printf("Failed getting Temperature list: %s\n\n", OpenNI::getExtendedError());
+        return 1;
+    }
+    else
+    {
+        for (XnUInt32 i = 0; i < args.count; ++i)
+        {
+            printf("%4u %s\n", tempInfo[i].id, tempInfo[i].name);
+        }
+
+        printf("\n");
+    }
+
+    return 0;
+}
+int ReadTemps(int argc, const char* argv[])
 {
 	Status nRetVal = STATUS_OK;
 
 	if (argc < 2)
 	{
-		printf("Usage: %s ALL | <Test>...\n\n", argv[0]);
+		printf("Usage: %s ALL | <Sensor ID> | <Sensor name>...\n\n", argv[0]);
 		return -1;
 	}
 
-	xnl::BitSet requestedTests;
+	XnTempInfo TempInfos[20];
+	XnCommandGetTempList supportedTempList;
+	supportedTempList.pTempInfos = TempInfos;
+	supportedTempList.count = sizeof(TempInfos)/sizeof(TempInfos[0]);
 
+	if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_TEMP_LIST, supportedTempList))
+	{
+		printf("Failed getting Temperature list: %s\n\n", OpenNI::getExtendedError());
+		return -2;
+	}
+
+
+	XnCommandTemperatureResponse response;
 	if (xnOSStrCaseCmp(argv[1], "ALL") == 0)
 	{
-		XnBistInfo tests[20];
-		XnCommandGetBistList args;
-		args.tests = tests;
-		args.count = sizeof(tests)/sizeof(tests[0]);
-
-		if (STATUS_OK != g_device.invoke(PS_COMMAND_GET_BIST_LIST, args))
+		for (XnUInt32 i = 0; i < supportedTempList.count; ++i)
 		{
-			printf("Failed getting tests list: %s\n\n", OpenNI::getExtendedError());
-			return -2;
-		}
-
-		for (XnUInt32 i = 0; i < args.count; ++i)
-		{
-			requestedTests.Set(tests[i].id, TRUE);
+            response.id = supportedTempList.pTempInfos[i].id;
+            nRetVal = g_device.invoke(PS_COMMAND_READ_TEMPERATURE, response);
+            if(nRetVal != STATUS_OK)
+            {
+                printf("Failed getting Temperature data for id %d: %s\n\n", response.id, OpenNI::getExtendedError());
+            }
+            else
+            {
+                printf("%s \t Temperature: %f \n\n", supportedTempList.pTempInfos[i].name, response.temperature);
+            }
 		}
 	}
 	else
-	{
-		for (int i = 1; i < argc; ++i)
-		{
-			requestedTests.Set(MyAtoi(argv[i]), TRUE);
-		}
+	{ 
+        XnInt32 argInt= (argv[1][0] >= '0' && argv[1][0] <= '9') ? MyAtoi(argv[1]) : -1;   
+        for (XnUInt32 i = 0; i < supportedTempList.count; ++i)
+        {
+            if ((xnOSStrCaseCmp(argv[1],supportedTempList.pTempInfos[i].name) == 0) 
+                || (argInt == (XnInt32)supportedTempList.pTempInfos[i].id) )
+            {
+                response.id = supportedTempList.pTempInfos[i].id;
+                nRetVal = g_device.invoke(PS_COMMAND_READ_TEMPERATURE, response);
+                if(nRetVal != STATUS_OK)
+                {
+                    printf("Failed getting Temperature data for id %d: %s\n\n", response.id, OpenNI::getExtendedError());
+                }
+                else
+                {
+                    printf("%s \t Temperature: %f \n\n", supportedTempList.pTempInfos[i].name, response.temperature);
+                }
+                break;
+            }
+        }
 	}
-
-	XnUInt8 response[512];
-	XnCommandExecuteBist args;
-	args.extraData = response;
-
-	for (XnUInt32 i = 0; i < requestedTests.GetSize(); ++i)
-	{
-		if (!requestedTests.IsSet(i))
-		{
-			continue;
-		}
-
-		printf("Executing test %u...\n", i);
-		args.id = i;
-		args.extraDataSize = sizeof(response);
-		nRetVal = g_device.invoke(PS_COMMAND_EXECUTE_BIST, args);
-		if (nRetVal != STATUS_OK)
-		{
-			printf("\nFailed to execute: %s\n\n", OpenNI::getExtendedError());
-			return nRetVal;
-		}
-
-		printf("Test %u ", i);
-
-		if (args.errorCode != 0)
-		{
-			printf("Failed (error code 0x%04X).", args.errorCode);
-		}
-		else
-		{
-			printf("Passed.");
-		}
-
-		printf("\n");
-
-		// extra data
-		if (args.extraDataSize > 0)
-		{
-			printf("Extra Data: ");
-			for (XnUInt32 j = 0; j < args.extraDataSize; ++j)
-			{
-				printf("%02X ", args.extraData[j]);
-			}
-			printf("\n");
-		}
-	}
-
-	printf("\n");
 
 	return (XN_STATUS_OK);
 }
+
 
 int Quit(int /*argc*/, const char* /*argv*/[])
 {
@@ -1440,7 +1704,9 @@ int FormatZone(int argc, const char* argv[])
 	}
 
 	XnUInt32 nZone = MyAtoi(argv[1]);
-	Status nRetVal = g_device.invoke(PS_COMMAND_FORMAT_ZONE, nZone);
+	XnCommandFormatZone formatZone;
+	formatZone.zone = (uint8_t)nZone;
+	Status nRetVal = g_device.invoke(PS_COMMAND_FORMAT_ZONE, formatZone);
 	if (nRetVal == STATUS_OK)
 	{
 		printf("Successfully formatZone.\n\n");
@@ -1496,6 +1762,106 @@ int TestAll(int /*argc*/, const char* /*argv*/[])
 	return XN_STATUS_OK;
 }
 
+int Projector(int argc, const char* argv[])
+{
+	XnStatus nRetVal = XN_STATUS_OK;
+
+	if (argc > 1)
+	{
+        //Projector <on/off> command
+        XnBool bProjectorActive = (xnOSStrCaseCmp(argv[1], "on") == 0);
+        if((bProjectorActive || xnOSStrCaseCmp(argv[1], "off") == 0))
+        {
+            Status nRetVal = g_device.setProperty(LINK_PROP_PROJECTOR_ACTIVE, bProjectorActive);
+            if (nRetVal == STATUS_OK)
+            {
+                printf("Projector is now %s.\n\n", argv[1]);
+            }
+            else
+            {
+                printf("Failed to set Projector %s: %s\n\n", argv[1], OpenNI::getExtendedError());
+            }
+
+            return nRetVal;
+        }
+
+		if (xnOSStrCaseCmp(argv[1], "power") == 0)
+		{
+			if (argc > 2)
+			{
+				// set power
+				XnUInt16 power = (XnUInt16)MyAtoi(argv[2]);
+				nRetVal = g_device.setProperty(LINK_PROP_PROJECTOR_POWER, power);
+				if (nRetVal != XN_STATUS_OK)
+				{
+					printf("Failed to set projector power: %s\n\n", xnGetStatusString(nRetVal));
+					return -2;
+				}
+
+				return 0;
+			}
+			else
+			{
+				// get power
+				XnUInt16 power;
+				nRetVal = g_device.getProperty(LINK_PROP_PROJECTOR_POWER, &power);
+				if (nRetVal != XN_STATUS_OK)
+				{
+					printf("Failed to get projector power: %s\n\n", xnGetStatusString(nRetVal));
+					return -3;
+				}
+
+				printf("Projector power is %u\n\n", power);
+				return 0;
+			}
+		}
+		else if (xnOSStrCaseCmp(argv[1], "pulse") == 0)
+		{
+			if (argc > 2)
+			{
+				if (xnOSStrCaseCmp(argv[2], "on") == 0 && argc > 5)
+				{
+					XnCommandSetProjectorPulse args;
+					args.delay = (float)atof(argv[3]);
+					args.cycle = (float)atof(argv[5]);
+					args.width = (float)atof(argv[4]); //where both delay and width are in ms, and can be float
+
+					nRetVal = g_device.invoke(LINK_COMMAND_SET_PROJECTOR_PULSE, args);
+					if (nRetVal != XN_STATUS_OK)
+					{
+						printf("Failed to set projector pulse: %s\n\n", xnGetStatusString(nRetVal));
+						return -3;
+					}
+
+					printf("Projector pulse set\n\n");
+					return 0;
+				}
+				else if (xnOSStrCaseCmp(argv[2], "off") == 0)
+				{
+					nRetVal = g_device.invoke(LINK_COMMAND_DISABLE_PROJECTOR_PULSE, NULL, 0);
+					if (nRetVal != XN_STATUS_OK)
+					{
+						printf("Failed to disable projector pulse: %s\n\n", xnGetStatusString(nRetVal));
+						return -3;
+					}
+
+					printf("Projector pulse disabled\n\n");
+					return 0;
+				}
+			}
+		}
+	}
+
+	// if we got here, something was wrong with the arguments
+	printf("Usage: \n");
+    printf("\t%s <on/off>\n", argv[0]);
+	printf("\t%s power [newVal]\n", argv[0]);
+	printf("\t%s pulse on <start> <cycle> <DC>\n", argv[0]);
+	printf("\t%s pulse off\n", argv[0]);
+	printf("\n");
+	return -1;
+}
+
 void RegisterCommands()
 {
 	RegisterCommand("Help", Help);
@@ -1523,17 +1889,23 @@ void RegisterCommands()
 	RegisterCommand("WriteAHB", WriteAHB);
 	RegisterCommand("ReadAHB", ReadAHB);
 	RegisterCommand("SoftReset", SoftReset);
-	RegisterCommand("HardReset", HardReset);
-	RegisterCommand("Emitter", Emitter);
+    RegisterCommand("HardReset", HardReset);
+    RegisterCommand("ReadDebugData", ReadDebugData);
+    RegisterCommand("Acc", Acc);
+    RegisterCommand("VDD", VDD);
+    RegisterCommand("PeriodBist", PeriodicBist);
 	RegisterCommand("Log", Log);
 	RegisterCommand("LogList", PrintLogFilesList);
 	RegisterCommand("Script", Script);
 	RegisterCommand("BistList", PrintBistList);
-	RegisterCommand("Bist", RunBist);
+    RegisterCommand("Bist", RunBist);
+    RegisterCommand("TempList", PrintTempList);
+    RegisterCommand("Temp", ReadTemps);
 	RegisterCommand("UsbInterface", UsbInterface);
 	RegisterCommand("FormatZone", FormatZone);
 	RegisterCommand("UsbTest", UsbTest);
 	RegisterCommand("TestAll", TestAll);
+	RegisterCommand("Projector", Projector);
 	RegisterCommand("Quit", Quit);
 	RegisterCommand("Bye", Quit);
 	RegisterCommand("Exit", Quit);
@@ -1544,7 +1916,8 @@ int main(int argc, char* argv[])
 	Status nRetVal = STATUS_OK;
 	const XnChar* strScriptFile = NULL;
 	XnUInt16 nProductID = 0;
-    XnBool bQuit = FALSE;
+	const char** commandArgv = NULL;
+	int commandArgc = 0;
 
 //	printf("PSLinkConsole version %s\n", XN_PS_VERSION_STRING);
 
@@ -1566,11 +1939,8 @@ int main(int argc, char* argv[])
 			else if (xnOSStrCaseCmp(argv[nArgIndex], "-help") == 0)
 			{
 				printf("USAGE\n");
-				printf("\t%s [-transport <usb|ip:port>] [-product <PID>] [-script <fileName>] [-help]\n", argv[0]);
+				printf("\t%s [-product <PID>] [-script <fileName>] [-help] [command]\n", argv[0]);
 				printf("OPTIONS\n");
-				printf("\t-transport <usb|ip:port>\n");
-				printf("\t\tOpen a device from a specific transport, either USB or from a specific IP and port number.\n");
-				printf("\t\tWhen omitted, USB will be used.\n");
 				printf("\t-product <PID>\n");
 				printf("\t\tOpen only devices with a specific product ID. By default, any device can be opened.\n");
 				printf("\t-script <filename>\n");
@@ -1587,8 +1957,9 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			printf("Unknown option: %s\n. Run %s -help for usage.\n", argv[nArgIndex], argv[0]);
-			return -1;
+			commandArgc = argc - nArgIndex;
+			commandArgv = (const char**)(argv + nArgIndex);
+			break;
 		}
 	}
 
@@ -1657,13 +2028,17 @@ int main(int argc, char* argv[])
 			return -5;
 		}
 
-        if (bQuit)
-        {
-            return 0;
-        }
+        return 0;
 	}
-
-	ExecuteCommandsFromStream(stdin, TRUE);
+	else if (commandArgc != 0)
+	{
+		RunCommand(commandArgc, commandArgv);
+		return 0;
+	}
+	else
+	{
+		ExecuteCommandsFromStream(stdin, TRUE);
+	}
 
 	g_device.close();
 	OpenNI::shutdown();

@@ -400,24 +400,31 @@ XN_C_API XnStatus xnLogInitFromINIFile(const XnChar* cpINIFileName, const XnChar
 	xnLogReadMasksFromINI(cpINIFileName, cpSectionName, "LogMasks", xnLogBCSetMaskState);
 	xnLogReadMasksFromINI(cpINIFileName, cpSectionName, "DumpMasks", xnDumpSetMaskState);
 
-	LogData::GetInstance().SetMinSeverityGlobally(XN_LOG_SEVERITY_NONE);
-
-	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogLevel", &nTemp);
+	//Test if log redirection is needed 
+	XnChar strLogPath[XN_FILE_MAX_PATH] = {0};
+	nRetVal = xnOSReadStringFromINI(cpINIFileName, cpSectionName, "LogPath", strLogPath, XN_FILE_MAX_PATH);
 	if (nRetVal == XN_STATUS_OK)
 	{
-		nRetVal = xnLogBCSetSeverityFilter((XnLogSeverity)nTemp);
+		nRetVal = xnLogSetOutputFolder(strLogPath);
+		XN_IS_STATUS_OK(nRetVal);
+	}
+
+	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "Verbosity", &nTemp);
+	if (nRetVal == XN_STATUS_OK)
+	{
+		nRetVal = xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)nTemp);
 		XN_IS_STATUS_OK(nRetVal);
 	}
 
 	// configure writers
-	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogWriteToConsole", &nTemp);
+	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogToConsole", &nTemp);
 	if (nRetVal == XN_STATUS_OK)
 	{
 		nRetVal = xnLogSetConsoleOutput(nTemp);
 		XN_IS_STATUS_OK(nRetVal);
 	}
 
-	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogWriteToFile", &nTemp);
+	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogToFile", &nTemp);
 	if (nRetVal == XN_STATUS_OK)
 	{
 		nRetVal = xnLogSetFileOutput(nTemp);
@@ -425,7 +432,7 @@ XN_C_API XnStatus xnLogInitFromINIFile(const XnChar* cpINIFileName, const XnChar
 	}
 
 #if XN_PLATFORM == XN_PLATFORM_ANDROID_ARM
-	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogWriteToAndroidLog", &nTemp);
+	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogToAndroidLog", &nTemp);
 	if (nRetVal == XN_STATUS_OK)
 	{
 		nRetVal = xnLogSetAndroidOutput(nTemp);
@@ -433,7 +440,7 @@ XN_C_API XnStatus xnLogInitFromINIFile(const XnChar* cpINIFileName, const XnChar
 	}
 #endif
 
-	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogWriteLineInfo", &nTemp);
+	nRetVal = xnOSReadIntFromINI(cpINIFileName, cpSectionName, "LogLineInfo", &nTemp);
 	if (nRetVal == XN_STATUS_OK)
 	{
 		nRetVal = xnLogSetLineInfo(nTemp);
@@ -637,6 +644,7 @@ XnLogger* xnLogGetLoggerForMask(const XnChar* csLogMask, XnBool bCreate)
 	{
 		XnLogger logger;
 		logger.nMinSeverity = logData.defaultMinSeverity;
+		logger.pInternal = NULL;
 
 		// first of all, add it to the map
 		if (XN_STATUS_OK != logData.pMasksHash->Set(csLogMask, logger))

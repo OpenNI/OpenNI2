@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _LIBRARY_HANDLER_H_
-#define _LIBRARY_HANDLER_H_
+#ifndef ONIDRIVERHANDLER_H
+#define ONIDRIVERHANDLER_H
 
 #include "OniCAPI.h"
 #include "OniCTypes.h"
@@ -258,4 +258,4 @@ private:
 ONI_NAMESPACE_IMPLEMENTATION_END
 
 
-#endif // _LIBRARY_HANDLER_H_
+#endif // ONIDRIVERHANDLER_H

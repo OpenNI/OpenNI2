@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _PS1080_H_
-#define _PS1080_H_
+#ifndef PS1080_H
+#define PS1080_H
 
 #include <OniCTypes.h>
 
@@ -127,6 +127,9 @@ enum
 	XN_MODULE_PROPERTY_APC_ENABLED = 0x1080FF91, // "APCEnabled"
 	/** Boolean */
 	XN_MODULE_PROPERTY_FIRMWARE_TEC_DEBUG_PRINT = 0x1080FF92, // "TecDebugPrint"
+	/** Boolean, set only */
+	XN_MODULE_PROPERTY_READ_ALL_ENDPOINTS = 0x1080FF93,
+
 
 	/*******************************************************************/
 	/* Common stream properties                                        */
@@ -143,6 +146,8 @@ enum
 
 	/** unsigned long long */
 	XN_STREAM_PROPERTY_CLOSE_RANGE = 0x1080F003, // "CloseRange"
+	/** unsigned long long */
+	XN_STREAM_PROPERTY_FAST_ZOOM_CROP = 0x1080F009, // "FastZoomCrop"
 	/** XnPixelRegistration - get only */
 	XN_STREAM_PROPERTY_PIXEL_REGISTRATION = 0x10801001, // "PixelRegistration"
 	/** unsigned long long */
@@ -212,6 +217,7 @@ typedef enum
 	XN_SENSOR_FW_VER_5_6 = 12,
 	XN_SENSOR_FW_VER_5_7 = 13,
 	XN_SENSOR_FW_VER_5_8 = 14,
+	XN_SENSOR_FW_VER_5_9 = 15,
 } XnFWVer;
 
 typedef enum {
@@ -629,4 +635,4 @@ typedef struct XnBist
 
 #pragma pack (pop)
 
-#endif //_PS1080_H_
+#endif // PS1080_H

@@ -77,6 +77,13 @@ OniStatus Device::close()
 
 	if (m_openCount == 0)
 	{
+		while(m_streams.Begin() != m_streams.End())
+		{
+			VideoStream* pStream = *m_streams.Begin();
+			pStream->stop();
+			m_streams.Remove(pStream);
+		}
+		
 		for (int i = 0; i < MAX_SENSORS_PER_DEVICE; ++i)
 		{
 			if (m_sensors[i] != NULL)

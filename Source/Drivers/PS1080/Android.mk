@@ -17,6 +17,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/BuildSystem/CommonAndroid.mk
+
 # Sources
 MY_SRC_FILES := \
 	$(LOCAL_PATH)/Core/*.cpp	\
@@ -26,16 +28,11 @@ MY_SRC_FILES := \
 	$(LOCAL_PATH)/Include/*.cpp	\
 	$(LOCAL_PATH)/Sensor/*.cpp
 
-ifdef OPENNI2_ANDROID_NDK_BUILD
-    MY_SRC_FILES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG/*.c
-endif	
-	
 MY_SRC_FILE_EXPANDED := $(wildcard $(MY_SRC_FILES))
 LOCAL_SRC_FILES := $(MY_SRC_FILE_EXPANDED:$(LOCAL_PATH)/%=%)
 
 # C/CPP Flags
-LOCAL_CFLAGS += $(OPENNI2_CFLAGS)
-LOCAL_CPPFLAGS := -frtti
+LOCAL_CPP_FEATURES := rtti
 
 # Includes
 LOCAL_C_INCLUDES := \
@@ -43,19 +40,12 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/Include \
 	$(LOCAL_PATH)/../../DepthUtils \
 	$(LOCAL_PATH)/../../../Include \
-	$(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Include
-
-ifdef OPENNI2_ANDROID_NDK_BUILD
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../ThirdParty/LibJPEG
-else
-    LOCAL_C_INCLUDES += external/jpeg
-endif
 
 # Dependencies	
 LOCAL_STATIC_LIBRARIES := XnLib DepthUtils
-LOCAL_SHARED_LIBRARIES := liblog libdl libusb libgabi++
+LOCAL_SHARED_LIBRARIES := libusb
 
-ifdef OPENNI2_ANDROID_OS_BUILD
+ifdef PS_OS_BUILD
     LOCAL_SHARED_LIBRARIES += libjpeg
 else
 	LOCAL_LDLIBS += -llog
@@ -65,3 +55,6 @@ endif
 LOCAL_MODULE:= libPS1080
 
 include $(BUILD_SHARED_LIBRARY)
+
+#include XnLib
+include $(LOCAL_PATH)/../../../ThirdParty/PSCommon/XnLib/Source/Android.mk

@@ -1,9 +1,9 @@
 /*****************************************************************************
 *                                                                            *
-*  OpenNI 1.x Alpha                                                          *
+*  PrimeSense PSCommon Library                                               *
 *  Copyright (C) 2012 PrimeSense Ltd.                                        *
 *                                                                            *
-*  This file is part of OpenNI.                                              *
+*  This file is part of PSCommon.                                            *
 *                                                                            *
 *  Licensed under the Apache License, Version 2.0 (the "License");           *
 *  you may not use this file except in compliance with the License.          *
@@ -58,7 +58,7 @@ void XnLogAndroidWriter::WriteEntry(const XnLogEntry* pEntry)
 #ifdef XN_PLATFORM_ANDROID_OS
 	ALOGE("OpenNI2: %s\n", pEntry->strMessage);
 #else
-	__android_log_print(OpenNISeverityToAndroid(pEntry->nSeverity), "OpenNI", pEntry->strMessage);
+	__android_log_write(OpenNISeverityToAndroid(pEntry->nSeverity), "OpenNI", pEntry->strMessage);
 #endif
 }
 

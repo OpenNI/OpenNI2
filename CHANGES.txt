@@ -1,7 +1,94 @@
 Change Log:
 -----------
 
-OpenNI 2.2.0:
+OpenNI 2.3:
+  - Android support added
+    - OpenNIHelper class to handle device permissions
+    - OpenNIView class to allow drawing of VideoFrameRef objects
+    - SimpleRead and SimpleViewer sample applications
+    - NiViewer application
+  - Fix pure-C APIs
+  - Allow providing driver list from config file
+  - Auto-recording feature (see OpenNI.ini)
+  - Bug Fix: depth/world conversion was wrong when depth is in 100 um format
+  - Adding logs for endpoints bandwidth and FPS
+  - Better handling of cases where device does not report its FOV
+  - Remove GLH from samples
+  - NiViewer: 
+    - IR emitter on/off is added for both PS1080 and Kinect.
+    - Near mode on/off is added for Kinect (was already there for PS1080)
+    - IR now also uses an histogram
+    - draw textures according to aspect ratio
+    - Cleanup help screen
+  - Java APIs
+    - Add log APIs
+    - Implemented hashCode() and equals() for VideoMode
+    - Bug Fix: VideoFrameRef.getData() returned ByteBuffer with big endianity, whereas data was with little endianity
+    - Bug Fix: bad JNI calls in oniGetDeviceList, oniStreamGetSensorInfo and oniDeviceGetSensorInfo.
+    - Fix callbacks JNI calls
+    - Bug Fix: memory leak in waitForAnyStream()
+  - Java SimpleViewer
+    - Allow passing file name in command prompt
+    - Add support for IR streams
+  - Carmine:
+    - Add support for FW 5.9
+    - PS1080Console bug: "startread" did not work properly
+    - Added support for the fast zoom crop (640x480 regular -> 640x480 zoomed) - 'z' in NiViewer
+    - Add a property that allows reading from endpoints without creating streams
+    - Bug Fix: Disconnect event was fired twice
+    - Implement MAX_PIXEL_VALUE for IR stream
+    - Bug Fix: Single pixel translation is wrong when image res is 1280x1024
+    - Windows: print USB banndwidth to log
+  - Kinect:
+    - Add mirror support
+    - Rewrite image registration for better performance
+    - Support of additional properties (exposed via KinectProperties.h):
+      - 3D sensing properties: Near Mode, IR Emitter On/Off
+      - Non-3D sensing properties: Camera Elevation, Accelerometer, Audio Array ID
+  - Capri:
+    - Bug Fix: Depth stops working if switching to QQVGA and then back to VGA
+    - i2c device list now also states the master and slave IDs
+    - Fixed a weird log during shutdown
+    - Add projector commands: projector on/off, pulse on/off
+    - Add commands for setting CMOS gain
+    - Add commands for reading temperature sensors
+    - Add commands for toggling ACC, periodic-BIST and VDD
+    - Print test name when running BIST
+    - Default resolution is now QQVGA on ARM machines
+    - Bug Fix: Setting Mirror from INI file didn't work
+    - Handle some protocol error codes that weren't handled
+    - Bug Fix: error strings were missing from log
+    - Implement MAX_PIXEL_VALUE for IR stream
+    - Bug Fix: no even frame indexes from Capri devices.
+    - Properties are now saved in recordings
+    - PSLinkConsole: allow running a single command and exit
+    - PresetsAHB property now supports comments in files
+    - Add ReadDebugData command
+    - Support 100um mode
+    - Can turn on firmware log from INI file
+    - Bug Fix: log stream might lose the first packet
+    - PSLinkConsole Bug Fix: FormatZone command did not work.
+    - Capri: don't set USB interface if not doing reset (console mode)
+    - Bug: Couldn't set video mode to IR stream
+  - OniFile:
+    - Allow calling setVideoMode() as long as it's the same mode (needed by some applications)
+    - Properties are now saved in recordings
+    - allow playback of recordings that don't have the cropping property (just assume it's disabled)
+    - Bug Fix: potential crash when playback restarts
+    - Fix a potential deadlock if calling stop() immediately after a repeat occurred
+    - potential crash when closing recorder
+    - Can control playback speed and repeat options from INI file
+  - Build:
+    - Support gold linker in compilation
+    - Add Linux prerequisites to release notes
+    - Add release notes and change log to installation
+    - Refactor TestDevice so it can actually be used for testing
+    - ReleaseVersion script now also creates a full Android package
+
+OpenNI 2.2.1:
+  - PS1080: Added a property for reading from all endpoints, regardless of streams
+
+OpenNI 2.2:
   - Added getDepthColorSyncEnabled() API
   - Added log settings API
   - Add a typedef: OniGrayscale8Pixel
@@ -50,7 +137,7 @@ OpenNI 2.2.0:
     - Support WIX 3.6 and up
     - ReleaseVersion script won't fail if output file exists (overwrite it)
 
-OpenNI 2.1.0:
+OpenNI 2.1:
   - API change: each event now has its own addListener()/removeListener() methods. A listener object can now be added only once.
   - Support for Mac OSX
   - Support for Linux on Arm
@@ -80,7 +167,7 @@ OpenNI 2.1.0:
   - Bug Fix: ReleaseVersion script did not work on 32-bit machines
   - Linux Bug Fix: log timestamps did not start from 0.
   
-OpenNI 2.0.0:
+OpenNI 2:
   - Brand new API (see documentation)
   - Algorithms API were removed, and are now part of middleware libraries (such as NiTE)
   - New deployment model - private copy to each application (see documentation)

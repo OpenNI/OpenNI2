@@ -21,6 +21,9 @@
 // --------------------------------
 // Types
 // --------------------------------
+#ifndef MOUSEINPUT_H
+#define MOUSEINPUT_H
+
 typedef struct
 {
 	int X;
@@ -68,3 +71,5 @@ void mouseInputRegisterForSelectionRectangle(SelectionRectangleChangedPtr pFunc)
 void mouseInputRegisterForCursorMovement(CursorMovedPtr pFunc);
 
 
+
+#endif // MOUSEINPUT_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__
-#define __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__
+#ifndef XNWAVELENGTHCORRECTIONDEBUGPROCESSOR_H
+#define XNWAVELENGTHCORRECTIONDEBUGPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -48,4 +48,4 @@ private:
 	XnDumpFile* m_DumpTxt;
 };
 
-#endif // __XN_WAVELENGTH_CORRECTION_DEBUG_PROCESSOR_H__
+#endif // XNWAVELENGTHCORRECTIONDEBUGPROCESSOR_H

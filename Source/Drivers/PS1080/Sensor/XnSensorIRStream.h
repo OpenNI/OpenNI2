@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SENSOR_IR_STREAM_H__
-#define __XN_SENSOR_IR_STREAM_H__
+#ifndef XNSENSORIRSTREAM_H
+#define XNSENSORIRSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -106,4 +106,4 @@ private:
 };
 
 
-#endif //__XN_SENSOR_IR_STREAM_H__
+#endif // XNSENSORIRSTREAM_H

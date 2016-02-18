@@ -1,5 +1,25 @@
-#ifndef _BASE_KINECT_STREAM_H_
-#define _BASE_KINECT_STREAM_H_
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef BASEKINECTSTREAM_H
+#define BASEKINECTSTREAM_H
 
 #include "Driver\OniDriverAPI.h"
 #include "XnLib.h"
@@ -53,6 +73,7 @@ protected:
 	KinectStreamImpl *m_pStreamImpl;
 	OniVideoMode m_videoMode;
 	OniCropping m_cropping;
+	OniBool m_mirroring;
 	bool m_running;
 	
 private:
@@ -60,4 +81,17 @@ private:
 
 };
 } // namespace kinect_device
-#endif //_BASE_KINECT_STREAM_H_
+
+// Macro to ensure the property size.
+// To be used in getProperty/setProperty implementation.
+// Borrowed from Drivers/PSLink/PrimeClientDefs.h and modified a bit.
+#define EXACT_PROP_SIZE_OR_DO(size, type) if ((size_t)(size) != sizeof(type))
+
+#define EXACT_PROP_SIZE_OR_RETURN(size, type) \
+	EXACT_PROP_SIZE_OR_DO(size, type) \
+	{ \
+		printf("Unexpected size: %d != %d\n", (size), sizeof(type)); /* TODO: Better to use log */ \
+		return ONI_STATUS_ERROR; \
+	}
+
+#endif // BASEKINECTSTREAM_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IO_STREAM_H__
-#define __XN_IO_STREAM_H__
+#ifndef XNIOSTREAM_H
+#define XNIOSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -43,4 +43,4 @@ public:
 	virtual XnStatus Free() { return XN_STATUS_OK; }
 };
 
-#endif //__XN_IO_STREAM_H__
+#endif // XNIOSTREAM_H

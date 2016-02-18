@@ -21,22 +21,23 @@
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
+#include <XnJpeg.h>
 #include "XnJpegToRGBImageProcessor.h"
 #include <XnProfiling.h>
 
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-
-XnJpegToRGBImageProcessor::XnJpegToRGBImageProcessor(XnSensorImageStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager) :
-	XnImageProcessor(pStream, pHelper, pBufferManager)
+XnJpegToRGBImageProcessor::XnJpegToRGBImageProcessor(XnSensorImageStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager)
+: XnImageProcessor(pStream, pHelper, pBufferManager)
+, mp_JPEGContext(NULL)
 {
 	SetAllowDoubleSOFPackets(TRUE);
 }
 
 XnJpegToRGBImageProcessor::~XnJpegToRGBImageProcessor()
 {
-	XnStreamFreeUncompressImageJ(&m_JPEGContext);
+    XnStreamFreeUncompressImageJ(&mp_JPEGContext);
 }
 
 XnStatus XnJpegToRGBImageProcessor::Init()
@@ -48,7 +49,7 @@ XnStatus XnJpegToRGBImageProcessor::Init()
 
 	XN_VALIDATE_BUFFER_ALLOCATE(m_RawData, GetExpectedOutputSize());
 
-	nRetVal = XnStreamInitUncompressImageJ(&m_JPEGContext);
+	nRetVal = XnStreamInitUncompressImageJ(&mp_JPEGContext);
 	XN_IS_STATUS_OK(nRetVal);
 
 	return (XN_STATUS_OK);
@@ -88,7 +89,7 @@ void XnJpegToRGBImageProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeade
 	XnBuffer* pWriteBuffer = GetWriteBuffer();
 
 	XnUInt32 nOutputSize = pWriteBuffer->GetMaxSize();
-	XnStatus nRetVal = XnStreamUncompressImageJ(&m_JPEGContext, m_RawData.GetData(), m_RawData.GetSize(), pWriteBuffer->GetUnsafeWritePointer(), &nOutputSize);
+    XnStatus nRetVal = XnStreamUncompressImageJ(&mp_JPEGContext, m_RawData.GetData(), m_RawData.GetSize(), pWriteBuffer->GetUnsafeWritePointer(), &nOutputSize);
 	if (nRetVal != XN_STATUS_OK)
 	{
 		xnLogWarning(XN_MASK_SENSOR_PROTOCOL_IMAGE, "Failed to uncompress JPEG for frame %d: %s (%d)\n", GetCurrentFrameID(), xnGetStatusString(nRetVal), pWriteBuffer->GetSize());

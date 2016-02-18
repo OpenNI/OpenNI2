@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICESENSOR_H_
-#define _XN_DEVICESENSOR_H_
+#ifndef XNDEVICESENSOR_H
+#define XNDEVICESENSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,6 +52,8 @@
 #define XN_DEVICE_SENSOR_MAX_DEPTH_100_UM 65534
 #define XN_DEVICE_SENSOR_NO_DEPTH_VALUE 0
 #define XN_DEVICE_SENSOR_MAX_SHIFT_VALUE 2048/*336*/
+
+#define XN_DEVICE_SENSOR_MAX_IR 1023
 
 #define XN_DEVICE_SENSOR_BOARDID_SEP ":"
 #define XN_DEVICE_SENSOR_DEFAULT_ID "*"
@@ -499,4 +501,4 @@ typedef struct XnAudioSharedBuffer
 
 XnStatus XnDeviceSensorSetParam(XnDevicePrivateData* pDevicePrivateData, const XnChar* cpParamName, const XnInt32 nValue);
 
-#endif 	
+#endif // XNDEVICESENSOR_H

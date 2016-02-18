@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "XnLinkInputStreamsMgr.h"
 #include "XnLinkProtoUtils.h"
 #include "XnLinkStatusCodes.h"
@@ -229,7 +249,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 			nPacketID, nStreamID, 
 			xnFragmentationFlagsToStr(fragmentation),
 			xnFragmentationFlagsToStr(pStreamInfo->prevFragmentation));
-		XN_ASSERT(FALSE);
 		pStreamInfo->packetLoss = TRUE;
 	}
 
@@ -247,7 +266,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 		{
 			xnLogWarning(XN_MASK_LINK, "Inconsistent msg type for stream %u - expected 0x%04X but got 0x%04X",
 				nStreamID, pStreamInfo->nMsgType, nMsgType);
-			XN_ASSERT(FALSE);
 			pStreamInfo->packetLoss = TRUE;
 			return;
 		}
@@ -267,7 +285,6 @@ void LinkInputStreamsMgr::HandlePacket(const LinkPacketHeader* pLinkPacketHeader
 	{
 		xnLogWarning(XN_MASK_LINK, "Failed to handle packet of %u bytes in stream %u: %s", 
 			pLinkPacketHeader->GetDataSize(), nStreamID, xnGetStatusString(nRetVal));
-		XN_ASSERT(FALSE);
 		return;
 	}
 }

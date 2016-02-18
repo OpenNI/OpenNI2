@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_ANDROID_ARM_H_
-#define _ONI_PLATFORM_ANDROID_ARM_H_
+#ifndef ONIPLATFORMANDROID_ARM_H
+#define ONIPLATFORMANDROID_ARM_H
 
 // Start with Linux-x86, and override what's different
 #include "../Linux-x86/OniPlatformLinux-x86.h"
@@ -40,4 +40,4 @@
 	#define ONI_PLATFORM_STRING "AndroidOS-Arm"
 #endif
 
-#endif //_ONI_PLATFORM_LINUX_ARM_H_
+#endif // ONIPLATFORMANDROID_ARM_H

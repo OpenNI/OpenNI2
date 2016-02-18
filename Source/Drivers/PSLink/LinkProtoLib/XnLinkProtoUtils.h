@@ -1,5 +1,25 @@
-#ifndef __XNLINKPROTOUTILS_H__
-#define __XNLINKPROTOUTILS_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef XNLINKPROTOUTILS_H
+#define XNLINKPROTOUTILS_H
 
 #include "XnLinkDefs.h"
 #include "XnLinkProto.h"
@@ -13,10 +33,6 @@
 #include <PSLink.h>
 
 #define XN_MASK_LINK "xnLink"
-
-#ifndef XN_COMPILER_ASSERT
-#define XN_COMPILER_ASSERT(x) typedef int compileAssert[x ? 1 : -1]
-#endif
 
 template <typename T>
 class XnArray;
@@ -47,8 +63,6 @@ public:
 	void SetPacketID(XnUInt16 nPacketID) { m_nPacketID = nPacketID; }
 	void SetCID(XnUInt16 nCID) { m_nCID = nCID; }
 };
-
-XN_COMPILER_ASSERT(sizeof(xn::LinkPacketHeader) == sizeof(XnLinkPacketHeader));
 
 }
 
@@ -152,6 +166,9 @@ XnStatus xnLinkParseFrameSyncStreamIDsProp(XnLinkPropType propType, const void* 
 XnStatus xnLinkParseComponentVersionsListProp(XnLinkPropType propType, const void* pValue, XnUInt32 nValueSize, xnl::Array<XnComponentVersion>& componentVersions);
 
 XnStatus xnLinkParseSupportedBistTests(const XnLinkSupportedBistTests* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnBistInfo>& supportedTests);
+XnStatus xnLinkParseSupportedTempList(const XnLinkTemperatureSensorsList* pSupportedList, XnUInt32 nBufferSize, xnl::Array<XnTempInfo>& supportedTempList);
+XnStatus xnLinkParseGetTemperature(const XnLinkTemperatureResponse* tempResponse, XnUInt32 nBufferSize, XnCommandTemperatureResponse& tempData);
+XnStatus xnLinkReadDebugData(XnCommandDebugData& commandDebugData, XnLinkDebugDataResponse* pDebugDataResponse);
 XnStatus xnLinkParseSupportedI2CDevices(const XnLinkSupportedI2CDevices* pSupportedTests, XnUInt32 nBufferSize, xnl::Array<XnLinkI2CDevice>& supportedDevices);
 XnStatus xnLinkParseSupportedLogFiles(const XnLinkSupportedLogFiles* pFilesList, XnUInt32 nBufferSize, xnl::Array<XnLinkLogFile>& supportedFiles);
 
@@ -160,4 +177,4 @@ void xnLinkParseBootStatus(XnBootStatus& bootStatus, const XnLinkBootStatus& lin
 XnUInt32 xnLinkGetPixelSizeByStreamType(XnLinkStreamType streamType);
 
 void xnLinkVideoModeToString(XnFwStreamVideoMode videoMode, XnChar* buffer, XnUInt32 bufferSize);
-#endif // __XNLINKPROTOUTILS_H__
+#endif // XNLINKPROTOUTILS_H

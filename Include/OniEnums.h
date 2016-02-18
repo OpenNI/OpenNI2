@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_ENUMS_H_
-#define _ONI_ENUMS_H_
+#ifndef ONIENUMS_H
+#define ONIENUMS_H
 
 namespace openni
 {
@@ -83,4 +83,4 @@ static const int TIMEOUT_FOREVER = -1;
 
 } // namespace openni
 
-#endif // _ONI_ENUMS_H_
+#endif // ONIENUMS_H

@@ -30,6 +30,40 @@
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
+#if _MSC_VER >= 1800
+
+static XnStatus GetOSName(xnOSInfo* pOSInfo)
+{
+	if (IsWindows8Point1OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "Windows8Point1OrGreater\n");
+	else if (IsWindows8OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "Windows8\n");
+	else if (IsWindows7SP1OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "Windows7SP1\n");
+	else if (IsWindows7OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "Windows7\n");
+	else if (IsWindowsVistaSP2OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "VistaSP2\n");
+	else if (IsWindowsVistaSP1OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "VistaSP1\n");
+	else if (IsWindowsVistaOrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "Vista\n");
+	else if (IsWindowsXPSP3OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "XPSP3\n");
+	else if (IsWindowsXPSP2OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "XPSP2\n");
+	else if (IsWindowsXPSP1OrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "XPSP1\n");
+	else if (IsWindowsXPOrGreater())
+		sprintf(pOSInfo->csOSName, "%s", "XP\n");
+	else
+		sprintf(pOSInfo->csOSName, "%s", "Unknown win version\n");
+
+	return (XN_STATUS_OK);
+}
+
+#else
+
 static const XnChar* GetOSName(OSVERSIONINFOEX& osVersionInfo)
 {
 	if (osVersionInfo.dwMajorVersion == 4)
@@ -134,6 +168,34 @@ static const XnChar* GetOSName(OSVERSIONINFOEX& osVersionInfo)
 	return "Unknown Windows Version";
 }
 
+static XnStatus GetOSName(xnOSInfo* pOSInfo)
+{
+	// Get OS Info
+	OSVERSIONINFOEX osVersionInfo;
+	osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+#pragma warning(push)
+#pragma warning(disable:4996)
+	if (0 == GetVersionEx((LPOSVERSIONINFO)&osVersionInfo))
+#pragma warning(pop)
+    {
+		DWORD nErr = GetLastError();
+		xnLogWarning(XN_MASK_OS, "Failed getting OS version information. Error code: %d", nErr);
+		return XN_STATUS_ERROR;
+	}
+
+	sprintf(pOSInfo->csOSName, "%s", GetOSName(osVersionInfo));
+	if (osVersionInfo.szCSDVersion[0] != '\0')
+	{
+		strcat(pOSInfo->csOSName, " ");
+		strcat(pOSInfo->csOSName, osVersionInfo.szCSDVersion);
+	}
+
+	return XN_STATUS_OK;
+}
+
+#endif
+
 static void GetCPUName(XnChar* csName)
 {
 	int CPUInfo[4] = {-1};
@@ -195,20 +257,11 @@ XN_C_API XnStatus xnOSGetInfo(xnOSInfo* pOSInfo)
 	XN_VALIDATE_OUTPUT_PTR(pOSInfo);
 
 	// Get OS Info
-	OSVERSIONINFOEX osVersionInfo;
-	osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if (0 == GetVersionEx((LPOSVERSIONINFO)&osVersionInfo))
+	if (GetOSName(pOSInfo) != XN_STATUS_OK)
 	{
 		DWORD nErr = GetLastError();
 		xnLogWarning(XN_MASK_OS, "Failed getting OS version information. Error code: %d", nErr);
 		return XN_STATUS_ERROR;
-	}
-
-	sprintf(pOSInfo->csOSName, "%s", GetOSName(osVersionInfo));
-	if (osVersionInfo.szCSDVersion[0] != '\0')
-	{
-		strcat(pOSInfo->csOSName, " ");
-		strcat(pOSInfo->csOSName, osVersionInfo.szCSDVersion);
 	}
 
 	// Get CPU Info

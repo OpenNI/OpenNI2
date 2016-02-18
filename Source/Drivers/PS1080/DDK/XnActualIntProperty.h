@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ACTUAL_INT_PROPERTY_H__
-#define __XN_ACTUAL_INT_PROPERTY_H__
+#ifndef XNACTUALINTPROPERTY_H
+#define XNACTUALINTPROPERTY_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -65,4 +65,4 @@ private:
 	XnUInt64 m_nValue;
 };
 
-#endif //__XN_ACTUAL_INT_PROPERTY_H__
+#endif // XNACTUALINTPROPERTY_H

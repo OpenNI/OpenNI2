@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IR_PROCESSOR_H__
-#define __XN_IR_PROCESSOR_H__
+#ifndef XNIRPROCESSOR_H
+#define XNIRPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -69,4 +69,4 @@ private:
 	XnDepthCMOSType m_DepthCMOSType;
 };
 
-#endif //__XN_IR_PROCESSOR_H__
+#endif // XNIRPROCESSOR_H

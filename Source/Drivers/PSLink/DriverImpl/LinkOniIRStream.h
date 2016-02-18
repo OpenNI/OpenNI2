@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_IR_STREAM_H__
-#define __LINK_ONI_IR_STREAM_H__
+#ifndef LINKONIIRSTREAM_H
+#define LINKONIIRSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -34,6 +34,7 @@ class LinkOniIRStream :
 {
 public:
 	LinkOniIRStream(const char* configFile, xn::PrimeClient* pSensor, LinkOniDevice* pDevice);
+    OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 };
 
-#endif // __LINK_ONI_IR_STREAM_H__
+#endif // LINKONIIRSTREAM_H

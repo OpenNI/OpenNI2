@@ -22,8 +22,8 @@
 /// Contains the declaration of Device class that implements a virtual OpenNI
 /// device, capable of reading data from a *.ONI file.
 
-#ifndef __PLAYER_DEVICE_H__
-#define __PLAYER_DEVICE_H__
+#ifndef PLAYERDEVICE_H
+#define PLAYERDEVICE_H
 
 #include "Driver/OniDriverAPI.h"
 #include "XnString.h"
@@ -82,15 +82,14 @@ public:
 	};
 	void TriggerDriverEOFCallback() { if(m_driverEOFCallback) (m_driverEOFCallback)(m_driverCookie, m_filePath.Data()); };
 
+	const char* getOriginalDevice() {return m_originalDevice;}
 protected:
-
-	void Lock() { m_cs.Lock(); }
-	void Unlock() { m_cs.Unlock(); }
-
 	PlayerSource* FindSource(const XnChar* strNodeName);
 
 	// Wake up when timestamp is valid.
 	void SleepToTimestamp(XnUInt64 nTimeStamp);
+
+	void LoadConfigurationFromIniFile();
 
 private:
 	void close();
@@ -102,6 +101,7 @@ private:
 	} Seek;
 
 	void MainLoop();
+
 	static XN_THREAD_PROC ThreadProc(XN_THREAD_PARAM pThreadParam);
 
 	static void     ONI_CALLBACK_TYPE ReadyForDataCallback(const PlayerStream::ReadyForDataEventArgs& newDataEventArgs, void* pCookie);
@@ -117,6 +117,8 @@ private:
 	static XnStatus XN_CALLBACK_TYPE OnNodeNewData(void* pCookie, const XnChar* strNodeName, XnUInt64 nTimeStamp, XnUInt32 nFrame, const void* pData, XnUInt32 nSize);
 	static void		XN_CALLBACK_TYPE OnEndOfFileReached(void* pCookie);
 	XnStatus AddPrivateProperty(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
+	XnStatus AddPrivateProperty_PS1080(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
+	XnStatus AddPrivateProperty_PSLink(PlayerSource* pSource, const XnChar* strPropName, XnUInt32 nBufferSize, const void* pBuffer);
 
 	static XnStatus XN_CALLBACK_TYPE FileOpen(void* pCookie);
 	static XnStatus XN_CALLBACK_TYPE FileRead(void* pCookie, void* pBuffer, XnUInt32 nSize, XnUInt32* pnBytesRead);
@@ -128,6 +130,8 @@ private:
 
 	static XnStatus XN_CALLBACK_TYPE CodecCreate(void* pCookie, const char* strNodeName, XnCodecID nCodecId, XnCodec** ppCodec);
 	static void     XN_CALLBACK_TYPE CodecDestroy(void* pCookie, XnCodec* pCodec);
+	
+	static XnStatus ResolveGlobalConfigFileName(XnChar* strConfigFile, XnUInt32 nBufSize, const XnChar* strConfigDir);
 
 	// Name of the node (used for identifying the device in the callbacks).
 	xnl::String m_nodeName;
@@ -188,8 +192,13 @@ private:
 
 	// Critical section.
 	xnl::CriticalSection m_cs;
+
+	char m_originalDevice[ONI_MAX_STR];
+
+	char m_iniFilePath[XN_FILE_MAX_PATH];
+
 };
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_DEVICE_H__
+#endif // PLAYERDEVICE_H

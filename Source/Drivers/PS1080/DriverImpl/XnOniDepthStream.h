@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_DEPTH_STREAM_H__
-#define __XN_ONI_DEPTH_STREAM_H__
+#ifndef XNONIDEPTHSTREAM_H
+#define XNONIDEPTHSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -41,4 +41,4 @@ public:
 	virtual OniStatus convertDepthToColorCoordinates(StreamBase* colorStream, int depthX, int depthY, OniDepthPixel depthZ, int* pColorX, int* pColorY);
 };
 
-#endif // __XN_ONI_DEPTH_STREAM_H__
+#endif // XNONIDEPTHSTREAM_H

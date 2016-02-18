@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _XN_DEVICE_H_
-#define _XN_DEVICE_H_
+#ifndef XNDEVICE_H
+#define XNDEVICE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -52,4 +52,4 @@ typedef void (XN_CALLBACK_TYPE* XnDeviceOnPropertyChangedEventHandler)(const XnC
 typedef void (XN_CALLBACK_TYPE* XnDeviceOnNewStreamDataEventHandler)(const XnNewStreamDataEventArgs& args, void* pCookie);
 
 
-#endif //_XN_DEVICE_H_
+#endif // XNDEVICE_H

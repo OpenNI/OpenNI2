@@ -3,16 +3,24 @@ include ../../BuildSystem/CommonDefs.mak
 BIN_DIR = ../Bin
 
 INC_DIRS = \
-	../Include
+	../Include \
+	../ThirdParty/LibJPEG
 
 SRC_FILES = \
 	*.cpp \
-	Linux/*.cpp
+	Linux/*.cpp\
+	../ThirdParty/LibJPEG/*.c
 
 ifeq ("$(OSTYPE)","Darwin")
-	INC_DIRS += /opt/local/include
-	LIB_DIRS += /opt/local/lib
-	LDFLAGS += -framework CoreFoundation -framework IOKit
+	INC_DIRS += \
+		/usr/local/include \
+		/opt/local/include
+	LIB_DIRS += \
+		/usr/local/lib \
+		/opt/local/lib
+	LDFLAGS += \
+		-framework CoreFoundation \
+		-framework IOKit
 endif
 
 SLIB_NAME = XnLib

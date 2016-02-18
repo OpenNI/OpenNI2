@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "IRKinectStream.h"
 
 #include <Shlobj.h>
@@ -38,109 +58,73 @@ OniStatus IRKinectStream::start()
 void IRKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
 	OniFrame* pFrame = getServices().acquireFrame();
+
 	if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY16)
 	{
-		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
-		if (!m_cropping.enabled)
+		struct IRToGray16PixelCopier
 		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
+			void operator()(const USHORT* const in, OniGrayscale16Pixel* const out)
 			{
-				unsigned short intensity = (*data_in)>> 6;
-				*data_out = intensity;
-				++data_in;
-				++data_out;
+				*out = (*in) >> 6;
 			}
-			pFrame->stride = m_videoMode.resolutionX * 2;
-		}
-		else
-		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					*(data_out++) = (*iter) >> 6;
-				}
-				cropY++;
-			}
-			pFrame->stride = m_cropping.width * 2;
-		}
+		};
+
+		typedef LineCopier<USHORT, OniGrayscale16Pixel, IRToGray16PixelCopier, ForwardMover<USHORT> > ForwardLineCopier;
+		typedef RectCopier<USHORT, OniGrayscale16Pixel, IRToGray16PixelCopier, ForwardMover<USHORT>, ForwardMover<USHORT> > ForwardRectCopier;
+		typedef RectCopier<USHORT, OniGrayscale16Pixel, IRToGray16PixelCopier, BackwardMover<USHORT>, ForwardMover<USHORT> > MirrorRectCopier;
+
+		USHORT* in = reinterpret_cast<USHORT*>(LockedRect.pBits);
+		OniGrayscale16Pixel* out = reinterpret_cast<OniGrayscale16Pixel*>(pFrame->data);
+
+		FrameCopier<USHORT, OniGrayscale16Pixel, ForwardLineCopier, ForwardRectCopier, MirrorRectCopier> copyFrame;
+		copyFrame(in, out, pFrame, m_videoMode, m_cropping, m_mirroring);
 	}
 	else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_GRAY8)
 	{
-		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		char* data_out = reinterpret_cast<char*>(pFrame->data);
-		if (!m_cropping.enabled)
+		struct IRToGray8PixelCopier
 		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
+			void operator()(const USHORT* const in, OniGrayscale8Pixel* const out)
 			{
-				char intensity = (*data_in)>> 8;
-				(*data_out) = intensity;
-				++data_in;
-				++data_out;
+				*out = (*in) >> 8;
 			}
-			pFrame->stride = m_videoMode.resolutionX;
-		}
-		else
-		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					char intensity = (*iter) >> 8;
-					*(data_out++) = intensity;
-				}
-				cropY++;
-			}
-			pFrame->stride = m_cropping.width * 2;
+		};
 
-		}
+		typedef LineCopier<USHORT, OniGrayscale8Pixel, IRToGray8PixelCopier, ForwardMover<USHORT> > ForwardLineCopier;
+		typedef RectCopier<USHORT, OniGrayscale8Pixel, IRToGray8PixelCopier, ForwardMover<USHORT>, ForwardMover<USHORT> > ForwardRectCopier;
+		typedef RectCopier<USHORT, OniGrayscale8Pixel, IRToGray8PixelCopier, BackwardMover<USHORT>, ForwardMover<USHORT> > MirrorRectCopier;
+
+		USHORT* in = reinterpret_cast<USHORT*>(LockedRect.pBits);
+		OniGrayscale8Pixel* out = reinterpret_cast<OniGrayscale8Pixel*>(pFrame->data);
+
+		FrameCopier<USHORT, OniGrayscale8Pixel, ForwardLineCopier, ForwardRectCopier, MirrorRectCopier> copyFrame;
+		copyFrame(in, out, pFrame, m_videoMode, m_cropping, m_mirroring);
+	}
+	else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_RGB888)
+	{
+		struct IRToRgbPixelCopier
+		{
+			void operator()(const USHORT* const in, OniRGB888Pixel* const out)
+			{
+				BYTE intensity = (*in) >> 8;
+				out->r = intensity;
+				out->g = intensity;
+				out->b = intensity;
+			}
+		};
+
+		typedef LineCopier<USHORT, OniRGB888Pixel, IRToRgbPixelCopier, ForwardMover<USHORT> > ForwardLineCopier;
+		typedef RectCopier<USHORT, OniRGB888Pixel, IRToRgbPixelCopier, ForwardMover<USHORT>, ForwardMover<USHORT> > ForwardRectCopier;
+		typedef RectCopier<USHORT, OniRGB888Pixel, IRToRgbPixelCopier, BackwardMover<USHORT>, ForwardMover<USHORT> > MirrorRectCopier;
+
+		USHORT* in = reinterpret_cast<USHORT*>(LockedRect.pBits);
+		OniRGB888Pixel* out = reinterpret_cast<OniRGB888Pixel*>(pFrame->data);
+
+		FrameCopier<USHORT, OniRGB888Pixel, ForwardLineCopier, ForwardRectCopier, MirrorRectCopier> copyFrame;
+		copyFrame(in, out, pFrame, m_videoMode, m_cropping, m_mirroring);
 	}
 	else
 	{
-		struct Rgb { unsigned char r, g, b;    };
-		unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-		Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
-		if (!m_cropping.enabled)
-		{
-			unsigned short* data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
-			{
-				char intensity = (*data_in)>> 8;
-				data_out->b = intensity;
-				data_out->r = intensity;
-				data_out->g = intensity;
-				++data_in;
-				++data_out;
-			}
-			pFrame->stride = m_videoMode.resolutionX * 3;
-		}
-		else
-		{
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				int cropX = m_cropping.originX;
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short *iter = data_in + (cropY * m_videoMode.resolutionX + cropX++);
-					char intensity = (*iter) >> 8;
-					data_out->b = intensity;
-					data_out->r = intensity;
-					data_out++->g = intensity;
-				}
-				cropY++;
-			}
-			pFrame->stride = m_cropping.width * 3;
-		}
+		XN_ASSERT(FALSE); // unsupported format. should not come here.
 	}
 		
 	if (!m_cropping.enabled)

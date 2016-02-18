@@ -36,7 +36,7 @@
 // XnSensorIRStream class
 //---------------------------------------------------------------------------
 XnSensorIRStream::XnSensorIRStream(const XnChar* StreamName, XnSensorObjects* pObjects) : 
-	XnIRStream(StreamName, FALSE),
+	XnIRStream(StreamName, FALSE, XN_DEVICE_SENSOR_MAX_IR),
 	m_InputFormat(XN_STREAM_PROPERTY_INPUT_FORMAT, "InputFormat", 0),
 	m_CroppingMode(XN_STREAM_PROPERTY_CROPPING_MODE, "CroppingMode", XN_CROPPING_MODE_NORMAL),
 	m_Helper(pObjects),
@@ -60,7 +60,7 @@ XnStatus XnSensorIRStream::Init()
 
 	// init base
 	nRetVal = XnIRStream::Init();
-	XN_IS_STATUS_OK(nRetVal);
+    XN_IS_STATUS_OK(nRetVal);
 
 	// add properties
 	XN_VALIDATE_ADD_PROPERTIES(this, &m_InputFormat, &m_ActualRead, &m_CroppingMode);
@@ -251,11 +251,13 @@ XnStatus XnSensorIRStream::SetOutputFormat(OniPixelFormat nOutputFormat)
 	switch (nOutputFormat)
 	{
 	case ONI_PIXEL_FORMAT_RGB888:
-	case ONI_PIXEL_FORMAT_GRAY16:
-		break;
+    case ONI_PIXEL_FORMAT_GRAY16:
+        nRetVal = DeviceMaxIRProperty().UnsafeUpdateValue(XN_DEVICE_SENSOR_MAX_IR);
+        break;
 	default:
 		XN_LOG_WARNING_RETURN(XN_STATUS_DEVICE_BAD_PARAM, XN_MASK_DEVICE_SENSOR, "Unsupported IR output format: %d", nOutputFormat);
 	}
+    XN_IS_STATUS_OK(nRetVal);
 
 	nRetVal = m_Helper.BeforeSettingDataProcessorProperty();
 	XN_IS_STATUS_OK(nRetVal);

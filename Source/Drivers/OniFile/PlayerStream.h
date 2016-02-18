@@ -22,8 +22,8 @@
 /// Contains the declaration of Stream class that implements a stream from 
 /// a virtual OpenNI device.
 
-#ifndef __PLAYER_STREAM_H__
-#define __PLAYER_STREAM_H__
+#ifndef PLAYERSTREAM_H
+#define PLAYERSTREAM_H
 
 #include "Driver/OniDriverAPI.h"
 #include "PlayerProperties.h"
@@ -33,6 +33,7 @@
 namespace oni_file {
 
 class Decoder;
+class PlayerDevice;
 
 /// Implements a stream from a virtual OpenNI device.
 class PlayerStream : public oni::driver::StreamBase
@@ -59,7 +60,7 @@ public:
 
 public:
 	/// Constructor.
-    PlayerStream(PlayerSource* pSource);
+    PlayerStream(PlayerDevice* pDevice, PlayerSource* pSource);
 
 	/// Destructor.
 	virtual ~PlayerStream();
@@ -99,6 +100,7 @@ public:
 	// Unregister from 'destroy' event.
 	void UnregisterDestroyEvent(OniCallbackHandle handle);
 
+	void notifyAllProperties();
 private:
 	void destroy();
 
@@ -133,8 +135,10 @@ private:
 	bool m_isStarted;
 
 	int m_requiredFrameSize;
+
+	PlayerDevice* m_pDevice;
 };
 
 } // namespace oni_files_player
 
-#endif //__PLAYER_STREAM_H__
+#endif // PLAYERSTREAM_H

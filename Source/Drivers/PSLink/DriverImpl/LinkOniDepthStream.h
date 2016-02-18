@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEPTH_STREAM_H__
-#define __LINK_ONI_DEPTH_STREAM_H__
+#ifndef LINKONIDEPTHSTREAM_H
+#define LINKONIDEPTHSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -37,6 +37,9 @@ public:
 	virtual OniStatus getProperty(int propertyId, void* data, int* pDataSize);
 	virtual OniBool isPropertySupported(int propertyId);
 	virtual void notifyAllProperties();
+
+protected:
+	virtual XnStatus GetDefaultVideoMode( OniVideoMode* pVideoMode );
 };
 
-#endif // __LINK_ONI_DEPTH_STREAM_H__
+#endif // LINKONIDEPTHSTREAM_H

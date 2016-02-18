@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ONI_COLOR_STREAM_H__
-#define __XN_ONI_COLOR_STREAM_H__
+#ifndef XNONICOLORSTREAM_H
+#define XNONICOLORSTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -42,4 +42,4 @@ public:
 	static XnBool IsPreferredInputFormat(XnIOImageFormats inputFormat, XnIOImageFormats thanFormat, OniPixelFormat oniFormat);
 };
 
-#endif // __XN_ONI_COLOR_STREAM_H__
+#endif // XNONICOLORSTREAM_H

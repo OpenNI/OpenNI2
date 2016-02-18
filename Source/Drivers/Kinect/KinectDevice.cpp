@@ -1,10 +1,30 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "KinectDevice.h"
+#include "KinectProperties.h"
 #include "DepthKinectStream.h"
 #include "ColorKinectStream.h"
 #include "IRKinectStream.h"
 #include <Shlobj.h>
 #include "NuiApi.h"
-#include "XnLog.h"
 
 using namespace kinect_device;
 using namespace oni::driver;
@@ -133,14 +153,27 @@ OniStatus KinectDevice::setProperty(int propertyId, const void* data, int dataSi
 	switch (propertyId) {
 	case ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION:
 		{
-			// FIXME data size validation
+			EXACT_PROP_SIZE_OR_RETURN(dataSize, OniImageRegistrationMode);
 			if (m_pDepthStream) {
 				OniImageRegistrationMode* pMode = (OniImageRegistrationMode*)data;
 				m_pDepthStream->setImageRegistrationMode(*pMode);
 				return ONI_STATUS_OK;
-			} else {
+			}
+			else
+			{
 				return ONI_STATUS_ERROR;
 			}
+		}
+	case KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(dataSize, long);
+			return SUCCEEDED(m_pNuiSensor->NuiCameraElevationSetAngle(*(long*)data)) ? ONI_STATUS_OK : ONI_STATUS_ERROR;
+		}
+	case KINECT_DEVICE_PROPERTY_EMITTER_STATE:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(dataSize, OniBool);
+			OniBool b = *(OniBool*)data;
+			return SUCCEEDED(m_pNuiSensor->NuiSetForceInfraredEmitterOff(!b)) ? ONI_STATUS_OK : ONI_STATUS_ERROR;
 		}
 	}
 
@@ -152,13 +185,63 @@ OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 	switch (propertyId) {
 	case ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION:
 		{
-			// FIXME data size validation
-			if (m_pDepthStream) {
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, OniImageRegistrationMode);
+			if (m_pDepthStream)
+			{
 				OniImageRegistrationMode* pMode = (OniImageRegistrationMode*)data;
 				*pMode = m_pDepthStream->getImageRegistrationMode();
 				return ONI_STATUS_OK;
-			} else {
+			}
+			else
+			{
 				return ONI_STATUS_ERROR;
+			}
+		}
+	case KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, long);
+			return SUCCEEDED(m_pNuiSensor->NuiCameraElevationGetAngle((long*)data)) ? ONI_STATUS_OK : ONI_STATUS_ERROR;
+		}
+	case KINECT_DEVICE_PROPERTY_ACCELEROMETER:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, KinectVector3f);
+			Vector4 v;
+			if (SUCCEEDED(m_pNuiSensor->NuiAccelerometerGetCurrentReading(&v)))
+			{
+				KinectVector3f* pVector3f = (KinectVector3f*)(data);
+				pVector3f->x = v.x;
+				pVector3f->y = v.y;
+				pVector3f->z = v.z;
+				return ONI_STATUS_OK;
+			}
+			else
+			{
+				return ONI_STATUS_ERROR;
+			}
+		}
+	case KINECT_DEVICE_PROPERTY_EMITTER_STATE:
+		{
+			EXACT_PROP_SIZE_OR_RETURN(*pDataSize, OniBool);
+			*(OniBool*)data = !m_pNuiSensor->NuiGetForceInfraredEmitterOff();
+			return ONI_STATUS_OK;
+		}
+	case KINECT_DEVICE_PROPERTY_AUDIO_ARRAY_ID:
+		{
+			char* arrayId = (char*)data;
+			BSTR wcsArrayId = m_pNuiSensor->NuiAudioArrayId();
+			size_t len = wcstombs(arrayId, wcsArrayId, *pDataSize - 1);
+			SysFreeString(wcsArrayId);
+
+			if (len == -1)
+			{
+				*pDataSize = 0;
+				return ONI_STATUS_ERROR;
+			}
+			else
+			{
+				arrayId[len] = '\0';
+				*pDataSize = int(len + 1);
+				return ONI_STATUS_OK;
 			}
 		}
 	}
@@ -168,7 +251,16 @@ OniStatus KinectDevice::getProperty(int propertyId, void* data, int* pDataSize)
 
 OniBool KinectDevice::isPropertySupported(int propertyId)
 {
-	return (propertyId == ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION);
+	switch (propertyId)
+	{
+	case ONI_DEVICE_PROPERTY_IMAGE_REGISTRATION:
+	case KINECT_DEVICE_PROPERTY_CAMERA_ELEVATION:
+	case KINECT_DEVICE_PROPERTY_ACCELEROMETER:
+	case KINECT_DEVICE_PROPERTY_EMITTER_STATE:
+	case KINECT_DEVICE_PROPERTY_AUDIO_ARRAY_ID:
+		return true;
+	}
+	return false;
 }
 
 OniBool KinectDevice::isCommandSupported(int commandId)

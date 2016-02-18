@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_MULTI_FRAME_BUFFER_H__
-#define __XN_MULTI_FRAME_BUFFER_H__
+#ifndef XNFRAMEBUFFERMANAGER_H
+#define XNFRAMEBUFFERMANAGER_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -77,4 +77,4 @@ private:
 	XnBuffer m_writeBuffer;
 };
 
-#endif //__XN_MULTI_FRAME_BUFFER_H__
+#endif // XNFRAMEBUFFERMANAGER_H

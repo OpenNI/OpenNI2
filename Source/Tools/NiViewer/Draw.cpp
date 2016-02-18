@@ -49,8 +49,6 @@
 // --------------------------------
 // Defines
 // --------------------------------
-#define MAX_DEPTH XN_MAX_UINT16
-
 #define YUV422_U  0
 #define YUV422_Y1 1
 #define YUV422_V  2
@@ -122,8 +120,10 @@ XnUInt8 PalletIntsR [256] = {0};
 XnUInt8 PalletIntsG [256] = {0};
 XnUInt8 PalletIntsB [256] = {0};
 
-/* Linear Depth Histogram */
-float g_pDepthHist[MAX_DEPTH];
+/* Histograms */
+float* g_pDepthHist = NULL;
+int g_nMaxDepth = 0;
+unsigned short g_nMaxGrayscale16Value = 0;
 
 const char* g_DepthDrawColoring[NUM_OF_DEPTH_DRAW_TYPES];
 const char* g_ColorDrawColoring[NUM_OF_COLOR_DRAW_TYPES];
@@ -136,8 +136,6 @@ typedef struct DrawUserInput
 } DrawUserInput;
 
 DrawUserInput g_DrawUserInput;
-
-float g_fMaxDepth = 0;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
@@ -166,7 +164,7 @@ char g_csUserMessage[256];
 
 bool g_bFullScreen = true;
 bool g_bFirstTimeNonFull = true;
-IntPair g_NonFullWinSize = { WIN_SIZE_X, WIN_SIZE_Y };
+IntPair g_NonFullWinSize = { 1280, 1024 };
 
 // --------------------------------
 // Textures
@@ -426,8 +424,8 @@ void toggleFullScreen(int)
 	{
 		if (g_bFirstTimeNonFull)
 		{
-			g_NonFullWinSize.X = WIN_SIZE_X/2;
-			g_NonFullWinSize.Y = WIN_SIZE_Y/2;
+			g_NonFullWinSize.X = g_NonFullWinSize.X/2;
+			g_NonFullWinSize.Y = g_NonFullWinSize.Y/2;
 			g_bFirstTimeNonFull = false;
 		}
 
@@ -576,15 +574,24 @@ void toggleHelpScreen(int)
 
 void calculateHistogram()
 {
-	xnOSMemSet(g_pDepthHist, 0, MAX_DEPTH*sizeof(float));
-	int nNumberOfPoints = 0;
-
-	openni::DepthPixel nValue;
-
 	openni::VideoStream& depthGen = getDepthStream();
 
 	if (!depthGen.isValid() || !getDepthFrame().isValid())
 		return;
+
+	int maxDepthValue = getDepthStream().getMaxPixelValue() + 1;
+	if (g_pDepthHist == NULL || maxDepthValue > g_nMaxDepth)
+	{
+		delete[] g_pDepthHist;
+		g_pDepthHist = new float[maxDepthValue];
+		g_nMaxDepth = maxDepthValue;
+	}
+
+	xnOSMemSet(g_pDepthHist, 0, g_nMaxDepth*sizeof(float));
+	int nNumberOfPoints = 0;
+
+	openni::DepthPixel nValue;
+
 
 	const openni::DepthPixel* pDepth = (const openni::DepthPixel*)getDepthFrame().getData();
 	const openni::DepthPixel* pDepthEnd = pDepth + (getDepthFrame().getDataSize() / sizeof(openni::DepthPixel));
@@ -593,7 +600,7 @@ void calculateHistogram()
 	{
 		nValue = *pDepth;
 
-		XN_ASSERT(nValue <= MAX_DEPTH);
+		XN_ASSERT(nValue <= g_nMaxDepth);
 
 		if (nValue != 0)
 		{
@@ -604,12 +611,12 @@ void calculateHistogram()
 		pDepth++;
 	}
 
-	XnUInt32 nIndex;
-	for (nIndex=1; nIndex<MAX_DEPTH; nIndex++)
+	int nIndex;
+	for (nIndex=1; nIndex<g_nMaxDepth; nIndex++)
 	{
 		g_pDepthHist[nIndex] += g_pDepthHist[nIndex-1];
 	}
-	for (nIndex=1; nIndex<MAX_DEPTH; nIndex++)
+	for (nIndex=1; nIndex<g_nMaxDepth; nIndex++)
 	{
 		if (g_pDepthHist[nIndex] != 0)
 		{
@@ -986,6 +993,24 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 		pDepth = (openni::DepthPixel*)depthMetaData.getData();
 	}
 
+	// create IR histogram
+	double grayscale16Factor = 1.0;
+	if (colorMD.getVideoMode().getPixelFormat() == openni::PIXEL_FORMAT_GRAY16)
+	{
+		int nPixelsCount = colorMD.getWidth() * colorMD.getHeight();
+		XnUInt16* pPixel = (XnUInt16*)colorMD.getData();
+		for (int i = 0; i < nPixelsCount; ++i,++pPixel)
+		{
+			if (*pPixel > g_nMaxGrayscale16Value)
+				g_nMaxGrayscale16Value = *pPixel;
+		}
+
+		if (g_nMaxGrayscale16Value > 0)
+		{
+			grayscale16Factor = 255.0 / g_nMaxGrayscale16Value;
+		}
+	}
+
 	for (XnUInt16 nY = 0; nY < height; nY++)
 	{
 		XnUInt8* pTexture = TextureMapGetLine(&g_texColor, nY + originY) + originX*4;
@@ -1025,6 +1050,8 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
 					}
 				}
 
+				XnUInt16* p16;
+
 				switch (format)
  				{
 				case openni::PIXEL_FORMAT_RGB888:
@@ -1038,7 +1065,8 @@ void drawColor(IntRect* pLocation, IntPair* pPointer, int pointerRed, int pointe
  					pColor+=1; 
  					break;
 				case openni::PIXEL_FORMAT_GRAY16:
- 					pTexture[0] = pTexture[1] = pTexture[2] = *((XnUInt16*)pColor) >> 2;
+					p16 = (XnUInt16*)pColor;
+					pTexture[0] = pTexture[1] = pTexture[2] = (XnUInt8)((*p16) * grayscale16Factor);
  					pColor+=2; 
  					break;
 				default:
@@ -1162,7 +1190,7 @@ void drawDepth(IntRect* pLocation, IntPair* pPointer)
 					}
 					break;
 				case RAINBOW:
-					nColIndex = (XnUInt16)((*pDepth / (g_fMaxDepth / 256)));
+					nColIndex = (XnUInt16)((*pDepth / (g_nMaxDepth / 256.)));
 					nRed   = PalletIntsR[nColIndex];
 					nGreen = PalletIntsG[nColIndex];
 					nBlue  = PalletIntsB[nColIndex];
@@ -1227,10 +1255,10 @@ void drawPointerMode(IntPair* pPointer)
 
 		glBegin(GL_QUADS);
 		glColor4f(0, 0, 0, 0.7);
-		glVertex2i(0, WIN_SIZE_Y); // lower left
-		glVertex2i(WIN_SIZE_X, WIN_SIZE_Y);
-		glVertex2i(WIN_SIZE_X, WIN_SIZE_Y - 135);
-		glVertex2i(0, WIN_SIZE_Y - 135);
+		glVertex2i(0, g_NonFullWinSize.Y); // lower left
+		glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y);
+		glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y - 135);
+		glVertex2i(0, g_NonFullWinSize.Y - 135);
 		glEnd();
 
 		glDisable(GL_BLEND);
@@ -1240,13 +1268,13 @@ void drawPointerMode(IntPair* pPointer)
 
 		// Print the scale data
 		glBegin(GL_POINTS);
-		for (int i=0; i<g_fMaxDepth; i+=1)
+		for (int i=0; i<g_nMaxDepth; i+=1)
 		{
 			float fNewColor = g_pDepthHist[i];
 			if ((fNewColor > 0.004) && (fNewColor < 0.996))
 			{
 				glColor3f(fNewColor, fNewColor, 0);
-				glVertex3f(((i/10)*2), WIN_SIZE_Y - 23, 1);
+				glVertex3f(((i/10)*2), g_NonFullWinSize.Y - 23, 1);
 			}
 		}
 		glEnd();
@@ -1268,28 +1296,28 @@ void drawPointerMode(IntPair* pPointer)
 
 				glBegin(GL_POINTS);
 				glColor3f(1,0,0);
-				glVertex3f(10 + ((nPointerValue/10)*2), WIN_SIZE_Y - 70, 1);
+				glVertex3f(10 + ((nPointerValue/10)*2), g_NonFullWinSize.Y - 70, 1);
 				glEnd();
 			}
 		}
 
 		// Print the scale texts
-		for (int i=0; i<g_fMaxDepth/10; i+=25)
+		for (int i=0; i<g_nMaxDepth/10; i+=25)
 		{
 			int xPos = i*2 + 10;
 
 			// draw a small line in this position
 			glBegin(GL_LINES);
 			glColor3f(0, 1, 0);
-			glVertex2i(xPos, WIN_SIZE_Y - 54);
-			glVertex2i(xPos, WIN_SIZE_Y - 62);
+			glVertex2i(xPos, g_NonFullWinSize.Y - 54);
+			glVertex2i(xPos, g_NonFullWinSize.Y - 62);
 			glEnd();
 
 			// place a label under, and in the middle of, that line.
 			XnUInt32 chars;
 			xnOSStrFormat(buf, sizeof(buf), &chars, "%d", i);
 			glColor3f(1,0,0);
-			glRasterPos2i(xPos - chars*nCharWidth/2, WIN_SIZE_Y - 40);
+			glRasterPos2i(xPos - chars*nCharWidth/2, g_NonFullWinSize.Y - 40);
 			glPrintString(GLUT_BITMAP_HELVETICA_18,buf);
 		}
 
@@ -1318,7 +1346,7 @@ void drawPointerMode(IntPair* pPointer)
 		xnOSStrFormat(buf + strlen(buf), (XnUInt32)(sizeof(buf) - strlen(buf)), &chars, "%s - Frame %4u, Timestamp %.3f", "IR", pIRMD->getFrameIndex(), (double)pIRMD->getTimestamp()/dTimestampDivider);
 	}
 
-	int nYLocation = WIN_SIZE_Y - 88;
+	int nYLocation = g_NonFullWinSize.Y - 88;
 	glColor3f(1,0,0);
 	glRasterPos2i(10,nYLocation);
 	glPrintString(GLUT_BITMAP_HELVETICA_18, buf);
@@ -1328,10 +1356,10 @@ void drawPointerMode(IntPair* pPointer)
 	{
 		// Print the pointer text
 		XnUInt64 nCutOffMin = 0;
-		XnUInt64 nCutOffMax = (pDepthMD != NULL) ? g_fMaxDepth : 0;
+		XnUInt64 nCutOffMax = (pDepthMD != NULL) ? g_nMaxDepth : 0;
 
 		XnChar sPointerValue[100];
-		if (nPointerValue != g_fMaxDepth)
+		if (nPointerValue != g_nMaxDepth)
 		{
 			xnOSStrFormat(sPointerValue, sizeof(sPointerValue), &chars, "%.1f", (float)nPointerValue/10);
 		}
@@ -1396,7 +1424,7 @@ void drawCenteredMessage(void* font, int y, const char* message, float fRed, flo
 	}
 	
 	XnUInt32 nHeight = 26;
-	int nXLocation = xnl::Math::Max(0, (WIN_SIZE_X - nMaxLineLength) / 2);
+	int nXLocation = xnl::Math::Max(0, (g_NonFullWinSize.X - nMaxLineLength) / 2);
 	int nYLocation = y;
 
 	// Draw black background
@@ -1434,7 +1462,7 @@ void drawUserMessage()
 
 	if (isInKeyboardInputMode())
 	{
-		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, g_NonFullWinSize.Y * 4 / 5, getCurrentKeyboardInputMessage(), 0, 1, 0);
 	}
 
 	static XnUInt64 nStartShowMessage = 0;
@@ -1450,7 +1478,7 @@ void drawUserMessage()
 
 	if (nNow - nStartShowMessage < 3000)
 	{
-		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, WIN_SIZE_Y * 4 / 5, g_csUserMessage, 
+		drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, g_NonFullWinSize.Y * 4 / 5, g_csUserMessage, 
 							fMessageTypeColors[g_DrawConfig.messageType][0],
 							fMessageTypeColors[g_DrawConfig.messageType][1],
 							fMessageTypeColors[g_DrawConfig.messageType][2]);
@@ -1473,7 +1501,7 @@ void printRecordingInfo()
 		captureGetColorFormatName(), 
 		captureGetIRFormatName());
 
-	drawCenteredMessage(GLUT_BITMAP_HELVETICA_12, WIN_SIZE_Y - 3, csMessage, 0, 1, 0);
+	drawCenteredMessage(GLUT_BITMAP_HELVETICA_12, g_NonFullWinSize.Y - 3, csMessage, 0, 1, 0);
 }
 
 void printHelpGroup(int nXLocation, int* pnYLocation, const char* csGroup)
@@ -1546,13 +1574,13 @@ void drawErrorState()
 	glBegin(GL_QUADS);
 	glColor4f(0, 0, 0, 0.8);
 	glVertex2i(0, 0);
-	glVertex2i(WIN_SIZE_X, 0);
-	glVertex2i(WIN_SIZE_X, WIN_SIZE_Y);
-	glVertex2i(0, WIN_SIZE_Y);
+	glVertex2i(g_NonFullWinSize.X, 0);
+	glVertex2i(g_NonFullWinSize.X, g_NonFullWinSize.Y);
+	glVertex2i(0, g_NonFullWinSize.Y);
 	glEnd();
 	glDisable(GL_BLEND);
 
-	int nYLocation = WIN_SIZE_Y/2 - 30;
+	int nYLocation = g_NonFullWinSize.Y/2 - 30;
 
 	drawCenteredMessage(GLUT_BITMAP_TIMES_ROMAN_24, nYLocation, "ERROR!", 1, 0, 0);
 	nYLocation += 40;
@@ -1561,10 +1589,10 @@ void drawErrorState()
 
 void drawHelpScreen()
 {
-	int nXStartLocation = WIN_SIZE_X/8;
-	int nYStartLocation = WIN_SIZE_Y/5;
-	int nXEndLocation = WIN_SIZE_X*7/8;
-	int nYEndLocation = WIN_SIZE_Y*4/5;
+	int nXStartLocation = g_NonFullWinSize.X/8;
+	int nYStartLocation = g_NonFullWinSize.Y/5;
+	int nXEndLocation = g_NonFullWinSize.X*7/8;
+	int nYEndLocation = g_NonFullWinSize.Y*4/5;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		
@@ -1589,16 +1617,16 @@ void drawHelpScreen()
 	// print left pane
 	int nXLocation = nXStartLocation;
 	int nYLocation = nYStartLocation;
+	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_GENERAL);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_PRESETS);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DISPLAY);
-	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DEVICE);
 
 	// print right pane
-	nXLocation = WIN_SIZE_X/2;
+	nXLocation = g_NonFullWinSize.X/2;
 	nYLocation = nYStartLocation;
+	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_DEVICE);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_PLAYER);
 	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_CAPTURE);
-	printHelpGroup(nXLocation, &nYLocation, KEYBOARD_GROUP_GENERAL);
 }
 
 void drawUserInput(bool bCursor)
@@ -1657,18 +1685,20 @@ void fixLocation(IntRect* pLocation, int xRes, int yRes)
 {
 	double resRatio = (double)xRes / yRes;
 
-	double locationRatio = (pLocation->uRight - pLocation->uLeft) / (pLocation->uTop - pLocation->uBottom);
+	double locationRatio = double(pLocation->uRight - pLocation->uLeft) / (pLocation->uTop - pLocation->uBottom);
 
 	if (locationRatio > resRatio) 
 	{
 		// location is wider. use height as reference.
 		double width = (pLocation->uTop - pLocation->uBottom) * resRatio;
+		pLocation->uLeft += (pLocation->uRight - pLocation->uLeft - width) / 2;
 		pLocation->uRight = (pLocation->uLeft + width);
 	}
 	else if (locationRatio < resRatio)
 	{
 		// res is wider. use width as reference.
 		double height = (pLocation->uRight - pLocation->uLeft) / resRatio;
+		pLocation->uBottom += (pLocation->uTop - pLocation->uBottom - height) / 2;
 		pLocation->uTop = (pLocation->uBottom + height);
 	}
 }
@@ -1691,7 +1721,7 @@ void drawPlaybackSpeed()
 // 			width += glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, strSpeed[i]);
 // 
 // 		glColor3f(0, 1, 0);
-// 		glRasterPos2i(WIN_SIZE_X - width - 3, 30);
+// 		glRasterPos2i(g_NonFullWinSize.X - width - 3, 30);
 // 		glPrintString(GLUT_BITMAP_TIMES_ROMAN_24, strSpeed);
 // 	}
 }
@@ -1700,31 +1730,25 @@ void drawFrame()
 {
 	// calculate locations
 	g_DrawConfig.DepthLocation.uBottom = 0;
-	g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y - 1;
+	g_DrawConfig.DepthLocation.uTop = g_NonFullWinSize.Y - 1;
 	g_DrawConfig.DepthLocation.uLeft = 0;
-	g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X - 1;
+	g_DrawConfig.DepthLocation.uRight = g_NonFullWinSize.X - 1;
 
 	g_DrawConfig.ColorLocation.uBottom = 0;
-	g_DrawConfig.ColorLocation.uTop = WIN_SIZE_Y - 1;
+	g_DrawConfig.ColorLocation.uTop = g_NonFullWinSize.Y - 1;
 	g_DrawConfig.ColorLocation.uLeft = 0;
-	g_DrawConfig.ColorLocation.uRight = WIN_SIZE_X - 1;
+	g_DrawConfig.ColorLocation.uRight = g_NonFullWinSize.X - 1;
 
 	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
 	{
-		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
-		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
-		g_DrawConfig.ColorLocation.uTop = WIN_SIZE_Y / 2 - 1;
-		g_DrawConfig.ColorLocation.uLeft = WIN_SIZE_X / 2;
+		g_DrawConfig.DepthLocation.uRight = g_NonFullWinSize.X / 2 - 1;
+		g_DrawConfig.ColorLocation.uLeft = g_NonFullWinSize.X / 2;
 	}
 
 	// Texture map init
 	openni::VideoFrameRef* pDepthMD = &getDepthFrame();
 	if (isDepthOn() && pDepthMD->isValid())
 	{
-		int maxDepth = 0;
-		maxDepth = getDepthStream().getMaxPixelValue();
-		g_fMaxDepth = maxDepth;
-		
 		TextureMapInit(&g_texDepth, pDepthMD->getVideoMode().getResolutionX(), pDepthMD->getVideoMode().getResolutionY(), 4, pDepthMD->getWidth(), pDepthMD->getHeight());
 		fixLocation(&g_DrawConfig.DepthLocation, pDepthMD->getVideoMode().getResolutionX(), pDepthMD->getVideoMode().getResolutionY());
 	}
@@ -1795,7 +1819,7 @@ void drawFrame()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+	glOrtho(0,g_NonFullWinSize.X,g_NonFullWinSize.Y,0,-1.0,1.0);
 	glDisable(GL_DEPTH_TEST); 
 
 	if (g_DrawConfig.Streams.Depth.Coloring == CYCLIC_RAINBOW_HISTOGRAM || g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
@@ -1832,4 +1856,9 @@ void setDepthDrawing(int nColoring)
 void setColorDrawing(int nColoring)
 {
 	g_DrawConfig.Streams.Color.Coloring	= (ColorDrawColoringType)nColoring;
+}
+
+void resetIRHistogram(int /*dummy*/)
+{
+	g_nMaxGrayscale16Value = 0;
 }

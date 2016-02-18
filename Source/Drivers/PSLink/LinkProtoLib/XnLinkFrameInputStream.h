@@ -1,11 +1,30 @@
-#ifndef __XNLINKFRAMEINPUTSTREAM_H__
-#define __XNLINKFRAMEINPUTSTREAM_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef XNLINKFRAMEINPUTSTREAM_H
+#define XNLINKFRAMEINPUTSTREAM_H
 
 #include "XnLinkMsgParser.h"
 #include "XnLinkInputStream.h"
 #include <XnEvent.h>
 #include <XnStatus.h>
-#include <OpenNI.h>
 
 #include <Driver/OniDriverAPI.h>
 
@@ -49,7 +68,7 @@ public:
 	virtual XnStreamFragLevel GetStreamFragLevel() const { return XN_LINK_STREAM_FRAG_LEVEL_FRAMES; }
 
 	typedef void (XN_CALLBACK_TYPE* NewFrameEventHandler)(const NewFrameEventArgs& args, void* pCookie);
-	NewFrameEvent::EventInterface& GetNewFrameEvent() { return m_newFrameEvent; }
+	NewFrameEvent::Interface& GetNewFrameEvent() { return m_newFrameEvent; }
 
 	virtual XnBool IsOutputFormatSupported(OniPixelFormat format) const;
 
@@ -59,7 +78,6 @@ public:
 
 	virtual const XnShiftToDepthConfig& GetShiftToDepthConfig() const;
 	virtual XnStatus GetShiftToDepthTables(const XnShiftToDepthTables*& pTables) const;
-	virtual XnStatus SetDepthScale(XnDouble dDepthScale);
 
 	virtual const XnLinkCameraIntrinsics& GetCameraIntrinsics() const { return m_cameraIntrinsics; }
 
@@ -134,4 +152,4 @@ private:
 
 }
 
-#endif // __XNLINKFRAMEINPUTSTREAM_H__
+#endif // XNLINKFRAMEINPUTSTREAM_H

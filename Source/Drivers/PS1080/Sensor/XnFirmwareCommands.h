@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_FIRMWARE_COMMANDS_H__
-#define __XN_FIRMWARE_COMMANDS_H__
+#ifndef XNFIRMWARECOMMANDS_H
+#define XNFIRMWARECOMMANDS_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -47,4 +47,4 @@ private:
 	XnDevicePrivateData* m_pDevicePrivateData;
 };
 
-#endif //__XN_FIRMWARE_COMMANDS_H__
+#endif // XNFIRMWARECOMMANDS_H

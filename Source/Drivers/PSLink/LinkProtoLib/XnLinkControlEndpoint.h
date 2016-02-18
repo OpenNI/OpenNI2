@@ -1,5 +1,25 @@
-#ifndef __XNLINKCONTROLENDPOINT_H__
-#define __XNLINKCONTROLENDPOINT_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef XNLINKCONTROLENDPOINT_H
+#define XNLINKCONTROLENDPOINT_H
 
 #include "ISyncIOConnection.h"
 #include "XnLinkMsgEncoder.h"
@@ -8,7 +28,6 @@
 #include "XnLinkDefs.h"
 #include "XnLinkProtoLibDefs.h"
 #include <XnBitSet.h>
-#include <OpenNI.h>
 #include <PrimeSense.h>
 
 struct XnShiftToDepthConfig;
@@ -64,7 +83,10 @@ public:
 	XnStatus StopStreaming(XnUInt16 nStreamID);
 	XnStatus SoftReset();
 	XnStatus HardReset();
+    XnStatus ReadDebugData(XnCommandDebugData& commandDebugData);
 	XnStatus GetSupportedBistTests(xnl::Array<XnBistInfo>& supportedTests);
+    XnStatus GetSupportedTempList(xnl::Array<XnTempInfo>& supportedTests);
+    XnStatus GetTemperature(XnCommandTemperatureResponse& temp);
 	XnStatus ExecuteBistTests(XnUInt32 nID, uint32_t& errorCode, uint32_t& extraDataSize, uint8_t* extraData);
 	XnStatus StartUsbTest();
 	XnStatus StopUsbTest();
@@ -82,12 +104,23 @@ public:
 	XnStatus DestroyInputStream(XnUInt16 nStreamID);
 	XnStatus SetCropping(XnUInt16 nStreamID, const OniCropping& cropping);
 	XnStatus GetCropping(XnUInt16 nStreamID, OniCropping& cropping);
-    XnStatus SetEmitterActive(XnBool bActive);
+    XnStatus SetProjectorActive(XnBool bActive);
+    XnStatus SetAccActive(XnBool bActive);
+    XnStatus GetAccActive(XnBool& bActive);
+    XnStatus SetVDDActive(XnBool bActive);
+    XnStatus GetVDDActive(XnBool& bActive);
+    XnStatus SetPeriodicBistActive(XnBool bActive);
+    XnStatus GetPeriodicBistActive(XnBool& bActive);
 	XnStatus GetSupportedLogFiles(xnl::Array<XnLinkLogFile>& supportedFiles);
 	XnStatus OpenFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamID);
 	XnStatus CloseFWLogFile(XnUInt8 logID, XnUInt16 nLogStreamID);
-
-    //TODO: Implement Get emitter active
+	XnStatus SetProjectorPulse(XnBool enabled, XnFloat delay, XnFloat width, XnFloat cycle);
+	XnStatus GetProjectorPulse(XnBool& enabled, XnFloat& delay, XnFloat& width, XnFloat& framesToskip);
+	XnStatus SetProjectorPower(XnUInt16 power);
+	XnStatus GetProjectorPower(XnUInt16& power);
+	XnStatus SetGain(XnUInt16 streamID, XnUInt16 gain);
+	XnStatus GetGain(XnUInt16 streamID, XnUInt16& gain);
+	//TODO: Implement Get emitter active
 
     XnStatus GetStreamFragLevel(XnUInt16 nStreamID, XnStreamFragLevel& streamFragLevel);
 	XnStatus GetMirror(XnUInt16 nStreamID, XnBool& bMirror);
@@ -163,4 +196,4 @@ private:
 };
 
 }
-#endif // __XNLINKCONTROLENDPOINT_H__
+#endif // XNLINKCONTROLENDPOINT_H

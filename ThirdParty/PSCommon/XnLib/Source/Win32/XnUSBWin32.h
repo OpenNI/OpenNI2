@@ -81,6 +81,9 @@ typedef struct xnUSBReadThreadData
 
 	xnUSBBuffersInfo* pBuffersInfo;
 	OVERLAPPED* pOvlpIO;
+
+	XnUInt32 nTotalBytesSinceLastPrint;
+	XnUInt64 nLastPrint;
 } xnUSBReadThreadData;
 
 typedef struct XnUSBEndPointHandle

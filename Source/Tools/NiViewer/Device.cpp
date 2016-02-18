@@ -27,11 +27,17 @@
 #include <math.h>
 #include <XnLog.h>
 #include <PS1080.h>
+#include <KinectProperties.h>
 
 // --------------------------------
 // Defines
 // --------------------------------
 #define MAX_STRINGS 20
+
+#define ZOOM_CROP_VGA_MODE_X_RES 640
+#define ZOOM_CROP_VGA_MODE_Y_RES 480
+#define ZOOM_CROP_HIRES_MODE_X_RES 1280
+#define ZOOM_CROP_HIRES_MODE_Y_RES 1024
 
 // --------------------------------
 // Global Variables
@@ -364,14 +370,46 @@ void toggleMirror(int )
 
 void toggleCloseRange(int )
 {
-	bool bCloseRange;
-	g_depthStream.getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &bCloseRange);
+	static OniBool bCloseRange = FALSE;
+
+	if (g_depthStream.getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, &bCloseRange) != XN_STATUS_OK &&
+		g_depthStream.getProperty(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, &bCloseRange) != XN_STATUS_OK)
+	{
+		// Continue with the latest value even in case of error
+	}
 
 	bCloseRange = !bCloseRange;
 
-	g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange);
+	if (g_depthStream.setProperty(XN_STREAM_PROPERTY_CLOSE_RANGE, bCloseRange) != XN_STATUS_OK &&
+		g_depthStream.setProperty(KINECT_DEPTH_PROPERTY_CLOSE_RANGE, bCloseRange) != XN_STATUS_OK)
+	{
+		displayError("Couldn't set the close range");
+		return;
+	}
 
 	displayMessage ("Close range: %s", bCloseRange?"On":"Off");	
+}
+
+void toggleEmitterState(int)
+{
+	static OniBool bEmitterState = TRUE;
+
+	if (g_device.getProperty(XN_MODULE_PROPERTY_EMITTER_STATE, &bEmitterState) != XN_STATUS_OK &&
+		g_device.getProperty(KINECT_DEVICE_PROPERTY_EMITTER_STATE, &bEmitterState) != XN_STATUS_OK)
+	{
+		// Continue with the latest value even in case of error
+	}
+
+	bEmitterState = !bEmitterState;
+
+	if (g_device.setProperty(XN_MODULE_PROPERTY_EMITTER_STATE, bEmitterState) != XN_STATUS_OK &&
+		g_device.setProperty(KINECT_DEVICE_PROPERTY_EMITTER_STATE, bEmitterState) != XN_STATUS_OK)
+	{
+		displayError("Couldn't set the emitter state");
+		return;
+	}
+
+	displayMessage ("Emitter state: %s", bEmitterState?"On":"Off");	
 }
 
 void toggleImageRegistration(int)
@@ -882,6 +920,46 @@ void toggleFrameSync(int)
 		displayMessage("Frame sync on");
 	}
 	g_bFrameSyncOn = !g_bFrameSyncOn;
+}
+
+bool g_bZoomCropOn = false;
+void toggleZoomCrop(int)
+{
+	if (g_bZoomCropOn)
+	{
+		displayMessage("Fast zoom crop off");
+
+		openni::VideoMode vm = g_colorStream.getVideoMode();
+		vm.setResolution(ZOOM_CROP_VGA_MODE_X_RES, ZOOM_CROP_VGA_MODE_Y_RES); 
+
+		g_colorStream.setVideoMode(vm);
+
+		g_colorStream.resetCropping();
+
+		g_colorStream.start();
+
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, FALSE); 
+	}
+	else
+	{
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_FAST_ZOOM_CROP, TRUE); 
+
+		displayMessage("Fast zoom crop on");
+		
+		g_colorStream.stop();
+	
+		g_colorStream.setProperty(XN_STREAM_PROPERTY_CROPPING_MODE, XN_CROPPING_MODE_INCREASED_FPS); 
+
+		openni::VideoMode vm = g_colorStream.getVideoMode();
+		vm.setResolution(ZOOM_CROP_HIRES_MODE_X_RES, ZOOM_CROP_HIRES_MODE_Y_RES); 
+		g_colorStream.setVideoMode(vm);
+
+		g_colorStream.setCropping(ZOOM_CROP_VGA_MODE_X_RES/2, ZOOM_CROP_VGA_MODE_Y_RES/2, ZOOM_CROP_VGA_MODE_X_RES, ZOOM_CROP_VGA_MODE_Y_RES);
+
+		g_colorStream.start();
+	}
+
+	g_bZoomCropOn = !g_bZoomCropOn;
 }
 
 bool convertDepthPointToColor(int depthX, int depthY, openni::DepthPixel depthZ, int* pColorX, int* pColorY)

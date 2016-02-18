@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEPTH_PROCESSOR_H__
-#define __XN_DEPTH_PROCESSOR_H__
+#ifndef XNDEPTHPROCESSOR_H
+#define XNDEPTHPROCESSOR_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -89,4 +89,4 @@ private:
 	OniDepthPixel m_noDepthValue;
 };
 
-#endif //__XN_DEPTH_PROCESSOR_H__
+#endif // XNDEPTHPROCESSOR_H

@@ -1,5 +1,25 @@
-#ifndef __XNLINKPROTO_H__
-#define __XNLINKPROTO_H__
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
+#ifndef XNLINKPROTO_H
+#define XNLINKPROTO_H
 
 #include <XnPlatform.h>
 #include "XnLinkDefs.h"
@@ -423,6 +443,9 @@ typedef struct XnLinkCameraIntrinsics
 
 typedef struct XnLinkI2CDevice
 {
+	XnUInt8 m_nMasterID;
+	XnUInt8 m_nSlaveID;
+	XnUInt16 m_nReserved;
 	XnUInt32 m_nID;
 	XnChar m_strName[XN_LINK_MAX_I2C_DEVICE_NAME_LENGTH];
 } XnLinkI2CDevice;
@@ -447,13 +470,23 @@ typedef struct XnLinkSupportedLogFiles
 
 typedef struct XnLinkProjectorPulse
 {
-	XnUInt8 m_bEnabled;
-	XnUInt8 m_nReserved;
-	XnUInt16 m_nDelay; // Delay between frame start and the start of pulse, in milliseconds
-	XnUInt16 m_nWidth; // Pulse width, in milliseconds
-	XnUInt16 m_nFramesToSkip; // number of frames to skip between projector pulses, from pulse start to next pulse start.
+	XnUInt16 m_bEnabled;
+	XnUInt16 m_nReserved;
+	XnFloat  m_nDelay; // Delay between frame start and the start of pulse, in milliseconds
+	XnFloat  m_nWidth; // Pulse width, in milliseconds
+	XnFloat  m_nCycle; // in pulse mode: number of frames to skip between projector pulses, from pulse start to next pulse start. in PWM : Cycle time
 } XnLinkProjectorPulse;
 
+typedef struct XnLinkTemperatureSensor
+{
+	XnUInt32 m_nID;
+	XnUInt8 m_strName[XN_LINK_MAX_SENSOR_NAME_LENGTH];
+} XnLinkTemperatureSensor;
+
+typedef struct XnLinkTemperatureSensorsList{
+ 	XnUInt32 m_nCount;
+ 	XnLinkTemperatureSensor m_aSensors[XN_LINK_MAX_TEMPERATURE_SENSORS];
+}XnLinkTemperatureSensorsList;
 //-----------------------------------------------------------------------
 // Command Parameters 
 //-----------------------------------------------------------------------
@@ -576,9 +609,25 @@ typedef struct XnLinkLogOpenCloseParams
 	XnUInt8 m_nID;
 } XnLinkLogOpenCloseParams;
 
+typedef struct XnLinkGetTemperatureParams
+{
+	XnUInt32 m_nID;
+} XnLinkGetTemperatureParams;
+
+typedef struct XnLinkGetDebugDataParams
+{
+	XnUInt32 m_nID;
+} XnLinkGetDebugDataParams;
+
 //-----------------------------------------------------------------------
 // Command Response Structures 
 //-----------------------------------------------------------------------
+typedef struct XnLinkTemperatureResponse
+{
+	XnUInt32 m_nID;
+	XnFloat value;
+} XnLinkTemperatureResponse;
+
 typedef struct XnLinkResponseInfo
 {
 	XnUInt16 m_nResponseCode;
@@ -768,6 +817,18 @@ typedef struct XnLinkGetFileListResponse
 	XnLinkFileEntry m_aFileEntries[1];
 } XnLinkGetFileListResponse;
 
+typedef struct XnLinkDebugDataResponseHeader
+{
+    XnUInt16 m_nDataID;		//Values come from XnLinkInternalPropID
+    XnUInt16 m_nValueSize;
+} XnLinkDebugDataResponseHeader;
+
+typedef struct XnLinkDebugDataResponse
+{
+    XnLinkDebugDataResponseHeader m_header;
+    XnUInt8 m_data[1];
+} XnLinkDebugDataResponse;
+
 typedef struct XnLinkBootStatus
 {
     XnUInt8  m_nZone;		    //Values come from XnLinkBootZone
@@ -783,4 +844,4 @@ typedef struct XnLinkBootStatus
 #pragma pack (pop)
 #endif
 
-#endif // __XNLINKPROTO_H__
+#endif // XNLINKPROTO_H

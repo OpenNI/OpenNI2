@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "XnLinkContInputStream.h"
 #include "XnLinkProtoUtils.h"
 #include "XnLinkProtoLibDefs.h"
@@ -200,11 +220,13 @@ XnStatus LinkContInputStream::StartImpl()
 	//We only need log buffer output if dumping is on
 	m_logParser.GenerateOutputBuffer(m_pDumpFile != NULL);
 
+	//We must set the streaming flag first cuz the data handler checks it
+	m_bStreaming = TRUE;
+
     nRetVal = m_pConnection->Connect();
     XN_IS_STATUS_OK_LOG_ERROR("Connect stream's input connection", nRetVal);
     nRetVal = m_pLinkControlEndpoint->StartStreaming(m_nStreamID);
     XN_IS_STATUS_OK_LOG_ERROR("Start streaming", nRetVal);
-    m_bStreaming = TRUE;
 
     return XN_STATUS_OK;
 }

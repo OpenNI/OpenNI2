@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_DRIVER_TYPES_H_
-#define _ONI_DRIVER_TYPES_H_
+#ifndef ONIDRIVERTYPES_H
+#define ONIDRIVERTYPES_H
 
 #include <OniCTypes.h>
 #include <stdarg.h>
@@ -51,4 +51,4 @@ struct OniStreamServices
 };
 
 
-#endif // _ONI_DRIVER_TYPES_H_
+#endif // ONIDRIVERTYPES_H

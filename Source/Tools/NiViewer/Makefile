@@ -22,11 +22,15 @@ ifeq ("$(OSTYPE)","Darwin")
 	LDFLAGS += -framework OpenGL -framework GLUT
 else
 	CFLAGS += -DUNIX -DGLX_GLXEXT_LEGACY
-	USED_LIBS += glut GL
+	USED_LIBS += glut GLU GL
 endif
 
 LIB_DIRS  += ../../../ThirdParty/PSCommon/XnLib/Bin/$(PLATFORM)-$(CFG)
-USED_LIBS += OpenNI2 XnLib
+USED_LIBS += OpenNI2 XnLib pthread
+ifneq ("$(OSTYPE)","Darwin")
+        USED_LIBS += rt 
+endif
+
 
 EXE_NAME = NiViewer
 

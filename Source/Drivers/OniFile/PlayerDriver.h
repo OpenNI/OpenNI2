@@ -22,6 +22,8 @@
 /// Contains the declaration of Driver class that implements an OpenNI driver,
 /// which manages virtual OpenNI devices. Those devices read their data from
 /// *.ONI files.
+#ifndef PLAYERDRIVER_H
+#define PLAYERDRIVER_H
 
 #ifndef _ONIFILESPLAYER_DRIVER_H_
 #define  _ONIFILESPLAYER_DRIVER_H_ 1
@@ -74,3 +76,5 @@ private:
 } // namespace oni_files_player
 
 #endif // _ONIFILESPLAYER_DRIVER_H_
+
+#endif // PLAYERDRIVER_H

@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_DEVICE_BASE_H__
-#define __XN_DEVICE_BASE_H__
+#ifndef XNDEVICEBASE_H
+#define XNDEVICEBASE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -101,7 +101,7 @@ public:
 	virtual XnStatus UnregisterFromPropertyChange(const XnChar* Module, XnUInt32 propertyId, XnCallbackHandle hCallback);
 
 	typedef xnl::Event<XnNewStreamDataEventArgs> NewStreamDataEvent;
-	NewStreamDataEvent::EventInterface& OnNewStreamDataEvent() { return m_OnNewStreamDataEvent; }
+	NewStreamDataEvent::Interface& OnNewStreamDataEvent() { return m_OnNewStreamDataEvent; }
 
 	/**
 	* Finds a stream (a module which has the IS_STREAM property set to TRUE). 
@@ -229,4 +229,4 @@ private:
 	XN_CRITICAL_SECTION_HANDLE m_hLock;
 };
 
-#endif //__XN_DEVICE_BASE_H__
+#endif // XNDEVICEBASE_H

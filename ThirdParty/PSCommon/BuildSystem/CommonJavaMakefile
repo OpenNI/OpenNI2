@@ -51,7 +51,7 @@ endif
 CREATE_SHORTCUT = 
 ifneq (, $(MAIN_CLASS))
 	SHORTCUT = $(OUT_DIR)/$(JAR_NAME)
-	CREATE_SHORTCUT = echo LD_LIBRARY_PATH=. java -jar $(OUTPUT_NAME) > $(SHORTCUT); chmod +x $(SHORTCUT)
+	CREATE_SHORTCUT = echo LD_LIBRARY_PATH=. java -jar $(OUTPUT_NAME) \$$* > $(SHORTCUT); chmod +x $(SHORTCUT)
 endif
 
 #############################################################################

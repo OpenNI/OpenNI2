@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_ACTUAL_PROPERTIES_HASH_H__
-#define __XN_ACTUAL_PROPERTIES_HASH_H__
+#ifndef XNACTUALPROPERTIESHASH_H
+#define XNACTUALPROPERTIESHASH_H
 
 #include "XnProperty.h"
 #include "XnActualIntProperty.h"
@@ -66,4 +66,4 @@ protected:
 	XnChar m_strName[XN_DEVICE_MAX_STRING_LENGTH];
 };
 
-#endif //__XN_ACTUAL_PROPERTIES_HASH_H__
+#endif // XNACTUALPROPERTIESHASH_H

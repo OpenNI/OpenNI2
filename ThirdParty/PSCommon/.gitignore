@@ -16,3 +16,4 @@ XnLib/Driver/Win32/Build/buildfre_win7_x86.wrn
 XnLib/Driver/Win32/Build/sys/amd64
 XnLib/Driver/Win32/Build/sys/x86
 XnLib/Driver/Win32/BinVSRls
+.DS_Store

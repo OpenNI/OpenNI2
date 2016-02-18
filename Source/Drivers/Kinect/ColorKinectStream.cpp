@@ -1,3 +1,23 @@
+/*****************************************************************************
+*                                                                            *
+*  OpenNI 2.x Alpha                                                          *
+*  Copyright (C) 2012 PrimeSense Ltd.                                        *
+*                                                                            *
+*  This file is part of OpenNI.                                              *
+*                                                                            *
+*  Licensed under the Apache License, Version 2.0 (the "License");           *
+*  you may not use this file except in compliance with the License.          *
+*  You may obtain a copy of the License at                                   *
+*                                                                            *
+*      http://www.apache.org/licenses/LICENSE-2.0                            *
+*                                                                            *
+*  Unless required by applicable law or agreed to in writing, software       *
+*  distributed under the License is distributed on an "AS IS" BASIS,         *
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+*  See the License for the specific language governing permissions and       *
+*  limitations under the License.                                            *
+*                                                                            *
+*****************************************************************************/
 #include "ColorKinectStream.h"
 
 #include <Shlobj.h>
@@ -38,83 +58,20 @@ OniStatus ColorKinectStream::start()
 void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
 {
 	OniFrame* pFrame = getServices().acquireFrame();
+
 	if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_RGB888)
 	{
-		struct Rgba { unsigned char b, g, r, a; };
-		struct Rgb { unsigned char r, g, b;    };
-		if (!m_cropping.enabled)
-		{
-			Rgba* data_in = reinterpret_cast<Rgba*>(LockedRect.pBits);
-			Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
-			pFrame->dataSize = m_videoMode.resolutionY * m_videoMode.resolutionX * 3;
-			Rgba * data_in_end = data_in + (m_videoMode.resolutionY * m_videoMode.resolutionX);
-			while (data_in < data_in_end)
-			{
-				data_out->b = data_in->b;
-				data_out->r = data_in->r;
-				data_out->g = data_in->g;
-				++data_in;
-				++data_out;
-			}
-			pFrame->stride = m_videoMode.resolutionX * 3;
-		}
-		else
-		{
-			Rgba* data_in = reinterpret_cast<Rgba*>(LockedRect.pBits);
-			Rgb* data_out = reinterpret_cast<Rgb*>(pFrame->data);
-			pFrame->dataSize = m_cropping.height * m_cropping.width * 3;
-			int cropX = m_cropping.originX;
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					Rgba* iter = data_in + (cropX + m_videoMode.resolutionX * cropY);
-					unsigned char c = iter->b;
-					data_out->b = c;
-					data_out->r = iter->r;
-					data_out->g = iter->g;
-					++data_out;
-					++cropX;
-				}
-				++cropY;
-				cropX = m_cropping.originX;
-			}
-			pFrame->stride = m_cropping.width * 3;
-		}
+		copyFrameRGB888(pFrame, imageFrame, LockedRect);
+	}
+	else if (m_videoMode.pixelFormat == ONI_PIXEL_FORMAT_YUV422)
+	{
+		copyFrameYUV422(pFrame, imageFrame, LockedRect);
 	}
 	else
 	{
-		if (!m_cropping.enabled)
-		{
-			xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
-			pFrame->dataSize = LockedRect.size;
-			pFrame->stride = m_videoMode.resolutionX * 2;
-		}
-		else
-		{
-			unsigned short* data_in = reinterpret_cast<unsigned short*>(LockedRect.pBits);
-			unsigned short* data_out = reinterpret_cast<unsigned short*>(pFrame->data);
-			pFrame->dataSize = m_cropping.height * m_cropping.width * 2;
-
-			int cropX = m_cropping.originX;
-			int cropY = m_cropping.originY;
-			while (cropY < m_cropping.originY + m_cropping.height)
-			{
-				while (cropX < m_cropping.originX + m_cropping.width)
-				{
-					unsigned short* iter = data_in + (cropX + m_videoMode.resolutionX * cropY);
-					*data_out = *iter;
-					++data_out;
-					++cropX;
-				}
-				cropY++;
-				cropX = m_cropping.originX;
-			}
-			pFrame->stride = m_cropping.width * 2;
-
-		}
+		XN_ASSERT(FALSE); // unsupported format. should not come here.
 	}
+
 	pFrame->videoMode.resolutionX = m_videoMode.resolutionX;
 	pFrame->videoMode.resolutionY = m_videoMode.resolutionY;
 	if (m_cropping.enabled)
@@ -140,6 +97,96 @@ void ColorKinectStream::frameReceived(NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RE
 	pFrame->timestamp = imageFrame.liTimeStamp.QuadPart*1000;
 	raiseNewFrame(pFrame);
 	getServices().releaseFrame(pFrame);
+}
+
+void ColorKinectStream::copyFrameRGB888(OniFrame* pFrame, NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
+{
+	struct Rgba { unsigned char b, g, r, a; };
+
+	struct RgbaToRgbPixelCopier
+	{
+		void operator()(const Rgba* const in, OniRGB888Pixel* const out)
+		{
+			out->r = in->r;
+			out->g = in->g;
+			out->b = in->b;
+		}
+	};
+
+	typedef LineCopier<Rgba, OniRGB888Pixel, RgbaToRgbPixelCopier, ForwardMover<Rgba> > ForwardLineCopier;
+	typedef RectCopier<Rgba, OniRGB888Pixel, RgbaToRgbPixelCopier, ForwardMover<Rgba>, ForwardMover<Rgba> > ForwardRectCopier;
+	typedef RectCopier<Rgba, OniRGB888Pixel, RgbaToRgbPixelCopier, BackwardMover<Rgba>, ForwardMover<Rgba> > MirrorRectCopier;
+
+	Rgba* in = reinterpret_cast<Rgba*>(LockedRect.pBits);
+	OniRGB888Pixel* out = reinterpret_cast<OniRGB888Pixel*>(pFrame->data);
+
+	FrameCopier<Rgba, OniRGB888Pixel, ForwardLineCopier, ForwardRectCopier, MirrorRectCopier> copyFrame;
+	copyFrame(in, out, pFrame, m_videoMode, m_cropping, m_mirroring);
+}
+
+void ColorKinectStream::copyFrameYUV422(OniFrame* pFrame, NUI_IMAGE_FRAME& imageFrame, NUI_LOCKED_RECT &LockedRect)
+{
+	// I YUV422, two pixels are packed into a 4-byte sequence.
+	// We need a little tricky mapping implementation for mirror mode.
+
+	OniYUV422DoublePixel* in = reinterpret_cast<OniYUV422DoublePixel*>(LockedRect.pBits);
+	OniYUV422DoublePixel* out = reinterpret_cast<OniYUV422DoublePixel*>(pFrame->data);
+
+	int resolutionXInPackets = m_videoMode.resolutionX / 2;
+
+	struct SwappedYUV422PixelCopier
+	{
+		void operator()(const OniYUV422DoublePixel* const in, OniYUV422DoublePixel* const out)
+		{
+			out->u = in->u;
+			out->y1 = in->y2;
+			out->v = in->v;
+			out->y2 = in->y1;
+		}
+	};
+
+	typedef RectCopier<OniYUV422DoublePixel, OniYUV422DoublePixel, PixelCopier<OniYUV422DoublePixel, OniYUV422DoublePixel>,
+		ForwardMover<OniYUV422DoublePixel>, ForwardMover<OniYUV422DoublePixel> > ForwardRectCopier;
+	typedef RectCopier<OniYUV422DoublePixel, OniYUV422DoublePixel, SwappedYUV422PixelCopier,
+		BackwardMover<OniYUV422DoublePixel>, ForwardMover<OniYUV422DoublePixel> > MirrorRectCopier;
+
+	if (!m_cropping.enabled)
+	{
+		pFrame->dataSize = LockedRect.size;
+		pFrame->stride = m_videoMode.resolutionX * 2;
+
+		if (!m_mirroring)
+		{
+			// optimized copy
+			xnOSMemCopy(pFrame->data, LockedRect.pBits, LockedRect.size);
+		} else {
+			MirrorRectCopier copyRect;
+			copyRect(in + resolutionXInPackets - 1, out,
+				resolutionXInPackets, resolutionXInPackets, m_videoMode.resolutionY);
+		}
+	}
+	else
+	{
+		int pixelCount = m_cropping.height * m_cropping.width;
+		pFrame->dataSize = pixelCount * 2;
+		pFrame->stride = m_cropping.width * 2;
+
+		int originXInPackets = m_cropping.originX / 2;
+		int copyWidthInPackets = m_cropping.width / 2;
+
+		if (!m_mirroring)
+		{
+			ForwardRectCopier copyRect;
+			OniYUV422DoublePixel* origin = in + m_cropping.originY * resolutionXInPackets + originXInPackets;
+			copyRect(origin, out, copyWidthInPackets, resolutionXInPackets, m_cropping.height);
+		}
+		else
+		{
+			MirrorRectCopier copyRect;
+			OniYUV422DoublePixel* origin = in + (m_cropping.originY+1) * resolutionXInPackets - originXInPackets - 1;
+			copyRect(origin, out, copyWidthInPackets, resolutionXInPackets, m_cropping.height);
+		}
+	}
 }
 
 OniStatus ColorKinectStream::getProperty(int propertyId, void* data, int* pDataSize)

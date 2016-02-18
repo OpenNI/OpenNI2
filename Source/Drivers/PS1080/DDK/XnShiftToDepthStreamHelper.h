@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_SHIFT_TO_DEPTH_STREAM_HELPER_H__
-#define __XN_SHIFT_TO_DEPTH_STREAM_HELPER_H__
+#ifndef XNSHIFTTODEPTHSTREAMHELPER_H
+#define XNSHIFTTODEPTHSTREAMHELPER_H
 
 #include <DDK/XnDeviceModule.h>
 #include <DDK/XnShiftToDepth.h>
@@ -62,4 +62,4 @@ private:
 	XnBool m_bPropertiesAdded;
 };
 
-#endif //__XN_SHIFT_TO_DEPTH_STREAM_HELPER_H__
+#endif // XNSHIFTTODEPTHSTREAMHELPER_H

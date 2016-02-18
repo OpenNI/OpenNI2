@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __XN_IMAGE_STREAM_H__
-#define __XN_IMAGE_STREAM_H__
+#ifndef XNIMAGESTREAM_H
+#define XNIMAGESTREAM_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -37,4 +37,4 @@ public:
 	XnImageStream(const XnChar* csName, XnBool bAllowCustomResolutions);
 };
 
-#endif //__XN_IMAGE_STREAM_H__
+#endif // XNIMAGESTREAM_H

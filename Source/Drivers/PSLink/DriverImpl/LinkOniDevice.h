@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef __LINK_ONI_DEVICE_H__
-#define __LINK_ONI_DEVICE_H__
+#ifndef LINKONIDEVICE_H
+#define LINKONIDEVICE_H
 
 //---------------------------------------------------------------------------
 // Includes
@@ -99,4 +99,4 @@ private:
 	LinkOniDriver* m_pDriver;
 };
 
-#endif // __LINK_ONI_DEVICE_H__
+#endif // LINKONIDEVICE_H

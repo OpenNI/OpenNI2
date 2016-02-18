@@ -18,8 +18,8 @@
 *  limitations under the License.                                            *
 *                                                                            *
 *****************************************************************************/
-#ifndef _ONI_PLATFORM_LINUX_ARM_H_
-#define _ONI_PLATFORM_LINUX_ARM_H_
+#ifndef ONIPLATFORMLINUX_ARM_H
+#define ONIPLATFORMLINUX_ARM_H
 
 // Start with Linux-x86, and override what's different
 #include "../Linux-x86/OniPlatformLinux-x86.h"
@@ -32,5 +32,5 @@
 #define ONI_PLATFORM ONI_PLATFORM_LINUX_ARM
 #define ONI_PLATFORM_STRING "Linux-Arm"
 
-#endif //_ONI_PLATFORM_LINUX_ARM_H_
+#endif // ONIPLATFORMLINUX_ARM_H
 
