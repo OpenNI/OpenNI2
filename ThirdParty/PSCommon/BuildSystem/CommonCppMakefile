@@ -73,7 +73,7 @@ CFLAGS += $(INC_DIRS_OPTION) $(DEFINES_OPTION)
 CFLAGS += -fPIC -fvisibility=hidden
 
 ifneq "$(ALLOW_WARNINGS)" "1"
-	CFLAGS += -Werror
+	CFLAGS += -Werror -Wno-error=unused-local-typedefs
 endif
 
 LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
