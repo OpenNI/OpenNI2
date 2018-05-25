@@ -223,7 +223,7 @@ void SampleViewer::display()
 					int nHistValue = m_pDepthHist[*pDepth];
 					pTex->r = nHistValue;
 					pTex->g = nHistValue;
-					pTex->b = 0;
+					pTex->b = nHistValue;
 				}
 			}
 
