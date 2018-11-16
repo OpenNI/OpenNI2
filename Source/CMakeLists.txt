@@ -2,10 +2,6 @@ cmake_minimum_required (VERSION 2.8)
 
 project(OpenNI2Core)
 
-if(APPLE)
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/../libusbx)
-endif(APPLE)
-
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Include)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/PSCommon/XnLib/Include)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../ThirdParty/LibJPEG)
@@ -30,6 +26,8 @@ set (ONI_FILE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/Drivers/OniFile/Formats/XnStreamCompression.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Drivers/OniFile/Formats/XnCodec.cpp
 )
+
+link_directories(${XNLIB_LIBRARY_DIRS})
 
 add_library(OpenNI2 SHARED ${CORE_SRC} ${ONI_FILE_SRC})
 

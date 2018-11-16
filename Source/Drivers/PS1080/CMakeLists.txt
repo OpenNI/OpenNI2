@@ -115,6 +115,8 @@ set (PS1080_SRC
     ${CMAKE_CURRENT_LIST_DIR}/Sensor/YUV.cpp
     )
 
+link_directories(${XNLIB_LIBRARY_DIRS})
+
 add_library(PS1080 SHARED ${PS1080_SRC})
 
 # This prevents libraries that link against libusbx from also
@@ -127,9 +129,4 @@ set_target_properties(PS1080
       DEBUG_POSTFIX ""
   )
 
-if(WIN32)
-    target_link_libraries(PS1080 JPEG XnLib)
-elseif(APPLE)
-    target_link_libraries(PS1080 JPEG usbx XnLib)
-endif()
-
+target_link_libraries(PS1080 JPEG XnLib)

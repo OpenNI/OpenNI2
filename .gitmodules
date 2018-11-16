@@ -1,6 +1,3 @@
 [submodule "ThirdParty/PSCommon"]
 	path = ThirdParty/PSCommon
 	url = ssh://git/localhome/GIT/Software/Common/PSCommon.git
-[submodule "libusbx"]
-	path = libusbx
-	url = git@github.com:PersonifyInc/libusbx.git

@@ -7,11 +7,38 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/.. ${CMAKE_MODULE_PATH})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/Include)
 
 if(APPLE)
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../libusbx)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/Include/MacOSX)
 elseif(WIN32)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/Include/Win32)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/Driver/Win32/Build/sys)
+endif()
+
+if(NOT WIN32)
+    include(ExternalProject)
+
+    ExternalProject_Add(
+        openni2-libusb
+
+        GIT_REPOSITORY "https://github.com/libusb/libusb.git"
+        GIT_TAG "master"
+
+        UPDATE_COMMAND  ${CMAKE_COMMAND} -E copy
+                        ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libusb/CMakeLists.txt
+                        ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/libusb/CMakeLists.txt
+        PATCH_COMMAND ""
+
+        SOURCE_DIR "ThirdParty/libusb/"
+        CMAKE_ARGS -DCMAKE_CXX_STANDARD_LIBRARIES=${CMAKE_CXX_STANDARD_LIBRARIES}
+                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/libusb_install
+
+        TEST_COMMAND ""
+    )
+
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/libusb)
+
+    set(XNLIB_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR}/libusb_install/lib PARENT_SCOPE)
+    link_directories(${XNLIB_LIBRARY_DIRS})
 endif()
 
 set (XNLIB_CORE_SRC
@@ -94,4 +121,10 @@ endif()
 add_library(XnLib STATIC ${XNLIB_CORE_SRC} ${XNLIB_LOG_SRC} ${XNLIB_COMMON_OS_SRC} ${XNLIB_SRC_OS})
 if(WIN32)
     target_link_libraries(XnLib ws2_32.lib Setupapi.lib)
+elseif(APPLE)
+    target_link_libraries(XnLib
+        usb
+        "-framework CoreFoundation"
+        "-framework IOKit"
+    )
 endif(WIN32)
