@@ -1,6 +1,9 @@
 # OpenNI
 
-http://structure.io/openni
+**Structure Core customers:** OpenNI does not currently support Structure Core. To start developing with Structure Core download *Structure SDK (Cross-Platform)* on the [Developer Portal](https://developer.structure.io/sdk).
+
+
+OpenNI2 homepage: http://structure.io/openni
 
 ## Develop branch ##
 
